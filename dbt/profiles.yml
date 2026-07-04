@@ -1,0 +1,19 @@
+# dbt connection profile for CardioTrace.
+# Defaults match the Dockerized Postgres in docker-compose.yml. These are
+# local development credentials only (no production secrets), so this file is
+# safe to commit for reproducibility. Override any value with an env var.
+#
+# Run dbt with:  dbt run --profiles-dir .
+
+cardiotrace:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('PGHOST', 'localhost') }}"
+      port: "{{ env_var('PGPORT', '5435') | int }}"
+      user: "{{ env_var('PGUSER', 'cardiotrace') }}"
+      password: "{{ env_var('PGPASSWORD', 'cardiotrace') }}"
+      dbname: "{{ env_var('PGDATABASE', 'cardiotrace') }}"
+      schema: mart
+      threads: 4
