@@ -1,0 +1,35 @@
+# Reproducible PostgreSQL for CardioTrace.
+# Spin up the analytics database with a single command:
+#
+#     docker compose up -d
+#
+# The database, schemas, and raw tables are created automatically on first
+# start by the DDL mounted into /docker-entrypoint-initdb.d.
+#
+# Connection string (matches .env.example):
+#     postgresql://cardiotrace:cardiotrace@localhost:5435/cardiotrace
+#
+# Port 5435 is used on the host to avoid clashing with any pre-existing
+# local PostgreSQL install on 5432.
+
+services:
+  db:
+    image: postgres:16
+    container_name: cardiotrace_db
+    environment:
+      POSTGRES_USER: cardiotrace
+      POSTGRES_PASSWORD: cardiotrace
+      POSTGRES_DB: cardiotrace
+    ports:
+      - "5435:5432"
+    volumes:
+      - cardiotrace_pgdata:/var/lib/postgresql/data
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cardiotrace -d cardiotrace"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cardiotrace_pgdata:

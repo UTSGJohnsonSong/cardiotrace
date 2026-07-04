@@ -1,0 +1,247 @@
+{
+  "dataset": {
+    "rows": 62890,
+    "cycles": [
+      "1999-2000",
+      "2001-2002",
+      "2003-2004",
+      "2005-2006",
+      "2007-2008",
+      "2009-2010",
+      "2011-2012",
+      "2013-2014",
+      "2015-2016",
+      "2017-2018",
+      "2021-2022"
+    ]
+  },
+  "prevalence": {
+    "any_cvd_first": {
+      "cycle": "1999-2000",
+      "pct": 8.1
+    },
+    "any_cvd_last": {
+      "cycle": "2021-2022",
+      "pct": 9.61
+    },
+    "by_outcome_latest": {
+      "has_heart_failure": 3.02,
+      "has_mi": 3.33,
+      "has_chd": 4.06,
+      "has_angina": 1.69,
+      "has_stroke": 3.56,
+      "has_any_cvd": 9.61
+    },
+    "total_n": 62890
+  },
+  "equity": {
+    "latest_cycle": "2021-2022",
+    "latest_by_race": {
+      "Other/Multiracial": 10.87,
+      "Non-Hispanic White": 10.85,
+      "Non-Hispanic Black": 9.21,
+      "Other Hispanic": 7.75,
+      "Mexican American": 5.37,
+      "Non-Hispanic Asian": 4.74
+    }
+  },
+  "covid": {
+    "pre_pandemic": {
+      "n": 55081,
+      "pct_any_cvd": 8.67,
+      "mean_bmi": 28.76,
+      "mean_hba1c": 5.62,
+      "mean_sbp": 122.59
+    },
+    "post_pandemic": {
+      "n": 7809,
+      "pct_any_cvd": 9.61,
+      "mean_bmi": 29.68,
+      "mean_hba1c": 5.71,
+      "mean_sbp": 121.15
+    }
+  },
+  "models": {
+    "features_used": [
+      "age",
+      "poverty_income_ratio",
+      "systolic_bp_avg",
+      "diastolic_bp_avg",
+      "bmi",
+      "waist_cm",
+      "total_cholesterol",
+      "hdl_cholesterol",
+      "triglycerides",
+      "non_hdl_cholesterol",
+      "hba1c",
+      "crp",
+      "gender",
+      "race_ethnicity",
+      "education_level",
+      "hypertension_flag",
+      "diabetes_flag",
+      "current_smoker",
+      "obese"
+    ],
+    "metrics": {
+      "has_heart_failure__logistic_regression": {
+        "roc_auc": 0.854,
+        "pr_auc": 0.1677,
+        "f1": 0.2504,
+        "prevalence": 0.0359,
+        "n": 62689
+      },
+      "has_heart_failure__xgboost": {
+        "roc_auc": 0.8571,
+        "pr_auc": 0.1775,
+        "f1": 0.2546,
+        "prevalence": 0.0359,
+        "n": 62689
+      },
+      "has_mi__logistic_regression": {
+        "roc_auc": 0.8401,
+        "pr_auc": 0.1795,
+        "f1": 0.2605,
+        "prevalence": 0.0446,
+        "n": 62770
+      },
+      "has_mi__xgboost": {
+        "roc_auc": 0.8427,
+        "pr_auc": 0.1866,
+        "f1": 0.2678,
+        "prevalence": 0.0446,
+        "n": 62770
+      },
+      "has_chd__logistic_regression": {
+        "roc_auc": 0.8522,
+        "pr_auc": 0.1865,
+        "f1": 0.2722,
+        "prevalence": 0.044,
+        "n": 62587
+      },
+      "has_chd__xgboost": {
+        "roc_auc": 0.8585,
+        "pr_auc": 0.209,
+        "f1": 0.2903,
+        "prevalence": 0.044,
+        "n": 62587
+      },
+      "has_angina__logistic_regression": {
+        "roc_auc": 0.8138,
+        "pr_auc": 0.1003,
+        "f1": 0.1674,
+        "prevalence": 0.0288,
+        "n": 62654
+      },
+      "has_angina__xgboost": {
+        "roc_auc": 0.8092,
+        "pr_auc": 0.1037,
+        "f1": 0.1724,
+        "prevalence": 0.0288,
+        "n": 62654
+      },
+      "has_stroke__logistic_regression": {
+        "roc_auc": 0.8136,
+        "pr_auc": 0.1344,
+        "f1": 0.2119,
+        "prevalence": 0.0408,
+        "n": 62785
+      },
+      "has_stroke__xgboost": {
+        "roc_auc": 0.8136,
+        "pr_auc": 0.1449,
+        "f1": 0.2188,
+        "prevalence": 0.0408,
+        "n": 62785
+      },
+      "has_any_cvd__logistic_regression": {
+        "roc_auc": 0.8407,
+        "pr_auc": 0.3848,
+        "f1": 0.4455,
+        "prevalence": 0.1164,
+        "n": 62886
+      },
+      "has_any_cvd__xgboost": {
+        "roc_auc": 0.8493,
+        "pr_auc": 0.4097,
+        "f1": 0.4616,
+        "prevalence": 0.1164,
+        "n": 62886
+      }
+    },
+    "best_by_outcome": {
+      "has_heart_failure": {
+        "model": "xgboost",
+        "roc_auc": 0.8571,
+        "pr_auc": 0.1775
+      },
+      "has_mi": {
+        "model": "xgboost",
+        "roc_auc": 0.8427,
+        "pr_auc": 0.1866
+      },
+      "has_chd": {
+        "model": "xgboost",
+        "roc_auc": 0.8585,
+        "pr_auc": 0.209
+      },
+      "has_angina": {
+        "model": "xgboost",
+        "roc_auc": 0.8092,
+        "pr_auc": 0.1037
+      },
+      "has_stroke": {
+        "model": "xgboost",
+        "roc_auc": 0.8136,
+        "pr_auc": 0.1449
+      },
+      "has_any_cvd": {
+        "model": "xgboost",
+        "roc_auc": 0.8493,
+        "pr_auc": 0.4097
+      }
+    },
+    "shap_top_features": [
+      {
+        "feature": "age",
+        "mean_abs_shap": 1.2505
+      },
+      {
+        "feature": "hypertension_flag",
+        "mean_abs_shap": 0.4513
+      },
+      {
+        "feature": "poverty_income_ratio",
+        "mean_abs_shap": 0.233
+      },
+      {
+        "feature": "diabetes_flag",
+        "mean_abs_shap": 0.1743
+      },
+      {
+        "feature": "systolic_bp_avg",
+        "mean_abs_shap": 0.1528
+      },
+      {
+        "feature": "total_cholesterol",
+        "mean_abs_shap": 0.1477
+      },
+      {
+        "feature": "race_ethnicity",
+        "mean_abs_shap": 0.1469
+      },
+      {
+        "feature": "waist_cm",
+        "mean_abs_shap": 0.146
+      },
+      {
+        "feature": "current_smoker",
+        "mean_abs_shap": 0.1229
+      },
+      {
+        "feature": "education_level",
+        "mean_abs_shap": 0.0916
+      }
+    ]
+  }
+}

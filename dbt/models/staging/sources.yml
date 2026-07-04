@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: >
+      Raw NHANES public-use files, one table per module group, loaded verbatim
+      from the CDC XPT files by src/etl.py. Column names match the NHANES
+      codebook (lowercased). One row per (seqn, cycle).
+    tables:
+      - name: demographics
+      - name: cardiovascular_questionnaire
+      - name: blood_pressure_exam
+      - name: blood_pressure_questionnaire
+      - name: body_measures
+      - name: diabetes_questionnaire
+      - name: smoking_questionnaire
+      - name: labs_cholesterol
+      - name: labs_glucose
+      - name: labs_biochemistry
+      - name: labs_crp
+      - name: physical_activity

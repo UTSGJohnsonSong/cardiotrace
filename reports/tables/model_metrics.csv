@@ -1,0 +1,13 @@
+roc_auc,pr_auc,f1,threshold,n_positive,n_total,prevalence,model,target
+0.854,0.1677,0.2504,0.797,2249,62689,0.0359,logistic_regression,has_heart_failure
+0.8571,0.1775,0.2546,0.761,2249,62689,0.0359,xgboost,has_heart_failure
+0.8401,0.1795,0.2605,0.729,2797,62770,0.0446,logistic_regression,has_mi
+0.8427,0.1866,0.2678,0.737,2797,62770,0.0446,xgboost,has_mi
+0.8522,0.1865,0.2722,0.755,2753,62587,0.044,logistic_regression,has_chd
+0.8585,0.209,0.2903,0.757,2753,62587,0.044,xgboost,has_chd
+0.8138,0.1003,0.1674,0.748,1805,62654,0.0288,logistic_regression,has_angina
+0.8092,0.1037,0.1724,0.767,1805,62654,0.0288,xgboost,has_angina
+0.8136,0.1344,0.2119,0.708,2564,62785,0.0408,logistic_regression,has_stroke
+0.8136,0.1449,0.2188,0.692,2564,62785,0.0408,xgboost,has_stroke
+0.8407,0.3848,0.4455,0.688,7320,62886,0.1164,logistic_regression,has_any_cvd
+0.8493,0.4097,0.4616,0.696,7320,62886,0.1164,xgboost,has_any_cvd
