@@ -1,4 +1,19 @@
 """
+DEPRECATED — superseded by data/download_from_catalog.py (2026-08-09).
+
+Do not use for new runs. This downloader hardcodes 17 module names and treats a
+404 as "that panel wasn't run this cycle". That assumption is wrong: CDC renamed
+the laboratory modules twice (LAB13 -> L13 -> TCHOL+HDL, and so on), so the
+probes for TCHOL/GLU/GHB/BIOPRO/CRP silently 404'd in 1999-2004 and those three
+cycles entered the warehouse with NO laboratory data — 15,332 adults, 24.4% of
+the analysis sample, whose lipids/glucose/HbA1c were then median-imputed.
+
+The replacement drives off the Stage 0 catalog (data/catalog/selection_ledger.csv)
+and raises on any file it cannot fetch. Kept here for provenance; see
+docs/research-design.md section 6.1 for the full write-up.
+
+--- original docstring follows ---
+
 NHANES downloader for CardioTrace.
 
 NHANES public-use files live at fully deterministic URLs. After CDC's 2024 site

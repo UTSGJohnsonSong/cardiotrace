@@ -5,6 +5,13 @@ data/processed/
 *.xpt
 *.sas7bdat
 
+# Linked Mortality Files: ignore the data, KEEP the manifest. The manifest is
+# the reproducibility record (SHA-256 per file) — CDC revises public-use files
+# in place without renaming them, so the digests are what prove two runs read
+# the same bytes.
+data/raw_mortality/*.dat
+!data/raw_mortality/MANIFEST.json
+
 # Environment
 .env
 *.env
@@ -46,3 +53,6 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/
+
+# Derived cohort tables — rebuildable from data/raw via src/cohort.py
+data/processed/
