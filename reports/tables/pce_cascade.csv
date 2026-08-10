@@ -1,0 +1,14 @@
+section,step,n,lost,pct_of_section_start
+cohort,start: all 1999-2014 respondents,82091,0,100.0
+cohort,age 40-79,25150,56941,30.6
+cohort,MEC exam weight > 0,24143,1007,29.4
+cohort,free of self-reported CVD at baseline,20771,3372,25.3
+pce_inputs,require age 40-79 non-null,20771,0,100.0
+pce_inputs,require sex non-null,20771,0,100.0
+pce_inputs,require race (Black vs other) non-null,20771,0,100.0
+pce_inputs,require diabetes non-null,20759,12,99.9
+pce_inputs,require current smoker non-null,20740,19,99.9
+pce_inputs,require on BP medication non-null,20673,67,99.5
+pce_inputs,require systolic BP non-null,19771,902,95.2
+pce_inputs,require total cholesterol non-null,18769,1002,90.4
+pce_inputs,require HDL cholesterol non-null,18769,0,90.4
