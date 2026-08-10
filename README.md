@@ -3,18 +3,53 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![XGBoost](https://img.shields.io/badge/XGBoost-3.2-green) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![SHAP](https://img.shields.io/badge/SHAP-interpretability-purple)
 
-CardioTrace ingests **25 years of CDC NHANES data (1999–2023, 11 biennial cycles, ~60,000 examined adults)**, transforms it through a Dockerized PostgreSQL + dbt warehouse, and trains survey-weighted machine-learning models for **five cardiovascular disease outcomes** — with SHAP interpretability, a health-equity analysis, and a pre/post-COVID comparison. The entire pipeline runs from raw government files to final figures with a single command.
+CardioTrace ingests **25 years of CDC NHANES data (1999–2023, 11 biennial cycles, ~60,000 examined adults)** plus the **NCHS Linked Mortality File**, and builds a prospective cohort of adults free of cardiovascular disease at baseline to study **death from cardiovascular causes** over up to 20 years of follow-up.
+
+Survey weights are applied to all population estimates. Competing risks are handled explicitly (deaths from other causes outnumber CVD deaths 2.9 : 1). Every file the pipeline keeps or drops is recorded with the rule that decided it.
 
 <!-- KEY_FINDINGS_START -->
 ## Key Findings
 
-- **Any-CVD prevalence, survey-weighted:** 8.1% of US adults in 1999-2000 → 9.61% in 2021-2022 (pooled N = 62,890 adults across 11 cycles).
-- **Best model:** Xgboost predicts coronary heart disease at ROC-AUC 0.8585 / PR-AUC 0.209 (5-fold cross-validated, survey design retained).
-- **Top risk drivers (SHAP, Any-CVD model):** age, hypertension_flag, poverty_income_ratio.
-- **Health equity (2021-2022):** Any-CVD prevalence ranges from 10.87% (Other/Multiracial) to 4.74% (Non-Hispanic Asian).
-- **Pre vs post-COVID:** Any-CVD 8.67% → 9.61%; mean HbA1c 5.62 → 5.71%; mean BMI 28.76 → 29.68.
+### Prospective cohort — CVD mortality (current)
 
-_Figures in [`reports/figures/`](reports/figures); full numbers in [`reports/results.json`](reports/results.json)._
+NHANES 1999–2014 linked to the National Death Index, adults 40–79 who were free of
+cardiovascular disease at baseline. **20,736 participants · 925 CVD deaths · 2,711
+competing deaths · 235,553 person-years.**
+
+- **Blood pressure gradient.** Survey-weighted 15-year cumulative incidence of CVD
+  death rises monotonically with baseline systolic BP: **2.40%** (<120 mmHg) → 3.14%
+  → 4.78% → 6.31% → **11.58%** (≥160 mmHg). A **4.8×** spread.
+- **Competing risk matters.** Treating deaths from other causes as censoring
+  (1 − Kaplan-Meier) overstates 15-year CVD risk by 0.30 pp — **7.4% relative** —
+  against the Aalen-Johansen estimator. Competing deaths outnumber CVD deaths 2.9 : 1.
+- **Primary vs secondary prevention.** Excluded participants (CVD at baseline) die of
+  CVD at **19.1 per 1,000 person-years** against **3.9** in the retained cohort — a
+  4.9× gap, which is why the two cannot be pooled into one model.
+
+_Figures in [`reports/figures/`](reports/figures); participant flow in
+[`reports/tables/strobe_part3.csv`](reports/tables/strobe_part3.csv)._
+
+### ⚠️ Earlier cross-sectional results — withdrawn, being rebuilt
+
+The prevalence-trend, health-equity and pre/post-COVID numbers previously published
+here, and the cross-sectional classification models, are **withdrawn**. Two reasons:
+
+1. **A data defect.** The original downloader hardcoded 17 NHANES module names and
+   treated an HTTP 404 as "that panel wasn't collected". CDC had renamed the
+   laboratory modules (`LAB13` → `L13` → `TCHOL`+`HDL`), so 1999–2004 entered the
+   warehouse with **no laboratory data at all** — 15,332 adults, 24.4% of the sample —
+   whose lipids, glucose and HbA1c were then median-imputed. Those fabricated values
+   reached the published figures. Fixed in `data/download_from_catalog.py`; the
+   affected cycles have been re-downloaded.
+2. **A design problem.** The outcome (`MCQ160B–F`) asks whether a doctor *ever* said
+   you had the condition, while the risk markers are measured at the same visit. The
+   exposure does not precede the outcome, so the models were identifying prevalent
+   diagnoses rather than predicting risk — and treatment effects run backwards
+   (statin users have *lower* cholesterol). See
+   [`docs/methodology-review.md`](docs/methodology-review.md).
+
+The descriptive and COVID analyses are being rebuilt on the corrected data with
+age standardisation and design-based confidence intervals.
 <!-- KEY_FINDINGS_END -->
 
 ---
