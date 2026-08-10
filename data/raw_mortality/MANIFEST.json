@@ -1,0 +1,98 @@
+{
+  "release": "2019",
+  "follow_up_through": "2019-12-31",
+  "source": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality",
+  "generated_at_utc": "2026-08-10T00:08:09+00:00",
+  "files": [
+    {
+      "cycle": "1999-2000",
+      "file": "NHANES_1999_2000_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_1999_2000_MORT_2019_PUBLIC.dat",
+      "bytes": 487666,
+      "sha256": "562bd367107add0b2b40fed36a062d8b194fca31e11aab897a0efad4bebc8b26",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:14 GMT",
+      "downloaded_at_utc": "2026-08-10T00:07:50+00:00"
+    },
+    {
+      "cycle": "2001-2002",
+      "file": "NHANES_2001_2002_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2001_2002_MORT_2019_PUBLIC.dat",
+      "bytes": 540362,
+      "sha256": "2788c8c8a02995ea5686882b5fe65b4b9cd415016031525f8a3c1a3646c47f1b",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:14 GMT",
+      "downloaded_at_utc": "2026-08-10T00:07:51+00:00"
+    },
+    {
+      "cycle": "2003-2004",
+      "file": "NHANES_2003_2004_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2003_2004_MORT_2019_PUBLIC.dat",
+      "bytes": 495722,
+      "sha256": "639f6b3292a55b112fbfc842954af3d8d32bcce287cd8ae49319e5aca1c033c0",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:14 GMT",
+      "downloaded_at_utc": "2026-08-10T00:07:53+00:00"
+    },
+    {
+      "cycle": "2005-2006",
+      "file": "NHANES_2005_2006_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2005_2006_MORT_2019_PUBLIC.dat",
+      "bytes": 506774,
+      "sha256": "69388ea13a4f395f29d9d21bc51941b9759003490d4b00f6ff12a1bc5f8dba5c",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:14 GMT",
+      "downloaded_at_utc": "2026-08-10T00:07:55+00:00"
+    },
+    {
+      "cycle": "2007-2008",
+      "file": "NHANES_2007_2008_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2007_2008_MORT_2019_PUBLIC.dat",
+      "bytes": 498376,
+      "sha256": "75f89bd545a13ba726a7eb56de4d62f6dfc8f0f76d505dc18ced9752d5e2c77d",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:15 GMT",
+      "downloaded_at_utc": "2026-08-10T00:07:58+00:00"
+    },
+    {
+      "cycle": "2009-2010",
+      "file": "NHANES_2009_2010_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2009_2010_MORT_2019_PUBLIC.dat",
+      "bytes": 517751,
+      "sha256": "eabf074331e20d3f3cbb8ddf21e3a43e517f5694187c12b755741f4472894786",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:15 GMT",
+      "downloaded_at_utc": "2026-08-10T00:08:01+00:00"
+    },
+    {
+      "cycle": "2011-2012",
+      "file": "NHANES_2011_2012_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2011_2012_MORT_2019_PUBLIC.dat",
+      "bytes": 475574,
+      "sha256": "ff98b6c87172643426b1c6d20f76495592bebd618ea18f742d98a44b84456b30",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:15 GMT",
+      "downloaded_at_utc": "2026-08-10T00:08:03+00:00"
+    },
+    {
+      "cycle": "2013-2014",
+      "file": "NHANES_2013_2014_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2013_2014_MORT_2019_PUBLIC.dat",
+      "bytes": 494268,
+      "sha256": "588acea1d4cdf47a14cc9a35bd56e372739b8788d63ca0af98bf954c70c29905",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:15 GMT",
+      "downloaded_at_utc": "2026-08-10T00:08:05+00:00"
+    },
+    {
+      "cycle": "2015-2016",
+      "file": "NHANES_2015_2016_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2015_2016_MORT_2019_PUBLIC.dat",
+      "bytes": 484288,
+      "sha256": "f392baaf9c20a4c75bc9936775ba956e64528fa5ada5102b08f86f64e41e84a0",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:15 GMT",
+      "downloaded_at_utc": "2026-08-10T00:08:07+00:00"
+    },
+    {
+      "cycle": "2017-2018",
+      "file": "NHANES_2017_2018_MORT_2019_PUBLIC.dat",
+      "url": "https://ftp.cdc.gov/pub/HEALTH_STATISTICS/NCHS/datalinkage/linked_mortality/NHANES_2017_2018_MORT_2019_PUBLIC.dat",
+      "bytes": 449623,
+      "sha256": "42989d4fe35754d696b770f26553b0a309c110a9e26ab0ee504be3eae5987523",
+      "server_last_modified": "Tue, 26 Apr 2022 15:57:15 GMT",
+      "downloaded_at_utc": "2026-08-10T00:08:09+00:00"
+    }
+  ]
+}
