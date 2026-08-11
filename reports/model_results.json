@@ -1,0 +1,28 @@
+{
+  "aetiologic_sbp_per_10mmhg": {
+    "hr": 1.1211,
+    "lo95": 1.0787,
+    "hi95": 1.1663
+  },
+  "aetiologic_sbp_per_10mmhg_no_tobin": {
+    "hr": 1.097
+  },
+  "prediction": {
+    "Test 2005\u20132008, 10-year risk": {
+      "n": 5163,
+      "cvd_deaths": 217,
+      "horizon_years": 10.0,
+      "harrell_c": 0.804,
+      "mean_predicted_pct": 2.82,
+      "mean_observed_pct": 2.76
+    },
+    "Test 2009\u20132014, 5-year risk": {
+      "n": 8801,
+      "cvd_deaths": 170,
+      "horizon_years": 5.0,
+      "harrell_c": 0.797,
+      "mean_predicted_pct": 0.92,
+      "mean_observed_pct": 0.89
+    }
+  }
+}
