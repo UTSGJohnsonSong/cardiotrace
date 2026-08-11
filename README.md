@@ -26,6 +26,33 @@ competing deaths · 235,553 person-years.**
   CVD at **19.1 per 1,000 person-years** against **3.9** in the retained cohort — a
   4.9× gap, which is why the two cannot be pooled into one model.
 
+**Aetiologic model** — cause-specific Cox, survey-weighted, robust variance clustered
+on stratum × PSU. Blood pressure is Tobin-adjusted (+10 mmHg for treated participants)
+so the exposure approximates the untreated level rather than a post-treatment value.
+
+| | HR (95% CI) |
+|---|---|
+| **Systolic BP, per 10 mmHg** | **1.121 (1.079–1.166)** |
+| Current smoker | 2.45 (1.97–3.05) |
+| Male | 2.01 (1.65–2.44) |
+| Non-Hispanic Black | 1.38 (1.15–1.65) |
+| Poverty-income ratio, per unit | 0.84 (0.78–0.89) |
+
+**Prediction model** — two cause-specific Cox fits combined into absolute risk, so a
+participant who dies of something else is not counted as if they could still die of
+CVD. Trained on 1999–2004 and applied **forward in time**; the split is on survey
+cycle, not at random, because same-PSU participants are correlated and a random fold
+would leak them across the boundary.
+
+| Test set | n | Harrell's C | Predicted | Observed |
+|---|---|---|---|---|
+| 2005–2008, 10-year risk | 5,163 | **0.804** | 2.82% | 2.76% |
+| 2009–2014, 5-year risk | 8,801 | **0.797** | 0.92% | 0.89% |
+
+Discrimination barely decays on the further-out test set, and mean predicted risk sits
+within 0.06 pp of observed in both. Calibration by decile is in
+[`reports/figures/calibration.png`](reports/figures/calibration.png).
+
 _Figures in [`reports/figures/`](reports/figures); participant flow in
 [`reports/tables/strobe_part3.csv`](reports/tables/strobe_part3.csv)._
 
