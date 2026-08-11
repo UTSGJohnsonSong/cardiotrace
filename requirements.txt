@@ -19,6 +19,9 @@ imbalanced-learn>=0.11.0
 # Model interpretability
 shap>=0.44.0
 
+# Survival analysis
+lifelines>=0.30.0
+
 # Stats
 scipy>=1.11.0
 statsmodels>=0.14.0
