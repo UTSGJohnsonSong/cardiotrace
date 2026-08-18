@@ -1,16 +1,20 @@
 # CardioTrace
-### 25 Years of Cardiovascular Risk in America — an end-to-end NHANES analytics pipeline
+### A prospective cohort study of cardiovascular mortality, built from 25 years of NHANES
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![XGBoost](https://img.shields.io/badge/XGBoost-3.2-green) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![SHAP](https://img.shields.io/badge/SHAP-interpretability-purple)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-64%20passing-brightgreen)
 
-CardioTrace ingests **25 years of CDC NHANES data (1999–2023, 11 biennial cycles, ~60,000 examined adults)** plus the **NCHS Linked Mortality File**, and builds a prospective cohort of adults free of cardiovascular disease at baseline to study **death from cardiovascular causes** over up to 20 years of follow-up.
+CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
+builds a prospective cohort of adults who were free of cardiovascular disease at
+baseline, to study **death from cardiovascular causes** over up to 20 years of follow-up.
 
-Survey weights are applied to all population estimates. Competing risks are handled explicitly (deaths from other causes outnumber CVD deaths 2.9 : 1). Every file the pipeline keeps or drops is recorded with the rule that decided it.
+Survey weights are applied to every population estimate. Competing risks are modelled
+rather than censored — deaths from other causes outnumber CVD deaths 2.9 : 1. Every one
+of the 1,821 published NHANES files is recorded with the rule that kept or dropped it.
 
 <!-- KEY_FINDINGS_START -->
 ## Key Findings
 
-### Prospective cohort — CVD mortality (current)
+### Prospective cohort — CVD mortality
 
 NHANES 1999–2014 linked to the National Death Index, adults 40–79 who were free of
 cardiovascular disease at baseline. **20,736 participants · 925 CVD deaths · 2,711
@@ -21,7 +25,7 @@ competing deaths · 235,553 person-years.**
   → 4.78% → 6.31% → **11.58%** (≥160 mmHg). A **4.8×** spread.
 - **Competing risk matters.** Treating deaths from other causes as censoring
   (1 − Kaplan-Meier) overstates 15-year CVD risk by 0.30 pp — **7.4% relative** —
-  against the Aalen-Johansen estimator. Competing deaths outnumber CVD deaths 2.9 : 1.
+  against the Aalen-Johansen estimator.
 - **Primary vs secondary prevention.** Excluded participants (CVD at baseline) die of
   CVD at **19.1 per 1,000 person-years** against **3.9** in the retained cohort — a
   4.9× gap, which is why the two cannot be pooled into one model.
@@ -40,9 +44,7 @@ so the exposure approximates the untreated level rather than a post-treatment va
 
 **Prediction model** — two cause-specific Cox fits combined into absolute risk, so a
 participant who dies of something else is not counted as if they could still die of
-CVD. Trained on 1999–2004 and applied **forward in time**; the split is on survey
-cycle, not at random, because same-PSU participants are correlated and a random fold
-would leak them across the boundary.
+CVD. Trained on 1999–2004 and applied **forward in time**.
 
 | Test set | n | Harrell's C | Predicted | Observed |
 |---|---|---|---|---|
@@ -50,99 +52,164 @@ would leak them across the boundary.
 | 2009–2014, 5-year risk | 8,801 | **0.797** | 0.92% | 0.89% |
 
 Discrimination barely decays on the further-out test set, and mean predicted risk sits
-within 0.06 pp of observed in both. Calibration by decile is in
-[`reports/figures/calibration.png`](reports/figures/calibration.png).
+within 0.06 pp of observed in both.
 
-_Figures in [`reports/figures/`](reports/figures); participant flow in
-[`reports/tables/strobe_part3.csv`](reports/tables/strobe_part3.csv)._
+<p align="center">
+  <img src="reports/figures/cif_by_sbp.png" width="49%" />
+  <img src="reports/figures/calibration.png" width="49%" />
+</p>
 
-### ⚠️ Earlier cross-sectional results — withdrawn, being rebuilt
+_All figures in [`reports/figures/`](reports/figures); participant flow in
+[`reports/tables/strobe_part3.csv`](reports/tables/strobe_part3.csv); numbers in
+[`reports/model_results.json`](reports/model_results.json)._
+
+### ⚠️ Earlier cross-sectional results — withdrawn
 
 The prevalence-trend, health-equity and pre/post-COVID numbers previously published
-here, and the cross-sectional classification models, are **withdrawn**. Two reasons:
+here, and the cross-sectional classification models, are **withdrawn** for two reasons.
+The figures are kept in [`reports/figures/archive/`](reports/figures/archive) with the
+same explanation, rather than deleted.
 
 1. **A data defect.** The original downloader hardcoded 17 NHANES module names and
    treated an HTTP 404 as "that panel wasn't collected". CDC had renamed the
    laboratory modules (`LAB13` → `L13` → `TCHOL`+`HDL`), so 1999–2004 entered the
    warehouse with **no laboratory data at all** — 15,332 adults, 24.4% of the sample —
    whose lipids, glucose and HbA1c were then median-imputed. Those fabricated values
-   reached the published figures. Fixed in `data/download_from_catalog.py`; the
-   affected cycles have been re-downloaded.
+   reached the published figures.
 2. **A design problem.** The outcome (`MCQ160B–F`) asks whether a doctor *ever* said
    you had the condition, while the risk markers are measured at the same visit. The
    exposure does not precede the outcome, so the models were identifying prevalent
-   diagnoses rather than predicting risk — and treatment effects run backwards
-   (statin users have *lower* cholesterol). See
-   [`docs/methodology-review.md`](docs/methodology-review.md).
+   diagnoses rather than predicting risk — and treatment effects run backwards, since
+   statin users have *lower* cholesterol.
 
-The descriptive and COVID analyses are being rebuilt on the corrected data with
-age standardisation and design-based confidence intervals.
+The descriptive and COVID analyses are being rebuilt on the corrected data with age
+standardisation and design-based confidence intervals.
 <!-- KEY_FINDINGS_END -->
 
 ---
 
 ## Why this project is built the way it is
 
-Every non-obvious decision here is one an interviewer would probe:
+Every non-obvious decision has a written reason in
+[`docs/research-design.md`](docs/research-design.md). The ones a reviewer probes first:
 
-- **Survey weights, everywhere.** NHANES is a complex, stratified, multi-stage probability sample. A raw mean is biased, so all population estimates use the pooled MEC exam weight (`WTMEC2YR ÷ n_cycles`), and the strata/PSU columns are retained for design-based standard errors. `n_cycles` is computed from the data, not hardcoded.
-- **No SMOTE.** CVD prevalence is ~2–6%, so classes are imbalanced ~20:1. SMOTE would fabricate minority cases and distort epidemiological prevalence — instead imbalance is handled in the loss function (`class_weight='balanced'` / per-target `scale_pos_weight`).
-- **PR-AUC over accuracy.** At 5% prevalence a model that predicts "no disease" for everyone scores 95% accuracy and is useless. Models are ranked by PR-AUC, then ROC-AUC and F1 at the best threshold.
-- **No participant double-counting.** The special 2017–2020 pre-pandemic file pools 2017–2018 with the partial 2019–2020 wave; including it alongside 2017–2018 would double-count people, so it is deliberately excluded. That leaves a clean gap before 2021–2023 — exactly what makes the COVID comparison valid.
-- **Instruments harmonized across the series.** Oscillometric blood pressure (`BPXO`) replaced the manual cuff (`BPX`) in 2017, and high-sensitivity CRP (mg/L) replaced the legacy assay (mg/dL). The ETL maps both onto one column/unit so a single model sees a continuous 25-year series.
+- **The outcome had to change.** Linking to the National Death Index fixes the time
+  order — exposure at the exam, death observed afterwards — at the cost of a harder
+  endpoint. Without it the design cannot support the word "prediction" at all.
+- **Baseline CVD becomes an exclusion, not a covariate.** It is a mediator between
+  blood pressure and CVD death, so adjusting for it is a Table 2 fallacy; leaving it in
+  pools two populations whose death rates differ 4.9-fold into an average with no
+  clinical counterpart. Excluding it also makes the cohort comparable to the ASCVD
+  Pooled Cohort Equations.
+- **Competing risks are modelled, not censored.** Treating other deaths as censoring
+  answers "what fraction would die of CVD if it were impossible to die of anything
+  else" — a question nobody asks.
+- **Validation splits on survey cycle, not at random.** Participants from the same
+  primary sampling unit share a neighbourhood, a provider mix and an interviewer, so a
+  random K-fold puts correlated people on both sides of the boundary. Splitting on
+  cycle also asks whether the score still works on people surveyed later.
+- **The cohort stops at 2014 for a measured reason.** From 2015 CDC collapses the
+  cause-of-death groups, so cerebrovascular deaths disappear into "other" and the
+  outcome definition would change mid-series. Those cycles contribute only ~4% of
+  events anyway, because follow-up is short.
+- **Survey weights, everywhere.** NHANES is a stratified multi-stage probability
+  sample. Population estimates use the pooled MEC exam weight; the variance is robust
+  and clustered on stratum × PSU.
+
+### What went wrong, and how it was caught
+
+The first version of this pipeline published fabricated numbers, for the reason in the
+withdrawal note above. Four separate defects turned out to share one cause:
+**pattern-matching identifiers instead of enumerating them.**
+
+| defect | consequence |
+|---|---|
+| `^[A-Z]+Y$` for youth-only modules | matched `TRIGLY`, dropping 8 cycles of lipid data |
+| prefix match for the cycle suffix | `L13` also matched `L13_2_B`, a second-exam replicate subsample |
+| health insurance read under one name | `HID010` → `HIQ011`; three cycles blank |
+| kidney module treated as absent | `KIQ`/`KIQ020` → `KIQ_U`/`KIQ022`, same question renamed |
+
+None of them raised. Each looked like ordinary missing data, and median imputation
+downstream turned the gaps into plausible numbers.
+
+The pipeline now enumerates all 1,821 published files before selecting any, records one
+rule per file, resolves column names through a verified per-cycle crosswalk, and fails
+the run on any cycle-wide gap that is not explicitly declared. The 64 tests are
+regressions for defects that actually shipped.
 
 ---
 
 ## Architecture
 
 ```
-CDC NHANES public files (11 cycles × ~17 modules, 1999–2023)
-      │  data/download.py — deterministic URL builder + HEAD probe
-      ▼
-data/raw/*.XPT
-      │  src/etl.py — pyreadstat, merge files→table, harmonize instruments
-      ▼
-PostgreSQL  (raw schema)          ← Dockerized: docker compose up -d
-      │  dbt: staging → mart
-      ▼
-PostgreSQL  (staging + mart schema)
-      │  run_pipeline.py — survey-weighted analysis + ML + SHAP
-      ▼
-reports/figures/*.png · reports/tables/*.csv · reports/results.json
-dashboard/data/*.csv  (Tableau-ready aggregates)
+CDC NHANES public files, 11 cycles           NCHS Linked Mortality File
+      │  build_catalog.py                          │  download_mortality.py
+      │    enumerate all 1,821 files               │    SEQN → National Death Index
+      │  apply_selection_rules.py                  │    cause of death, months of
+      │    R0–R5 ladder → 225 kept                 │    follow-up from the exam
+      │  download_from_catalog.py                  │
+      │    fetch by published URL, hash, verify    │
+      ▼                                            ▼
+data/raw/*.XPT                              data/raw_mortality/*.dat
+      │                                            │
+      │  build_variable_crosswalk.py               │
+      │    analyte × cycle → column, unit factor   │
+      └──────────────────┬─────────────────────────┘
+                         ▼
+              src/cohort.py    harmonise · decode skip patterns ·
+                               exclude with STROBE accounting
+                         ▼
+              src/survival.py  Kaplan-Meier · Aalen-Johansen
+              src/models.py    cause-specific Cox · absolute risk · calibration
+                         ▼
+              reports/figures · reports/tables · reports/model_results.json
 ```
+
+Harmonisation lives in Python rather than SQL because selecting a different column per
+cycle is awkward in SQL and untestable without a database. The Dockerized
+PostgreSQL + dbt layer remains for the descriptive analyses.
 
 ---
 
-## Reproduce it end to end
+## Reproduce it
 
-Prereqs: Docker Desktop, Python 3.11. From the project root:
+Prereqs: Python 3.11.
 
 ```bash
-make setup     # create .venv, install requirements
-make up        # start Dockerized Postgres on localhost:5435
-make data      # download NHANES XPT files into data/raw/  (~280 MB)
-make load      # load raw files into Postgres
-make dbt       # build staging + mart models
-make analyze   # run analysis + models → reports/
+make setup                                  # .venv + requirements
+python data/build_catalog.py                # enumerate every published file
+python data/apply_selection_rules.py        # R0-R5 ladder -> selection ledger
+python data/download_from_catalog.py        # fetch the 225 kept files (~1 GB)
+python data/download_mortality.py           # linked mortality files (~5 MB)
+python data/build_variable_crosswalk.py     # resolve per-cycle column names
+python -c "from src.cohort import build_cohort; build_cohort()"
+python scripts/make_survival_figures.py     # descriptive curves
+python scripts/fit_survival_models.py       # Cox + absolute risk + calibration
+pytest tests/ -q                            # 64 tests
 ```
 
-Or in one go: `make all`. Without `make` (e.g. Windows PowerShell), run the underlying commands shown in the [Makefile](Makefile).
+Every download writes a SHA-256 manifest; `--verify` re-hashes against it. CDC revises
+public-use files in place without renaming them, so the digests are what prove two runs
+read the same bytes.
 
-The database is fully containerized (`docker-compose.yml`), so there is nothing to install or configure beyond Docker — the schema is created automatically on first start.
+The test suite needs no downloaded data — fixtures write synthetic XPT files that round
+-trip through the same reader the pipeline uses.
 
 ---
 
-## The five cardiovascular outcomes
+## Cohort
 
-| Disease | NHANES Variable | Modeled |
-|---------|-----------------|---------|
-| Congestive Heart Failure | MCQ160B | ✅ |
-| Myocardial Infarction (Heart Attack) | MCQ160E | ✅ |
-| Coronary Heart Disease | MCQ160C | ✅ |
-| Angina Pectoris | MCQ160D | ✅ |
-| Stroke | MCQ160F | ✅ |
-| _Composite: any of the above_ | derived | ✅ |
+| | |
+|---|---|
+| Source | NHANES 1999–2014, 8 cycles, linked to the National Death Index through 2019-12-31 |
+| Population | Adults 40–79 (the ASCVD PCE applicability range), free of self-reported CVD at baseline |
+| Outcome | Death from diseases of the heart or cerebrovascular disease (`UCOD_LEADING` ∈ {1, 5}) |
+| Competing event | Death from any other cause |
+| Time origin | The MEC examination, so follow-up starts when the exposures were measured |
+| Size | **20,736 participants · 925 CVD deaths · 2,711 competing deaths · 235,553 person-years** |
+
+Participant flow with every exclusion counted:
+[`reports/tables/strobe_part3.csv`](reports/tables/strobe_part3.csv).
 
 ---
 
@@ -150,21 +217,28 @@ The database is fully containerized (`docker-compose.yml`), so there is nothing 
 
 ```
 CardioTrace/
-├── docker-compose.yml       # Dockerized PostgreSQL 16 (localhost:5435)
-├── Makefile                 # one-command pipeline
-├── run_pipeline.py          # orchestrator: analysis + models + SHAP → reports/
-├── data/download.py         # deterministic NHANES downloader
-├── sql/schema.sql           # raw schema DDL (auto-run by Docker)
-├── dbt/                     # staging + mart models, sources, profile
-│   └── models/{staging,mart}/
+├── data/
+│   ├── build_catalog.py            # Stage 0: enumerate all 1,821 published files
+│   ├── apply_selection_rules.py    # R0-R5 ladder, one rule per file
+│   ├── download_from_catalog.py    # fetch by published URL; fails on any miss
+│   ├── build_variable_crosswalk.py # analyte x cycle -> column name, unit factor
+│   ├── download_mortality.py       # NCHS linked mortality files
+│   └── catalog/                    # the ledgers, committed so CI needs no network
 ├── src/
-│   ├── etl.py               # XPT → Postgres (merge, harmonize)
-│   ├── analysis.py          # survey-weighted prevalence / equity / COVID
-│   ├── features.py          # 3-layer feature selection funnel
-│   └── model.py             # LR + XGBoost training, SHAP, metrics
-├── notebooks/               # 01 EDA · 02 feature selection · 03 modeling · 04 SHAP
-├── reports/{figures,tables} # generated artifacts + results.json
-└── dashboard/data/          # Tableau-ready aggregated CSVs
+│   ├── cohort.py                   # harmonisation, skip-pattern decoding, STROBE
+│   ├── survival.py                 # Kaplan-Meier, Aalen-Johansen
+│   └── models.py                   # cause-specific Cox, absolute risk, calibration
+├── scripts/
+│   ├── pce_variable_cascade.py     # what each PCE alignment filter costs
+│   ├── make_survival_figures.py    # descriptive curves
+│   └── fit_survival_models.py      # fit, validate forward in time, calibrate
+├── tests/                          # 64 regressions for defects that shipped
+├── docs/
+│   ├── research-design.md          # decision log - every choice, with its cost
+│   ├── methodology-review.md       # the audit that started the rework
+│   └── advisor-briefing.md         # the narrative version
+├── dbt/                            # staging + mart, for the descriptive analyses
+└── reports/{figures,tables}        # generated artifacts
 ```
 
 ---
@@ -173,32 +247,61 @@ CardioTrace/
 
 | Layer | Tool |
 |-------|------|
-| Data acquisition | Python `requests` (deterministic URL builder + HEAD probe) |
-| Parsing | `pyreadstat` (robust C-based XPORT reader) |
-| Warehouse | PostgreSQL 16 (Dockerized) |
-| Transformation | dbt-core 1.11 (staging → mart, sources, tests) |
-| Analysis | pandas, NumPy, SciPy, statsmodels |
-| ML | scikit-learn (Logistic Regression) + XGBoost |
-| Interpretability | SHAP (TreeExplainer) |
-| Visualization | Matplotlib → figures; Tableau Public (dashboard) |
+| Acquisition | `requests`, catalog-driven, SHA-256 manifests |
+| Parsing | `pyreadstat` (XPT), fixed-width reader (mortality) |
+| Harmonisation | pandas, driven by a verified per-cycle crosswalk |
+| Survival | `lifelines` (Cox); Kaplan-Meier and Aalen-Johansen implemented directly |
+| Warehouse | PostgreSQL 16 + dbt-core (descriptive layer) |
+| Figures | Matplotlib, colourblind-validated palette |
+| Testing | pytest, synthetic XPT fixtures |
 
 ---
 
-## Data notes
+## Limitations
 
-- **Source**: [CDC NHANES](https://wwwn.cdc.gov/nchs/nhanes/), fully de-identified public-use data (no IRB required).
-- **Cycles**: 11 non-overlapping biennial waves, 1999–2000 … 2017–2018 and 2021–2023.
-- **Population**: adults 20+ (`RIDAGEYR ≥ 20`); age is top-coded at 80 for privacy.
-- **Missing codes**: NHANES 7/77/777 (Refused) and 9/99/999 (Don't Know) are recoded to NULL in the staging layer.
+Stated because they bound what the numbers mean, not as a disclaimer.
+
+- **One measurement per person.** NHANES is a series of independent cross-sections; the
+  linkage adds an outcome, not repeated exposures. This supports baseline risk
+  prediction — the same design as Framingham, PCE, SCORE2 and QRISK3 — but not dynamic
+  risk updating or time-varying causal effects. A single measurement also attenuates
+  associations through regression dilution.
+- **Mortality, not incidence.** Non-fatal myocardial infarction and stroke are
+  invisible, so the estimand blends incidence with case fatality.
+- **Survivor and institutionalisation bias.** NHANES samples the living,
+  non-institutionalised population; people who died young of CVD were never eligible.
+- **Self-reported baseline CVD.** Sensitivity is roughly 60–80%, so some true patients
+  remain in a cohort described as primary-prevention, biasing effects toward the null.
+- **Follow-up ends 2019-12-31.** The model is trained and validated entirely on
+  pre-pandemic data; its transportability after 2020 cannot be tested with public data.
+- **Point estimates only.** Design-based confidence intervals via Taylor linearisation
+  are not yet implemented.
+- **Diet is unmeasured.** It sits in the causal graph as an unmeasured confounder of the
+  blood-pressure effect.
+
+---
+
+## Data
+
+- **Source**: [CDC NHANES](https://wwwn.cdc.gov/nchs/nhanes/) and the
+  [NCHS Public-Use Linked Mortality Files](https://www.cdc.gov/nchs/data-linkage/mortality-public.htm).
+  Fully de-identified public-use data; no IRB required.
+- **Perturbation**: NCHS substitutes synthetic follow-up time or cause of death for a
+  small number of records in the public-use linkage, to prevent re-identification.
+- **Missing codes**: 7/77/777 (refused) and 9/99/999 (don't know) become missing, never
+  "no". Questionnaire skip patterns are decoded deterministically instead — never
+  having been told you had hypertension means untreated, not unknown, and decoding both
+  skip branches took that column from 65.3% to 0.3% missing.
 
 ---
 
 ## Part of the HealthTrace platform
 
-CardioTrace is Module 1 of a planned multi-disease analytics platform on NHANES; the ETL + warehouse + modeling infrastructure is built to extend to other conditions.
+CardioTrace is Module 1 of a multi-disease analytics platform on NHANES. The catalog,
+rule ladder and variable crosswalk are disease-agnostic and carry over directly.
 
 | Module | Focus | Status |
 |--------|-------|--------|
-| **CardioTrace** | Cardiovascular disease | ✅ Built |
+| **CardioTrace** | Cardiovascular disease | ✅ Prospective cohort built |
 | NephroTrace | Kidney disease (CKD) | 📋 Planned |
 | GutTrace | Digestive & nutrition | 📋 Planned |
