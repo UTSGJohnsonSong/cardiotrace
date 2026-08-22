@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CardioTrace</title>
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #f7f6f2;
+  --plate:      #fcfcfb;
+  --ink:        #0b0b0b;
+  --ink-2:      #52514e;
+  --ink-3:      #898781;
+  --rule:       #c3c2b7;
+  --rule-soft:  #e1e0d9;
+  --series:     #2a78d6;
+  --flag:       #eb6834;
+  --chip-bg:    #ffffff;
+  --serif: Georgia, "Iowan Old Style", "Source Serif Pro", "Times New Roman", serif;
+  --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --measure: 68ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #16161a;
+    --plate:     #1e1e22;
+    --ink:       #f4f3ef;
+    --ink-2:     #b9b7b0;
+    --ink-3:     #8b8983;
+    --rule:      #46454a;
+    --rule-soft: #2c2c31;
+    --series:    #6aa5ee;
+    --flag:      #f0895e;
+    --chip-bg:   #232329;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #16161a;
+  --plate:     #1e1e22;
+  --ink:       #f4f3ef;
+  --ink-2:     #b9b7b0;
+  --ink-3:     #8b8983;
+  --rule:      #46454a;
+  --rule-soft: #2c2c31;
+  --series:    #6aa5ee;
+  --flag:      #f0895e;
+  --chip-bg:   #232329;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px 96px; }
+@media (max-width: 520px) { .wrap { padding: 0 18px 72px; } }
+.measure { max-width: var(--measure); }
+
+/* ── masthead ─────────────────────────────────────────────────────── */
+.masthead { padding: 76px 0 34px; border-bottom: 2px solid var(--ink); }
+.eyebrow {
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  margin: 0 0 20px;
+}
+h1 {
+  font-size: clamp(32px, 4.6vw, 46px); line-height: 1.1; margin: 0 0 10px;
+  font-weight: 700; letter-spacing: -0.016em; text-wrap: balance;
+}
+.subtitle {
+  font-size: clamp(18px, 2.2vw, 22px); line-height: 1.34; margin: 0 0 22px;
+  color: var(--ink-2); font-weight: 400; text-wrap: balance;
+}
+.standfirst { font-size: 18px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.masthead-meta {
+  display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 30px;
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+}
+.masthead-meta b { color: var(--ink-2); font-weight: 600; }
+
+/* ── section scaffolding ──────────────────────────────────────────── */
+section { padding-top: 62px; }
+.sec-head { display: flex; gap: 20px; align-items: baseline; margin-bottom: 8px; }
+.sec-num {
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; color: var(--ink-3); padding-top: 8px;
+  min-width: 74px; flex-shrink: 0;
+}
+h2 {
+  font-size: clamp(24px, 3vw, 31px); line-height: 1.18; margin: 0;
+  font-weight: 700; letter-spacing: -0.012em; text-wrap: balance;
+}
+h3 {
+  font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2);
+  margin: 44px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-soft);
+}
+p { margin: 0 0 18px; }
+.body-indent { margin-left: 94px; }
+@media (max-width: 760px) { .body-indent { margin-left: 0; } .sec-num { min-width: 0; } }
+
+/* ── method chips ─────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--sans); font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 11px; border: 1px solid var(--rule); border-radius: 2px;
+  background: var(--chip-bg); color: var(--ink-2); white-space: nowrap;
+  max-width: 100%;
+}
+@media (max-width: 520px) { .chip { white-space: normal; } }
+.chip::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--series); flex-shrink: 0;
+}
+.chip.quiet::before { background: var(--ink-3); }
+.chip.open::before { background: transparent; border: 1.5px solid var(--flag); }
+.chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 26px; }
+
+/* ── the decision ledger: the organising device ───────────────────── */
+.ledger { margin: 30px 0 8px; border-top: 1px solid var(--rule); }
+.decision {
+  display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 0 26px;
+  padding: 20px 0; border-bottom: 1px solid var(--rule-soft);
+}
+@media (max-width: 860px) { .decision { grid-template-columns: 1fr; gap: 14px 0; } }
+.decision .d-choice { font-size: 16px; line-height: 1.45; }
+.decision .d-choice b { font-weight: 700; }
+.decision .col-label {
+  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-3);
+  display: block; margin-bottom: 6px;
+}
+.decision .d-buys, .decision .d-costs {
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.52; color: var(--ink-2);
+}
+.decision .d-costs { color: var(--ink-2); }
+.decision .d-costs .col-label { color: var(--flag); }
+
+/* ── figure plates ────────────────────────────────────────────────── */
+/* The figures are matplotlib PNGs rendered once, on a light surface. Rather
+   than frame a bright image in a dark card, the plate stays paper in both
+   themes and carries its own ink — a deliberate single-theme island, the way a
+   printed plate sits on a page. Its colours are literals on purpose: they must
+   not follow the theme, because the image inside them cannot. */
+figure {
+  margin: 34px 0; background: #fcfcfb;
+  border: 1px solid var(--rule); border-radius: 3px;
+  padding: 22px; overflow-x: auto;
+}
+figure img { display: block; width: 100%; height: auto; }
+figcaption {
+  font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+  color: #6b6a65; margin-top: 16px; padding-top: 14px;
+  border-top: 1px solid #e1e0d9;
+}
+figcaption b { color: #34332f; font-weight: 600; }
+
+/* ── stat strip ───────────────────────────────────────────────────── */
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; background: var(--rule-soft);
+  border: 1px solid var(--rule-soft); margin: 26px 0;
+}
+.stat { background: var(--plate); padding: 16px 18px; }
+.stat .k {
+  font-family: var(--sans); font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: 7px;
+}
+.stat .v {
+  font-family: var(--sans); font-size: 23px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ink);
+  line-height: 1.12;
+}
+.stat .n { font-family: var(--sans); font-size: 11.5px; color: var(--ink-3); margin-top: 5px; }
+
+/* ── tables ───────────────────────────────────────────────────────── */
+.twrap { overflow-x: auto; margin: 26px 0; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--sans); font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+caption {
+  text-align: left; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3);
+  padding-bottom: 10px;
+}
+th, td { padding: 9px 14px 9px 0; text-align: right; border-bottom: 1px solid var(--rule-soft); }
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-3);
+  border-bottom: 1px solid var(--rule);
+}
+tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+td.em { font-weight: 700; color: var(--ink); }
+
+/* ── callouts & inline ────────────────────────────────────────────── */
+.note {
+  border-left: 2px solid var(--rule); padding: 4px 0 4px 20px;
+  margin: 28px 0; color: var(--ink-2); font-size: 16px;
+}
+.note.flag { border-left-color: var(--flag); }
+.note b { color: var(--ink); }
+code { font-family: var(--mono); font-size: 0.86em; color: var(--ink-2); }
+.lede { font-size: 19px; line-height: 1.54; color: var(--ink-2); }
+.term { font-style: italic; }
+a { color: var(--series); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--series); outline-offset: 3px; }
+ul { margin: 0 0 18px; padding-left: 22px; }
+li { margin-bottom: 10px; }
+hr { border: 0; border-top: 1px solid var(--rule-soft); margin: 58px 0 0; }
+footer {
+  margin-top: 58px; padding-top: 26px; border-top: 2px solid var(--ink);
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ── site chrome: the only styling the single-file report does not need ── */
+.sitenav {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: saturate(1.2) blur(8px);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.sitenav-inner {
+  max-width: 1080px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;
+  min-height: 54px;
+}
+.sitenav .brand {
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
+  text-decoration: none; margin-right: auto;
+}
+.sitenav a {
+  font-family: var(--sans); font-size: 13px; color: var(--ink-3);
+  text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent;
+}
+.sitenav a:hover { color: var(--ink-2); }
+.sitenav a[aria-current="page"] {
+  color: var(--ink); border-bottom-color: var(--series); font-weight: 600;
+}
+@media (max-width: 520px) { .sitenav-inner { padding: 0 18px; gap: 16px; } }
+
+/* Index: the three analyses, each with what it actually found. */
+.findings { display: grid; gap: 1px; background: var(--rule-soft);
+            border: 1px solid var(--rule-soft); margin: 32px 0 8px; }
+.finding { background: var(--plate); padding: 22px 24px;
+           display: grid; grid-template-columns: 1fr auto; gap: 6px 24px;
+           align-items: start; }
+.finding h3 { font-family: var(--serif); font-size: 19px; font-weight: 700;
+              text-transform: none; letter-spacing: 0; color: var(--ink);
+              margin: 0; padding: 0; border: 0; grid-column: 1; }
+.finding .what { grid-column: 1; margin: 0; color: var(--ink-2); font-size: 16px;
+                 line-height: 1.5; max-width: 60ch; }
+.finding .go { grid-column: 1; margin-top: 6px; font-family: var(--sans);
+               font-size: 13px; font-weight: 600; }
+.finding .chip { grid-column: 2; grid-row: 1; }
+@media (max-width: 640px) {
+  .finding { grid-template-columns: 1fr; }
+  .finding .chip { grid-column: 1; grid-row: auto; justify-self: start; }
+}
+
+.pagefoot {
+  margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule);
+  display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  font-family: var(--sans); font-size: 13px;
+}
+.pagefoot a { font-weight: 600; }
+</style>
+</head>
+<body>
+<nav class="sitenav"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="methods.html">Methods</a></div></nav>
+<div class="wrap">
+<header class="masthead">
+  <p class="eyebrow">CardioTrace · NHANES 1999–2022 · NCHS Linked Mortality File</p>
+  <h1>Cardiovascular Disease in the United States, 1999–2022</h1>
+  <p class="subtitle">Three estimands, three designs: a standardised prevalence series,
+  a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
+  <p class="standfirst measure">One national survey can answer more than one question, but not
+  with one method. This report states each question as a quantity to be estimated, sets out the
+  design that identifies it, and prices the choices that design requires.</p>
+  <div class="masthead-meta">
+    <span><b>Prepared</b> 2026-08-21</span>
+    <span><b>Survey cycles</b> 11 (1999–2022)</span>
+    <span><b>Descriptive sample</b> 58,454 adults 20+</span>
+    <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
+    <span><b>Mortality follow-up through</b> 2019-12-31</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><div class="sec-num">THE&nbsp;THREE</div>
+  <h2>What each part asks, and what it found</h2></div>
+  <div class="body-indent">
+    <div class="findings"><div class="finding"><h3>The 25-year burden</h3><span class="chip result">Result</span><p class="what">Crude prevalence rose while the age-standardised series fell. The rise is the population ageing, not the disease spreading.</p><div class="go"><a href="burden.html">Read this part &rarr;</a></div></div><div class="finding"><h3>The pandemic</h3><span class="chip quiet">No detectable change</span><p class="what">The observed 2021&ndash;2022 level sits above the pre-pandemic trend, but the interval contains zero. One post-pandemic cycle cannot settle it.</p><div class="go"><a href="pandemic.html">Read this part &rarr;</a></div></div><div class="finding"><h3>Who dies of it</h3><span class="chip result">Result</span><p class="what">Blood pressure at examination predicts cardiovascular death up to twenty years later, validated forward in time rather than at random.</p><div class="go"><a href="cohort.html">Read this part &rarr;</a></div></div></div>
+    <p class="measure" style="margin-top:26px">The full write-up is also available
+    as <a href="cardiotrace-report.html">a single page</a>, which carries every
+    section, table and figure in one file.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">1</div>
+  <h2>Why one dataset needs three designs</h2></div>
+  <div class="body-indent">
+    <p class="lede measure">Statistical questions come in three kinds, and the same variable can
+    be required in one, forbidden in another, and irrelevant in the third. Fixing which kind of
+    question is being asked is what makes every downstream choice decidable.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>The three kinds of question</caption>
+        <thead><tr><th>&nbsp;</th><th>Descriptive</th><th>Causal</th><th>Predictive</th></tr></thead>
+        <tbody>
+          <tr><td>Asks</td><td>How many, and how has it moved?</td>
+              <td>If we changed X, what happens to Y?</td>
+              <td>Given what we know now, who is at risk?</td></tr>
+          <tr><td>Needs</td><td>Survey weights, standardisation, intervals</td>
+              <td>A causal graph, confounder control, stated assumptions</td>
+              <td>Out-of-sample validation, calibration</td></tr>
+          <tr><td>Does not need</td><td>Confounder control</td><td>A high AUC</td>
+              <td>A causal story</td></tr>
+          <tr><td>Fails by</td><td>Reporting raw rates from an ageing population</td>
+              <td>Interpreting every coefficient in one table as an effect</td>
+              <td>Validating on data that leaks into training</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="measure">The clearest illustration is age. To describe how disease burden moved
+    over 25 years, age must be <em>removed</em> — otherwise an ageing population looks like a
+    spreading disease. To predict who will die, age must be <em>kept</em> — it is the single
+    strongest predictor available, and a model without it is worthless. The same variable,
+    opposite treatment, and the only thing that decides which is correct is which question is
+    being asked.</p>
+
+    <p class="measure">The three analyses below therefore use three different samples. They are
+    not three views of one table.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>The three analyses</caption>
+        <thead><tr><th>&nbsp;</th><th>§2 Burden</th><th>§3 Pandemic</th><th>§4 Cohort</th></tr></thead>
+        <tbody>
+          <tr><td>Question</td><td>How has prevalence moved?</td>
+              <td>Did 2020 bend the trend?</td>
+              <td>Who among the healthy dies of it?</td></tr>
+          <tr><td>Kind</td><td>Descriptive</td><td>Causal (quasi-experimental)</td>
+              <td>Predictive + causal</td></tr>
+          <tr><td>Sample</td><td>58,454 adults 20+, 11 cycles</td>
+              <td>Same series, one post-pandemic point</td>
+              <td>20,736 adults 40–79, CVD-free at baseline</td></tr>
+          <tr><td>Outcome</td><td>Self-reported diagnosis</td><td>Self-reported diagnosis</td>
+              <td>Death from cardiovascular causes</td></tr>
+          <tr><td>Estimator</td><td>Weighted, age-standardised prevalence</td>
+              <td>Counterfactual extrapolation</td>
+              <td>Cause-specific Cox, competing risks</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<div class="pagefoot">
+  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File</span>
+  <span><a href="https://github.com/UTSGJohnsonSong/cardiotrace">Source on GitHub</a></span>
+</div>
+</div>
+</body>
+</html>
