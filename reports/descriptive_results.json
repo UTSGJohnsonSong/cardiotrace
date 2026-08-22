@@ -1,0 +1,41 @@
+{
+  "part1": {
+    "n_adults": 58454,
+    "n_cycles": 11,
+    "age_floor": 20,
+    "crude_first": 0.08096667620547218,
+    "crude_last_pre": 0.09536875154046827,
+    "std_first": 0.08833994237873001,
+    "std_last_pre": 0.08346350149346132,
+    "mean_age_first": 44.99385395801411,
+    "mean_age_last": 48.79903802373179,
+    "std_slope_per_decade": -0.006118570290430472,
+    "std_slope_ci": [
+      -0.011631056884176452,
+      -0.0006060836966844908
+    ],
+    "crude_slope_per_decade": 0.00448410947920121,
+    "dispersion": 0.8491567605367174
+  },
+  "part2": {
+    "post_cycle": "2021-2022",
+    "observed": 0.08210483747715198,
+    "observed_se": 0.0042832228676787255,
+    "counterfactual": 0.07635374772991188,
+    "counterfactual_se": 0.0035019405501797185,
+    "gap": 0.005751089747240104,
+    "gap_se": 0.005532593040446676,
+    "gap_ci": [
+      -0.005092792612035381,
+      0.016594972106515588
+    ],
+    "gap_ci_unfloored": [
+      -0.004760013352150776,
+      0.016262192846630982
+    ],
+    "z": 1.039492640285682,
+    "extrapolation_years": 4.0,
+    "n_post_cycles": 1,
+    "slope_change_identified": false
+  }
+}
