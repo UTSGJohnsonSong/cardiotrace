@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CardioTrace &middot; Pandemic</title>
+<style>
+:root {
+  color-scheme: light;
+  --paper:      #f7f6f2;
+  --plate:      #fcfcfb;
+  --ink:        #0b0b0b;
+  --ink-2:      #52514e;
+  --ink-3:      #898781;
+  --rule:       #c3c2b7;
+  --rule-soft:  #e1e0d9;
+  --series:     #2a78d6;
+  --flag:       #eb6834;
+  --chip-bg:    #ffffff;
+  --serif: Georgia, "Iowan Old Style", "Source Serif Pro", "Times New Roman", serif;
+  --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --measure: 68ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:     #16161a;
+    --plate:     #1e1e22;
+    --ink:       #f4f3ef;
+    --ink-2:     #b9b7b0;
+    --ink-3:     #8b8983;
+    --rule:      #46454a;
+    --rule-soft: #2c2c31;
+    --series:    #6aa5ee;
+    --flag:      #f0895e;
+    --chip-bg:   #232329;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:     #16161a;
+  --plate:     #1e1e22;
+  --ink:       #f4f3ef;
+  --ink-2:     #b9b7b0;
+  --ink-3:     #8b8983;
+  --rule:      #46454a;
+  --rule-soft: #2c2c31;
+  --series:    #6aa5ee;
+  --flag:      #f0895e;
+  --chip-bg:   #232329;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px 96px; }
+@media (max-width: 520px) { .wrap { padding: 0 18px 72px; } }
+.measure { max-width: var(--measure); }
+
+/* ── masthead ─────────────────────────────────────────────────────── */
+.masthead { padding: 76px 0 34px; border-bottom: 2px solid var(--ink); }
+.eyebrow {
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  margin: 0 0 20px;
+}
+h1 {
+  font-size: clamp(32px, 4.6vw, 46px); line-height: 1.1; margin: 0 0 10px;
+  font-weight: 700; letter-spacing: -0.016em; text-wrap: balance;
+}
+.subtitle {
+  font-size: clamp(18px, 2.2vw, 22px); line-height: 1.34; margin: 0 0 22px;
+  color: var(--ink-2); font-weight: 400; text-wrap: balance;
+}
+.standfirst { font-size: 18px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.masthead-meta {
+  display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 30px;
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+}
+.masthead-meta b { color: var(--ink-2); font-weight: 600; }
+
+/* ── section scaffolding ──────────────────────────────────────────── */
+section { padding-top: 62px; }
+.sec-head { display: flex; gap: 20px; align-items: baseline; margin-bottom: 8px; }
+.sec-num {
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; color: var(--ink-3); padding-top: 8px;
+  min-width: 74px; flex-shrink: 0;
+}
+h2 {
+  font-size: clamp(24px, 3vw, 31px); line-height: 1.18; margin: 0;
+  font-weight: 700; letter-spacing: -0.012em; text-wrap: balance;
+}
+h3 {
+  font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2);
+  margin: 44px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-soft);
+}
+p { margin: 0 0 18px; }
+.body-indent { margin-left: 94px; }
+@media (max-width: 760px) { .body-indent { margin-left: 0; } .sec-num { min-width: 0; } }
+
+/* ── method chips ─────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--sans); font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 11px; border: 1px solid var(--rule); border-radius: 2px;
+  background: var(--chip-bg); color: var(--ink-2); white-space: nowrap;
+  max-width: 100%;
+}
+@media (max-width: 520px) { .chip { white-space: normal; } }
+.chip::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--series); flex-shrink: 0;
+}
+.chip.quiet::before { background: var(--ink-3); }
+.chip.open::before { background: transparent; border: 1.5px solid var(--flag); }
+.chip-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 26px; }
+
+/* ── the decision ledger: the organising device ───────────────────── */
+.ledger { margin: 30px 0 8px; border-top: 1px solid var(--rule); }
+.decision {
+  display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 0 26px;
+  padding: 20px 0; border-bottom: 1px solid var(--rule-soft);
+}
+@media (max-width: 860px) { .decision { grid-template-columns: 1fr; gap: 14px 0; } }
+.decision .d-choice { font-size: 16px; line-height: 1.45; }
+.decision .d-choice b { font-weight: 700; }
+.decision .col-label {
+  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-3);
+  display: block; margin-bottom: 6px;
+}
+.decision .d-buys, .decision .d-costs {
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.52; color: var(--ink-2);
+}
+.decision .d-costs { color: var(--ink-2); }
+.decision .d-costs .col-label { color: var(--flag); }
+
+/* ── figure plates ────────────────────────────────────────────────── */
+/* The figures are matplotlib PNGs rendered once, on a light surface. Rather
+   than frame a bright image in a dark card, the plate stays paper in both
+   themes and carries its own ink — a deliberate single-theme island, the way a
+   printed plate sits on a page. Its colours are literals on purpose: they must
+   not follow the theme, because the image inside them cannot. */
+figure {
+  margin: 34px 0; background: #fcfcfb;
+  border: 1px solid var(--rule); border-radius: 3px;
+  padding: 22px; overflow-x: auto;
+}
+figure img { display: block; width: 100%; height: auto; }
+figcaption {
+  font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+  color: #6b6a65; margin-top: 16px; padding-top: 14px;
+  border-top: 1px solid #e1e0d9;
+}
+figcaption b { color: #34332f; font-weight: 600; }
+
+/* ── stat strip ───────────────────────────────────────────────────── */
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px; background: var(--rule-soft);
+  border: 1px solid var(--rule-soft); margin: 26px 0;
+}
+.stat { background: var(--plate); padding: 16px 18px; }
+.stat .k {
+  font-family: var(--sans); font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: 7px;
+}
+.stat .v {
+  font-family: var(--sans); font-size: 23px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ink);
+  line-height: 1.12;
+}
+.stat .n { font-family: var(--sans); font-size: 11.5px; color: var(--ink-3); margin-top: 5px; }
+
+/* ── tables ───────────────────────────────────────────────────────── */
+.twrap { overflow-x: auto; margin: 26px 0; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--sans); font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+caption {
+  text-align: left; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3);
+  padding-bottom: 10px;
+}
+th, td { padding: 9px 14px 9px 0; text-align: right; border-bottom: 1px solid var(--rule-soft); }
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink-3);
+  border-bottom: 1px solid var(--rule);
+}
+tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+td.em { font-weight: 700; color: var(--ink); }
+
+/* ── callouts & inline ────────────────────────────────────────────── */
+.note {
+  border-left: 2px solid var(--rule); padding: 4px 0 4px 20px;
+  margin: 28px 0; color: var(--ink-2); font-size: 16px;
+}
+.note.flag { border-left-color: var(--flag); }
+.note b { color: var(--ink); }
+code { font-family: var(--mono); font-size: 0.86em; color: var(--ink-2); }
+.lede { font-size: 19px; line-height: 1.54; color: var(--ink-2); }
+.term { font-style: italic; }
+a { color: var(--series); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--series); outline-offset: 3px; }
+ul { margin: 0 0 18px; padding-left: 22px; }
+li { margin-bottom: 10px; }
+hr { border: 0; border-top: 1px solid var(--rule-soft); margin: 58px 0 0; }
+footer {
+  margin-top: 58px; padding-top: 26px; border-top: 2px solid var(--ink);
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ── site chrome: the only styling the single-file report does not need ── */
+.sitenav {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: saturate(1.2) blur(8px);
+  border-bottom: 1px solid var(--rule-soft);
+}
+.sitenav-inner {
+  max-width: 1080px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;
+  min-height: 54px;
+}
+.sitenav .brand {
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
+  text-decoration: none; margin-right: auto;
+}
+.sitenav a {
+  font-family: var(--sans); font-size: 13px; color: var(--ink-3);
+  text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent;
+}
+.sitenav a:hover { color: var(--ink-2); }
+.sitenav a[aria-current="page"] {
+  color: var(--ink); border-bottom-color: var(--series); font-weight: 600;
+}
+@media (max-width: 520px) { .sitenav-inner { padding: 0 18px; gap: 16px; } }
+
+/* Index: the three analyses, each with what it actually found. */
+.findings { display: grid; gap: 1px; background: var(--rule-soft);
+            border: 1px solid var(--rule-soft); margin: 32px 0 8px; }
+.finding { background: var(--plate); padding: 22px 24px;
+           display: grid; grid-template-columns: 1fr auto; gap: 6px 24px;
+           align-items: start; }
+.finding h3 { font-family: var(--serif); font-size: 19px; font-weight: 700;
+              text-transform: none; letter-spacing: 0; color: var(--ink);
+              margin: 0; padding: 0; border: 0; grid-column: 1; }
+.finding .what { grid-column: 1; margin: 0; color: var(--ink-2); font-size: 16px;
+                 line-height: 1.5; max-width: 60ch; }
+.finding .go { grid-column: 1; margin-top: 6px; font-family: var(--sans);
+               font-size: 13px; font-weight: 600; }
+.finding .chip { grid-column: 2; grid-row: 1; }
+@media (max-width: 640px) {
+  .finding { grid-template-columns: 1fr; }
+  .finding .chip { grid-column: 1; grid-row: auto; justify-self: start; }
+}
+
+.pagefoot {
+  margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule);
+  display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  font-family: var(--sans); font-size: 13px;
+}
+.pagefoot a { font-weight: 600; }
+</style>
+</head>
+<body>
+<nav class="sitenav"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html" aria-current="page">Pandemic</a><a href="cohort.html">Cohort</a><a href="methods.html">Methods</a></div></nav>
+<div class="wrap">
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Pandemic</h1><p class="standfirst measure">Whether the pandemic bent the trend, and what a single post-pandemic observation can and cannot establish.</p></header><section>
+  <div class="sec-head"><div class="sec-num">3</div>
+  <h2>Whether the pandemic bent the trend</h2></div>
+  <div class="body-indent">
+    <div class="chip-row">
+      <span class="chip">Quasi-experimental</span>
+      <span class="chip">Counterfactual extrapolation</span>
+      <span class="chip quiet">Result: no detectable change</span>
+    </div>
+    <p class="lede measure">Observed prevalence in 2021–2022 sits +0.58 pp above what the
+    pre-pandemic trend predicts. The 95% interval runs -0.51 to
+    +1.66 points and contains zero. The honest reading is that this design,
+    on this data, cannot detect a change of the size one might expect.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Observed 2021–22</div><div class="v">8.21%</div><div class="n">SE 0.43 pp</div></div>
+      <div class="stat"><div class="k">Counterfactual</div><div class="v">7.64%</div><div class="n">SE 0.35 pp</div></div>
+      <div class="stat"><div class="k">Difference</div><div class="v">+0.58 pp</div><div class="n">z = 1.04</div></div>
+      <div class="stat"><div class="k">Post-period cycles</div><div class="v">1</div><div class="n">4-year extrapolation</div></div>
+    </div>
+
+    <figure>
+      <img src="assets/part2_counterfactual.png"
+           alt="Age-standardised prevalence with a fitted pre-pandemic trend extrapolated across
+                the gap where NHANES fielded no cycle, compared against the single observed
+                2021-2022 point with its confidence interval.">
+      <figcaption><b>The gap in the horizontal axis is the analytical problem.</b> NHANES
+      suspended field operations, so no 2019–2020 cycle exists and the counterfactual must be
+      carried 4 years beyond the last observation. With one point
+      after the interruption, a level change is estimable but a change in slope is not identified,
+      so none is reported.</figcaption>
+    </figure>
+
+    <h3>What an interrupted time series normally does, and what is missing here</h3>
+    <p class="measure">The design behind this figure is simple to state: fit the trend that held
+    before an event, project it forward as the world that would have happened without the event,
+    and read the difference against the world that did. Its strength is that it needs no control
+    group — the pre-period is the control. Its weakness is that everything depends on the
+    projected line being right, and a projection is only as good as the distance it has to travel
+    and the number of points on the far side.</p>
+    <p class="measure">Both go against this analysis. NHANES did not field a 2019–2020 cycle, so
+    the projection spans 4 years rather than the usual two, and the
+    single post-interruption cycle means a change in level can be estimated but a change in
+    trajectory cannot be separated from it at all.</p>
+
+    <div class="note flag">
+      <b>The subtle failure this design invites.</b> Design-based standard errors describe
+      sampling error only — how much the estimate would move if the same population were sampled
+      again. They do not describe how much a national prevalence genuinely moves between cycles.
+      Building the counterfactual interval from sampling error alone produces a band that is too
+      narrow, and a difference that clears it looks like a pandemic effect when it is an artefact
+      of the model. The interval here therefore carries a dispersion term estimated from the
+      pre-pandemic residuals rather than assumed. It came out at 0.85 — the series moves slightly
+      less than sampling error alone predicts — and is floored at 1, so the band is never narrower
+      than nominal but is not inflated either. The null survives both ways: un-floored the interval
+      is -0.48 to +1.63 points, floored it is -0.51 to +1.66, and both contain zero.
+    </div>
+
+    <h3>Who is in the one post-pandemic cycle</h3>
+    <p class="measure">The whole counterfactual rests on a single observation, so
+    it matters who that observation is made of. Every cycle loses some
+    age-eligible respondents who were interviewed but never examined and
+    therefore carry no examination weight. In 2021&ndash;2022 that loss is
+    <b>22.3%</b>, against 2.6&ndash;
+    8.9% in every other cycle &mdash; a fourfold change in
+    examination coverage, concentrated on exactly the point the analysis leans
+    on.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>Part 1 and Part 2 &mdash; participant flow by cycle</caption>
+        <thead><tr><th>Cycle</th><th>Age-eligible (20+)</th>
+          <th>No examination weight</th><th>Analysed</th><th>Lost</th></tr></thead>
+        <tbody><tr><td>1999-2000</td><td>4,880</td><td>436</td><td>4,444</td><td class='em'>8.9%</td></tr><tr><td>2001-2002</td><td>5,411</td><td>384</td><td>5,027</td><td class='em'>7.1%</td></tr><tr><td>2003-2004</td><td>5,041</td><td>299</td><td>4,740</td><td class='em'>6.0%</td></tr><tr><td>2005-2006</td><td>4,979</td><td>206</td><td>4,773</td><td class='em'>4.1%</td></tr><tr><td>2007-2008</td><td>5,935</td><td>228</td><td>5,706</td><td class='em'>3.9%</td></tr><tr><td>2009-2010</td><td>6,218</td><td>159</td><td>6,058</td><td class='em'>2.6%</td></tr><tr><td>2011-2012</td><td>5,560</td><td>241</td><td>5,317</td><td class='em'>4.4%</td></tr><tr><td>2013-2014</td><td>5,769</td><td>181</td><td>5,587</td><td class='em'>3.2%</td></tr><tr><td>2015-2016</td><td>5,719</td><td>245</td><td>5,474</td><td class='em'>4.3%</td></tr><tr><td>2017-2018</td><td>5,569</td><td>304</td><td>5,264</td><td class='em'>5.5%</td></tr><tr><td>2021-2022</td><td>7,809</td><td>1,745</td><td>6,064</td><td class='em'>22.3%</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="note flag">
+      <b>This is a competing explanation, not a footnote.</b> A cycle that
+      examined a different quarter of the people it recruited could differ from
+      its predecessors for reasons that have nothing to do with the pandemic&rsquo;s
+      effect on cardiovascular disease. The survey weights are designed to
+      correct for non-response, and NCHS reweighted this cycle accordingly, but
+      that correction is an adjustment rather than a guarantee. It belongs beside
+      the gap, not below it.
+    </div>
+
+    <h3>Letting the data choose the breakpoint &mdash; within the window it can reach</h3>
+    <div class="note flag">
+      <b>This test cannot address the pandemic, and is not offered as if it could.</b> Three
+      points are needed on each side of a knot, so with eleven observations the last candidate
+      sits eight years before 2020. Simulated power against a true break at the pandemic is
+      0.057 at a slope change of one point per decade &mdash; indistinguishable from the
+      test&rsquo;s own five per cent size. What follows is a statement about breaks inside the
+      pre-pandemic series and carries no information about a pandemic break either way.
+    </div>
+
+    <p class="measure">Within that window, placing a break anywhere is still an assumption
+    worth testing. A joinpoint model relaxes it: fit a continuous piecewise line, let the knot fall wherever it best fits, and test
+    whether any knot earns its parameter. Because each point carries a known design-based variance,
+    the weighted residual sum of squares is an exact goodness-of-fit statistic rather than an
+    estimated one &mdash; and it says the straight line already fits. The series scatters no more
+    than the sampling errors alone predict, so there is no unexplained structure for a break to
+    explain.</p>
+
+    <figure>
+      <img src="assets/part2_changepoint.png"
+           alt="Left panel: improvement in weighted residual sum of squares for each candidate
+                breakpoint, none reaching the bootstrap significance threshold. Right panel:
+                simulated statistical power against the size of a true slope change.">
+      <figcaption><b>No break is detectable, and none would be unless it were very large.</b>
+      Significance is assessed by parametric bootstrap rather than a chi-square test at the fitted
+      knot: searching over the breakpoint inflates the null, so the honest threshold is 5.6 rather
+      than 3.84. The 95% profile set for the knot spans every candidate year, meaning the data
+      cannot localise a break at all.</figcaption>
+    </figure>
+
+    <div class="twrap">
+      <table>
+        <caption>Power to detect a true slope change at 2011</caption>
+        <thead><tr><th>True change in slope</th><th>Power</th></tr></thead>
+        <tbody><tr><td>+0.2 pp / decade</td><td class='em'>6%</td></tr><tr><td>+0.4 pp / decade</td><td class='em'>10%</td></tr><tr><td>+0.6 pp / decade</td><td class='em'>9%</td></tr><tr><td>+1.0 pp / decade</td><td class='em'>23%</td></tr><tr><td>+1.5 pp / decade</td><td class='em'>41%</td></tr><tr><td>+2.5 pp / decade</td><td class='em'>86%</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="note flag">
+      <b>This is a limit of the design, not evidence of absence.</b> A reversal from the observed
+      decline to a flat trend &mdash; a slope change of 0.6 points per
+      decade &mdash; would be detected about 9% of the time. Only a
+      change of roughly 2.5 points per decade &mdash; large for a series that moves
+      between 7.7% and 9.9% &mdash; would be caught reliably. The correct conclusion is that eleven biennial estimates cannot
+      settle whether the trend bent, not that it did not.
+    </div>
+
+    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.</div><div class="d-buys"><span class="col-label">What it buys</span>Sidesteps 25 years of instrument and assay changes, which would otherwise be indistinguishable from a pandemic effect.</div><div class="d-costs"><span class="col-label">What it costs</span>Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns an assumption into a measured quantity: it came out at {p1['dispersion']:.2f}, so the straight line already explains the series as well as sampling error allows.</div><div class="d-costs"><span class="col-label">What it costs</span>Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Report a <b>level difference only</b>, and state that the slope change is unidentified.</div><div class="d-buys"><span class="col-label">What it buys</span>Nothing is claimed that one post-period observation cannot support.</div><div class="d-costs"><span class="col-label">What it costs</span>The most interesting question — whether the trajectory changed — is left open.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Let a <b>joinpoint model</b> nominate the breakpoint, rather than assuming it sits at the pandemic.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns the framing into a testable claim. It is not supported: no candidate knot clears the bootstrap threshold, and the profile set for its location spans the whole series.</div><div class="d-costs"><span class="col-label">What it costs</span>The same test has well under half the power needed to catch a break the size of the trend itself, so it cannot be reported as evidence that none exists.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Assess significance by <b>parametric bootstrap</b> instead of a chi-square test at the fitted knot.</div><div class="d-buys"><span class="col-label">What it buys</span>Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is {cp['crit95']:.1f}, not the nominal 3.84.</div><div class="d-costs"><span class="col-label">What it costs</span>Roughly fifty per cent harder to reach significance than the test most software would report by default.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the pre-period on the <b>standardised</b> series, not the crude one.</div><div class="d-buys"><span class="col-label">What it buys</span>The counterfactual is about disease, not about the population continuing to age.</div><div class="d-costs"><span class="col-label">What it costs</span>Inherits every standardisation choice from §2, including the 20+ base.</div></div></div>
+
+    <div class="note">
+      <b>What is still needed.</b> Extending this to measured risk factors — blood pressure,
+      lipids, glycaemia, where a real pandemic effect is far more likely to show — requires
+      bridging the instrument and assay changes across the series first. Without that bridge, a
+      change of blood-pressure device would be attributed to the pandemic.
+    </div>
+  </div>
+</section>
+<div class="pagefoot">
+  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File</span>
+  <span><a href="cohort.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">Source on GitHub</a></span>
+</div>
+</div>
+</body>
+</html>

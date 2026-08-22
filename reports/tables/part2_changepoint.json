@@ -1,0 +1,94 @@
+{
+  "observed": 1.2272463546283925,
+  "p": 0.5213696575856036,
+  "crit95": 5.620025724995902,
+  "n_boot": 4000,
+  "seed": 20260819,
+  "tau": 2013.5,
+  "line_wrss": 7.87379903306366,
+  "line_p_fit": 0.5469126829876061,
+  "line_df": 9,
+  "line_beta": [
+    0.9750046010314724,
+    -0.00044340673066790495
+  ],
+  "joinpoint_wrss": 6.646552678435268,
+  "profile": [
+    [
+      2003.5,
+      7.819723199915497
+    ],
+    [
+      2005.5,
+      7.811440721663226
+    ],
+    [
+      2007.5,
+      7.322046082631894
+    ],
+    [
+      2009.5,
+      6.670041328694344
+    ],
+    [
+      2011.5,
+      6.9751718126443345
+    ],
+    [
+      2013.5,
+      6.646552678435268
+    ]
+  ],
+  "grid": [
+    2003.5,
+    2005.5,
+    2007.5,
+    2009.5,
+    2011.5,
+    2013.5
+  ],
+  "profile_set": [
+    2003.5,
+    2005.5,
+    2007.5,
+    2009.5,
+    2011.5,
+    2013.5
+  ],
+  "profile_set_spans_grid": true,
+  "power_tau": 2011.5,
+  "power_n_sim": 400,
+  "power_n_boot": 800,
+  "power": [
+    {
+      "slope_change_per_year": 0.0002,
+      "slope_change_per_decade_pp": 0.2,
+      "power": 0.0625
+    },
+    {
+      "slope_change_per_year": 0.0004,
+      "slope_change_per_decade_pp": 0.4,
+      "power": 0.1025
+    },
+    {
+      "slope_change_per_year": 0.0006,
+      "slope_change_per_decade_pp": 0.6,
+      "power": 0.0875
+    },
+    {
+      "slope_change_per_year": 0.001,
+      "slope_change_per_decade_pp": 1.0,
+      "power": 0.2325
+    },
+    {
+      "slope_change_per_year": 0.0015,
+      "slope_change_per_decade_pp": 1.5,
+      "power": 0.4075
+    },
+    {
+      "slope_change_per_year": 0.0025,
+      "slope_change_per_decade_pp": 2.5,
+      "power": 0.8625
+    }
+  ]
+}
