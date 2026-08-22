@@ -3,7 +3,7 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help setup up down data load dbt analyze notebooks all clean
+.PHONY: help setup up down data load dbt analyze descriptive notebooks all clean
 
 help:
 	@echo "setup      create venv + install requirements"
@@ -37,6 +37,15 @@ dbt:
 
 analyze:
 	$(PY) run_pipeline.py
+
+# The Part 1 / Part 2 chain. It was outside the build entirely: two of its
+# outputs had no producer in the repository at all, so nobody could regenerate
+# them and nothing would have detected them drifting out of step with the code.
+descriptive:
+	$(PY) scripts/build_descriptive_results.py
+	$(PY) scripts/build_ascertainment_results.py
+	$(PY) scripts/make_descriptive_figures.py
+	$(PY) scripts/render_report.py
 
 notebooks:
 	$(PY) scripts/build_notebooks.py
