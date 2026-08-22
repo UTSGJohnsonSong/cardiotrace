@@ -42,6 +42,7 @@ analyze:
 # outputs had no producer in the repository at all, so nobody could regenerate
 # them and nothing would have detected them drifting out of step with the code.
 descriptive:
+	$(PY) scripts/build_cohort_results.py
 	$(PY) scripts/build_descriptive_results.py
 	$(PY) scripts/build_ascertainment_results.py
 	$(PY) scripts/make_descriptive_figures.py
