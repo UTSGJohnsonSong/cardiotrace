@@ -393,34 +393,34 @@ def build_cohort() -> tuple[pd.DataFrame, pd.DataFrame]:
     assert_cycle_coverage(df)
     mort = load_mortality()
 
-    steps: list[tuple[str, pd.DataFrame]] = [("NHANES 1999-2014 全部受访者", df)]
+    steps: list[tuple[str, pd.DataFrame]] = [("NHANES 1999-2014 respondents", df)]
 
     df = df.merge(mort, on="SEQN", how="left", validate="1:1")
-    steps.append(("与死亡链接文件合并", df))
+    steps.append(("Merged with the linked mortality file", df))
 
     df = df[df.eligstat == 1]
-    steps.append(("可链接（ELIGSTAT=1）", df))
+    steps.append(("Eligible for linkage (ELIGSTAT = 1)", df))
 
     df = df[df.permth_exm.notna()]
-    steps.append(("完成 MEC 体检（有体检随访时间）", df))
+    steps.append(("Completed the MEC examination", df))
 
     df = df[df.age.between(AGE_MIN, AGE_MAX)]
-    steps.append((f"年龄 {AGE_MIN}-{AGE_MAX}", df))
+    steps.append((f"Aged {AGE_MIN}-{AGE_MAX}", df))
 
     df = df[df.wtmec2yr.fillna(0) > 0]
-    steps.append(("MEC 体检权重 > 0", df))
+    steps.append(("Non-zero examination weight", df))
 
     df = df[df.prev_cvd.notna()]
-    steps.append(("基线 CVD 状态已知", df))
+    steps.append(("Baseline CVD status known", df))
 
     df = df[df.prev_cvd == 0]
-    steps.append(("基线无自报 CVD（一级预防）", df))
+    steps.append(("Free of self-reported CVD at baseline", df))
 
     # A decedent whose underlying cause was never coded cannot be assigned to
     # either arm. Excluding them is a STROBE row, not a silent recode — folding
     # them into "competing" or "censored" would bias the CIF with no trace.
     df = df[df.cvd_death.notna() & df.competing_death.notna()]
-    steps.append(("死者死因已编码", df))
+    steps.append(("Cause of death coded for every decedent", df))
 
     n0 = len(steps[0][1])
     prev = n0
