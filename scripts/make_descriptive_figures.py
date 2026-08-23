@@ -22,6 +22,13 @@ disease, and is marked rather than quietly plotted as trend. The counts in the
 annotation are read from the table, because when they were typed here they went
 stale the first time the age base moved.
 
+Every heading is wrapped to the figure width before it is drawn. These figures are
+saved with bbox_inches="tight", so an unwrapped heading -- not the axes -- sets the
+width of the saved PNG. part1_ascertainment shipped at 3475x684 for a 1204 px axes
+because its subtitle was one 24.6-inch line, and inside a phone-width plate that
+image collapsed to 58 px tall. The wrap width therefore has to track figsize, which
+is why `_heading` reads it off the figure instead of taking a constant.
+
 Palette, spines and grid come from src.survival, so these sit in the same visual
 system as the Part 3 figures. Both hues are the first two categorical slots and
 clear the all-pairs separation checks in light and dark.
@@ -79,12 +86,73 @@ def _style(ax, ylabel):
     ax.set_axisbelow(True)
 
 
+# Heading typography. 12.5 and 8.5 were inline literals in `_heading`; they are
+# named here because the wrap and the vertical stacking both have to agree with
+# them, and a silent disagreement shows up as a title printed over a subtitle.
+_TITLE_PT = 12.5
+_SUB_PT = 8.5
+_LINESPACING = 1.25
+_TITLE_GAP_PT = 3.5
+
+
+def _wrap_to_width(fig, text: str, fontsize: float, weight: str,
+                   width_in: float) -> str:
+    """Word-wrap `text` so no line exceeds `width_in`, measured for real.
+
+    The headings are assembled from the artefacts, so their length is not known
+    when the figure is laid out, and `savefig(bbox_inches="tight")` grows the
+    saved PNG to whatever the longest line needs. That is how part1_ascertainment
+    shipped at 3475x684 for a 1204 px axes: the subtitle was one 24.6-inch line.
+
+    Measured against the renderer rather than counted in characters, because the
+    character width depends on which font the machine actually resolves from the
+    rcParam stack, and a character count that is right here is wrong on CI.
+
+    Explicit newlines are honoured and each segment wrapped independently. A
+    single word longer than `width_in` still overflows; no heading contains one.
+    """
+    limit = width_in * fig.dpi
+    probe = fig.text(0.0, 0.0, "", fontsize=fontsize, fontweight=weight)
+    renderer = fig.canvas.get_renderer()
+
+    def width_of(s: str) -> float:
+        probe.set_text(s)
+        return probe.get_window_extent(renderer).width
+
+    out: list[str] = []
+    for segment in text.split("\n"):
+        line = ""
+        for word in segment.split():
+            trial = f"{line} {word}" if line else word
+            if line and width_of(trial) > limit:
+                out.append(line)
+                line = word
+            else:
+                line = trial
+        out.append(line)
+    probe.remove()
+    return "\n".join(out)
+
+
 def _heading(fig, title, subtitle):
-    """Title and standfirst as figure text, so they cannot collide with axes."""
-    fig.text(0.0, 1.045, title, color=INK_PRIMARY, fontweight="bold",
-             fontsize=12.5, ha="left", va="bottom")
-    fig.text(0.0, 1.004, subtitle, color=INK_MUTED, fontsize=8.5,
-             ha="left", va="bottom")
+    """Title and standfirst as figure text, so they cannot collide with axes.
+
+    Both are wrapped to the figure width. The block is anchored at the subtitle's
+    baseline and grows upward, so a two- or three-line subtitle pushes the title
+    up rather than printing under it.
+    """
+    width_in, height_in = fig.get_size_inches()
+    title = _wrap_to_width(fig, title, _TITLE_PT, "bold", width_in)
+    subtitle = _wrap_to_width(fig, subtitle, _SUB_PT, "normal", width_in)
+
+    sub_y = 1.004
+    fig.text(0.0, sub_y, subtitle, color=INK_MUTED, fontsize=_SUB_PT,
+             linespacing=_LINESPACING, ha="left", va="bottom")
+
+    block_pt = (subtitle.count("\n") + 1) * _SUB_PT * _LINESPACING + _TITLE_GAP_PT
+    fig.text(0.0, sub_y + block_pt / (72.0 * height_in), title,
+             color=INK_PRIMARY, fontweight="bold", fontsize=_TITLE_PT,
+             linespacing=_LINESPACING, ha="left", va="bottom")
 
 
 def figure_standardisation(overall: pd.DataFrame, p1: dict) -> None:
@@ -305,7 +373,17 @@ def figure_ascertainment(asc: pd.DataFrame) -> None:
 
 
 def figure_changepoint(overall: pd.DataFrame, cp: dict) -> None:
-    """Where a break would sit if there were one, and what size it would take."""
+    """Where a break would sit if there were one, and what size it would take.
+
+    The two panels stack rather than sit side by side. Side by side they shared
+    one 293 px plate on a phone, so each panel got roughly 145 px of width and
+    the whole figure rendered 89 px tall; stacked, each panel gets the full
+    width and the figure renders 241 px tall. Stacking rather than emitting a
+    narrow variant for CSS to pick, because the single-file report is emailed
+    and cannot rely on `<picture>`, and because build_site.externalise_images
+    only rewrites `src=` -- a `<source srcset>` would stay inlined as a data URI
+    in every docs page.
+    """
     # Read the persisted test rather than re-running it. Re-running here with a
     # different replicate count put a different critical value on the figure from
     # the one the report quoted.
@@ -313,7 +391,7 @@ def figure_changepoint(overall: pd.DataFrame, cp: dict) -> None:
     inside = set(cp["profile_set"])
     power = cp["power"]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.4, 4.2))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8.6, 6.6))
 
     taus = [t for t, _ in cp["profile"]]
     gains = [line_wrss - w for _, w in cp["profile"]]
@@ -349,11 +427,11 @@ def figure_changepoint(overall: pd.DataFrame, cp: dict) -> None:
 
     _heading(fig,
              "No evidence of a breakpoint — and too little power to rule a moderate one out",
-             f"Left: every admissible knot, against a bootstrap threshold that prices in having "
+             f"Top: every admissible knot, against a bootstrap threshold that prices in having "
              f"searched for it (best knot {cp['tau']:.0f}, p = {cp['p']:.2f}). Blue bars "
              f"are inside the 95% profile set, which spans "
              f"{'the whole grid' if cp['profile_set_spans_grid'] else 'part of the grid'}. "
-             f"Right: simulated power to detect a true break at "
+             f"Bottom: simulated power to detect a true break at "
              f"{cp['power_tau']:.0f}.")
     fig.tight_layout()
     fig.savefig(FIG / "part2_changepoint.png", bbox_inches="tight", facecolor=SURFACE)
