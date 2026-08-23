@@ -1,0 +1,16 @@
+variable,label,e2_status,n,coverage,events,hr_per_sd,z,wald,in_pool,note
+log_uacr,log urine albumin/creatinine,undetermined,5920,0.993,447,1.458,7.79,60.7,True,
+fasting_glucose,Fasting glucose,undetermined,2951,0.495,225,1.316,4.0,16.03,False,observed for 50% of the training rows
+drinks_per_day,"Alcohol, drinks per day",admissible,3668,0.616,224,1.087,2.6,6.74,False,observed for 62% of the training rows
+hba1c,HbA1c,undetermined,5955,0.999,451,1.161,2.45,5.98,True,
+insured,Health insurance,admissible,5896,0.989,448,0.869,-1.74,3.04,False,
+uric_acid,Uric acid,undetermined,5946,0.998,450,1.122,1.63,2.65,False,
+egfr,eGFR (CKD-EPI 2021),undetermined,5946,0.998,450,0.89,-1.45,2.1,False,
+pulse_pressure,Pulse pressure,forbidden,5919,0.993,446,1.169,1.4,1.96,False,
+diastolic_bp,Diastolic pressure,forbidden,5919,0.993,446,0.91,-1.4,1.96,False,
+kidney_dx,Told they have kidney disease,forbidden,5948,0.998,448,1.07,1.36,1.84,False,
+waist_cm,Waist circumference,admissible,5885,0.988,444,1.244,1.2,1.45,False,
+htn_diagnosed,Told they have hypertension,forbidden,5959,1.0,451,0.854,-1.14,1.31,False,
+on_insulin,On insulin,forbidden,5958,1.0,450,1.062,1.04,1.09,False,
+triglycerides,Triglycerides,undetermined,2964,0.497,227,0.983,-0.17,0.03,False,observed for 50% of the training rows
+ldl_cholesterol,LDL cholesterol,undetermined,2721,0.457,198,1.02,0.06,0.0,False,observed for 46% of the training rows
