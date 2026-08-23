@@ -17,21 +17,36 @@
     "top_marginal_hr_per_sd": 1.458
   },
   "prevent": {
-    "additions": {
+    "base_new": {
       "egfr": "eGFR",
-      "log_uacr": "urine albumin/creatinine",
-      "hba1c": "HbA1c"
+      "bmi": "BMI"
     },
-    "considered": [
-      "egfr",
+    "optional": {
+      "log_uacr": "urine albumin/creatinine ratio",
+      "hba1c": "HbA1c",
+      "sdi": "social deprivation index"
+    },
+    "unavailable": {
+      "sdi": "needs census-tract geography, which NHANES withholds for disclosure control"
+    },
+    "base_already_in_model": [
+      "bmi"
+    ],
+    "base_screened": [
+      "egfr"
+    ],
+    "base_selected": [],
+    "base_rejected": [
+      "egfr"
+    ],
+    "optional_screened": [
       "hba1c",
       "log_uacr"
     ],
-    "selected": [
+    "optional_selected": [
       "log_uacr"
     ],
-    "rejected": [
-      "egfr",
+    "optional_rejected": [
       "hba1c"
     ]
   },
