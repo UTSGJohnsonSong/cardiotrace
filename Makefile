@@ -3,7 +3,7 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help setup up down data load dbt analyze descriptive notebooks all clean
+.PHONY: help setup up down data load dbt analyze descriptive learning site notebooks all clean
 
 help:
 	@echo "setup      create venv + install requirements"
@@ -41,12 +41,25 @@ analyze:
 # The Part 1 / Part 2 chain. It was outside the build entirely: two of its
 # outputs had no producer in the repository at all, so nobody could regenerate
 # them and nothing would have detected them drifting out of step with the code.
+# `learning` must have run at least once before `descriptive`: render_report.py
+# reads reports/part4_learning_results.json and stops with a message naming this
+# target if it is absent. `site` then splits the rendered report into docs/.
 descriptive:
 	$(PY) scripts/build_cohort_results.py
 	$(PY) scripts/build_descriptive_results.py
 	$(PY) scripts/build_ascertainment_results.py
 	$(PY) scripts/make_descriptive_figures.py
 	$(PY) scripts/render_report.py
+
+# ~15 minutes: the screen fits one Cox per candidate per step, and the arm
+# comparison bootstraps four paired differences over whole variance units.
+learning:
+	$(PY) scripts/build_learning_results.py
+	$(PY) scripts/make_learning_figures.py
+
+site:
+	$(PY) scripts/build_site.py
+	$(PY) scripts/render_readme.py
 
 notebooks:
 	$(PY) scripts/build_notebooks.py
