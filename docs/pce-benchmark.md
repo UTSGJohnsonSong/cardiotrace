@@ -1,7 +1,30 @@
 # ASCVD PCE 基准对比 —— 系数来源与设计修正
 
 > 状态：系数已取得并核验；**三层拆解的设计需要修正**（见 §2）。
+> ⚠️ **PCE 已不是当前临床标准**（2026-08-22 核实，见 §0）——本项目仍按预先设定的历史基准保留 PCE，
+> PREVENT-ASCVD 记为当前标准与未来比较对象。
 > 决策记录以 `research-design.md` 的决策表为准，这份只做本议题的展开。
+
+---
+
+## 0. ⚠️ PCE 已不是当前临床标准（2026-08-22 核实）
+
+| | 现状 |
+|---|---|
+| **当前推荐** | AHA **PREVENT-ASCVD** 方程。2026 ACC/AHA/Multisociety 血脂管理指南以 10 年 PREVENT-ASCVD 风险为起点；2025 ACC/AHA 高血压指南亦推荐用 PREVENT 取代 PCE |
+| **PCE 的地位** | ACC 自家的 CVD Risk Estimator Plus 明示：用 pooled cohort equation 算出的 10 年 ASCVD 风险 "is no longer supported by ACC clinical policy or guidelines"，并指向 2026 血脂指南的 PREVENT 模型 |
+
+**本项目的处理 —— 保留 PCE，但改称谓：**
+
+1. PCE 由「the risk tool in clinical use」降为**预先设定的历史基准**（prespecified historical benchmark）。§3.5 锁定的四条协议、系数转抄与核验都在指南更新之前完成；事后换比较对象，等于看着答案改设计。
+2. **PREVENT-ASCVD 写为当前标准与未来比较对象**，不是本轮工作。它不是 PCE 的即插即用替代：需要 eGFR、去掉种族输入、年龄下探到 30 岁、结局口径也不同（PREVENT 另有 total CVD 与 HF 模型）。换过去是新工作量，不是改个名字。
+3. §2 与 §3.5 的结局口径论证**不受影响**：PCE 结局仍是 hard ASCVD，本项目 Part 3 仍只有 CVD 死亡。这一条与指南更新无关。
+
+**出处**（2026-08-22 取得）：
+
+- ACC CVD Risk Estimator Plus <https://tools.acc.org/cvd-risk-estimator-plus/> —— 上表引文直接取自该页
+- 2026 ACC/AHA/Multisociety Guideline on the Management of Dyslipidemia, *Circulation* —— <https://www.ahajournals.org/doi/10.1161/CIR.0000000000001423>（**DOI 由检索结果 URL 取得，原文 403 未能直取；正式引用前需核对**）
+- Implementing the PREVENT Risk Equation in the 2025 Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults, *Hypertension* —— <https://www.ahajournals.org/doi/10.1161/HYPERTENSIONAHA.125.25465>（同上，未直取）
 
 ---
 

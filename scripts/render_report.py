@@ -21,7 +21,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from src.descriptive import AGE_LABELS, STD_2000  # noqa: E402
+from src.descriptive import AGE_LABELS, PRE_COVID_CYCLES, STD_2000  # noqa: E402
 
 ROOT = Path(__file__).parent.parent
 FIG = ROOT / "reports" / "figures"
@@ -52,11 +52,13 @@ CSS = """
   --plate:      #fcfcfb;
   --ink:        #0b0b0b;
   --ink-2:      #52514e;
-  --ink-3:      #898781;
+  --ink-3:      #6b6a65;   /* 5.01:1 on --paper; was #898781 at 3.32:1 */
   --rule:       #c3c2b7;
   --rule-soft:  #e1e0d9;
   --series:     #2a78d6;
   --flag:       #eb6834;
+  --series-text: #1c5cab;   /* 6.13:1 on --paper; = ORDINAL_BLUE[3] */
+  --flag-text:   #ba4212;   /* 5.01:1 on --paper */
   --chip-bg:    #ffffff;
   --serif: Georgia, "Iowan Old Style", "Source Serif Pro", "Times New Roman", serif;
   --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
@@ -75,6 +77,8 @@ CSS = """
     --rule-soft: #2c2c31;
     --series:    #6aa5ee;
     --flag:      #f0895e;
+    --series-text: #6aa5ee;   /* 7.07:1 on --paper */
+    --flag-text:   #f0895e;   /* 7.26:1 on --paper */
     --chip-bg:   #232329;
   }
 }
@@ -89,6 +93,8 @@ CSS = """
   --rule-soft: #2c2c31;
   --series:    #6aa5ee;
   --flag:      #f0895e;
+  --series-text: #6aa5ee;   /* 7.07:1 on --paper */
+  --flag-text:   #f0895e;   /* 7.26:1 on --paper */
   --chip-bg:   #232329;
 }
 
@@ -185,7 +191,7 @@ p { margin: 0 0 18px; }
   font-family: var(--sans); font-size: 13.5px; line-height: 1.52; color: var(--ink-2);
 }
 .decision .d-costs { color: var(--ink-2); }
-.decision .d-costs .col-label { color: var(--flag); }
+.decision .d-costs .col-label { color: var(--flag-text); }
 
 /* ── figure plates ────────────────────────────────────────────────── */
 /* The figures are matplotlib PNGs rendered once, on a light surface. Rather
@@ -257,7 +263,7 @@ td.em { font-weight: 700; color: var(--ink); }
 code { font-family: var(--mono); font-size: 0.86em; color: var(--ink-2); }
 .lede { font-size: 19px; line-height: 1.54; color: var(--ink-2); }
 .term { font-style: italic; }
-a { color: var(--series); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a { color: var(--series-text); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 a:focus-visible { outline: 2px solid var(--series); outline-offset: 3px; }
 ul { margin: 0 0 18px; padding-left: 22px; }
 li { margin-bottom: 10px; }
@@ -394,6 +400,8 @@ def build() -> str:
     clust_med = overall["deff_clustering"].median()
     neff_med = overall["n_effective_std"].median()
     n_med = overall["n"].median()
+    psu_lo, psu_hi = int(overall["n_psu"].min()), int(overall["n_psu"].max())
+    n_pre_cycles = len(PRE_COVID_CYCLES)
     asc_aus = asc[asc["instrument"] == "auscultatory"]
     asc_peak = asc_aus.loc[asc_aus["ascertained_std"].idxmax()]
 
@@ -420,7 +428,7 @@ def build() -> str:
   design that identifies it, and prices the choices that design requires.</p>
   <div class="masthead-meta">
     <span><b>Prepared</b> {BUILD_DATE}</span>
-    <span><b>Survey cycles</b> 11 (1999–2022)</span>
+    <span><b>Survey cycles</b> {p1['n_cycles']}, {overall.iloc[0]['cycle']} to {p1['last_cycle']}</span>
     <span><b>Descriptive sample</b> {p1['n_adults']:,} adults 20+</span>
     <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
     <span><b>Mortality follow-up through</b> {DATA_CUTOFF}</span>
@@ -456,7 +464,7 @@ def build() -> str:
     </div>
 
     <p class="measure">The clearest illustration is age. To describe how disease burden moved
-    over 25 years, age must be <em>removed</em> — otherwise an ageing population looks like a
+    across {p1['n_cycles']} survey cycles, age must be <em>removed</em> — otherwise an ageing population looks like a
     spreading disease. To predict who will die, age must be <em>kept</em> — it is the single
     strongest predictor available, and a model without it is worthless. The same variable,
     opposite treatment, and the only thing that decides which is correct is which question is
@@ -475,7 +483,7 @@ def build() -> str:
               <td>Who among the healthy dies of it?</td></tr>
           <tr><td>Kind</td><td>Descriptive</td><td>Causal (quasi-experimental)</td>
               <td>Predictive + causal</td></tr>
-          <tr><td>Sample</td><td>{p1['n_adults']:,} adults 20+, 11 cycles</td>
+          <tr><td>Sample</td><td>{p1['n_adults']:,} adults 20+, {p1['n_cycles']} cycles</td>
               <td>Same series, one post-pandemic point</td>
               <td>20,736 adults 40–79, CVD-free at baseline</td></tr>
           <tr><td>Outcome</td><td>Self-reported diagnosis</td><td>Self-reported diagnosis</td>
@@ -493,7 +501,7 @@ def build() -> str:
 
 <section>
   <div class="sec-head"><div class="sec-num">2</div>
-  <h2>The 25-year burden, with ageing taken out</h2></div>
+  <h2>The burden across {p1['n_cycles']} cycles, with ageing taken out</h2></div>
   <div class="body-indent">
     <div class="chip-row">
       <span class="chip">Descriptive</span>
@@ -506,9 +514,9 @@ def build() -> str:
     reverses its sign.</p>
 
     <div class="stats">
-      {stat("Adults 20+", f"{p1['n_adults']:,}", "11 cycles, 1999–2022")}
-      {stat("Crude", f"{pct(p1['crude_first'], 1)} → {pct(p1['crude_last_pre'], 1)}", "rising")}
-      {stat("Standardised", f"{pct(p1['std_first'], 1)} → {pct(p1['std_last_pre'], 1)}", "falling")}
+      {stat("Adults 20+", f"{p1['n_adults']:,}", f"{p1['n_cycles']} cycles, {overall.iloc[0]['cycle']} to {p1['last_cycle']}")}
+      {stat("Crude", f"{pct(p1['crude_first'], 1)} → {pct(p1['crude_last'], 1)}", f"rising, to {p1['last_cycle']}")}
+      {stat("Standardised", f"{pct(p1['std_first'], 1)} → {pct(p1['std_last'], 1)}", f"falling, to {p1['last_cycle']}")}
       {stat("Weighted mean age", f"{p1['mean_age_first']:.1f} → {p1['mean_age_last']:.1f}", "years — the driver")}
     </div>
 
@@ -517,11 +525,16 @@ def build() -> str:
            alt="Crude and age-standardised prevalence of self-reported cardiovascular disease by
                 NHANES cycle, 1999 to 2022. The two series track together until roughly 2015, then
                 the crude series rises while the standardised series stays flat.">
-      <figcaption><b>Two series, opposite conclusions.</b> Fitted across the ten pre-pandemic
-      cycles, the standardised series falls {abs(100 * p1['std_slope_per_decade']):.2f} points per
-      decade (95% CI {100 * p1['std_slope_ci'][0]:.2f} to {100 * p1['std_slope_ci'][1]:.2f}) while
-      the crude series rises {100 * p1['crude_slope_per_decade']:+.2f}. The interval excludes zero,
-      so the decline is not noise.</figcaption>
+      <figcaption><b>Two series, opposite conclusions.</b> Both lines run all
+      {p1['n_cycles']} cycles, to {p1['last_cycle']}; the trend is fitted on the
+      {n_pre_cycles} pre-pandemic cycles only, because §3 exists to ask what the last one did
+      relative to it. Over that window the standardised series falls
+      {abs(100 * p1['std_slope_per_decade']):.2f} points per decade (95% CI
+      {100 * p1['std_slope_ci'][0]:.2f} to {100 * p1['std_slope_ci'][1]:.2f}) while the crude
+      series rises {100 * p1['crude_slope_per_decade']:+.2f}. The interval excludes zero, so the
+      decline is not noise. Read the final point with the caveat §3 develops: that cycle lost
+      {_post_lost:.1f}% of age-eligible adults to a missing examination weight, against
+      {_other_lost.min():.1f}&ndash;{_other_lost.max():.1f}% everywhere else.</figcaption>
     </figure>
 
     <h3>How standardisation works, and why it is not a correction factor</h3>
@@ -535,7 +548,8 @@ def build() -> str:
     probability sample: people are drawn in clusters, and two people from the same cluster share a
     neighbourhood, a provider mix and an interviewer. Treating them as independent produces
     standard errors that are too small and intervals that look decisive when they are not. The
-    variance here is Taylor-linearised and clustered on stratum × primary sampling unit, and the
+    variance here is Taylor-linearised and clustered on the masked variance units NCHS releases in
+    place of the true stratum and primary sampling unit, and the
     linearisation is applied to the standardised estimator as a whole rather than band by band. A
     single sampling unit contributes people to every age band at once, so band-by-band variances
     would discard the covariance between bands and understate the total.</p>
@@ -554,9 +568,9 @@ def build() -> str:
         "NHANES top-codes age, and the top code itself changed over the series. An open upper band is stable across all cycles.",
         "No resolution above 75, where prevalence is highest and still rising with age."),
       decision(
-        "Use <b>Taylor linearisation clustered on stratum × PSU</b> rather than model-based standard errors.",
-        "Intervals that reflect how the sample was actually drawn.",
-        "Wider intervals than a naive calculation, and no closed form — the estimator has to be linearised by hand."),
+        "Use <b>Taylor linearisation on the masked variance units</b> (<code>SDMVSTRA</code> × <code>SDMVPSU</code>) rather than model-based standard errors.",
+        "Intervals that reflect how the sample was actually drawn, using the only design variables NCHS releases publicly.",
+        "Wider intervals than a naive calculation, no closed form — the estimator has to be linearised by hand — and variances that approximate the true design rather than reproduce it, because the real strata and PSUs are withheld for disclosure control."),
     )}
 
     <figure>
@@ -598,10 +612,12 @@ def build() -> str:
 
     <div class="twrap">
       <table>
-        <caption>Design effect, decomposed &mdash; age-standardised prevalence</caption>
-        <thead><tr><th>Cycle</th><th>n</th><th>Sampling units</th>
+        <caption>Design effect, decomposed &mdash; age-standardised prevalence. The residual is
+        the total divided by the Kish weighting factor: it carries clustering, stratification and
+        their interaction, not clustering alone.</caption>
+        <thead><tr><th>Cycle</th><th>n</th><th>Variance units</th>
           <th>Total DEFF</th><th>Weighting alone</th>
-          <th>Clustering</th></tr></thead>
+          <th>Residual (DEFF &divide; Kish)</th></tr></thead>
         <tbody>{rows_deff}</tbody>
       </table>
     </div>
@@ -612,18 +628,33 @@ def build() -> str:
     effect belongs to an estimator rather than to the sample, so this figure describes this
     estimate and does not transfer to another one computed on the same people.</p>
 
-    <p class="measure">It also carries two things at once, and they should not be conflated.
-    Unequal selection probabilities inflate the variance on their own, by a factor of
+    <p class="measure">It also carries more than one thing at once, and they should not be
+    conflated. Unequal selection probabilities inflate the variance on their own, by a factor of
     1 + CV&sup2; of the weights &mdash; a median of <b>{kish_med:.2f}</b> here. Dividing it out
-    leaves a median clustering component of about <b>{clust_med:.2f}</b>. That is the honest
-    figure for what the cluster structure costs; quoting the total as the price of clustering
-    would overstate it by roughly half again. The reason a clustering component above one exists
-    at all is visible in the third column &mdash; each cycle reaches
-    roughly thirty sampling units, because participants must travel to a mobile examination centre
-    and the centres go to a limited number of counties. Two adults from the same county share a
-    food environment, an insurance market, a provider mix and often an interviewer, so the second
-    largely repeats what the first already said. Treating them as independent would not bias the
-    estimate; it would make the interval too narrow.</p>
+    leaves a residual of about <b>{clust_med:.2f}</b>. That residual is what the design structure
+    costs beyond the weights: mostly clustering, but net of stratification, which pulls the other
+    way, and of whatever interaction the two have &mdash; so it is neither an upper nor a lower
+    bound on clustering alone. The total is worse still as a price for clustering: quoting it that
+    way would overstate it by roughly half again. The reason a residual above one exists at all is
+    visible in the third column &mdash; each cycle resolves into only {psu_lo}&ndash;{psu_hi}
+    variance units, because participants must travel to a mobile examination centre and NCHS
+    fields the centres in a small number of locations. Two adults reached by the same location
+    share a food environment, an insurance market, a provider mix and often an interviewer, so the
+    second largely repeats what the first already said. Treating them as independent would not
+    bias the estimate; it would make the interval too narrow.</p>
+
+    <div class="note">
+      <b>These units are not counties, and cannot be turned back into any.</b> The public-use
+      files do not carry the true design variables. NCHS withholds them because releasing the real
+      primary sampling units every two years would carry a disclosure risk, and substitutes
+      <em>masked variance units</em> &mdash; a pseudo-stratum (<code>SDMVSTRA</code>) and a
+      pseudo-PSU (<code>SDMVPSU</code>) &mdash; which it describes as producing variance estimates
+      that &ldquo;closely approximate&rdquo; the ones the true design variables would give, and
+      directs analysts to use for all public-release work. The real first-stage units are mostly
+      single counties, but the {psu_lo}&ndash;{psu_hi} units counted above are the masked ones:
+      they stand in for that structure rather than identify it. Nothing here is a statement about
+      any particular county, and no geography can be recovered from the table.
+    </div>
 
     <div class="note">
       <b>Unequal selection and clustering are different problems.</b> Sampling some groups at
@@ -805,8 +836,8 @@ def build() -> str:
 
     <figure>
       <img src="{data_uri('part2_changepoint.png')}"
-           alt="Left panel: improvement in weighted residual sum of squares for each candidate
-                breakpoint, none reaching the bootstrap significance threshold. Right panel:
+           alt="Top panel: improvement in weighted residual sum of squares for each candidate
+                breakpoint, none reaching the bootstrap significance threshold. Bottom panel:
                 simulated statistical power against the size of a true slope change.">
       <figcaption><b>No break is detectable, and none would be unless it were very large.</b>
       Significance is assessed by parametric bootstrap rather than a chi-square test at the fitted
@@ -835,11 +866,11 @@ def build() -> str:
     {ledger(
       decision(
         "Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.",
-        "Sidesteps 25 years of instrument and assay changes, which would otherwise be indistinguishable from a pandemic effect.",
+        f"Sidesteps the instrument and assay changes accumulated across {p1['n_cycles']} cycles, which would otherwise be indistinguishable from a pandemic effect.",
         "Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock."),
       decision(
         "Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.",
-        "Turns an assumption into a measured quantity: it came out at {p1['dispersion']:.2f}, so the straight line already explains the series as well as sampling error allows.",
+        f"Turns an assumption into a measured quantity: it came out at {p1['dispersion']:.2f}, so the straight line already explains the series as well as sampling error allows.",
         "Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after."),
       decision(
         "Report a <b>level difference only</b>, and state that the slope change is unidentified.",
@@ -851,7 +882,7 @@ def build() -> str:
         "The same test has well under half the power needed to catch a break the size of the trend itself, so it cannot be reported as evidence that none exists."),
       decision(
         "Assess significance by <b>parametric bootstrap</b> instead of a chi-square test at the fitted knot.",
-        "Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is {cp['crit95']:.1f}, not the nominal 3.84.",
+        f"Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is {cp['crit95']:.1f}, not the nominal 3.84.",
         "Roughly fifty per cent harder to reach significance than the test most software would report by default."),
       decision(
         "Fit the pre-period on the <b>standardised</b> series, not the crude one.",
@@ -949,7 +980,7 @@ def build() -> str:
 
     <h3>Validation splits on survey cycle, not at random</h3>
     <p class="measure">Random cross-validation assumes observations are exchangeable. In a
-    clustered sample they are not: participants from the same primary sampling unit share a
+    clustered sample they are not: participants reached by the same examination location share a
     neighbourhood and an interviewer, so a random split places correlated people on both sides of
     the boundary and reports optimistic performance. Splitting on survey cycle keeps clusters
     intact and answers the more demanding question — whether a score fitted on people surveyed in
@@ -1044,17 +1075,32 @@ def build() -> str:
 
 <section>
   <div class="sec-head"><div class="sec-num">5</div>
-  <h2>Benchmarking against the clinical standard</h2></div>
+  <h2>Benchmarking against the Pooled Cohort Equations</h2></div>
   <div class="body-indent">
     <div class="chip-row">
       <span class="chip open">Open decision</span>
       <span class="chip">Coefficients sourced and verified</span>
     </div>
     <p class="lede measure">A discrimination statistic is only interpretable against something.
-    The natural comparator is the ASCVD Pooled Cohort Equations, the risk tool in clinical use.
-    Its coefficients are in hand — transcribed from the 2013 ACC/AHA Full Work Group Report and
-    checked by reproducing the four worked examples that document prints for its own equations.
-    The comparison is nonetheless held, because of a definitional problem worth stating carefully.</p>
+    The prespecified comparator is the ASCVD Pooled Cohort Equations — the score this project was
+    designed against, and no longer the one ACC/AHA recommend. Its coefficients are in hand —
+    transcribed from the 2013 ACC/AHA Full Work Group Report and checked by reproducing the four
+    worked examples that document prints for its own equations. The comparison is nonetheless
+    held, because of a definitional problem worth stating carefully.</p>
+
+    <div class="note flag">
+      <b>The Pooled Cohort Equations are no longer the current clinical standard.</b> The 2026
+      ACC/AHA/Multisociety dyslipidemia guideline starts from ten-year <b>PREVENT-ASCVD</b> risk,
+      and the 2025 ACC/AHA high blood pressure guideline recommends PREVENT in place of the Pooled
+      Cohort Equations. The ACC&rsquo;s own CVD Risk Estimator Plus states that the ten-year risk
+      it computes from the pooled cohort equation &ldquo;is no longer supported by ACC clinical
+      policy or guidelines&rdquo;. The equations are kept here as the <em>prespecified historical
+      benchmark</em>: the comparison protocol, the coefficient transcription and its verification
+      were all locked before that change, and re-choosing the comparator afterwards would be a
+      design decision made with the answer already in view. PREVENT-ASCVD is recorded as the
+      future comparator, not a relabelling of this one — it takes eGFR as an input, drops race,
+      runs from age 30, and predicts a different outcome set, so adding it is new work.
+    </div>
 
     <div class="note flag">
       <b>The outcomes are not the same quantity.</b> The Pooled Cohort Equations predict
@@ -1103,13 +1149,17 @@ def build() -> str:
       prevent re-identification.</li>
       <li><b>2000 projected U.S. standard population</b>, NCHS <i>Health, United States 2019</i>,
       Appendix II Table 2.</li>
-      <li><b>ASCVD Pooled Cohort Equations</b>, 2013 ACC/AHA Full Work Group Report, Table 4.</li>
+      <li><b>ASCVD Pooled Cohort Equations</b>, 2013 ACC/AHA Full Work Group Report, Table 4 —
+      the prespecified historical benchmark. The current ACC/AHA recommendation for ten-year risk
+      is the AHA PREVENT-ASCVD equations (2026 ACC/AHA/Multisociety dyslipidemia guideline); they
+      are named here as a future comparator and are not used in this report.</li>
     </ul>
 
     <h3>Estimation</h3>
     <ul class="measure">
       <li>Every population quantity is weighted with the examination weight. Variances are
-      Taylor-linearised and clustered on stratum × primary sampling unit.</li>
+      Taylor-linearised and clustered on the masked variance units NCHS releases in place of
+      the true design variables (<code>SDMVSTRA</code> × <code>SDMVPSU</code>).</li>
       <li>Age standardisation is direct, to the published 2000 standard bands renormalised over
       adults 20+, with 75–84 and 85+ collapsed to an open 75+ band.</li>
       <li>Absolute risk is assembled from two cause-specific Cox fits rather than a subdistribution

@@ -10,9 +10,37 @@ from pathlib import Path
 
 import pandas as pd
 import pyreadstat
+import json
+
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Record the size of this suite where the site can read it.
+
+    The published site states how many automated tests there are. No statistic
+    on that site may be typed by hand, and the only thing that knows this one is
+    the suite itself -- so the suite writes it, on every full run.
+
+    A filtered run would record a smaller number than the suite really has, so
+    selective invocations are skipped rather than allowed to overwrite it. The
+    option name for --last-failed is `lf`, not `last_failed`; getattr on the
+    long name silently returns the default and lets a filtered run through.
+    """
+    o = session.config.option
+    if (getattr(o, "file_or_dir", None) or getattr(o, "keyword", "")
+            or getattr(o, "markexpr", "") or getattr(o, "lf", False)
+            or getattr(o, "failedfirst", False) or o.collectonly):
+        return
+    out = Path(__file__).parent.parent / "reports"
+    out.mkdir(exist_ok=True)
+    (out / "test_summary.json").write_text(
+        json.dumps({"collected": session.testscollected,
+                    "failed": session.testsfailed,
+                    "exit_status": int(exitstatus)}, indent=2) + "\n",
+        encoding="utf-8")
 
 
 @pytest.fixture
