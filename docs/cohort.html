@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cohort &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.804 at 10 years on held-out cycles.">
+<meta name="description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.838 at 10 years on held-out cycles.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/cohort.html">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
 <meta property="og:title" content="Cohort &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.804 at 10 years on held-out cycles.">
+<meta property="og:description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.838 at 10 years on held-out cycles.">
 <meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/cohort.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
@@ -23,7 +23,7 @@
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Cohort &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.804 at 10 years on held-out cycles.">
+<meta name="twitter:description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.838 at 10 years on held-out cycles.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <style>
@@ -547,9 +547,22 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     <p class="measure">The exposure is instead reconstructed: treated participants have a constant
     added to their measured value to approximate the untreated level. The adjustment is an
     assumption, stated as one, and the model is refitted without it as a sensitivity check —
-    the effect attenuates from 1.121 to
+    the estimate attenuates from 1.121 to
     1.097 per 10 mmHg, which is the direction
     and roughly the magnitude the reasoning predicts.</p>
+
+    <div class="note flag">
+      <b>What this quantity is, stated narrowly on purpose.</b> It is the association of
+      treatment-adjusted baseline systolic pressure with subsequent cardiovascular mortality,
+      adjusted for the confounders the graph names. It is not the total causal effect of blood
+      pressure, and calling it one would claim more than this design carries: the pressure is
+      already the product of years of treatment nobody observed, the Tobin constant is a
+      convention rather than an identification strategy, there is no treatment history, kidney
+      function may precede hypertension as easily as follow it, and excluding prevalent disease
+      at baseline does not undo the selection that being alive and non-institutionalised in a
+      survey imposes. A target-trial specification with treatment histories would be needed to
+      say more, and none of that is available here.
+    </div>
 
     <h3 id="validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</h3>
     <p class="measure">Random cross-validation assumes observations are exchangeable. In a
@@ -574,7 +587,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
         <caption>Discrimination and calibration, held-out cycles</caption>
         <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th><th>Harrell&rsquo;s C</th>
           <th>Mean predicted</th><th>Mean observed</th></tr></thead>
-        <tbody><tr><td>Test 2005–2008, 10-year risk</td><td>5,163</td><td>217</td><td class='em'>0.804</td><td>2.82%</td><td>2.76%</td></tr><tr><td>Test 2009–2014, 5-year risk</td><td>8,801</td><td>170</td><td class='em'>0.797</td><td>0.92%</td><td>0.89%</td></tr></tbody>
+        <tbody><tr><td>Test 2005–2008, 10-year risk</td><td>5,163</td><td>217</td><td class='em'>0.838</td><td>1.96%</td><td>2.02%</td></tr><tr><td>Test 2009–2014, 5-year risk</td><td>8,801</td><td>170</td><td class='em'>0.802</td><td>0.69%</td><td>0.74%</td></tr></tbody>
       </table>
     </div>
 

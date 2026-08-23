@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Learning &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
+<meta name="description" content="Is the 0.838 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
 <meta property="og:title" content="Learning &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
+<meta property="og:description" content="Is the 0.838 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
 <meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
@@ -23,7 +23,7 @@
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Learning &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
+<meta name="twitter:description" content="Is the 0.838 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <style>
@@ -485,7 +485,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <span class="chip">Paired cluster bootstrap</span>
     </div>
     <p class="lede measure">The model in &sect;4 carries eleven variables and reaches
-    C&nbsp;=&nbsp;0.803. Two quite different things could be holding it there: the
+    C&nbsp;=&nbsp;0.838. Two quite different things could be holding it there: the
     eleven may not carry more, or the linear additive proportional-hazards form may not fit what
     they carry. Those are separable, so they are separated &mdash; the variable set and the model
     form are varied factorially on one analysis set, with a model on age and sex alone as the
@@ -495,7 +495,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <div class="stat"><div class="k">Candidates screened</div><div class="v">15</div><div class="n">on 6,772 training rows</div></div>
       <div class="stat"><div class="k">Selected</div><div class="v">1</div><div class="n">design-based Wald &ge; 3.84</div></div>
       <div class="stat"><div class="k">Best single addition</div><div class="v">&times;1.46</div><div class="n">per SD of log urine albumin/creatinine, z = 7.8</div></div>
-      <div class="stat"><div class="k">Gain in C</div><div class="v">+0.0151</div><div class="n">95% CI +0.0069 to +0.0245</div></div>
+      <div class="stat"><div class="k">Gain in C</div><div class="v">+0.0176</div><div class="n">95% CI +0.0057 to +0.0329</div></div>
     </div>
 
     <h3 id="the-screen">The screen</h3>
@@ -576,15 +576,15 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
         <caption>Discrimination on held-out cycles, 10-year risk</caption>
         <thead><tr><th>Arm</th><th>Variables</th><th>Harrell C</th>
           <th>AUC at the horizon</th><th>&Delta;C vs published</th><th>95% CI</th></tr></thead>
-        <tbody><tr><td>Cox &mdash; the eleven <i>(the published model)</i></td><td>11</td><td>0.8034</td><td>0.8334</td><td class='em'>&mdash; reference</td><td></td></tr><tr><td>Cox &mdash; the eleven plus what the screen chose</td><td>12</td><td>0.8185</td><td>0.8509</td><td class='em'>+0.0151</td><td>+0.0069 to +0.0245</td></tr><tr><td>Gradient boosting &mdash; the eleven</td><td>11</td><td>0.7526</td><td>0.7763</td><td class='em'>-0.0508</td><td>-0.0700 to -0.0272</td></tr><tr><td>Gradient boosting &mdash; the eleven plus the screen</td><td>12</td><td>0.7684</td><td>0.8079</td><td class='em'>-0.0350</td><td>-0.0539 to -0.0146</td></tr><tr><td>Cox &mdash; age and sex only <i>(the floor)</i></td><td>2</td><td>0.7706</td><td>0.7969</td><td class='em'>-0.0328</td><td>-0.0518 to -0.0120</td></tr></tbody>
+        <tbody><tr><td>Cox &mdash; the eleven <i>(the published model)</i></td><td>11</td><td>0.8379</td><td>0.8334</td><td class='em'>&mdash; reference</td><td></td></tr><tr><td>Cox &mdash; the eleven plus what the screen chose</td><td>12</td><td>0.8555</td><td>0.8509</td><td class='em'>+0.0176</td><td>+0.0057 to +0.0329</td></tr><tr><td>Gradient boosting &mdash; the eleven</td><td>11</td><td>0.7837</td><td>0.7763</td><td class='em'>-0.0542</td><td>-0.0904 to -0.0125</td></tr><tr><td>Gradient boosting &mdash; the eleven plus the screen</td><td>12</td><td>0.8134</td><td>0.8079</td><td class='em'>-0.0245</td><td>-0.0604 to +0.0162</td></tr><tr><td>Cox &mdash; age and sex only <i>(the floor)</i></td><td>2</td><td>0.8028</td><td>0.7969</td><td class='em'>-0.0351</td><td>-0.0602 to -0.0104</td></tr></tbody>
       </table>
     </div>
 
-    <p class="measure">One screened variable added +0.0151 to C on the same form.
-    Changing the form to gradient boosting on the same eleven cost -0.0508, and the
-    interval excludes zero in both directions. The floor arm is what makes those numbers readable:
-    a Cox model on age and sex alone reaches C&nbsp;=&nbsp;0.7706, so gradient
-    boosting on all eleven variables discriminates <em>worse than age and sex</em>.</p>
+    <p class="measure">One screened variable added +0.0176 to C on the same form.
+    Changing the form to gradient boosting on the same eleven cost -0.0542, and the
+    interval on each excludes zero. The floor arm is what makes those numbers readable: a Cox
+    model on age and sex alone reaches C&nbsp;=&nbsp;0.8028, so gradient
+    boosting on all eleven variables discriminates <em>worse than</em> age and sex.</p>
 
     <div class="note">
       <b>Two statistics, because one of them is not a fair contest.</b> Harrell's C rewards
@@ -614,7 +614,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
         <caption>What the prediction needs most, and what the causal model may do with it</caption>
         <thead><tr><th>#</th><th>Variable</th><th>Fall in C when shuffled</th>
           <th>In the causal model?</th><th>Why</th></tr></thead>
-        <tbody><tr><td>1</td><td><code>age</code></td><td class='em'>+0.17701</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>2</td><td><code>log_uacr</code></td><td class='em'>+0.02772</td><td>undetermined</td><td>Same node as eGFR, same omission.</td></tr><tr><td>3</td><td><code>smoke_current</code></td><td class='em'>+0.02025</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>4</td><td><code>male</code></td><td class='em'>+0.01215</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>5</td><td><code>bp_treated</code></td><td class='em'>+0.00417</td><td>forbidden</td><td>A collider: blood pressure and prevalent disease both cause treatment.</td></tr><tr><td>6</td><td><code>systolic_bp</code></td><td class='em'>+0.00314</td><td>exposure</td><td>The exposure whose effect E2 estimates.</td></tr><tr><td>7</td><td><code>diabetes_dx</code></td><td class='em'>+0.00073</td><td>undetermined</td><td>A diagnosis at the glucose node, so it carries access to care as well.</td></tr><tr><td>8</td><td><code>race_black</code></td><td class='em'>+0.00057</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr></tbody>
+        <tbody><tr><td>1</td><td><code>age</code></td><td class='em'>+0.18993</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>2</td><td><code>smoke_current</code></td><td class='em'>+0.02858</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>3</td><td><code>log_uacr</code></td><td class='em'>+0.02357</td><td>undetermined</td><td>Same node as eGFR, same omission.</td></tr><tr><td>4</td><td><code>male</code></td><td class='em'>+0.01843</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>5</td><td><code>bp_treated</code></td><td class='em'>+0.00609</td><td>forbidden</td><td>A collider: blood pressure and prevalent disease both cause treatment.</td></tr><tr><td>6</td><td><code>systolic_bp</code></td><td class='em'>+0.00301</td><td>exposure</td><td>The exposure whose effect E2 estimates.</td></tr><tr><td>7</td><td><code>race_black</code></td><td class='em'>+0.00235</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>8</td><td><code>diabetes_dx</code></td><td class='em'>+0.00023</td><td>undetermined</td><td>A diagnosis at the glucose node, so it carries access to care as well.</td></tr></tbody>
       </table>
     </div>
 
