@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pandemic &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.58 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<title>Learning &mdash; CardioTrace | Zekun Song</title>
+<meta name="description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
-<link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/pandemic.html">
+<link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cstyle%3E.g%7Bfill%3A%23f7f6f2%7D%40media%28prefers-color-scheme%3Adark%29%7B.g%7Bfill%3A%2316161a%7D%7D%3C%2Fstyle%3E%3Crect%20class%3D%22g%22%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%2F%3E%3Cpath%20d%3D%22M2%2020h5.2l2.6-7.4%204.2%2014.2%204.1-19%202.9%2012.2H30%22%20fill%3D%22none%22%20stroke%3D%22%232a78d6%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
-<meta property="og:title" content="Pandemic &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.58 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
-<meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/pandemic.html">
+<meta property="og:title" content="Learning &mdash; CardioTrace | Zekun Song">
+<meta property="og:description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
+<meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta property="og:image:type" content="image/png">
@@ -22,8 +22,8 @@
 <meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Pandemic &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.58 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<meta name="twitter:title" content="Learning &mdash; CardioTrace | Zekun Song">
+<meta name="twitter:description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <style>
@@ -472,156 +472,181 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html" aria-current="page">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Learning</a><a href="methods.html">Methods</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html" aria-current="page">Learning</a><a href="methods.html">Methods</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Pandemic</h1><p class="standfirst measure">Whether the pandemic bent the trend, and what a single post-pandemic observation can and cannot establish.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li></ol></nav><section>
-  <div class="sec-head"><div class="sec-num">3</div>
-  <h2 id="whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</h2></div>
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Learning</h1><p class="standfirst measure">Whether the prediction model is limited by the eleven variables it carries or by the form it takes, and what a systematic screen of the laboratory finds.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</a></li><li class="toc-h3"><a href="#the-screen">The screen</a></li><li class="toc-h3"><a href="#against-the-current-guideline-which-was-never-consulted">Against the current guideline, which was never consulted</a></li><li class="toc-h3"><a href="#form-against-variable-set">Form against variable set</a></li><li class="toc-h3"><a href="#the-two-orderings-which-do-not-agree">The two orderings, which do not agree</a></li><li class="toc-h3"><a href="#the-assay-change-underneath-all-of-this">The assay change underneath all of this</a></li></ol></nav><section>
+  <div class="sec-head"><div class="sec-num">5</div>
+  <h2 id="what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</h2></div>
   <div class="body-indent">
     <div class="chip-row">
-      <span class="chip">Quasi-experimental</span>
-      <span class="chip">Counterfactual extrapolation</span>
-      <span class="chip quiet">Result: no detectable change</span>
+      <span class="chip">Prospective</span>
+      <span class="chip">Screened on training cycles only</span>
+      <span class="chip">Design-based Wald</span>
+      <span class="chip">Paired cluster bootstrap</span>
     </div>
-    <p class="lede measure">Observed prevalence in 2021–2022 sits +0.58 pp above what the
-    pre-pandemic trend predicts. The 95% interval runs -0.51 to
-    +1.66 points and contains zero. The honest reading is that this design,
-    on this data, cannot detect a change of the size one might expect.</p>
+    <p class="lede measure">The model in &sect;4 carries eleven variables and reaches
+    C&nbsp;=&nbsp;0.803. Two quite different things could be holding it there: the
+    eleven may not carry more, or the linear additive proportional-hazards form may not fit what
+    they carry. Those are separable, so they are separated &mdash; the variable set and the model
+    form are varied factorially on one analysis set, with a model on age and sex alone as the
+    floor.</p>
 
     <div class="stats">
-      <div class="stat"><div class="k">Observed 2021–22</div><div class="v">8.21%</div><div class="n">SE 0.43 pp</div></div>
-      <div class="stat"><div class="k">Counterfactual</div><div class="v">7.64%</div><div class="n">SE 0.35 pp</div></div>
-      <div class="stat"><div class="k">Difference</div><div class="v">+0.58 pp</div><div class="n">z = 1.04</div></div>
-      <div class="stat"><div class="k">Post-period cycles</div><div class="v">1</div><div class="n">4-year extrapolation</div></div>
+      <div class="stat"><div class="k">Candidates screened</div><div class="v">15</div><div class="n">on 6,772 training rows</div></div>
+      <div class="stat"><div class="k">Selected</div><div class="v">1</div><div class="n">design-based Wald &ge; 3.84</div></div>
+      <div class="stat"><div class="k">Best single addition</div><div class="v">&times;1.46</div><div class="n">per SD of log urine albumin/creatinine, z = 7.8</div></div>
+      <div class="stat"><div class="k">Gain in C</div><div class="v">+0.0151</div><div class="n">95% CI +0.0069 to +0.0245</div></div>
     </div>
 
-    <figure>
-      <img src="assets/part2_counterfactual.png"
-           alt="Age-standardised prevalence with a fitted pre-pandemic trend extrapolated across
-                the gap where NHANES fielded no cycle, compared against the single observed
-                2021-2022 point with its confidence interval.">
-      <figcaption><b>The gap in the horizontal axis is the analytical problem.</b> NHANES
-      suspended field operations, so no 2019–2020 cycle exists and the counterfactual must be
-      carried 4 years beyond the last observation. With one point
-      after the interruption, a level change is estimable but a change in slope is not identified,
-      so none is reported.</figcaption>
-    </figure>
+    <h3 id="the-screen">The screen</h3>
+    <p class="measure">Fifteen candidates, each scored against the eleven the model already has
+    rather than on its own &mdash; a univariate hazard ratio for kidney function mostly reports
+    that older people have worse kidneys. Scoring is by the design-based Wald statistic, the
+    coefficient over its cluster-robust standard error, which is what the rest of this report
+    uses for inference and is the only thing that has a null distribution here. Screening runs on
+    the <b>training cycles only</b>; a variable chosen with the test cycles in view would make the
+    concordance that follows an in-sample number wearing an out-of-sample label.</p>
 
-    <h3 id="what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</h3>
-    <p class="measure">The design behind this figure is simple to state: fit the trend that held
-    before an event, project it forward as the world that would have happened without the event,
-    and read the difference against the world that did. Its strength is that it needs no control
-    group — the pre-period is the control. Its weakness is that everything depends on the
-    projected line being right, and a projection is only as good as the distance it has to travel
-    and the number of points on the far side.</p>
-    <p class="measure">Both go against this analysis. NHANES did not field a 2019–2020 cycle, so
-    the projection spans 4 years rather than the usual two, and the
-    single post-interruption cycle means a change in level can be estimated but a change in
-    trajectory cannot be separated from it at all.</p>
+    <p class="measure">The screen admitted <b>1</b> of 15 candidates: <code>log_uacr</code>.</p>
 
-    <div class="note flag">
-      <b>The subtle failure this design invites.</b> Design-based standard errors describe
-      sampling error only — how much the estimate would move if the same population were sampled
-      again. They do not describe how much a national prevalence genuinely moves between cycles.
-      Building the counterfactual interval from sampling error alone produces a band that is too
-      narrow, and a difference that clears it looks like a pandemic effect when it is an artefact
-      of the model. The interval here therefore carries a dispersion term estimated from the
-      pre-pandemic residuals rather than assumed. It came out at 0.85 — the series moves slightly
-      less than sampling error alone predicts — and is floored at 1, so the band is never narrower
-      than nominal but is not inflated either. The null survives both ways: un-floored the interval
-      is -0.48 to +1.63 points, floored it is -0.51 to +1.66, and both contain zero.
-    </div>
-
-    <h3 id="who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</h3>
-    <p class="measure">The whole counterfactual rests on a single observation, so
-    it matters who that observation is made of. Every cycle loses some
-    age-eligible respondents who were interviewed but never examined and
-    therefore carry no examination weight. In 2021&ndash;2022 that loss is
-    <b>22.3%</b>, against 2.6&ndash;
-    8.9% in every other cycle &mdash; a fourfold change in
-    examination coverage, concentrated on exactly the point the analysis leans
-    on.</p>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Part 1 and Part 2 — participant flow by cycle. Scrollable.">
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Every candidate, adjusted for the eleven — training cycles. Scrollable.">
       <table>
-        <caption>Part 1 and Part 2 &mdash; participant flow by cycle</caption>
-        <thead><tr><th>Cycle</th><th>Age-eligible (20+)</th>
-          <th>No examination weight</th><th>Analysed</th><th>Lost</th></tr></thead>
-        <tbody><tr><td>1999-2000</td><td>4,880</td><td>436</td><td>4,444</td><td class='em'>8.9%</td></tr><tr><td>2001-2002</td><td>5,411</td><td>384</td><td>5,027</td><td class='em'>7.1%</td></tr><tr><td>2003-2004</td><td>5,041</td><td>299</td><td>4,740</td><td class='em'>6.0%</td></tr><tr><td>2005-2006</td><td>4,979</td><td>206</td><td>4,773</td><td class='em'>4.1%</td></tr><tr><td>2007-2008</td><td>5,935</td><td>228</td><td>5,706</td><td class='em'>3.9%</td></tr><tr><td>2009-2010</td><td>6,218</td><td>159</td><td>6,058</td><td class='em'>2.6%</td></tr><tr><td>2011-2012</td><td>5,560</td><td>241</td><td>5,317</td><td class='em'>4.4%</td></tr><tr><td>2013-2014</td><td>5,769</td><td>181</td><td>5,587</td><td class='em'>3.2%</td></tr><tr><td>2015-2016</td><td>5,719</td><td>245</td><td>5,474</td><td class='em'>4.3%</td></tr><tr><td>2017-2018</td><td>5,569</td><td>304</td><td>5,264</td><td class='em'>5.5%</td></tr><tr><td>2021-2022</td><td>7,809</td><td>1,745</td><td>6,064</td><td class='em'>22.3%</td></tr></tbody>
+        <caption>Every candidate, adjusted for the eleven &mdash; training cycles</caption>
+        <thead><tr><th>Candidate</th><th>In the causal model?</th><th>n</th>
+          <th>HR per SD</th><th>Wald</th><th>Into the forward path?</th></tr></thead>
+        <tbody><tr><td>log urine albumin/creatinine</td><td>undetermined</td><td>5,920</td><td>1.458</td><td class='em'>60.7</td><td>yes</td></tr><tr><td>Fasting glucose</td><td>undetermined</td><td>2,951</td><td>1.316</td><td class='em'>16.0</td><td>observed for 50% of the training rows</td></tr><tr><td>Alcohol, drinks per day</td><td>admissible</td><td>3,668</td><td>1.087</td><td class='em'>6.7</td><td>observed for 62% of the training rows</td></tr><tr><td>HbA1c</td><td>undetermined</td><td>5,955</td><td>1.161</td><td class='em'>6.0</td><td>yes</td></tr><tr><td>Health insurance</td><td>admissible</td><td>5,896</td><td>0.869</td><td class='em'>3.0</td><td>nan</td></tr><tr><td>Uric acid</td><td>undetermined</td><td>5,946</td><td>1.122</td><td class='em'>2.6</td><td>nan</td></tr><tr><td>eGFR (CKD-EPI 2021)</td><td>undetermined</td><td>5,946</td><td>0.890</td><td class='em'>2.1</td><td>nan</td></tr><tr><td>Pulse pressure</td><td>forbidden</td><td>5,919</td><td>1.169</td><td class='em'>2.0</td><td>nan</td></tr><tr><td>Diastolic pressure</td><td>forbidden</td><td>5,919</td><td>0.910</td><td class='em'>2.0</td><td>nan</td></tr><tr><td>Told they have kidney disease</td><td>forbidden</td><td>5,948</td><td>1.070</td><td class='em'>1.8</td><td>nan</td></tr><tr><td>Waist circumference</td><td>admissible</td><td>5,885</td><td>1.244</td><td class='em'>1.4</td><td>nan</td></tr><tr><td>Told they have hypertension</td><td>forbidden</td><td>5,959</td><td>0.854</td><td class='em'>1.3</td><td>nan</td></tr><tr><td>On insulin</td><td>forbidden</td><td>5,958</td><td>1.062</td><td class='em'>1.1</td><td>nan</td></tr><tr><td>Triglycerides</td><td>undetermined</td><td>2,964</td><td>0.983</td><td class='em'>0.0</td><td>observed for 50% of the training rows</td></tr><tr><td>LDL cholesterol</td><td>undetermined</td><td>2,721</td><td>1.020</td><td class='em'>0.0</td><td>observed for 46% of the training rows</td></tr></tbody>
       </table>
     </div>
-
-    <div class="note flag">
-      <b>This is a competing explanation, not a footnote.</b> A cycle that
-      examined a different quarter of the people it recruited could differ from
-      its predecessors for reasons that have nothing to do with the pandemic&rsquo;s
-      effect on cardiovascular disease. The survey weights are designed to
-      correct for non-response, and NCHS reweighted this cycle accordingly, but
-      that correction is an adjustment rather than a guarantee. It belongs beside
-      the gap, not below it.
-    </div>
-
-    <h3 id="letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint &mdash; within the window it can reach</h3>
-    <div class="note flag">
-      <b>This test cannot address the pandemic, and is not offered as if it could.</b> Three
-      points are needed on each side of a knot, so with eleven observations the last candidate
-      sits eight years before 2020. Simulated power against a true break at the pandemic is
-      0.057 at a slope change of one point per decade &mdash; indistinguishable from the
-      test&rsquo;s own five per cent size. What follows is a statement about breaks inside the
-      pre-pandemic series and carries no information about a pandemic break either way.
-    </div>
-
-    <p class="measure">Within that window, placing a break anywhere is still an assumption
-    worth testing. A joinpoint model relaxes it: fit a continuous piecewise line, let the knot fall wherever it best fits, and test
-    whether any knot earns its parameter. Because each point carries a known design-based variance,
-    the weighted residual sum of squares is an exact goodness-of-fit statistic rather than an
-    estimated one &mdash; and it says the straight line already fits. The series scatters no more
-    than the sampling errors alone predict, so there is no unexplained structure for a break to
-    explain.</p>
-
-    <figure>
-      <img src="assets/part2_changepoint.png"
-           alt="Top panel: improvement in weighted residual sum of squares for each candidate
-                breakpoint, none reaching the bootstrap significance threshold. Bottom panel:
-                simulated statistical power against the size of a true slope change.">
-      <figcaption><b>No break is detectable, and none would be unless it were very large.</b>
-      Significance is assessed by parametric bootstrap rather than a chi-square test at the fitted
-      knot: searching over the breakpoint inflates the null, so the honest threshold is 5.6 rather
-      than 3.84. The 95% profile set for the knot spans every candidate year, meaning the data
-      cannot localise a break at all.</figcaption>
-    </figure>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Power to detect a true slope change at 2011. Scrollable.">
-      <table>
-        <caption>Power to detect a true slope change at 2011</caption>
-        <thead><tr><th>True change in slope</th><th>Power</th></tr></thead>
-        <tbody><tr><td>+0.2 pp / decade</td><td class='em'>6%</td></tr><tr><td>+0.4 pp / decade</td><td class='em'>10%</td></tr><tr><td>+0.6 pp / decade</td><td class='em'>9%</td></tr><tr><td>+1.0 pp / decade</td><td class='em'>23%</td></tr><tr><td>+1.5 pp / decade</td><td class='em'>41%</td></tr><tr><td>+2.5 pp / decade</td><td class='em'>86%</td></tr></tbody>
-      </table>
-    </div>
-
-    <div class="note flag">
-      <b>This is a limit of the design, not evidence of absence.</b> A reversal from the observed
-      decline to a flat trend &mdash; a slope change of 0.6 points per
-      decade &mdash; would be detected about 9% of the time. Only a
-      change of roughly 2.5 points per decade &mdash; large for a series that moves
-      between 7.7% and 9.9% &mdash; would be caught reliably. The correct conclusion is that eleven biennial estimates cannot
-      settle whether the trend bent, not that it did not.
-    </div>
-
-    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.</div><div class="d-buys"><span class="col-label">What it buys</span>Sidesteps the instrument and assay changes accumulated across 11 cycles, which would otherwise be indistinguishable from a pandemic effect.</div><div class="d-costs"><span class="col-label">What it costs</span>Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns an assumption into a measured quantity: it came out at 0.85, so the straight line already explains the series as well as sampling error allows.</div><div class="d-costs"><span class="col-label">What it costs</span>Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Report a <b>level difference only</b>, and state that the slope change is unidentified.</div><div class="d-buys"><span class="col-label">What it buys</span>Nothing is claimed that one post-period observation cannot support.</div><div class="d-costs"><span class="col-label">What it costs</span>The most interesting question — whether the trajectory changed — is left open.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Let a <b>joinpoint model</b> nominate the breakpoint, rather than assuming it sits at the pandemic.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns the framing into a testable claim. It is not supported: no candidate knot clears the bootstrap threshold, and the profile set for its location spans the whole series.</div><div class="d-costs"><span class="col-label">What it costs</span>The same test has well under half the power needed to catch a break the size of the trend itself, so it cannot be reported as evidence that none exists.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Assess significance by <b>parametric bootstrap</b> instead of a chi-square test at the fitted knot.</div><div class="d-buys"><span class="col-label">What it buys</span>Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is 5.6, not the nominal 3.84.</div><div class="d-costs"><span class="col-label">What it costs</span>Roughly fifty per cent harder to reach significance than the test most software would report by default.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the pre-period on the <b>standardised</b> series, not the crude one.</div><div class="d-buys"><span class="col-label">What it buys</span>The counterfactual is about disease, not about the population continuing to age.</div><div class="d-costs"><span class="col-label">What it costs</span>Inherits every standardisation choice from §2, including the 20+ base.</div></div></div>
 
     <div class="note">
-      <b>What is still needed.</b> Extending this to measured risk factors — blood pressure,
-      lipids, glycaemia, where a real pandemic effect is far more likely to show — requires
-      bridging the instrument and assay changes across the series first. Without that bridge, a
-      change of blood-pressure device would be attributed to the pandemic.
+      <b>Half the candidates are measured on half the cohort, and that decides more than it
+      looks.</b> Fasting glucose, triglycerides and LDL come from the morning fasting subsample,
+      which is roughly half the participants by design, and alcohol intake is missing for a third.
+      Requiring complete data on all of them collapsed the common analysis set from
+      6,772 rows and 538 events to 1,644 and 104 &mdash;
+      selecting six variables on 104 events is fitting noise. A candidate therefore joins the
+      forward path only if it is observed for at least 80% of the
+      training rows. The others keep their rankings, each computed on its own rows, and are marked
+      out of the path with the reason rather than quietly dropped.
     </div>
+
+    <h3 id="against-the-current-guideline-which-was-never-consulted">Against the current guideline, which was never consulted</h3>
+    <p class="measure">The 2023 PREVENT equations added three variables to the Pooled Cohort
+    Equations: <code>egfr</code>, <code>log_uacr</code>, <code>hba1c</code>. All three were
+    among the candidates here, and the screen was not told that. It kept <code>log_uacr</code> and rejected <code>egfr</code>, <code>hba1c</code>. A partial match, and the disagreement is the informative half.</p>
+
+    <p class="measure">The disagreement has a reason worth stating rather than explaining away.
+    This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; eGFR has little
+    variance where it would matter, while albuminuria varies across the whole range and marks
+    damage before filtration falls. A screen run on a cohort with more advanced kidney disease
+    would very likely have kept both.</p>
+
+    <h3 id="form-against-variable-set">Form against variable set</h3>
+    <figure>
+      <img src="assets/part4_arms.png"
+           alt="Paired differences in Harrell C against the published model, with 95% bootstrap
+                intervals. Adding one screened variable to the Cox model improves it; both
+                gradient-boosting arms are worse, and boosting on the eleven is worse than a Cox
+                model on age and sex alone.">
+      <figcaption><b>The variable set was binding; the model form was not.</b> Every arm is fitted
+      on the same training cycles and scored on the same 4,641 held-out
+      participants and 191 cardiovascular deaths, so no difference here is a
+      difference in who was scored. Intervals are 400 bootstrap replicates
+      resampling whole variance units rather than rows, for the same reason &sect;2 does.</figcaption>
+    </figure>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Discrimination on held-out cycles, 10-year risk. Scrollable.">
+      <table>
+        <caption>Discrimination on held-out cycles, 10-year risk</caption>
+        <thead><tr><th>Arm</th><th>Variables</th><th>Harrell C</th>
+          <th>AUC at the horizon</th><th>&Delta;C vs published</th><th>95% CI</th></tr></thead>
+        <tbody><tr><td>Cox &mdash; the eleven <i>(the published model)</i></td><td>11</td><td>0.8034</td><td>0.8334</td><td class='em'>&mdash; reference</td><td></td></tr><tr><td>Cox &mdash; the eleven plus what the screen chose</td><td>12</td><td>0.8185</td><td>0.8509</td><td class='em'>+0.0151</td><td>+0.0069 to +0.0245</td></tr><tr><td>Gradient boosting &mdash; the eleven</td><td>11</td><td>0.7526</td><td>0.7763</td><td class='em'>-0.0508</td><td>-0.0700 to -0.0272</td></tr><tr><td>Gradient boosting &mdash; the eleven plus the screen</td><td>12</td><td>0.7684</td><td>0.8079</td><td class='em'>-0.0350</td><td>-0.0539 to -0.0146</td></tr><tr><td>Cox &mdash; age and sex only <i>(the floor)</i></td><td>2</td><td>0.7706</td><td>0.7969</td><td class='em'>-0.0328</td><td>-0.0518 to -0.0120</td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="measure">One screened variable added +0.0151 to C on the same form.
+    Changing the form to gradient boosting on the same eleven cost -0.0508, and the
+    interval excludes zero in both directions. The floor arm is what makes those numbers readable:
+    a Cox model on age and sex alone reaches C&nbsp;=&nbsp;0.7706, so gradient
+    boosting on all eleven variables discriminates <em>worse than age and sex</em>.</p>
+
+    <div class="note">
+      <b>Two statistics, because one of them is not a fair contest.</b> Harrell's C rewards
+      ordering deaths correctly in time, and the boosted arms never see a time &mdash; they are
+      fitted on a binary "dead of cardiovascular disease by the horizon", which is what a
+      general-purpose classifier can represent. Reporting only C would hand the Cox arms an
+      advantage that came from the metric. The area under the ROC at the horizon is the statistic
+      the boosted arms were actually fitted for, and it ranks the five arms in exactly the same
+      order. The result is not an artefact of the choice between them.
+    </div>
+
+    <h3 id="the-two-orderings-which-do-not-agree">The two orderings, which do not agree</h3>
+    <figure>
+      <img src="assets/part4_two_orderings.png"
+           alt="Permutation importance for each variable in the wide prediction model, coloured by
+                whether the aetiologic model may adjust for it. Age dominates, followed by urine
+                albumin-to-creatinine ratio, which the locked causal graph does not classify.">
+      <figcaption><b>Earning a place in one model does not earn it a place in the other.</b>
+      Permutation importance measured in the model frame rather than the raw one &mdash; three of
+      the eleven features are constructed during model preparation, so shuffling them upstream
+      would let them be rebuilt from untouched source columns and report an importance of exactly
+      zero.</figcaption>
+    </figure>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: What the prediction needs most, and what the causal model may do with it. Scrollable.">
+      <table>
+        <caption>What the prediction needs most, and what the causal model may do with it</caption>
+        <thead><tr><th>#</th><th>Variable</th><th>Fall in C when shuffled</th>
+          <th>In the causal model?</th><th>Why</th></tr></thead>
+        <tbody><tr><td>1</td><td><code>age</code></td><td class='em'>+0.17701</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>2</td><td><code>log_uacr</code></td><td class='em'>+0.02772</td><td>undetermined</td><td>Same node as eGFR, same omission.</td></tr><tr><td>3</td><td><code>smoke_current</code></td><td class='em'>+0.02025</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>4</td><td><code>male</code></td><td class='em'>+0.01215</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>5</td><td><code>bp_treated</code></td><td class='em'>+0.00417</td><td>forbidden</td><td>A collider: blood pressure and prevalent disease both cause treatment.</td></tr><tr><td>6</td><td><code>systolic_bp</code></td><td class='em'>+0.00314</td><td>exposure</td><td>The exposure whose effect E2 estimates.</td></tr><tr><td>7</td><td><code>diabetes_dx</code></td><td class='em'>+0.00073</td><td>undetermined</td><td>A diagnosis at the glucose node, so it carries access to care as well.</td></tr><tr><td>8</td><td><code>race_black</code></td><td class='em'>+0.00057</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="measure">Of the five variables the prediction depends on most,
+    <b>2</b> are variables the aetiologic model may not
+    simply adjust for. That is the argument of &sect;1 made concrete instead of asserted: the same
+    dataset, the same people, two questions, and a variable that is indispensable to one and
+    inadmissible in the other.</p>
+
+    <div class="note flag">
+      <b>Three of the fifteen candidates are marked "the locked DAG does not say", and that is a
+      finding about the DAG.</b> The causal graph in the design document draws the kidney node
+      with no parents and no edge to or from blood pressure, so it cannot decide whether eGFR and
+      albuminuria are confounders or mediators &mdash; and albuminuria is the one variable the
+      screen selected. Lipids sit at a collider between the unmeasured genetic node and adiposity.
+      Resolving either is a modelling decision, not a data question, and it is recorded as open
+      rather than settled here.
+    </div>
+
+    <h3 id="the-assay-change-underneath-all-of-this">The assay change underneath all of this</h3>
+    <p class="measure">Kidney function could not be screened at all until one thing was corrected.
+    NHANES measured serum creatinine on a non-standardised method in two cycles and published a
+    Deming regression back onto the reference scale for each, describing the correction as highly
+    recommended. Those two cycles fall on <em>opposite sides</em> of the train/test split, so the
+    uncorrected series carries a step there that no population change produced: a model fitted on
+    it would learn one scale and be judged on another, which looks exactly like a model failing to
+    transport.</p>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Serum creatinine by cycle, mg/dL — as loaded and as corrected. Scrollable.">
+      <table>
+        <caption>Serum creatinine by cycle, mg/dL &mdash; as loaded and as corrected</caption>
+        <thead><tr><th>Cycle</th><th>n</th><th>As loaded</th><th>Corrected</th>
+          <th></th></tr></thead>
+        <tbody><tr><td>1999-2000</td><td>2,030</td><td>0.7600</td><td class='em'>0.9169</td><td>CDC correction applied</td></tr><tr><td>2001-2002</td><td>2,277</td><td>0.9026</td><td class='em'>0.9026</td><td>&mdash;</td></tr><tr><td>2003-2004</td><td>2,076</td><td>0.9102</td><td class='em'>0.9102</td><td>&mdash;</td></tr><tr><td>2005-2006</td><td>2,095</td><td>0.9506</td><td class='em'>0.9137</td><td>CDC correction applied</td></tr><tr><td>2007-2008</td><td>2,800</td><td>0.8799</td><td class='em'>0.8799</td><td>&mdash;</td></tr><tr><td>2009-2010</td><td>2,971</td><td>0.8917</td><td class='em'>0.8917</td><td>&mdash;</td></tr><tr><td>2011-2012</td><td>2,493</td><td>0.9042</td><td class='em'>0.9042</td><td>&mdash;</td></tr><tr><td>2013-2014</td><td>2,800</td><td>0.9175</td><td class='em'>0.9175</td><td>&mdash;</td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="measure">The equations were applied before the data was looked at, and both move
+    their cycle <em>toward</em> the untouched ones rather than away. That agreement is the check
+    that they were read the right way round.</p>
+
+    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Screen on the <b>training cycles only</b>, and score by the design-based Wald statistic.</div><div class="d-buys"><span class="col-label">What it buys</span>The concordance that follows is genuinely out of sample, and the statistic has a null distribution under the survey design rather than borrowing one it does not have.</div><div class="d-costs"><span class="col-label">What it costs</span>A candidate observed for less than 80% of the training rows cannot enter the forward path at all, so anything measured only in the fasting subsample is out by construction.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Compare the arms by a <b>paired</b> difference in C, bootstrapped over whole variance units.</div><div class="d-buys"><span class="col-label">What it buys</span>The two scores are computed on identical people, so the difference has far less variance than either statistic alone; resampling clusters keeps the interval honest about who is independent.</div><div class="d-costs"><span class="col-label">What it costs</span>400 replicates of five arms is the slowest step in the pipeline, and the interval is Monte Carlo rather than exact.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the boosted arms on a <b>binary outcome at the horizon</b> rather than on survival time.</div><div class="d-buys"><span class="col-label">What it buys</span>It is what a general-purpose classifier can represent, and it makes the comparison one of form rather than of library.</div><div class="d-costs"><span class="col-label">What it costs</span>Competing deaths become negative labels rather than a competing risk, and the output ranks people instead of being an absolute risk &mdash; so this section compares discrimination and never calibration.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Declare every candidate's causal status by hand, with three states rather than two.</div><div class="d-buys"><span class="col-label">What it buys</span>A variable the graph does not classify is reported as unclassified instead of being defaulted to admissible, which would print &lsquo;allowed&rsquo; for variables nobody decided about.</div><div class="d-costs"><span class="col-label">What it costs</span>The table carries three &lsquo;undetermined&rsquo; rows that a reader may find unsatisfying, and one of them is the variable the screen chose.</div></div></div>
   </div>
 </section>
 <div class="pagefoot">
   <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
   <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
-  <span class="footlinks"><a href="cohort.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
+  <span class="footlinks"><a href="methods.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
 </div>
 </main>
 <a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>
