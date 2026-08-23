@@ -403,10 +403,12 @@ def design_effect(df: pd.DataFrame, *, se: float,
                   outcome: str = "prev_cvd") -> tuple[float, float]:
     """TOTAL design effect and effective sample size for the standardised estimate.
 
-    Total, meaning it carries both unequal selection probabilities and
-    clustering. `kish_weighting_factor` isolates the first, so the two
-    together bound what the clustering contributes. Reporting this number as
-    the cost of clustering alone would overstate it.
+    Total, meaning it carries every departure from simple random sampling at
+    once. `kish_weighting_factor` isolates the unequal-probability part; what
+    is left after dividing it out carries clustering net of stratification,
+    which pulls the other way, and of whatever interaction the two have. That
+    residual is therefore not a bound on clustering alone in either direction.
+    Reporting the total as the cost of clustering overstates it outright.
 
     DEFF is the design-based variance divided by the variance the same estimator
     would have had under simple random sampling of the same size. NCHS publishes
