@@ -477,7 +477,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 <header class="masthead">
   <p class="eyebrow">CardioTrace · NHANES 1999–2022 · NCHS Linked Mortality File</p>
   <h1>Cardiovascular Disease in the United States, 1999–2022</h1>
-  <p class="subtitle">Three estimands, three designs: a standardised prevalence series,
+  <p class="subtitle">Three estimands, three designs &mdash; and a fourth section asking what limits the third: a standardised prevalence series,
   a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
   <p class="standfirst measure">One national survey can answer more than one question, but not
   with one method. This report states each question as a quantity to be estimated, sets out the
@@ -490,7 +490,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     <span><b>Mortality follow-up through</b> 2019-12-31</span>
   </div>
 </header>
-<nav class="toc" aria-label="Contents"><p class="toc-label">Contents</p><ol><li class="toc-h2"><a href="#why-one-dataset-needs-three-designs">Why one dataset needs three designs</a></li><li class="toc-h2"><a href="#the-burden-across-11-cycles-with-ageing-taken-out">The burden across 11 cycles, with ageing taken out</a></li><li class="toc-h3"><a href="#how-standardisation-works-and-why-it-is-not-a">How standardisation works, and why it is not a correction factor</a></li><li class="toc-h3"><a href="#the-standard-population-written-out">The standard population, written out</a></li><li class="toc-h3"><a href="#how-much-the-clustering-actually-costs">How much the clustering actually costs</a></li><li class="toc-h3"><a href="#testing-the-limitation-instead-of-only-declaring-it">Testing the limitation instead of only declaring it</a></li><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li><li class="toc-h2"><a href="#who-among-the-currently-healthy-goes-on-to-die-of-it">Who, among the currently healthy, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li><li class="toc-h2"><a href="#what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</a></li><li class="toc-h3"><a href="#the-screen">The screen</a></li><li class="toc-h3"><a href="#against-the-current-guideline-which-was-never-consulted">Against the current guideline, which was never consulted</a></li><li class="toc-h3"><a href="#form-against-variable-set">Form against variable set</a></li><li class="toc-h3"><a href="#the-two-orderings-which-do-not-agree">The two orderings, which do not agree</a></li><li class="toc-h3"><a href="#the-assay-change-underneath-all-of-this">The assay change underneath all of this</a></li><li class="toc-h2"><a href="#benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</a></li><li class="toc-h2"><a href="#data-and-methods">Data and methods</a></li><li class="toc-h3"><a href="#sources">Sources</a></li><li class="toc-h3"><a href="#estimation">Estimation</a></li><li class="toc-h3"><a href="#reproducibility">Reproducibility</a></li></ol></nav>
+<nav class="toc" aria-label="Contents"><p class="toc-label">Contents</p><ol><li class="toc-h2"><a href="#why-one-dataset-needs-three-designs">Why one dataset needs three designs</a></li><li class="toc-h2"><a href="#the-burden-across-11-cycles-with-ageing-taken-out">The burden across 11 cycles, with ageing taken out</a></li><li class="toc-h3"><a href="#how-standardisation-works-and-why-it-is-not-a">How standardisation works, and why it is not a correction factor</a></li><li class="toc-h3"><a href="#the-standard-population-written-out">The standard population, written out</a></li><li class="toc-h3"><a href="#how-much-the-clustering-actually-costs">How much the clustering actually costs</a></li><li class="toc-h3"><a href="#testing-the-limitation-instead-of-only-declaring-it">Testing the limitation instead of only declaring it</a></li><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li><li class="toc-h2"><a href="#who-among-the-currently-healthy-goes-on-to-die-of-it">Who, among the currently healthy, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li><li class="toc-h2"><a href="#what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</a></li><li class="toc-h3"><a href="#the-screen">The screen</a></li><li class="toc-h3"><a href="#against-the-current-guideline-which-the-screen-was">Against the current guideline, which the screen was never shown</a></li><li class="toc-h3"><a href="#form-against-variable-set">Form against variable set</a></li><li class="toc-h3"><a href="#the-two-orderings-which-do-not-agree">The two orderings, which do not agree</a></li><li class="toc-h3"><a href="#the-assay-change-underneath-all-of-this">The assay change underneath all of this</a></li><li class="toc-h2"><a href="#benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</a></li><li class="toc-h2"><a href="#data-and-methods">Data and methods</a></li><li class="toc-h3"><a href="#sources">Sources</a></li><li class="toc-h3"><a href="#estimation">Estimation</a></li><li class="toc-h3"><a href="#reproducibility">Reproducibility</a></li></ol></nav>
 
 <section>
   <div class="sec-head"><div class="sec-num">1</div>
@@ -527,12 +527,12 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     opposite treatment, and the only thing that decides which is correct is which question is
     being asked.</p>
 
-    <p class="measure">The three analyses below therefore use three different samples. They are
+    <p class="measure">The first three analyses below therefore use three different samples. They are
     not three views of one table.</p>
 
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: The three analyses. Scrollable.">
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: The three estimands, and the samples they need. Scrollable.">
       <table>
-        <caption>The three analyses</caption>
+        <caption>The three estimands, and the samples they need</caption>
         <thead><tr><th>&nbsp;</th><th>§2 Burden</th><th>§3 Pandemic</th><th>§4 Cohort</th></tr></thead>
         <tbody>
           <tr><td>Question</td><td>How has prevalence moved?</td>
@@ -928,7 +928,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     </div>
     <p class="lede measure">Linking survey records to the National Death Index converts a series
     of cross-sections into a cohort: exposures measured at the examination, deaths observed for up
-    to twenty years afterwards. This is the only one of the three analyses in which exposure
+    to twenty years afterwards. This is the only estimand here in which exposure
     precedes outcome, and therefore the only one where prediction is a defensible word.</p>
 
     <div class="stats">
@@ -1119,16 +1119,32 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       out of the path with the reason rather than quietly dropped.
     </div>
 
-    <h3 id="against-the-current-guideline-which-was-never-consulted">Against the current guideline, which was never consulted</h3>
-    <p class="measure">The 2023 PREVENT equations added three variables to the Pooled Cohort
-    Equations: <code>egfr</code>, <code>log_uacr</code>, <code>hba1c</code>. All three were
-    among the candidates here, and the screen was not told that. It kept <code>log_uacr</code> and rejected <code>egfr</code>, <code>hba1c</code>. A partial match, and the disagreement is the informative half.</p>
+    <h3 id="against-the-current-guideline-which-the-screen-was">Against the current guideline, which the screen was never shown</h3>
+    <p class="measure">PREVENT takes two different kinds of variable that the Pooled Cohort
+    Equations do not, and the distinction matters here. Its <b>base model</b> requires
+    eGFR and BMI &mdash; eGFR was newly included as a primary predictor, computed from
+    CKD-EPI 2021 on serum creatinine, which is the same equation and the reason the assay
+    calibration below had to be done first. Its <b>optional</b> cardiovascular-kidney-metabolic
+    extensions are urine albumin/creatinine ratio, HbA1c and social deprivation index.</p>
 
-    <p class="measure">The disagreement has a reason worth stating rather than explaining away.
-    This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; eGFR has little
-    variance where it would matter, while albuminuria varies across the whole range and marks
-    damage before filtration falls. A screen run on a cohort with more advanced kidney disease
-    would very likely have kept both.</p>
+    <p class="measure">Of those, BMI was already among the eleven. The screen was
+    able to consider eGFR from the base model and HbA1c and urine albumin/creatinine ratio from the
+    extensions; social deprivation index could not be built at all &mdash; it needs census-tract geography, which NHANES withholds for disclosure control, which
+    is the same constraint that produced the masked variance units in &sect;2. The screen was not
+    told that any of them were of interest.</p>
+
+    <p class="measure">The screen rejected eGFR, which PREVENT makes mandatory, and kept urine albumin/creatinine ratio, which PREVENT treats as optional. It disagrees with the guideline in both directions at once, and that is the informative result rather than an embarrassment.</p>
+
+    <div class="note flag">
+      <b>The disagreement points away from the flattering reading, which is why it is worth
+      keeping.</b> This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; the
+      median eGFR sits near 92, so glomerular filtration has little variance in the range where
+      it would separate people, while albuminuria varies across four orders of magnitude and
+      marks kidney damage before filtration falls. PREVENT was derived on 6.6&nbsp;million adults
+      from age 30 and predicts a composite that includes heart failure; a screen on that
+      population, for that outcome, would very likely have kept eGFR. Nothing here is evidence
+      against the guideline. It is evidence about what this cohort can see.
+    </div>
 
     <h3 id="form-against-variable-set">Form against variable set</h3>
     <figure>
@@ -1238,7 +1254,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   <h2 id="benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</h2></div>
   <div class="body-indent">
     <div class="chip-row">
-      <span class="chip open">Open decision</span>
+      <span class="chip open">Protocol locked &middot; analysis pending</span>
       <span class="chip">Coefficients sourced and verified</span>
     </div>
     <p class="lede measure">A discrimination statistic is only interpretable against something.

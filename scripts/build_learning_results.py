@@ -26,6 +26,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.biomarkers import calibration_effect, derive  # noqa: E402
 from src.discrimination import run  # noqa: E402
+from src.models import P_FEATURES  # noqa: E402
 from src.screening import STATUS, screen  # noqa: E402
 
 # lifelines is loud about ties and step sizes on every one of the ~90 fits this
@@ -40,11 +41,37 @@ PROCESSED = ROOT / "data" / "processed" / "cohort_part3.csv.gz"
 TABLES = ROOT / "reports" / "tables"
 OUT = ROOT / "reports" / "part4_learning_results.json"
 
-# The variables the 2023 PREVENT equations added to the Pooled Cohort Equations.
-# Named here so the comparison in the report is against a fixed list rather than
-# against whatever the screen happened to produce.
-PREVENT_ADDITIONS = {"egfr": "eGFR", "log_uacr": "urine albumin/creatinine",
-                     "hba1c": "HbA1c"}
+# What PREVENT takes that the Pooled Cohort Equations do not, split the way
+# PREVENT itself splits it. Getting this structure wrong once already produced a
+# claim on the site that was flattering and false -- that the screen "recovered
+# the three variables PREVENT added" -- when eGFR is not one of three optional
+# additions but a mandatory base predictor the screen went on to reject.
+#
+# Base model, from the AHA scientific statement (Circulation 2024,
+# https://www.ahajournals.org/doi/10.1161/CIR.0000000000001191): "The base model
+# to predict risk of total CVD included the following predictors: SBP, HDL-C,
+# non-HDL-C, eGFR, smoking status, use of antihypertensive or statin
+# medications, and diabetes. eGFR was newly included as a predictor in the
+# primary or base model." BMI enters through the heart-failure component of the
+# total-CVD outcome. Both are new relative to PCE.
+#
+# The same statement specifies eGFR from CKD-EPI 2021 on serum creatinine --
+# the equation `biomarkers.egfr_ckdepi_2021` implements, and the reason the
+# calibration in that module had to be done first.
+PREVENT_BASE_NEW = {"egfr": "eGFR", "bmi": "BMI"}
+
+# The optional cardiovascular-kidney-metabolic extensions. Three of them, and
+# eGFR is NOT among them.
+PREVENT_OPTIONAL = {"log_uacr": "urine albumin/creatinine ratio",
+                    "hba1c": "HbA1c",
+                    "sdi": "social deprivation index"}
+
+# SDI is a geographic index keyed to census tract. NHANES withholds geography
+# for the same disclosure-control reason it masks the variance units, so this
+# one cannot be built from the public files at all -- it is reported as
+# unavailable rather than as untested.
+PREVENT_UNAVAILABLE = {"sdi": "needs census-tract geography, which NHANES "
+                              "withholds for disclosure control"}
 
 
 def main() -> None:
@@ -85,13 +112,19 @@ def main() -> None:
     top5 = imp.head(5)
     not_admissible = top5[top5["e2_status"] != "admissible"]
 
-    # What the screen selected, against what PREVENT added. Reported as an
-    # intersection and a difference rather than as a verdict, because a partial
-    # match is the actual result and rounding it either way would be a claim the
-    # data does not make.
+    # What the screen selected, against what PREVENT takes. Reported as
+    # intersections and differences rather than as a verdict: the actual result
+    # is that the screen kept an OPTIONAL extension and rejected a MANDATORY
+    # base predictor, and rounding that either way would be a claim the data
+    # does not make.
     selected = set(scr["selected"])
     considered = {r.variable for r in scr["ranking"].itertuples()}
-    prevent_here = {v for v in PREVENT_ADDITIONS if v in considered}
+    # BMI is already among the eleven, so it was never a candidate: PREVENT's
+    # other base addition is one this model already had.
+    incumbent = set(P_FEATURES)
+    base_here = {v for v in PREVENT_BASE_NEW if v in considered}
+    base_incumbent = {v for v in PREVENT_BASE_NEW if v in incumbent}
+    opt_here = {v for v in PREVENT_OPTIONAL if v in considered}
 
     results = {
         "screen": {
@@ -105,10 +138,16 @@ def main() -> None:
             "top_marginal_hr_per_sd": float(scr["ranking"].iloc[0]["hr_per_sd"]),
         },
         "prevent": {
-            "additions": PREVENT_ADDITIONS,
-            "considered": sorted(prevent_here),
-            "selected": sorted(selected & prevent_here),
-            "rejected": sorted(prevent_here - selected),
+            "base_new": PREVENT_BASE_NEW,
+            "optional": PREVENT_OPTIONAL,
+            "unavailable": PREVENT_UNAVAILABLE,
+            "base_already_in_model": sorted(base_incumbent),
+            "base_screened": sorted(base_here),
+            "base_selected": sorted(selected & base_here),
+            "base_rejected": sorted(base_here - selected),
+            "optional_screened": sorted(opt_here),
+            "optional_selected": sorted(selected & opt_here),
+            "optional_rejected": sorted(opt_here - selected),
         },
         "arms": {
             "reference": res["reference"],
@@ -143,8 +182,12 @@ def main() -> None:
     print(f"  screen      {scr['n_train']:,} train rows, {scr['events_train']} events, "
           f"{len(scr['ranking'])} candidates")
     print(f"              pool {scr['pool']} -> selected {scr['selected'] or '(none)'}")
-    print(f"  PREVENT     considered {sorted(prevent_here)}; "
-          f"selected {sorted(selected & prevent_here) or '(none)'}")
+    print(f"  PREVENT     base new: screened {sorted(base_here)}, "
+          f"selected {sorted(selected & base_here) or '(none)'}, "
+          f"already in the model {sorted(base_incumbent) or '(none)'}")
+    print(f"              optional: screened {sorted(opt_here)}, "
+          f"selected {sorted(selected & opt_here) or '(none)'}, "
+          f"unavailable {sorted(PREVENT_UNAVAILABLE)}")
     for name, s in res["scores"].items():
         d = res["deltas"].get(name)
         tail = (f"{d['delta']:+.4f} [{d['lo']:+.4f}, {d['hi']:+.4f}]"

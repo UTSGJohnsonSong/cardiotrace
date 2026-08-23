@@ -480,20 +480,60 @@ def build() -> str:
             "candidates. On this cohort the eleven already carry what the "
             "laboratory adds.")
 
-    p4_kept = p4_prev["selected"]
-    p4_dropped = p4_prev["rejected"]
-    if p4_kept and p4_dropped:
+    def _codes(names):
+        return ", ".join(f"<code>{v}</code>" for v in names) or "none"
+
+    p4_base_kept = p4_prev["base_selected"]
+    p4_base_dropped = p4_prev["base_rejected"]
+    p4_opt_kept = p4_prev["optional_selected"]
+    p4_opt_dropped = p4_prev["optional_rejected"]
+    p4_base_had = p4_prev["base_already_in_model"]
+
+    def _names(keys, lookup):
+        """PREVENT's own variables under PREVENT's own names.
+
+        The code names are this project's column labels; printing `egfr` and
+        `sdi` in a sentence about what a published guideline requires reads as
+        though the guideline used them.
+        """
+        got = [lookup[k] for k in keys if k in lookup]
+        if len(got) < 2:
+            return got[0] if got else "none"
+        return ", ".join(got[:-1]) + " and " + got[-1]
+
+    p4_base_new_list = _names(p4_prev["base_new"], p4_prev["base_new"])
+    p4_opt_list = _names(p4_prev["optional"], p4_prev["optional"])
+    p4_all = p4_prev["base_new"] | p4_prev["optional"]
+    p4_base_screened = _names(p4_prev["base_screened"], p4_all)
+    p4_opt_screened = _names(p4_prev["optional_screened"], p4_all)
+    p4_base_had_list = _names(p4_base_had, p4_all)
+    p4_unavailable = _names(list(p4_prev["unavailable"]), p4_all)
+    p4_unavailable_why = "; ".join(p4_prev["unavailable"].values())
+
+    # Branching on what happened, in both directions. The interesting case here
+    # is the asymmetric one, and it is the one that does NOT flatter the screen.
+    if p4_base_dropped and p4_opt_kept:
         p4_prevent_says = (
-            f"It kept {', '.join(f'<code>{v}</code>' for v in p4_kept)} and "
-            f"rejected {', '.join(f'<code>{v}</code>' for v in p4_dropped)}. "
-            "A partial match, and the disagreement is the informative half.")
-    elif p4_kept:
-        p4_prevent_says = ("It selected every one of them, having never been "
-                           "told they were the ones to look for.")
+            f"The screen rejected {_names(p4_base_dropped, p4_all)}, which "
+            f"PREVENT makes mandatory, and kept "
+            f"{_names(p4_opt_kept, p4_all)}, which PREVENT treats as "
+            "optional. It disagrees with the guideline in both directions at "
+            "once, and that is the informative result rather than an "
+            "embarrassment.")
+    elif p4_base_kept and p4_opt_kept:
+        p4_prevent_says = (
+            f"The screen kept {_codes(p4_base_kept + p4_opt_kept)} &mdash; the "
+            "base predictor and the extensions alike &mdash; having never been "
+            "told which they were.")
+    elif not (p4_base_kept or p4_opt_kept):
+        p4_prevent_says = (
+            "The screen kept none of them. That is a disagreement with the "
+            "current guideline, and it is worth explaining rather than "
+            "smoothing over.")
     else:
-        p4_prevent_says = ("It selected none of them, which is a disagreement "
-                           "with the current guideline worth explaining rather "
-                           "than smoothing over.")
+        p4_prevent_says = (
+            f"The screen kept {_codes(p4_base_kept + p4_opt_kept)} and rejected "
+            f"{_codes(p4_base_dropped + p4_opt_dropped)}.")
 
     sbp = model["aetiologic_sbp_per_10mmhg"]
 
@@ -1219,16 +1259,32 @@ def build() -> str:
       out of the path with the reason rather than quietly dropped.
     </div>
 
-    <h3>Against the current guideline, which was never consulted</h3>
-    <p class="measure">The 2023 PREVENT equations added three variables to the Pooled Cohort
-    Equations: {", ".join(f"<code>{k}</code>" for k in p4_prev["additions"])}. All three were
-    among the candidates here, and the screen was not told that. {p4_prevent_says}</p>
+    <h3>Against the current guideline, which the screen was never shown</h3>
+    <p class="measure">PREVENT takes two different kinds of variable that the Pooled Cohort
+    Equations do not, and the distinction matters here. Its <b>base model</b> requires
+    {p4_base_new_list} &mdash; eGFR was newly included as a primary predictor, computed from
+    CKD-EPI 2021 on serum creatinine, which is the same equation and the reason the assay
+    calibration below had to be done first. Its <b>optional</b> cardiovascular-kidney-metabolic
+    extensions are {p4_opt_list}.</p>
 
-    <p class="measure">The disagreement has a reason worth stating rather than explaining away.
-    This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; eGFR has little
-    variance where it would matter, while albuminuria varies across the whole range and marks
-    damage before filtration falls. A screen run on a cohort with more advanced kidney disease
-    would very likely have kept both.</p>
+    <p class="measure">Of those, {p4_base_had_list} was already among the eleven. The screen was
+    able to consider {p4_base_screened} from the base model and {p4_opt_screened} from the
+    extensions; {p4_unavailable} could not be built at all &mdash; it {p4_unavailable_why}, which
+    is the same constraint that produced the masked variance units in &sect;2. The screen was not
+    told that any of them were of interest.</p>
+
+    <p class="measure">{p4_prevent_says}</p>
+
+    <div class="note flag">
+      <b>The disagreement points away from the flattering reading, which is why it is worth
+      keeping.</b> This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; the
+      median eGFR sits near 92, so glomerular filtration has little variance in the range where
+      it would separate people, while albuminuria varies across four orders of magnitude and
+      marks kidney damage before filtration falls. PREVENT was derived on 6.6&nbsp;million adults
+      from age 30 and predicts a composite that includes heart failure; a screen on that
+      population, for that outcome, would very likely have kept eGFR. Nothing here is evidence
+      against the guideline. It is evidence about what this cohort can see.
+    </div>
 
     <h3>Form against variable set</h3>
     <figure>
@@ -1355,7 +1411,7 @@ def build() -> str:
   <h2>Benchmarking against the Pooled Cohort Equations</h2></div>
   <div class="body-indent">
     <div class="chip-row">
-      <span class="chip open">Open decision</span>
+      <span class="chip open">Protocol locked &middot; analysis pending</span>
       <span class="chip">Coefficients sourced and verified</span>
     </div>
     <p class="lede measure">A discrimination statistic is only interpretable against something.
