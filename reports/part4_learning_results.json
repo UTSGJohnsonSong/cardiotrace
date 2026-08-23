@@ -1,0 +1,230 @@
+{
+  "screen": {
+    "n_train": 6772,
+    "events_train": 538,
+    "wald_threshold": 3.84,
+    "min_coverage": 0.8,
+    "n_candidates": 15,
+    "pool": [
+      "log_uacr",
+      "hba1c"
+    ],
+    "selected": [
+      "log_uacr"
+    ],
+    "top_marginal": "log_uacr",
+    "top_marginal_z": 7.79,
+    "top_marginal_hr_per_sd": 1.458
+  },
+  "prevent": {
+    "base_new": {
+      "egfr": "eGFR",
+      "bmi": "BMI"
+    },
+    "optional": {
+      "log_uacr": "urine albumin/creatinine ratio",
+      "hba1c": "HbA1c",
+      "sdi": "social deprivation index"
+    },
+    "unavailable": {
+      "sdi": "needs census-tract geography, which NHANES withholds for disclosure control"
+    },
+    "base_already_in_model": [
+      "bmi"
+    ],
+    "base_screened": [
+      "egfr"
+    ],
+    "base_selected": [],
+    "base_rejected": [
+      "egfr"
+    ],
+    "optional_screened": [
+      "hba1c",
+      "log_uacr"
+    ],
+    "optional_selected": [
+      "log_uacr"
+    ],
+    "optional_rejected": [
+      "hba1c"
+    ]
+  },
+  "arms": {
+    "reference": "cox_p",
+    "wide": [
+      "age",
+      "male",
+      "race_black",
+      "systolic_bp",
+      "bp_treated",
+      "total_cholesterol",
+      "hdl_cholesterol",
+      "diabetes_dx",
+      "smoke_current",
+      "smoke_former",
+      "bmi",
+      "log_uacr"
+    ],
+    "horizon": 10.0,
+    "n_train": 5920,
+    "n_test": 4641,
+    "events_test": 191,
+    "n_boot": 400,
+    "scores": {
+      "cox_p": {
+        "c": 0.8034,
+        "auc_horizon": 0.8334,
+        "n": 4641,
+        "n_evaluable": 4641,
+        "events": 191,
+        "n_features": 11
+      },
+      "cox_wide": {
+        "c": 0.8185,
+        "auc_horizon": 0.8509,
+        "n": 4641,
+        "n_evaluable": 4641,
+        "events": 191,
+        "n_features": 12
+      },
+      "gbm_p": {
+        "c": 0.7526,
+        "auc_horizon": 0.7763,
+        "n": 4641,
+        "n_evaluable": 4641,
+        "events": 191,
+        "n_features": 11
+      },
+      "gbm_wide": {
+        "c": 0.7684,
+        "auc_horizon": 0.8079,
+        "n": 4641,
+        "n_evaluable": 4641,
+        "events": 191,
+        "n_features": 12
+      },
+      "floor_age_sex": {
+        "c": 0.7706,
+        "auc_horizon": 0.7969,
+        "n": 4641,
+        "n_evaluable": 4641,
+        "events": 191,
+        "n_features": 2
+      }
+    },
+    "deltas": {
+      "cox_wide": {
+        "delta": 0.0151,
+        "lo": 0.0069,
+        "hi": 0.0245,
+        "half_width": 0.0088,
+        "n_boot": 400,
+        "excludes_zero": true
+      },
+      "gbm_p": {
+        "delta": -0.0508,
+        "lo": -0.07,
+        "hi": -0.0272,
+        "half_width": 0.0214,
+        "n_boot": 400,
+        "excludes_zero": true
+      },
+      "gbm_wide": {
+        "delta": -0.035,
+        "lo": -0.0539,
+        "hi": -0.0146,
+        "half_width": 0.0196,
+        "n_boot": 400,
+        "excludes_zero": true
+      },
+      "floor_age_sex": {
+        "delta": -0.0328,
+        "lo": -0.0518,
+        "hi": -0.012,
+        "half_width": 0.0199,
+        "n_boot": 400,
+        "excludes_zero": true
+      }
+    }
+  },
+  "importance": {
+    "top5": [
+      "age",
+      "log_uacr",
+      "smoke_current",
+      "male",
+      "bp_treated"
+    ],
+    "top5_not_admissible": [
+      "log_uacr",
+      "bp_treated"
+    ],
+    "n_top5_not_admissible": 2,
+    "largest_null_half_width": null
+  },
+  "creatinine": {
+    "corrected_cycles": [
+      "1999-2000",
+      "2005-2006"
+    ],
+    "table": [
+      {
+        "cycle": "1999-2000",
+        "n": 2030,
+        "mean_as_loaded": 0.76,
+        "mean_calibrated": 0.9169,
+        "corrected": true
+      },
+      {
+        "cycle": "2001-2002",
+        "n": 2277,
+        "mean_as_loaded": 0.9026,
+        "mean_calibrated": 0.9026,
+        "corrected": false
+      },
+      {
+        "cycle": "2003-2004",
+        "n": 2076,
+        "mean_as_loaded": 0.9102,
+        "mean_calibrated": 0.9102,
+        "corrected": false
+      },
+      {
+        "cycle": "2005-2006",
+        "n": 2095,
+        "mean_as_loaded": 0.9506,
+        "mean_calibrated": 0.9137,
+        "corrected": true
+      },
+      {
+        "cycle": "2007-2008",
+        "n": 2800,
+        "mean_as_loaded": 0.8799,
+        "mean_calibrated": 0.8799,
+        "corrected": false
+      },
+      {
+        "cycle": "2009-2010",
+        "n": 2971,
+        "mean_as_loaded": 0.8917,
+        "mean_calibrated": 0.8917,
+        "corrected": false
+      },
+      {
+        "cycle": "2011-2012",
+        "n": 2493,
+        "mean_as_loaded": 0.9042,
+        "mean_calibrated": 0.9042,
+        "corrected": false
+      },
+      {
+        "cycle": "2013-2014",
+        "n": 2800,
+        "mean_as_loaded": 0.9175,
+        "mean_calibrated": 0.9175,
+        "corrected": false
+      }
+    ]
+  }
+}

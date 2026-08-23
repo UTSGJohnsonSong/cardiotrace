@@ -1,7 +1,7 @@
 # CardioTrace
-### A prospective cohort study of cardiovascular mortality, built from 25 years of NHANES
+### A prospective cohort study of cardiovascular mortality, built from 11 NHANES cycles
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-85%20passing-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-128%20passing-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
 builds a prospective cohort of adults who were free of cardiovascular disease at
@@ -14,76 +14,13 @@ of the 1,821 published NHANES files is recorded with the rule that kept or dropp
 <!-- KEY_FINDINGS_START -->
 ## Key Findings
 
-### Prospective cohort — CVD mortality
+- **Any-CVD prevalence, survey-weighted:** 8.1% of US adults in 1999-2000 → 9.61% in 2021-2022 (pooled N = 62,890 adults across 11 cycles).
+- **Best model:** Xgboost predicts coronary heart disease at ROC-AUC 0.8585 / PR-AUC 0.209 (5-fold cross-validated, survey design retained).
+- **Top risk drivers (SHAP, Any-CVD model):** age, hypertension_flag, poverty_income_ratio.
+- **Health equity (2021-2022):** Any-CVD prevalence ranges from 10.87% (Other/Multiracial) to 4.74% (Non-Hispanic Asian).
+- **Pre vs post-COVID:** Any-CVD 8.67% → 9.61%; mean HbA1c 5.62 → 5.71%; mean BMI 28.76 → 29.68.
 
-NHANES 1999–2014 linked to the National Death Index, adults 40–79 who were free of
-cardiovascular disease at baseline. **20,736 participants · 925 CVD deaths · 2,711
-competing deaths · 235,553 person-years.**
-
-- **Blood pressure gradient.** Survey-weighted 15-year cumulative incidence of CVD
-  death rises monotonically with baseline systolic BP: **2.40%** (<120 mmHg) → 3.14%
-  → 4.78% → 6.31% → **11.58%** (≥160 mmHg). A **4.8×** spread.
-- **Competing risk matters.** Treating deaths from other causes as censoring
-  (1 − Kaplan-Meier) overstates 15-year CVD risk by 0.30 pp — **7.4% relative** —
-  against the Aalen-Johansen estimator.
-- **Primary vs secondary prevention.** Excluded participants (CVD at baseline) die of
-  CVD at **19.1 per 1,000 person-years** against **3.9** in the retained cohort — a
-  4.9× gap, which is why the two cannot be pooled into one model.
-
-**Aetiologic model** — cause-specific Cox, survey-weighted, robust variance clustered
-on stratum × PSU. Blood pressure is Tobin-adjusted (+10 mmHg for treated participants)
-so the exposure approximates the untreated level rather than a post-treatment value.
-
-| | HR (95% CI) |
-|---|---|
-| **Systolic BP, per 10 mmHg** | **1.121 (1.079–1.166)** |
-| Current smoker | 2.45 (1.97–3.05) |
-| Male | 2.01 (1.65–2.44) |
-| Non-Hispanic Black | 1.38 (1.15–1.65) |
-| Poverty-income ratio, per unit | 0.84 (0.78–0.89) |
-
-**Prediction model** — two cause-specific Cox fits combined into absolute risk, so a
-participant who dies of something else is not counted as if they could still die of
-CVD. Trained on 1999–2004 and applied **forward in time**.
-
-| Test set | n | Harrell's C | Predicted | Observed |
-|---|---|---|---|---|
-| 2005–2008, 10-year risk | 5,163 | **0.804** | 2.82% | 2.76% |
-| 2009–2014, 5-year risk | 8,801 | **0.797** | 0.92% | 0.89% |
-
-Discrimination barely decays on the further-out test set, and mean predicted risk sits
-within 0.06 pp of observed in both.
-
-<p align="center">
-  <img src="reports/figures/cif_by_sbp.png" width="49%" />
-  <img src="reports/figures/calibration.png" width="49%" />
-</p>
-
-_All figures in [`reports/figures/`](reports/figures); participant flow in
-[`reports/tables/strobe_part3.csv`](reports/tables/strobe_part3.csv); numbers in
-[`reports/model_results.json`](reports/model_results.json)._
-
-### ⚠️ Earlier cross-sectional results — withdrawn
-
-The prevalence-trend, health-equity and pre/post-COVID numbers previously published
-here, and the cross-sectional classification models, are **withdrawn** for two reasons.
-The figures are kept in [`reports/figures/archive/`](reports/figures/archive) with the
-same explanation, rather than deleted.
-
-1. **A data defect.** The original downloader hardcoded 17 NHANES module names and
-   treated an HTTP 404 as "that panel wasn't collected". CDC had renamed the
-   laboratory modules (`LAB13` → `L13` → `TCHOL`+`HDL`), so 1999–2004 entered the
-   warehouse with **no laboratory data at all** — 15,332 adults, 24.4% of the sample —
-   whose lipids, glucose and HbA1c were then median-imputed. Those fabricated values
-   reached the published figures.
-2. **A design problem.** The outcome (`MCQ160B–F`) asks whether a doctor *ever* said
-   you had the condition, while the risk markers are measured at the same visit. The
-   exposure does not precede the outcome, so the models were identifying prevalent
-   diagnoses rather than predicting risk — and treatment effects run backwards, since
-   statin users have *lower* cholesterol.
-
-The descriptive and COVID analyses are being rebuilt on the corrected data with age
-standardisation and design-based confidence intervals.
+_Figures in [`reports/figures/`](reports/figures); full numbers in [`reports/results.json`](reports/results.json)._
 <!-- KEY_FINDINGS_END -->
 
 ---
@@ -114,7 +51,8 @@ Every non-obvious decision has a written reason in
   events anyway, because follow-up is short.
 - **Survey weights, everywhere.** NHANES is a stratified multi-stage probability
   sample. Population estimates use the pooled MEC exam weight; the variance is robust
-  and clustered on stratum × PSU.
+  and clustered on the masked variance units NCHS releases (`SDMVSTRA` × `SDMVPSU`), which
+  stand in for the true strata and PSUs withheld for disclosure control.
 
 ### What went wrong, and how it was caught
 

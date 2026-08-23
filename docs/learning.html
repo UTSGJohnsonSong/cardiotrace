@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cohort &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.804 at 10 years on held-out cycles.">
+<title>Learning &mdash; CardioTrace | Zekun Song</title>
+<meta name="description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
-<link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/cohort.html">
+<link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cstyle%3E.g%7Bfill%3A%23f7f6f2%7D%40media%28prefers-color-scheme%3Adark%29%7B.g%7Bfill%3A%2316161a%7D%7D%3C%2Fstyle%3E%3Crect%20class%3D%22g%22%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%2F%3E%3Cpath%20d%3D%22M2%2020h5.2l2.6-7.4%204.2%2014.2%204.1-19%202.9%2012.2H30%22%20fill%3D%22none%22%20stroke%3D%22%232a78d6%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
-<meta property="og:title" content="Cohort &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.804 at 10 years on held-out cycles.">
-<meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/cohort.html">
+<meta property="og:title" content="Learning &mdash; CardioTrace | Zekun Song">
+<meta property="og:description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
+<meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta property="og:image:type" content="image/png">
@@ -22,8 +22,8 @@
 <meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Cohort &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="A prospective cohort of 20,736 US adults free of cardiovascular disease at baseline, 925 cardiovascular deaths, competing risks modelled; Harrell C 0.804 at 10 years on held-out cycles.">
+<meta name="twitter:title" content="Learning &mdash; CardioTrace | Zekun Song">
+<meta name="twitter:description" content="Is the 0.804 concordance limited by the variable set or the model form? A screen of 15 laboratory candidates against the eleven, and gradient boosting against a cause-specific Cox pair on the same held-out cycles.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <style>
@@ -472,156 +472,197 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html" aria-current="page">Cohort</a><a href="learning.html">Learning</a><a href="methods.html">Methods</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html" aria-current="page">Learning</a><a href="methods.html">Methods</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Cohort</h1><p class="standfirst measure">A prospective cohort of adults free of cardiovascular disease at baseline, followed for up to twenty years.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#who-among-the-currently-healthy-goes-on-to-die-of-it">Who, among the currently healthy, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li></ol></nav><section>
-  <div class="sec-head"><div class="sec-num">4</div>
-  <h2 id="who-among-the-currently-healthy-goes-on-to-die-of-it">Who, among the currently healthy, goes on to die of it</h2></div>
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Learning</h1><p class="standfirst measure">Whether the prediction model is limited by the eleven variables it carries or by the form it takes, and what a systematic screen of the laboratory finds.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</a></li><li class="toc-h3"><a href="#the-screen">The screen</a></li><li class="toc-h3"><a href="#against-the-current-guideline-which-the-screen-was">Against the current guideline, which the screen was never shown</a></li><li class="toc-h3"><a href="#form-against-variable-set">Form against variable set</a></li><li class="toc-h3"><a href="#the-two-orderings-which-do-not-agree">The two orderings, which do not agree</a></li><li class="toc-h3"><a href="#the-assay-change-underneath-all-of-this">The assay change underneath all of this</a></li></ol></nav><section>
+  <div class="sec-head"><div class="sec-num">5</div>
+  <h2 id="what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</h2></div>
   <div class="body-indent">
     <div class="chip-row">
-      <span class="chip">Prospective cohort</span>
-      <span class="chip">Cause-specific Cox</span>
-      <span class="chip">Competing risks modelled</span>
-      <span class="chip">Validated forward in time</span>
+      <span class="chip">Prospective</span>
+      <span class="chip">Screened on training cycles only</span>
+      <span class="chip">Design-based Wald</span>
+      <span class="chip">Paired cluster bootstrap</span>
     </div>
-    <p class="lede measure">Linking survey records to the National Death Index converts a series
-    of cross-sections into a cohort: exposures measured at the examination, deaths observed for up
-    to twenty years afterwards. This is the only estimand here in which exposure
-    precedes outcome, and therefore the only one where prediction is a defensible word.</p>
+    <p class="lede measure">The model in &sect;4 carries eleven variables and reaches
+    C&nbsp;=&nbsp;0.803. Two quite different things could be holding it there: the
+    eleven may not carry more, or the linear additive proportional-hazards form may not fit what
+    they carry. Those are separable, so they are separated &mdash; the variable set and the model
+    form are varied factorially on one analysis set, with a model on age and sex alone as the
+    floor.</p>
 
     <div class="stats">
-      <div class="stat"><div class="k">Participants</div><div class="v">20,736</div><div class="n">40–79, CVD-free at baseline</div></div>
-      <div class="stat"><div class="k">CVD deaths</div><div class="v">925</div><div class="n">2,711 competing deaths</div></div>
-      <div class="stat"><div class="k">Person-years</div><div class="v">235,553</div><div class="n">origin at the examination</div></div>
-      <div class="stat"><div class="k">Systolic BP</div><div class="v">HR 1.121</div><div class="n">per 10 mmHg · 1.079–1.166</div></div>
+      <div class="stat"><div class="k">Candidates screened</div><div class="v">15</div><div class="n">on 6,772 training rows</div></div>
+      <div class="stat"><div class="k">Selected</div><div class="v">1</div><div class="n">design-based Wald &ge; 3.84</div></div>
+      <div class="stat"><div class="k">Best single addition</div><div class="v">&times;1.46</div><div class="n">per SD of log urine albumin/creatinine, z = 7.8</div></div>
+      <div class="stat"><div class="k">Gain in C</div><div class="v">+0.0151</div><div class="n">95% CI +0.0069 to +0.0245</div></div>
     </div>
 
-    <figure>
-      <img src="assets/cif_by_sbp.png"
-           alt="Cumulative incidence of cardiovascular death over fifteen years, by baseline
-                systolic blood pressure category, showing a monotonic gradient.">
-      <figcaption><b>A monotonic gradient across five blood-pressure strata.</b> Survey-weighted
-      15-year cumulative incidence of cardiovascular death rises from 2.40% below 120 mmHg to
-      11.58% at or above 160 mmHg — a 4.8-fold spread, with no crossing between adjacent
-      strata.</figcaption>
-    </figure>
+    <h3 id="the-screen">The screen</h3>
+    <p class="measure">Fifteen candidates, each scored against the eleven the model already has
+    rather than on its own &mdash; a univariate hazard ratio for kidney function mostly reports
+    that older people have worse kidneys. Scoring is by the design-based Wald statistic, the
+    coefficient over its cluster-robust standard error, which is what the rest of this report
+    uses for inference and is the only thing that has a null distribution here. Screening runs on
+    the <b>training cycles only</b>; a variable chosen with the test cycles in view would make the
+    concordance that follows an in-sample number wearing an out-of-sample label.</p>
 
-    <h3 id="time-is-the-unit-of-information-not-people">Time is the unit of information, not people</h3>
-    <p class="measure">Survival analysis does not count people; it counts person-time at risk. A
-    participant recruited two years before follow-up ends contributes two person-years and almost
-    no information, however large the sample they arrive in. This has a concrete consequence for
-    the cohort's boundaries: extending it to the two most recent linkable cycles would add
-    thousands of participants but only about 4% of events, while the cause-of-death coding used
-    from 2015 collapses cerebrovascular deaths into a residual category — changing the definition
-    of the outcome midway through the series. The cohort therefore stops at 2014, and stopping
-    there yields <em>more</em> events than the wider alternative, not fewer.</p>
+    <p class="measure">The screen admitted <b>1</b> of 15 candidates: <code>log_uacr</code>.</p>
 
-    <h3 id="why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</h3>
-    <p class="measure">Standard survival methods handle incomplete follow-up by censoring: a
-    participant still alive at the end of the study is recorded as “outcome not yet observed, and
-    still possible”. Applying the same treatment to someone who died of cancer asserts something
-    false — that they might still die of cardiovascular disease. The estimate that results answers
-    a hypothetical question in which no one can die of anything else.</p>
-    <p class="measure">In this cohort the distortion is not academic: competing deaths outnumber
-    cardiovascular deaths 2.9 to 1. Absolute risk is therefore built from two cause-specific
-    models — one for cardiovascular death, one for everything else — combined into a cumulative
-    incidence function, so that the competing hazard remains an explicit object in the model
-    rather than an assumption folded into a reweighting.</p>
-
-    <figure>
-      <img src="assets/competing_risk_comparison.png"
-           alt="Comparison of one minus Kaplan-Meier against the Aalen-Johansen estimator,
-                showing that treating competing deaths as censoring overstates risk.">
-      <figcaption><b>Censoring competing deaths overstates 15-year risk by 7.4%.</b> The gap
-      between the two estimators is the size of the error, and it grows with follow-up time
-      because the competing hazard accumulates.</figcaption>
-    </figure>
-
-    <h3 id="blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</h3>
-    <p class="measure">A participant on antihypertensive medication has a measured blood pressure
-    that reflects the treatment, not their underlying level. The intuitive fix — add “currently
-    treated” to the model as a covariate — is wrong for a specific reason: treatment is a
-    <span class="term">collider</span>. It is caused both by high blood pressure and by access to
-    care, so conditioning on it opens a path between blood pressure and healthcare access that was
-    not there before, and contaminates the estimate with confounding it did not previously have.</p>
-    <p class="measure">The exposure is instead reconstructed: treated participants have a constant
-    added to their measured value to approximate the untreated level. The adjustment is an
-    assumption, stated as one, and the model is refitted without it as a sensitivity check —
-    the effect attenuates from 1.121 to
-    1.097 per 10 mmHg, which is the direction
-    and roughly the magnitude the reasoning predicts.</p>
-
-    <h3 id="validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</h3>
-    <p class="measure">Random cross-validation assumes observations are exchangeable. In a
-    clustered sample they are not: participants reached by the same examination location share a
-    neighbourhood and an interviewer, so a random split places correlated people on both sides of
-    the boundary and reports optimistic performance. Splitting on survey cycle keeps clusters
-    intact and answers the more demanding question — whether a score fitted on people surveyed in
-    1999–2004 still works on people surveyed a decade later.</p>
-
-    <figure>
-      <img src="assets/calibration.png"
-           alt="Calibration of predicted against observed cardiovascular death risk, by decile of
-                predicted risk, on held-out survey cycles.">
-      <figcaption><b>Discrimination and calibration are separate properties.</b> Discrimination
-      asks whether higher-risk people are ranked above lower-risk people; calibration asks whether
-      a predicted 3% actually means 3%. A model can rank well and still be systematically wrong
-      about magnitude, which is what makes it unusable for a clinical threshold.</figcaption>
-    </figure>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Discrimination and calibration, held-out cycles. Scrollable.">
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Every candidate, adjusted for the eleven — training cycles. Scrollable.">
       <table>
-        <caption>Discrimination and calibration, held-out cycles</caption>
-        <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th><th>Harrell&rsquo;s C</th>
-          <th>Mean predicted</th><th>Mean observed</th></tr></thead>
-        <tbody><tr><td>Test 2005–2008, 10-year risk</td><td>5,163</td><td>217</td><td class='em'>0.804</td><td>2.82%</td><td>2.76%</td></tr><tr><td>Test 2009–2014, 5-year risk</td><td>8,801</td><td>170</td><td class='em'>0.797</td><td>0.92%</td><td>0.89%</td></tr></tbody>
-      </table>
-    </div>
-
-    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Exclude participants with <b>cardiovascular disease at baseline</b> rather than adjust for it.</div><div class="d-buys"><span class="col-label">What it buys</span>Three things at once: it removes a mediator that would otherwise absorb most of the blood-pressure effect; it gives a cohort with a real clinical counterpart (primary prevention); and it matches the population the clinical risk scores are built for.</div><div class="d-costs"><span class="col-label">What it costs</span>Fewer events, since the excluded group has the highest mortality — 19.1 versus 3.9 deaths per 1,000 person-years.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Set the time origin at the <b>examination</b>, not the interview.</div><div class="d-buys"><span class="col-label">What it buys</span>Follow-up starts when the exposures were actually measured, which is what a survival model assumes.</div><div class="d-costs"><span class="col-label">What it costs</span>Requires the examination weight and drops participants who were interviewed but not examined.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Define the outcome as <b>heart plus cerebrovascular death</b>, over 1999–2014 only.</div><div class="d-buys"><span class="col-label">What it buys</span>More events than the narrower definition over more cycles, and one consistent outcome definition throughout.</div><div class="d-costs"><span class="col-label">What it costs</span>Nothing can be said about the period after 2014, and stroke and cardiac deaths are not separable.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Model <b>two cause-specific hazards</b> and combine them, rather than fitting a subdistribution model.</div><div class="d-buys"><span class="col-label">What it buys</span>The competing hazard stays visible and inspectable; one fitting path serves both the causal and the predictive question.</div><div class="d-costs"><span class="col-label">What it costs</span>Absolute risk must be assembled explicitly rather than read off a single fitted model.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Adjust treated blood pressure by a <b>fixed constant</b> instead of conditioning on treatment.</div><div class="d-buys"><span class="col-label">What it buys</span>Avoids opening a collider path through healthcare access, and targets the untreated exposure the causal question is about.</div><div class="d-costs"><span class="col-label">What it costs</span>The constant is borrowed from the literature, not estimated here — an assumption that a sensitivity analysis can bound but not remove.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Validate by <b>survey cycle</b> rather than random folds.</div><div class="d-buys"><span class="col-label">What it buys</span>No leakage between correlated clusters, and it tests transportability forward in time.</div><div class="d-costs"><span class="col-label">What it costs</span>A smaller training set, and performance that will degrade if the population drifts — though that degradation is itself the finding.</div></div></div>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: 15-year cumulative incidence by baseline systolic blood pressure. Scrollable.">
-      <table>
-        <caption>15-year cumulative incidence by baseline systolic blood pressure</caption>
-        <thead><tr><th>stratum_mmhg</th><th>n</th><th>cvd_deaths</th><th>cif_15y_pct</th></tr></thead>
-        <tbody><tr><td><120</td><td>7409</td><td>175</td><td class="em">2.4</td></tr><tr><td>120–129</td><td>4557</td><td>153</td><td class="em">3.14</td></tr><tr><td>130–139</td><td>3405</td><td>166</td><td class="em">4.78</td></tr><tr><td>140–159</td><td>3196</td><td>232</td><td class="em">6.31</td></tr><tr><td>≥160</td><td>1264</td><td>162</td><td class="em">11.58</td></tr></tbody>
-      </table>
-    </div>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Aetiologic model — cause-specific Cox, survey-weighted. Scrollable.">
-      <table>
-        <caption>Aetiologic model — cause-specific Cox, survey-weighted</caption>
-        <thead><tr><th>covariate</th><th>n</th><th>log_hr</th><th>hr</th><th>hr_lo95</th><th>hr_hi95</th><th>p</th></tr></thead>
-        <tbody><tr><td>systolic_bp</td><td>17890</td><td>0.0115</td><td>1.0115</td><td>1.0076</td><td>1.0155</td><td>0.0</td></tr><tr><td>age</td><td>17890</td><td>0.0988</td><td>1.1038</td><td>1.0917</td><td>1.116</td><td>0.0</td></tr><tr><td>male</td><td>17890</td><td>0.6964</td><td>2.0065</td><td>1.6468</td><td>2.4448</td><td>0.0</td></tr><tr><td>race_black</td><td>17890</td><td>0.3213</td><td>1.3789</td><td>1.1514</td><td>1.6514</td><td>0.0005</td></tr><tr><td>education</td><td>17890</td><td>-0.0615</td><td>0.9403</td><td>0.8728</td><td>1.0131</td><td>0.1058</td></tr><tr><td>pir</td><td>17890</td><td>-0.179</td><td>0.8361</td><td>0.7818</td><td>0.8943</td><td>0.0</td></tr><tr><td>smoke_current</td><td>17890</td><td>0.8957</td><td>2.4491</td><td>1.9698</td><td>3.0451</td><td>0.0</td></tr><tr><td>smoke_former</td><td>17890</td><td>0.1702</td><td>1.1856</td><td>0.9548</td><td>1.4722</td><td>0.1233</td></tr><tr><td>bmi</td><td>17890</td><td>0.0393</td><td>1.0401</td><td>1.0255</td><td>1.0548</td><td>0.0</td></tr></tbody>
-      </table>
-    </div>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Participant flow. Scrollable.">
-      <table>
-        <caption>Participant flow</caption>
-        <thead><tr><th>step</th><th>n</th><th>excluded</th><th>pct_of_start</th><th>cvd_deaths</th></tr></thead>
-        <tbody><tr><td>NHANES 1999-2014 respondents</td><td>82091</td><td>0</td><td>100.0</td><td>nan</td></tr><tr><td>Merged with the linked mortality file</td><td>82091</td><td>0</td><td>100.0</td><td>2825.0</td></tr><tr><td>Eligible for linkage (ELIGSTAT = 1)</td><td>47281</td><td>34810</td><td>57.6</td><td>2825.0</td></tr><tr><td>Completed the MEC examination</td><td>45035</td><td>2246</td><td>54.9</td><td>2513.0</td></tr><tr><td>Aged 40-79</td><td>24106</td><td>20929</td><td>29.4</td><td>1530.0</td></tr><tr><td>Non-zero examination weight</td><td>24106</td><td>0</td><td>29.4</td><td>1530.0</td></tr><tr><td>Baseline CVD status known</td><td>24103</td><td>3</td><td>29.4</td><td>1530.0</td></tr><tr><td>Free of self-reported CVD at baseline</td><td>20737</td><td>3366</td><td>25.3</td><td>925.0</td></tr><tr><td>Cause of death coded for every decedent</td><td>20736</td><td>1</td><td>25.3</td><td>925.0</td></tr></tbody>
+        <caption>Every candidate, adjusted for the eleven &mdash; training cycles</caption>
+        <thead><tr><th>Candidate</th><th>In the causal model?</th><th>n</th>
+          <th>HR per SD</th><th>Wald</th><th>Into the forward path?</th></tr></thead>
+        <tbody><tr><td>log urine albumin/creatinine</td><td>undetermined</td><td>5,920</td><td>1.458</td><td class='em'>60.7</td><td>yes</td></tr><tr><td>Fasting glucose</td><td>undetermined</td><td>2,951</td><td>1.316</td><td class='em'>16.0</td><td>observed for 50% of the training rows</td></tr><tr><td>Alcohol, drinks per day</td><td>admissible</td><td>3,668</td><td>1.087</td><td class='em'>6.7</td><td>observed for 62% of the training rows</td></tr><tr><td>HbA1c</td><td>undetermined</td><td>5,955</td><td>1.161</td><td class='em'>6.0</td><td>yes</td></tr><tr><td>Health insurance</td><td>admissible</td><td>5,896</td><td>0.869</td><td class='em'>3.0</td><td>nan</td></tr><tr><td>Uric acid</td><td>undetermined</td><td>5,946</td><td>1.122</td><td class='em'>2.6</td><td>nan</td></tr><tr><td>eGFR (CKD-EPI 2021)</td><td>undetermined</td><td>5,946</td><td>0.890</td><td class='em'>2.1</td><td>nan</td></tr><tr><td>Pulse pressure</td><td>forbidden</td><td>5,919</td><td>1.169</td><td class='em'>2.0</td><td>nan</td></tr><tr><td>Diastolic pressure</td><td>forbidden</td><td>5,919</td><td>0.910</td><td class='em'>2.0</td><td>nan</td></tr><tr><td>Told they have kidney disease</td><td>forbidden</td><td>5,948</td><td>1.070</td><td class='em'>1.8</td><td>nan</td></tr><tr><td>Waist circumference</td><td>admissible</td><td>5,885</td><td>1.244</td><td class='em'>1.4</td><td>nan</td></tr><tr><td>Told they have hypertension</td><td>forbidden</td><td>5,959</td><td>0.854</td><td class='em'>1.3</td><td>nan</td></tr><tr><td>On insulin</td><td>forbidden</td><td>5,958</td><td>1.062</td><td class='em'>1.1</td><td>nan</td></tr><tr><td>Triglycerides</td><td>undetermined</td><td>2,964</td><td>0.983</td><td class='em'>0.0</td><td>observed for 50% of the training rows</td></tr><tr><td>LDL cholesterol</td><td>undetermined</td><td>2,721</td><td>1.020</td><td class='em'>0.0</td><td>observed for 46% of the training rows</td></tr></tbody>
       </table>
     </div>
 
     <div class="note">
-      <b>What this cannot say.</b> The outcome is death, so non-fatal infarction and stroke are
-      invisible and the estimand blends how often disease occurs with how often it kills. NHANES
-      samples the living, non-institutionalised population, so people who died young of
-      cardiovascular disease were never eligible — a selection that cannot be corrected, only
-      declared. Baseline disease is self-reported, with roughly 60–80% sensitivity, so some true
-      patients remain in a cohort described as primary prevention, biasing effects toward the
-      null. Exposures are measured once, which supports baseline risk prediction — the same design
-      as Framingham, the Pooled Cohort Equations, SCORE2 and QRISK3 — but not dynamic risk
-      updating, and a single measurement attenuates associations through regression dilution.
-      Follow-up ends 2019-12-31, entirely before the pandemic.
+      <b>Half the candidates are measured on half the cohort, and that decides more than it
+      looks.</b> Fasting glucose, triglycerides and LDL come from the morning fasting subsample,
+      which is roughly half the participants by design, and alcohol intake is missing for a third.
+      Requiring complete data on all of them collapsed the common analysis set from
+      6,772 rows and 538 events to 1,644 and 104 &mdash;
+      selecting six variables on 104 events is fitting noise. A candidate therefore joins the
+      forward path only if it is observed for at least 80% of the
+      training rows. The others keep their rankings, each computed on its own rows, and are marked
+      out of the path with the reason rather than quietly dropped.
     </div>
+
+    <h3 id="against-the-current-guideline-which-the-screen-was">Against the current guideline, which the screen was never shown</h3>
+    <p class="measure">PREVENT takes two different kinds of variable that the Pooled Cohort
+    Equations do not, and the distinction matters here. Its <b>base model</b> requires
+    eGFR and BMI &mdash; eGFR was newly included as a primary predictor, computed from
+    CKD-EPI 2021 on serum creatinine, which is the same equation and the reason the assay
+    calibration below had to be done first. Its <b>optional</b> cardiovascular-kidney-metabolic
+    extensions are urine albumin/creatinine ratio, HbA1c and social deprivation index.</p>
+
+    <p class="measure">Of those, BMI was already among the eleven. The screen was
+    able to consider eGFR from the base model and HbA1c and urine albumin/creatinine ratio from the
+    extensions; social deprivation index could not be built at all &mdash; it needs census-tract geography, which NHANES withholds for disclosure control, which
+    is the same constraint that produced the masked variance units in &sect;2. The screen was not
+    told that any of them were of interest.</p>
+
+    <p class="measure">The screen rejected eGFR, which PREVENT makes mandatory, and kept urine albumin/creatinine ratio, which PREVENT treats as optional. It disagrees with the guideline in both directions at once, and that is the informative result rather than an embarrassment.</p>
+
+    <div class="note flag">
+      <b>The disagreement points away from the flattering reading, which is why it is worth
+      keeping.</b> This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; the
+      median eGFR sits near 92, so glomerular filtration has little variance in the range where
+      it would separate people, while albuminuria varies across four orders of magnitude and
+      marks kidney damage before filtration falls. PREVENT was derived on 6.6&nbsp;million adults
+      from age 30 and predicts a composite that includes heart failure; a screen on that
+      population, for that outcome, would very likely have kept eGFR. Nothing here is evidence
+      against the guideline. It is evidence about what this cohort can see.
+    </div>
+
+    <h3 id="form-against-variable-set">Form against variable set</h3>
+    <figure>
+      <img src="assets/part4_arms.png"
+           alt="Paired differences in Harrell C against the published model, with 95% bootstrap
+                intervals. Adding one screened variable to the Cox model improves it; both
+                gradient-boosting arms are worse, and boosting on the eleven is worse than a Cox
+                model on age and sex alone.">
+      <figcaption><b>The variable set was binding; the model form was not.</b> Every arm is fitted
+      on the same training cycles and scored on the same 4,641 held-out
+      participants and 191 cardiovascular deaths, so no difference here is a
+      difference in who was scored. Intervals are 400 bootstrap replicates
+      resampling whole variance units rather than rows, for the same reason &sect;2 does.</figcaption>
+    </figure>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Discrimination on held-out cycles, 10-year risk. Scrollable.">
+      <table>
+        <caption>Discrimination on held-out cycles, 10-year risk</caption>
+        <thead><tr><th>Arm</th><th>Variables</th><th>Harrell C</th>
+          <th>AUC at the horizon</th><th>&Delta;C vs published</th><th>95% CI</th></tr></thead>
+        <tbody><tr><td>Cox &mdash; the eleven <i>(the published model)</i></td><td>11</td><td>0.8034</td><td>0.8334</td><td class='em'>&mdash; reference</td><td></td></tr><tr><td>Cox &mdash; the eleven plus what the screen chose</td><td>12</td><td>0.8185</td><td>0.8509</td><td class='em'>+0.0151</td><td>+0.0069 to +0.0245</td></tr><tr><td>Gradient boosting &mdash; the eleven</td><td>11</td><td>0.7526</td><td>0.7763</td><td class='em'>-0.0508</td><td>-0.0700 to -0.0272</td></tr><tr><td>Gradient boosting &mdash; the eleven plus the screen</td><td>12</td><td>0.7684</td><td>0.8079</td><td class='em'>-0.0350</td><td>-0.0539 to -0.0146</td></tr><tr><td>Cox &mdash; age and sex only <i>(the floor)</i></td><td>2</td><td>0.7706</td><td>0.7969</td><td class='em'>-0.0328</td><td>-0.0518 to -0.0120</td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="measure">One screened variable added +0.0151 to C on the same form.
+    Changing the form to gradient boosting on the same eleven cost -0.0508, and the
+    interval excludes zero in both directions. The floor arm is what makes those numbers readable:
+    a Cox model on age and sex alone reaches C&nbsp;=&nbsp;0.7706, so gradient
+    boosting on all eleven variables discriminates <em>worse than age and sex</em>.</p>
+
+    <div class="note">
+      <b>Two statistics, because one of them is not a fair contest.</b> Harrell's C rewards
+      ordering deaths correctly in time, and the boosted arms never see a time &mdash; they are
+      fitted on a binary "dead of cardiovascular disease by the horizon", which is what a
+      general-purpose classifier can represent. Reporting only C would hand the Cox arms an
+      advantage that came from the metric. The area under the ROC at the horizon is the statistic
+      the boosted arms were actually fitted for, and it ranks the five arms in exactly the same
+      order. The result is not an artefact of the choice between them.
+    </div>
+
+    <h3 id="the-two-orderings-which-do-not-agree">The two orderings, which do not agree</h3>
+    <figure>
+      <img src="assets/part4_two_orderings.png"
+           alt="Permutation importance for each variable in the wide prediction model, coloured by
+                whether the aetiologic model may adjust for it. Age dominates, followed by urine
+                albumin-to-creatinine ratio, which the locked causal graph does not classify.">
+      <figcaption><b>Earning a place in one model does not earn it a place in the other.</b>
+      Permutation importance measured in the model frame rather than the raw one &mdash; three of
+      the eleven features are constructed during model preparation, so shuffling them upstream
+      would let them be rebuilt from untouched source columns and report an importance of exactly
+      zero.</figcaption>
+    </figure>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: What the prediction needs most, and what the causal model may do with it. Scrollable.">
+      <table>
+        <caption>What the prediction needs most, and what the causal model may do with it</caption>
+        <thead><tr><th>#</th><th>Variable</th><th>Fall in C when shuffled</th>
+          <th>In the causal model?</th><th>Why</th></tr></thead>
+        <tbody><tr><td>1</td><td><code>age</code></td><td class='em'>+0.17701</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>2</td><td><code>log_uacr</code></td><td class='em'>+0.02772</td><td>undetermined</td><td>Same node as eGFR, same omission.</td></tr><tr><td>3</td><td><code>smoke_current</code></td><td class='em'>+0.02025</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>4</td><td><code>male</code></td><td class='em'>+0.01215</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr><tr><td>5</td><td><code>bp_treated</code></td><td class='em'>+0.00417</td><td>forbidden</td><td>A collider: blood pressure and prevalent disease both cause treatment.</td></tr><tr><td>6</td><td><code>systolic_bp</code></td><td class='em'>+0.00314</td><td>exposure</td><td>The exposure whose effect E2 estimates.</td></tr><tr><td>7</td><td><code>diabetes_dx</code></td><td class='em'>+0.00073</td><td>undetermined</td><td>A diagnosis at the glucose node, so it carries access to care as well.</td></tr><tr><td>8</td><td><code>race_black</code></td><td class='em'>+0.00057</td><td>admissible</td><td>In E2_ADJUSTMENT.</td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="measure">Of the five variables the prediction depends on most,
+    <b>2</b> are variables the aetiologic model may not
+    simply adjust for. That is the argument of &sect;1 made concrete instead of asserted: the same
+    dataset, the same people, two questions, and a variable that is indispensable to one and
+    inadmissible in the other.</p>
+
+    <div class="note flag">
+      <b>Three of the fifteen candidates are marked "the locked DAG does not say", and that is a
+      finding about the DAG.</b> The causal graph in the design document draws the kidney node
+      with no parents and no edge to or from blood pressure, so it cannot decide whether eGFR and
+      albuminuria are confounders or mediators &mdash; and albuminuria is the one variable the
+      screen selected. Lipids sit at a collider between the unmeasured genetic node and adiposity.
+      Resolving either is a modelling decision, not a data question, and it is recorded as open
+      rather than settled here.
+    </div>
+
+    <h3 id="the-assay-change-underneath-all-of-this">The assay change underneath all of this</h3>
+    <p class="measure">Kidney function could not be screened at all until one thing was corrected.
+    NHANES measured serum creatinine on a non-standardised method in two cycles and published a
+    Deming regression back onto the reference scale for each, describing the correction as highly
+    recommended. Those two cycles fall on <em>opposite sides</em> of the train/test split, so the
+    uncorrected series carries a step there that no population change produced: a model fitted on
+    it would learn one scale and be judged on another, which looks exactly like a model failing to
+    transport.</p>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Serum creatinine by cycle, mg/dL — as loaded and as corrected. Scrollable.">
+      <table>
+        <caption>Serum creatinine by cycle, mg/dL &mdash; as loaded and as corrected</caption>
+        <thead><tr><th>Cycle</th><th>n</th><th>As loaded</th><th>Corrected</th>
+          <th></th></tr></thead>
+        <tbody><tr><td>1999-2000</td><td>2,030</td><td>0.7600</td><td class='em'>0.9169</td><td>CDC correction applied</td></tr><tr><td>2001-2002</td><td>2,277</td><td>0.9026</td><td class='em'>0.9026</td><td>&mdash;</td></tr><tr><td>2003-2004</td><td>2,076</td><td>0.9102</td><td class='em'>0.9102</td><td>&mdash;</td></tr><tr><td>2005-2006</td><td>2,095</td><td>0.9506</td><td class='em'>0.9137</td><td>CDC correction applied</td></tr><tr><td>2007-2008</td><td>2,800</td><td>0.8799</td><td class='em'>0.8799</td><td>&mdash;</td></tr><tr><td>2009-2010</td><td>2,971</td><td>0.8917</td><td class='em'>0.8917</td><td>&mdash;</td></tr><tr><td>2011-2012</td><td>2,493</td><td>0.9042</td><td class='em'>0.9042</td><td>&mdash;</td></tr><tr><td>2013-2014</td><td>2,800</td><td>0.9175</td><td class='em'>0.9175</td><td>&mdash;</td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="measure">The equations were applied before the data was looked at, and both move
+    their cycle <em>toward</em> the untouched ones rather than away. That agreement is the check
+    that they were read the right way round.</p>
+
+    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Screen on the <b>training cycles only</b>, and score by the design-based Wald statistic.</div><div class="d-buys"><span class="col-label">What it buys</span>The concordance that follows is genuinely out of sample, and the statistic has a null distribution under the survey design rather than borrowing one it does not have.</div><div class="d-costs"><span class="col-label">What it costs</span>A candidate observed for less than 80% of the training rows cannot enter the forward path at all, so anything measured only in the fasting subsample is out by construction.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Compare the arms by a <b>paired</b> difference in C, bootstrapped over whole variance units.</div><div class="d-buys"><span class="col-label">What it buys</span>The two scores are computed on identical people, so the difference has far less variance than either statistic alone; resampling clusters keeps the interval honest about who is independent.</div><div class="d-costs"><span class="col-label">What it costs</span>400 replicates of five arms is the slowest step in the pipeline, and the interval is Monte Carlo rather than exact.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the boosted arms on a <b>binary outcome at the horizon</b> rather than on survival time.</div><div class="d-buys"><span class="col-label">What it buys</span>It is what a general-purpose classifier can represent, and it makes the comparison one of form rather than of library.</div><div class="d-costs"><span class="col-label">What it costs</span>Competing deaths become negative labels rather than a competing risk, and the output ranks people instead of being an absolute risk &mdash; so this section compares discrimination and never calibration.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Declare every candidate's causal status by hand, with three states rather than two.</div><div class="d-buys"><span class="col-label">What it buys</span>A variable the graph does not classify is reported as unclassified instead of being defaulted to admissible, which would print &lsquo;allowed&rsquo; for variables nobody decided about.</div><div class="d-costs"><span class="col-label">What it costs</span>The table carries three &lsquo;undetermined&rsquo; rows that a reader may find unsatisfying, and one of them is the variable the screen chose.</div></div></div>
   </div>
 </section>
 <div class="pagefoot">
   <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
   <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
-  <span class="footlinks"><a href="learning.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
+  <span class="footlinks"><a href="methods.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
 </div>
 </main>
 <a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>

@@ -153,6 +153,18 @@ def main() -> None:
             "crude_last_pre": float(pre.iloc[-1]["p_crude"]),
             "std_first": float(overall.iloc[0]["p_std"]),
             "std_last_pre": float(pre.iloc[-1]["p_std"]),
+            # The full series as well as the pre-pandemic one, because the report
+            # needs both and had no way to say so: the standardisation figure
+            # plots all eleven cycles and computes its heading off the last of
+            # them, while the statistic strip beside it read `*_last_pre` and so
+            # described 1999-2018. Two windows, adjacent on the page, neither
+            # labelled. The trend estimate stays pre-pandemic -- it is a
+            # pre-pandemic trend by construction, and section 3 exists to ask
+            # what the last cycle did relative to it.
+            "crude_last": float(overall.iloc[-1]["p_crude"]),
+            "std_last": float(overall.iloc[-1]["p_std"]),
+            "last_cycle": str(overall.iloc[-1]["cycle"]),
+            "pre_last_cycle": str(pre.iloc[-1]["cycle"]),
             "mean_age_first": float(comp.iloc[0]["mean_age_weighted"]),
             "mean_age_last": float(comp.iloc[-1]["mean_age_weighted"]),
             "std_slope_per_decade": float(slope_per_decade),

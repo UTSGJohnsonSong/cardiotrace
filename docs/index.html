@@ -3,7 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CardioTrace</title>
+<title>CardioTrace &mdash; Population Cardiovascular Research | Zekun Song</title>
+<meta name="description" content="Survey-weighted analysis of cardiovascular disease in 58,454 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
+<meta name="author" content="Zekun Song">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cstyle%3E.g%7Bfill%3A%23f7f6f2%7D%40media%28prefers-color-scheme%3Adark%29%7B.g%7Bfill%3A%2316161a%7D%7D%3C%2Fstyle%3E%3Crect%20class%3D%22g%22%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%2F%3E%3Cpath%20d%3D%22M2%2020h5.2l2.6-7.4%204.2%2014.2%204.1-19%202.9%2012.2H30%22%20fill%3D%22none%22%20stroke%3D%22%232a78d6%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CardioTrace">
+<meta property="og:title" content="CardioTrace &mdash; Population Cardiovascular Research | Zekun Song">
+<meta property="og:description" content="Survey-weighted analysis of cardiovascular disease in 58,454 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
+<meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
+<meta property="article:author" content="Zekun Song">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CardioTrace &mdash; Population Cardiovascular Research | Zekun Song">
+<meta name="twitter:description" content="Survey-weighted analysis of cardiovascular disease in 58,454 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
+<meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
+<meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <style>
 :root {
   color-scheme: light;
@@ -11,11 +33,13 @@
   --plate:      #fcfcfb;
   --ink:        #0b0b0b;
   --ink-2:      #52514e;
-  --ink-3:      #898781;
+  --ink-3:      #6b6a65;   /* 5.01:1 on --paper; was #898781 at 3.32:1 */
   --rule:       #c3c2b7;
   --rule-soft:  #e1e0d9;
   --series:     #2a78d6;
   --flag:       #eb6834;
+  --series-text: #1c5cab;   /* 6.13:1 on --paper; = ORDINAL_BLUE[3] */
+  --flag-text:   #ba4212;   /* 5.01:1 on --paper */
   --chip-bg:    #ffffff;
   --serif: Georgia, "Iowan Old Style", "Source Serif Pro", "Times New Roman", serif;
   --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
@@ -34,6 +58,8 @@
     --rule-soft: #2c2c31;
     --series:    #6aa5ee;
     --flag:      #f0895e;
+    --series-text: #6aa5ee;   /* 7.07:1 on --paper */
+    --flag-text:   #f0895e;   /* 7.26:1 on --paper */
     --chip-bg:   #232329;
   }
 }
@@ -48,6 +74,8 @@
   --rule-soft: #2c2c31;
   --series:    #6aa5ee;
   --flag:      #f0895e;
+  --series-text: #6aa5ee;   /* 7.07:1 on --paper */
+  --flag-text:   #f0895e;   /* 7.26:1 on --paper */
   --chip-bg:   #232329;
 }
 
@@ -144,7 +172,7 @@ p { margin: 0 0 18px; }
   font-family: var(--sans); font-size: 13.5px; line-height: 1.52; color: var(--ink-2);
 }
 .decision .d-costs { color: var(--ink-2); }
-.decision .d-costs .col-label { color: var(--flag); }
+.decision .d-costs .col-label { color: var(--flag-text); }
 
 /* ── figure plates ────────────────────────────────────────────────── */
 /* The figures are matplotlib PNGs rendered once, on a light surface. Rather
@@ -216,7 +244,7 @@ td.em { font-weight: 700; color: var(--ink); }
 code { font-family: var(--mono); font-size: 0.86em; color: var(--ink-2); }
 .lede { font-size: 19px; line-height: 1.54; color: var(--ink-2); }
 .term { font-style: italic; }
-a { color: var(--series); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a { color: var(--series-text); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 a:focus-visible { outline: 2px solid var(--series); outline-offset: 3px; }
 ul { margin: 0 0 18px; padding-left: 22px; }
 li { margin-bottom: 10px; }
@@ -230,11 +258,50 @@ footer {
 }
 
 /* ── site chrome: the only styling the single-file report does not need ── */
+
+/* --- accessibility -------------------------------------------------------
+   Measured against --paper #f7f6f2 (WCAG 2.x):
+     --ink-3 was #898781 3.32:1,  --series #2a78d6 4.08:1,  --flag #eb6834 2.96:1
+   All three failed the 4.5:1 that normal-size text needs. --series and --flag
+   are also the categorical slots the matplotlib figures draw with, so they do
+   NOT move: render_report.py darkens --ink-3 (text everywhere but one dot) and
+   adds --series-text / --flag-text for the two places those two colours carry
+   text. As marks they were always fine -- #eb6834 on the figure plate is
+   3.12:1, above the 3:1 WCAG 1.4.11 asks of a graphical object. ------------ */
+.skip {
+  /* fixed, not absolute: absolute resolves against the initial containing
+     block, so on a scrolled page the focused link lands at document top and is
+     never seen. */
+  position: fixed; left: 8px; top: -64px; z-index: 40;
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 16px; border-radius: 2px; text-decoration: none;
+  transition: top 120ms ease;
+}
+.skip:focus { top: 8px; }
+main.wrap:focus { outline: none; }
+
+:root { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { :root { scroll-behavior: auto; } }
+/* the sticky bar would otherwise sit on top of whatever was jumped to */
+h1, h2, h3, [id] { scroll-margin-top: 78px; }
+
+/* The report styles only a:focus-visible. Everything else made focusable here
+   -- the table regions, the main landmark -- needs a ring of its own. */
+:focus-visible { outline: 2px solid var(--series); outline-offset: 3px; }
+.twrap:focus-visible { outline-offset: 2px; }
+
+/* --- site nav ------------------------------------------------------------ */
 .sitenav {
   position: sticky; top: 0; z-index: 10;
-  background: color-mix(in srgb, var(--paper) 92%, transparent);
-  backdrop-filter: saturate(1.2) blur(8px);
+  background: var(--paper);
   border-bottom: 1px solid var(--rule-soft);
+}
+@supports (background: color-mix(in srgb, red 50%, transparent)) {
+  .sitenav {
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: saturate(1.2) blur(8px);
+  }
 }
 .sitenav-inner {
   max-width: 1080px; margin: 0 auto; padding: 0 32px;
@@ -254,60 +321,201 @@ footer {
 .sitenav a[aria-current="page"] {
   color: var(--ink); border-bottom-color: var(--series); font-weight: 600;
 }
-@media (max-width: 520px) { .sitenav-inner { padding: 0 18px; gap: 16px; } }
 
-/* Index: the three analyses, each with what it actually found. */
+@media (max-width: 640px) {
+  /* One line that scrolls, instead of three lines that eat the viewport. */
+  .sitenav-inner {
+    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity; scrollbar-width: none;
+    align-items: center; gap: 20px; padding: 0 18px; min-height: 46px;
+  }
+  .sitenav-inner::-webkit-scrollbar { width: 0; height: 0; }
+  .sitenav-inner > * { flex: 0 0 auto; scroll-snap-align: start; }
+  /* margin-right:auto strands every link off-screen inside a scroller. */
+  .sitenav .brand { margin-right: 6px; }
+  .sitenav a { font-size: 12.5px; padding: 3px 0; }
+  .masthead { padding: 40px 0 26px; }     /* the bar already costs 46px */
+  h1, h2, h3, [id] { scroll-margin-top: 62px; }
+}
+
+/* --- author line --------------------------------------------------------- */
+.colophon { padding-top: 34px; }
+.colophon h2 { font-size: clamp(21px, 2.4vw, 26px); }
+.colophon-affil {
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-2); margin: 0;
+}
+.colophon-stmt { font-size: 17px; line-height: 1.55; color: var(--ink-2);
+                 margin: 14px 0 0; }
+.colophon-links {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 22px;
+  margin-top: 18px; font-family: var(--sans); font-size: 13.5px;
+}
+.colophon-links a {
+  font-weight: 600; text-decoration: none; color: var(--series-text);
+  border-bottom: 1px solid var(--rule); padding-bottom: 2px;
+}
+.colophon-links a:hover { border-bottom-color: var(--series-text); }
+.colophon-links a.lead::after { content: " \2192"; }
+
+/* --- evidence strip ------------------------------------------------------ */
+.evidence { padding-top: 46px; }
+.stats.evidence-strip {
+  grid-template-columns: repeat(auto-fit, minmax(164px, 1fr));
+  margin: 4px 0 0;
+}
+
+/* --- contents ------------------------------------------------------------ */
+.toc {
+  margin: 32px 0 0; padding: 18px 22px 14px;
+  background: var(--plate); border: 1px solid var(--rule-soft);
+  font-family: var(--sans);
+}
+.toc-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px;
+}
+.toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 34px; }
+@media (max-width: 700px) { .toc ol { columns: 1; } }
+.toc li { margin: 0 0 8px; break-inside: avoid; font-size: 13.5px; line-height: 1.4; }
+.toc li.toc-h3 { padding-left: 16px; }
+.toc a { color: var(--ink-2); text-decoration: none;
+         border-bottom: 1px solid transparent; }
+.toc a:hover { color: var(--ink); border-bottom-color: var(--rule); }
+
+/* --- back to top ---------------------------------------------------------
+   The guaranteed path is the "Back to top" link in .pagefoot, present in the
+   DOM on every page and reachable by keyboard everywhere. The floating pill is
+   a pointer affordance and is inert -- visibility:hidden, so not focusable --
+   until the page has been scrolled, which modern browsers can do with a
+   scroll-driven animation and no script at all. Browsers without it simply
+   never see the pill and lose nothing. ------------------------------------- */
+.toplink { display: none; }
+@supports (animation-timeline: scroll()) {
+  .toplink {
+    position: fixed; right: 20px; bottom: 20px; z-index: 20;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--sans); font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--ink-2); background: var(--plate);
+    border: 1px solid var(--rule); border-radius: 2px;
+    padding: 9px 13px; text-decoration: none;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.10);
+    opacity: 0; visibility: hidden;
+    animation: toplink-in linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 620px 1100px;
+  }
+  @keyframes toplink-in {
+    from { opacity: 0; visibility: hidden; }
+    to   { opacity: 1; visibility: visible; }
+  }
+}
+
+/* --- finding cards: the number first ------------------------------------- */
 .findings { display: grid; gap: 1px; background: var(--rule-soft);
             border: 1px solid var(--rule-soft); margin: 32px 0 8px; }
 .finding { background: var(--plate); padding: 22px 24px;
-           display: grid; grid-template-columns: 1fr auto; gap: 6px 24px;
+           display: grid; grid-template-columns: 1fr auto; gap: 4px 24px;
            align-items: start; }
+.finding > * { grid-column: 1; }
+.finding .chip { grid-column: 2; grid-row: 1; }
+.finding .fnum { grid-row: 1; margin: 0; display: flex;
+                 align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+.finding .fnum b {
+  font-family: var(--sans); font-size: 30px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: -0.025em;
+  line-height: 1.05; color: var(--ink);
+}
+.finding .fnum span {
+  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
+  letter-spacing: 0.02em; color: var(--ink-2);
+}
 .finding h3 { font-family: var(--serif); font-size: 19px; font-weight: 700;
               text-transform: none; letter-spacing: 0; color: var(--ink);
-              margin: 0; padding: 0; border: 0; grid-column: 1; }
-.finding .what { grid-column: 1; margin: 0; color: var(--ink-2); font-size: 16px;
+              margin: 8px 0 0; padding: 0; border: 0; }
+.finding .fci {
+  font-family: var(--sans); font-size: 12px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; margin: 2px 0 0;
+}
+.finding .what { margin: 10px 0 0; color: var(--ink-2); font-size: 16px;
                  line-height: 1.5; max-width: 60ch; }
-.finding .go { grid-column: 1; margin-top: 6px; font-family: var(--sans);
+.finding .go { margin: 6px 0 0; font-family: var(--sans);
                font-size: 13px; font-weight: 600; }
-.finding .chip { grid-column: 2; grid-row: 1; }
 @media (max-width: 640px) {
   .finding { grid-template-columns: 1fr; }
-  .finding .chip { grid-column: 1; grid-row: auto; justify-self: start; }
+  /* fnum has to give up its pinned row here, or the chip auto-places after it
+     and the reading order becomes number, chip, heading. */
+  .finding .fnum { grid-row: auto; }
+  .finding .chip { grid-column: 1; grid-row: auto; justify-self: start;
+                   order: -1; margin-bottom: 8px; }
+  .finding .fnum b { font-size: 26px; }
 }
 
+/* --- the explorer, when one is published --------------------------------- */
+.vizwrap {
+  margin: 30px 0; background: var(--plate);
+  border: 1px solid var(--rule); border-radius: 3px; padding: 14px;
+  overflow-x: auto;
+}
+.vizwrap > div { min-width: 1000px; }
+
+/* --- footer -------------------------------------------------------------- */
 .pagefoot {
   margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule);
   display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
   font-family: var(--sans); font-size: 13px;
 }
 .pagefoot a { font-weight: 600; }
+.pagefoot .byline { color: var(--ink-2); font-weight: 600; }
+.pagefoot .footlinks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 </style>
 </head>
 <body>
-<nav class="sitenav"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="methods.html">Methods</a></div></nav>
-<div class="wrap">
+<a class="skip" href="#main">Skip to content</a>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Learning</a><a href="methods.html">Methods</a></div></nav>
+<main class="wrap" id="main" tabindex="-1">
 <header class="masthead">
   <p class="eyebrow">CardioTrace · NHANES 1999–2022 · NCHS Linked Mortality File</p>
   <h1>Cardiovascular Disease in the United States, 1999–2022</h1>
-  <p class="subtitle">Three estimands, three designs: a standardised prevalence series,
+  <p class="subtitle">Three estimands, three designs &mdash; and a fourth section asking what limits the third: a standardised prevalence series,
   a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
   <p class="standfirst measure">One national survey can answer more than one question, but not
   with one method. This report states each question as a quantity to be estimated, sets out the
   design that identifies it, and prices the choices that design requires.</p>
   <div class="masthead-meta">
     <span><b>Prepared</b> 2026-08-21</span>
-    <span><b>Survey cycles</b> 11 (1999–2022)</span>
+    <span><b>Survey cycles</b> 11, 1999-2000 to 2021-2022</span>
     <span><b>Descriptive sample</b> 58,454 adults 20+</span>
     <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
     <span><b>Mortality follow-up through</b> 2019-12-31</span>
   </div>
 </header>
 
-<section>
-  <div class="sec-head"><div class="sec-num">THE&nbsp;THREE</div>
+<section class="colophon" aria-labelledby="colophon-h">
+  <div class="sec-head"><div class="sec-num">AUTHOR</div>
+  <h2 id="colophon-h">Zekun Song</h2></div>
+  <div class="body-indent">
+    <p class="colophon-affil">Computer Science &amp; Data Science, University of Toronto</p>
+    <p class="colophon-stmt measure">I designed and built CardioTrace end to end &mdash; from reproducible CDC data acquisition to survey-weighted inference and prospective risk modelling.</p>
+    <nav class="colophon-links" aria-label="Author and project links">
+      <a href="#findings" class="lead">Explore findings</a><a href="methods.html" class="lead">View methodology</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a>
+    </nav>
+  </div>
+</section>
+
+<section class="evidence" aria-labelledby="evidence-h">
+  <div class="sec-head"><div class="sec-num">BUILT</div>
+  <h2 id="evidence-h">What it took to answer them</h2></div>
+  <div class="body-indent">
+    <div class="stats evidence-strip"><div class="stat"><div class="k">Survey cycles</div><div class="v">11</div><div class="n">NHANES 1999&ndash;2022, harmonised</div></div><div class="stat"><div class="k">Public-use files catalogued</div><div class="v">1,821</div><div class="n">each recorded with the rule that kept or dropped it</div></div><div class="stat"><div class="k">Adults 20+ analysed</div><div class="v">58,454</div><div class="n">survey-weighted, design-based intervals</div></div><div class="stat"><div class="k">Automated tests</div><div class="v">128</div><div class="n">the whole suite, green, on synthetic fixtures</div></div><div class="stat"><div class="k">Mortality follow-up</div><div class="v">20 yr</div><div class="n">record linkage to the National Death Index</div></div></div>
+  </div>
+</section>
+
+<section id="findings">
+  <div class="sec-head"><div class="sec-num">THE&nbsp;PARTS</div>
   <h2>What each part asks, and what it found</h2></div>
   <div class="body-indent">
-    <div class="findings"><div class="finding"><h3>The 25-year burden</h3><span class="chip result">Result</span><p class="what">Crude prevalence rose while the age-standardised series fell. The rise is the population ageing, not the disease spreading.</p><div class="go"><a href="burden.html">Read this part &rarr;</a></div></div><div class="finding"><h3>The pandemic</h3><span class="chip quiet">No detectable change</span><p class="what">The observed 2021&ndash;2022 level sits above the pre-pandemic trend, but the interval contains zero. One post-pandemic cycle cannot settle it.</p><div class="go"><a href="pandemic.html">Read this part &rarr;</a></div></div><div class="finding"><h3>Who dies of it</h3><span class="chip result">Result</span><p class="what">Blood pressure at examination predicts cardiovascular death up to twenty years later, validated forward in time rather than at random.</p><div class="go"><a href="cohort.html">Read this part &rarr;</a></div></div></div>
+    <div class="findings"><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>&minus;0.61&nbsp;pp</b> <span>per decade, age-standardised</span></p><h3>The burden across 11 cycles</h3><p class="fci">95% CI &minus;1.16 to &minus;0.06 pp</p><p class="what">Crude prevalence rose while the age-standardised series fell. The rise is the population ageing, not the disease spreading.</p><p class="go"><a href="burden.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip quiet">No detectable change</span><p class="fnum"><b>+0.58&nbsp;pp</b> <span>2021-2022 against the extrapolated trend</span></p><h3>The pandemic</h3><p class="fci">95% CI &minus;0.51 to +1.66 pp &mdash; contains zero</p><p class="what">The observed level sits above the pre-pandemic trend, but the interval contains zero. One post-pandemic cycle cannot settle it.</p><p class="go"><a href="pandemic.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>0.804</b> <span>Harrell C, 10-year risk</span></p><h3>Who dies of it</h3><p class="fci">held-out later cycles, n&nbsp;=&nbsp;5,163</p><p class="what">Blood pressure at examination predicts cardiovascular death up to twenty years later, validated forward in time rather than at random.</p><p class="go"><a href="cohort.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>+0.015</b> <span>Harrell C, from one screened variable</span></p><h3>What limits it</h3><p class="fci">95% CI +0.007 to +0.025 &mdash; gradient boosting on the same eleven: &minus;0.051</p><p class="what">The variable set was the binding constraint, not the model form. And 2 of the five variables the prediction leans on hardest are ones the causal model may not simply adjust for.</p><p class="go"><a href="learning.html">Read this part &rarr;</a></p></article></div>
     <p class="measure" style="margin-top:26px">The full write-up is also available
     as <a href="cardiotrace-report.html">a single page</a>, which carries every
     section, table and figure in one file.</p>
@@ -316,13 +524,13 @@ footer {
 
 <section>
   <div class="sec-head"><div class="sec-num">1</div>
-  <h2>Why one dataset needs three designs</h2></div>
+  <h2 id="why-one-dataset-needs-three-designs">Why one dataset needs three designs</h2></div>
   <div class="body-indent">
     <p class="lede measure">Statistical questions come in three kinds, and the same variable can
     be required in one, forbidden in another, and irrelevant in the third. Fixing which kind of
     question is being asked is what makes every downstream choice decidable.</p>
 
-    <div class="twrap">
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: The three kinds of question. Scrollable.">
       <table>
         <caption>The three kinds of question</caption>
         <thead><tr><th>&nbsp;</th><th>Descriptive</th><th>Causal</th><th>Predictive</th></tr></thead>
@@ -343,18 +551,18 @@ footer {
     </div>
 
     <p class="measure">The clearest illustration is age. To describe how disease burden moved
-    over 25 years, age must be <em>removed</em> — otherwise an ageing population looks like a
+    across 11 survey cycles, age must be <em>removed</em> — otherwise an ageing population looks like a
     spreading disease. To predict who will die, age must be <em>kept</em> — it is the single
     strongest predictor available, and a model without it is worthless. The same variable,
     opposite treatment, and the only thing that decides which is correct is which question is
     being asked.</p>
 
-    <p class="measure">The three analyses below therefore use three different samples. They are
+    <p class="measure">The first three analyses below therefore use three different samples. They are
     not three views of one table.</p>
 
-    <div class="twrap">
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: The three estimands, and the samples they need. Scrollable.">
       <table>
-        <caption>The three analyses</caption>
+        <caption>The three estimands, and the samples they need</caption>
         <thead><tr><th>&nbsp;</th><th>§2 Burden</th><th>§3 Pandemic</th><th>§4 Cohort</th></tr></thead>
         <tbody>
           <tr><td>Question</td><td>How has prevalence moved?</td>
@@ -376,9 +584,11 @@ footer {
   </div>
 </section>
 <div class="pagefoot">
-  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File</span>
-  <span><a href="https://github.com/UTSGJohnsonSong/cardiotrace">Source on GitHub</a></span>
+  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
+  <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
+  <span class="footlinks"><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
 </div>
-</div>
+</main>
+<a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>
 </body>
 </html>
