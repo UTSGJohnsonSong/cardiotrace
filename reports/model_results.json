@@ -12,17 +12,21 @@
       "n": 5163,
       "cvd_deaths": 217,
       "horizon_years": 10.0,
-      "harrell_c": 0.804,
-      "mean_predicted_pct": 2.82,
-      "mean_observed_pct": 2.76
+      "harrell_c": 0.838,
+      "harrell_c_unweighted": 0.804,
+      "n_evaluable": 4669,
+      "mean_predicted_pct": 1.96,
+      "mean_observed_pct": 2.02
     },
     "Test 2009\u20132014, 5-year risk": {
       "n": 8801,
       "cvd_deaths": 170,
       "horizon_years": 5.0,
-      "harrell_c": 0.797,
-      "mean_predicted_pct": 0.92,
-      "mean_observed_pct": 0.89
+      "harrell_c": 0.802,
+      "harrell_c_unweighted": 0.797,
+      "n_evaluable": 7901,
+      "mean_predicted_pct": 0.69,
+      "mean_observed_pct": 0.74
     }
   }
 }

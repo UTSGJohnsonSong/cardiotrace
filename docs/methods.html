@@ -474,7 +474,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 <a class="skip" href="#main">Skip to content</a>
 <nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Learning</a><a href="methods.html" aria-current="page">Methods</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Methods</h1><p class="standfirst measure">The comparison against the prespecified risk-score benchmark, the data sources, and what was done to them.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</a></li><li class="toc-h2"><a href="#data-and-methods">Data and methods</a></li><li class="toc-h3"><a href="#sources">Sources</a></li><li class="toc-h3"><a href="#estimation">Estimation</a></li><li class="toc-h3"><a href="#reproducibility">Reproducibility</a></li></ol></nav><section>
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Methods</h1><p class="standfirst measure">The comparison against the prespecified risk-score benchmark, the data sources, and what was done to them.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</a></li><li class="toc-h2"><a href="#data-and-methods">Data and methods</a></li><li class="toc-h3"><a href="#sources">Sources</a></li><li class="toc-h3"><a href="#estimation">Estimation</a></li><li class="toc-h3"><a href="#reproducibility">Reproducibility</a></li><li class="toc-h3"><a href="#checked-against-an-independent-implementation">Checked against an independent implementation</a></li></ol></nav><section>
   <div class="sec-head"><div class="sec-num">6</div>
   <h2 id="benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</h2></div>
   <div class="body-indent">
@@ -554,7 +554,11 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 
     <h3 id="estimation">Estimation</h3>
     <ul class="measure">
-      <li>Every population quantity is weighted with the examination weight. Variances are
+      <li><b>Cross-validated against R.</b> Both hand-written estimators were checked
+      against an independent implementation &mdash; see the section below.</li>
+            <li>Each analysis is weighted with the weight of its most restrictive component: the
+      <b>interview</b> weight for the self-reported prevalence series, the <b>examination</b>
+      weight for anything that needs a measured blood pressure or a laboratory value. Variances are
       Taylor-linearised and clustered on the masked variance units NCHS releases in place of
       the true design variables (<code>SDMVSTRA</code> × <code>SDMVPSU</code>).</li>
       <li>Age standardisation is direct, to the published 2000 standard bands renormalised over
@@ -574,6 +578,42 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     read the same bytes. The test suite requires no downloaded data — fixtures write synthetic
     files that round-trip through the same reader the pipeline uses.</p>
   </div>
+
+    <h3 id="checked-against-an-independent-implementation">Checked against an independent implementation</h3>
+    
+    <p class="measure">Two of the estimators here are written by hand: the Taylor-linearised
+    variance for the standardised prevalence, and the cluster-robust Cox. Unit tests can show that
+    such an estimator does what its author meant; they cannot show that what the author meant is
+    what the method is. So both were re-fitted in R with <code>survey</code> and
+    <code>survival</code>, on exactly the rows the shipped code path uses, and compared term by
+    term.</p>
+
+    <p class="measure"><b>Part 1 agrees to machine precision.</b> Across all 11
+    cycles the standardised prevalence and its standard error match
+    <code>svydesign</code>&nbsp;+&nbsp;<code>svyby</code>&nbsp;+&nbsp;<code>svycontrast</code> to
+    within 8.7e-17 absolute and 2.1e-14 relative &mdash; floating-point noise. Two
+    different R routes to the same estimand agree with each other exactly as well, so this is not
+    agreement with one arbitrary choice. R also reports the design degrees of freedom directly:
+    14&ndash;17 per cycle, which is the number the intervals above use.</p>
+
+    <p class="measure"><b>Part 3 agrees on the coefficients and disagrees on the standard
+    errors, for a reason worth stating.</b> Every coefficient matches <code>svycoxph</code> to
+    3.3e-12. The robust standard errors differ by a median of
+    1.20% and at worst 9.4%. A third fit &mdash; R&rsquo;s
+    <code>coxph</code> with <code>cluster()</code>, which is the same estimator the Python code
+    computes &mdash; agrees with it to 0.06%. The implementation is
+    therefore right and the gap is a difference of estimator: the Python fit is an
+    <em>unstratified</em> cluster sandwich, while <code>svycoxph</code> uses the stratified
+    ultimate-cluster form that NHANES guidance describes.</p>
+
+    <div class="note flag">
+      <b>So the Part 3 hazard-ratio intervals are cluster-robust, not design-based, and they are
+      labelled that way rather than the other way.</b> The difference falls on the covariates,
+      not the exposure: systolic blood pressure moves 0.2% and no term changes
+      whether its interval covers the null. The descriptive intervals in &sect;2 are design-based
+      and are confirmed to be. Reconciling the two is recorded as open, because doing it properly
+      means implementing the stratified form rather than shipping a dependency on R.
+    </div>
 </section>
 <div class="pagefoot">
   <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>

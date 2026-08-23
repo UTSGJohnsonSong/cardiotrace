@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pandemic &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.58 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<meta name="description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.45 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/pandemic.html">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
 <meta property="og:title" content="Pandemic &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.58 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<meta property="og:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.45 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
 <meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/pandemic.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
@@ -23,7 +23,7 @@
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pandemic &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.58 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<meta name="twitter:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: 2021-2022 sits +0.45 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
 <style>
@@ -483,16 +483,16 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <span class="chip">Counterfactual extrapolation</span>
       <span class="chip quiet">Result: no detectable change</span>
     </div>
-    <p class="lede measure">Observed prevalence in 2021–2022 sits +0.58 pp above what the
-    pre-pandemic trend predicts. The 95% interval runs -0.51 to
+    <p class="lede measure">Observed prevalence in 2021–2022 sits +0.45 pp above what the
+    pre-pandemic trend predicts. The 95% interval runs -0.76 to
     +1.66 points and contains zero. The honest reading is that this design,
     on this data, cannot detect a change of the size one might expect.</p>
 
     <div class="stats">
-      <div class="stat"><div class="k">Observed 2021–22</div><div class="v">8.21%</div><div class="n">SE 0.43 pp</div></div>
-      <div class="stat"><div class="k">Counterfactual</div><div class="v">7.64%</div><div class="n">SE 0.35 pp</div></div>
-      <div class="stat"><div class="k">Difference</div><div class="v">+0.58 pp</div><div class="n">z = 1.04</div></div>
-      <div class="stat"><div class="k">Post-period cycles</div><div class="v">1</div><div class="n">4-year extrapolation</div></div>
+      <div class="stat"><div class="k">Observed 2021–22</div><div class="v">8.03%</div><div class="n">SE 0.38 pp</div></div>
+      <div class="stat"><div class="k">Counterfactual</div><div class="v">7.58%</div><div class="n">SE 0.36 pp</div></div>
+      <div class="stat"><div class="k">Difference</div><div class="v">+0.45 pp</div><div class="n">z = 0.86</div></div>
+      <div class="stat"><div class="k">Post-period cycles</div><div class="v">1</div><div class="n">5-year extrapolation</div></div>
     </div>
 
     <figure>
@@ -502,7 +502,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
                 2021-2022 point with its confidence interval.">
       <figcaption><b>The gap in the horizontal axis is the analytical problem.</b> NHANES
       suspended field operations, so no 2019–2020 cycle exists and the counterfactual must be
-      carried 4 years beyond the last observation. With one point
+      carried 5 years beyond the last observation. With one point
       after the interruption, a level change is estimable but a change in slope is not identified,
       so none is reported.</figcaption>
     </figure>
@@ -515,7 +515,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     projected line being right, and a projection is only as good as the distance it has to travel
     and the number of points on the far side.</p>
     <p class="measure">Both go against this analysis. NHANES did not field a 2019–2020 cycle, so
-    the projection spans 4 years rather than the usual two, and the
+    the projection spans 5 years rather than the usual two, and the
     single post-interruption cycle means a change in level can be estimated but a change in
     trajectory cannot be separated from it at all.</p>
 
@@ -526,39 +526,46 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       Building the counterfactual interval from sampling error alone produces a band that is too
       narrow, and a difference that clears it looks like a pandemic effect when it is an artefact
       of the model. The interval here therefore carries a dispersion term estimated from the
-      pre-pandemic residuals rather than assumed. It came out at 0.85 — the series moves slightly
+      pre-pandemic residuals rather than assumed. It came out at 0.86 — the series moves slightly
       less than sampling error alone predicts — and is floored at 1, so the band is never narrower
       than nominal but is not inflated either. The null survives both ways: un-floored the interval
-      is -0.48 to +1.63 points, floored it is -0.51 to +1.66, and both contain zero.
+      is -0.72 to +1.62 points, floored it is -0.76 to +1.66, and both contain zero.
     </div>
 
     <h3 id="who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</h3>
-    <p class="measure">The whole counterfactual rests on a single observation, so
-    it matters who that observation is made of. Every cycle loses some
-    age-eligible respondents who were interviewed but never examined and
-    therefore carry no examination weight. In 2021&ndash;2022 that loss is
-    <b>22.3%</b>, against 2.6&ndash;
-    8.9% in every other cycle &mdash; a fourfold change in
-    examination coverage, concentrated on exactly the point the analysis leans
-    on.</p>
+    <p class="measure">The whole counterfactual rests on a single observation, so it matters who
+    that observation is made of &mdash; and for a while this section reported a problem that was
+    not there. Every NHANES analysis takes the weight of its most restrictive component. The
+    outcome here is five questions asked in the household interview, so the interview weight is
+    the one that matches it; the examination weight was used originally, and it silently
+    restricts the sample to people who also attended the mobile examination centre.</p>
 
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Part 1 and Part 2 — participant flow by cycle. Scrollable.">
+    <p class="measure">That choice mattered most exactly where the analysis is weakest. Under the
+    examination weight the post-pandemic cycle lost
+    <b>22.3%</b> of its age-eligible respondents against
+    2.6&ndash;8.9%
+    elsewhere, and that fourfold change in examination coverage was reported here as a competing
+    explanation for the whole gap. Under the interview weight no cycle loses more than
+    <b>0.05%</b>, and nobody at all lacks a weight. The competing explanation
+    was an artefact of the wrong weight, and it is withdrawn rather than quietly dropped.</p>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Part 1 and Part 2 — participant flow by cycle, interview weight. Scrollable.">
       <table>
-        <caption>Part 1 and Part 2 &mdash; participant flow by cycle</caption>
+        <caption>Part 1 and Part 2 &mdash; participant flow by cycle, interview weight</caption>
         <thead><tr><th>Cycle</th><th>Age-eligible (20+)</th>
-          <th>No examination weight</th><th>Analysed</th><th>Lost</th></tr></thead>
-        <tbody><tr><td>1999-2000</td><td>4,880</td><td>436</td><td>4,444</td><td class='em'>8.9%</td></tr><tr><td>2001-2002</td><td>5,411</td><td>384</td><td>5,027</td><td class='em'>7.1%</td></tr><tr><td>2003-2004</td><td>5,041</td><td>299</td><td>4,740</td><td class='em'>6.0%</td></tr><tr><td>2005-2006</td><td>4,979</td><td>206</td><td>4,773</td><td class='em'>4.1%</td></tr><tr><td>2007-2008</td><td>5,935</td><td>228</td><td>5,706</td><td class='em'>3.9%</td></tr><tr><td>2009-2010</td><td>6,218</td><td>159</td><td>6,058</td><td class='em'>2.6%</td></tr><tr><td>2011-2012</td><td>5,560</td><td>241</td><td>5,317</td><td class='em'>4.4%</td></tr><tr><td>2013-2014</td><td>5,769</td><td>181</td><td>5,587</td><td class='em'>3.2%</td></tr><tr><td>2015-2016</td><td>5,719</td><td>245</td><td>5,474</td><td class='em'>4.3%</td></tr><tr><td>2017-2018</td><td>5,569</td><td>304</td><td>5,264</td><td class='em'>5.5%</td></tr><tr><td>2021-2022</td><td>7,809</td><td>1,745</td><td>6,064</td><td class='em'>22.3%</td></tr></tbody>
+          <th>No weight</th><th>Analysed</th><th>Lost</th></tr></thead>
+        <tbody><tr><td>1999-2000</td><td>4,880</td><td>0</td><td>4,880</td><td class='em'>0.0%</td></tr><tr><td>2001-2002</td><td>5,411</td><td>0</td><td>5,410</td><td class='em'>0.0%</td></tr><tr><td>2003-2004</td><td>5,041</td><td>0</td><td>5,039</td><td class='em'>0.0%</td></tr><tr><td>2005-2006</td><td>4,979</td><td>0</td><td>4,979</td><td class='em'>0.0%</td></tr><tr><td>2007-2008</td><td>5,935</td><td>0</td><td>5,934</td><td class='em'>0.0%</td></tr><tr><td>2009-2010</td><td>6,218</td><td>0</td><td>6,216</td><td class='em'>0.0%</td></tr><tr><td>2011-2012</td><td>5,560</td><td>0</td><td>5,557</td><td class='em'>0.1%</td></tr><tr><td>2013-2014</td><td>5,769</td><td>0</td><td>5,768</td><td class='em'>0.0%</td></tr><tr><td>2015-2016</td><td>5,719</td><td>0</td><td>5,719</td><td class='em'>0.0%</td></tr><tr><td>2017-2018</td><td>5,569</td><td>0</td><td>5,568</td><td class='em'>0.0%</td></tr><tr><td>2021-2022</td><td>7,809</td><td>0</td><td>7,807</td><td class='em'>0.0%</td></tr></tbody>
       </table>
     </div>
 
     <div class="note flag">
-      <b>This is a competing explanation, not a footnote.</b> A cycle that
-      examined a different quarter of the people it recruited could differ from
-      its predecessors for reasons that have nothing to do with the pandemic&rsquo;s
-      effect on cardiovascular disease. The survey weights are designed to
-      correct for non-response, and NCHS reweighted this cycle accordingly, but
-      that correction is an adjustment rather than a guarantee. It belongs beside
-      the gap, not below it.
+      <b>What remains a competing explanation is the cycle itself, and it comes from CDC.</b>
+      NCHS names this cycle <em>August 2021 &ndash; August 2023</em>, states that it &ldquo;is
+      based on an updated sample design and modified interview as well as examination
+      procedures&rdquo;, and urges analysts to proceed with caution before combining it with
+      earlier cycles for trend analysis, given the fifteen months in which nothing was observed.
+      A changed sample design and a changed instrument are not things a weight corrects. It is
+      why this section reports a deviation from an extrapolated trend and not a pandemic effect.
     </div>
 
     <h3 id="letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint &mdash; within the window it can reach</h3>
@@ -586,7 +593,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
                 simulated statistical power against the size of a true slope change.">
       <figcaption><b>No break is detectable, and none would be unless it were very large.</b>
       Significance is assessed by parametric bootstrap rather than a chi-square test at the fitted
-      knot: searching over the breakpoint inflates the null, so the honest threshold is 5.6 rather
+      knot: searching over the breakpoint inflates the null, so the honest threshold is 5.5 rather
       than 3.84. The 95% profile set for the knot spans every candidate year, meaning the data
       cannot localise a break at all.</figcaption>
     </figure>
@@ -595,20 +602,20 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <table>
         <caption>Power to detect a true slope change at 2011</caption>
         <thead><tr><th>True change in slope</th><th>Power</th></tr></thead>
-        <tbody><tr><td>+0.2 pp / decade</td><td class='em'>6%</td></tr><tr><td>+0.4 pp / decade</td><td class='em'>10%</td></tr><tr><td>+0.6 pp / decade</td><td class='em'>9%</td></tr><tr><td>+1.0 pp / decade</td><td class='em'>23%</td></tr><tr><td>+1.5 pp / decade</td><td class='em'>41%</td></tr><tr><td>+2.5 pp / decade</td><td class='em'>86%</td></tr></tbody>
+        <tbody><tr><td>+0.2 pp / decade</td><td class='em'>6%</td></tr><tr><td>+0.4 pp / decade</td><td class='em'>10%</td></tr><tr><td>+0.6 pp / decade</td><td class='em'>10%</td></tr><tr><td>+1.0 pp / decade</td><td class='em'>28%</td></tr><tr><td>+1.5 pp / decade</td><td class='em'>53%</td></tr><tr><td>+2.5 pp / decade</td><td class='em'>94%</td></tr></tbody>
       </table>
     </div>
 
     <div class="note flag">
       <b>This is a limit of the design, not evidence of absence.</b> A reversal from the observed
       decline to a flat trend &mdash; a slope change of 0.6 points per
-      decade &mdash; would be detected about 9% of the time. Only a
+      decade &mdash; would be detected about 10% of the time. Only a
       change of roughly 2.5 points per decade &mdash; large for a series that moves
-      between 7.7% and 9.9% &mdash; would be caught reliably. The correct conclusion is that eleven biennial estimates cannot
+      between 7.7% and 9.7% &mdash; would be caught reliably. The correct conclusion is that eleven biennial estimates cannot
       settle whether the trend bent, not that it did not.
     </div>
 
-    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.</div><div class="d-buys"><span class="col-label">What it buys</span>Sidesteps the instrument and assay changes accumulated across 11 cycles, which would otherwise be indistinguishable from a pandemic effect.</div><div class="d-costs"><span class="col-label">What it costs</span>Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns an assumption into a measured quantity: it came out at 0.85, so the straight line already explains the series as well as sampling error allows.</div><div class="d-costs"><span class="col-label">What it costs</span>Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Report a <b>level difference only</b>, and state that the slope change is unidentified.</div><div class="d-buys"><span class="col-label">What it buys</span>Nothing is claimed that one post-period observation cannot support.</div><div class="d-costs"><span class="col-label">What it costs</span>The most interesting question — whether the trajectory changed — is left open.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Let a <b>joinpoint model</b> nominate the breakpoint, rather than assuming it sits at the pandemic.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns the framing into a testable claim. It is not supported: no candidate knot clears the bootstrap threshold, and the profile set for its location spans the whole series.</div><div class="d-costs"><span class="col-label">What it costs</span>The same test has well under half the power needed to catch a break the size of the trend itself, so it cannot be reported as evidence that none exists.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Assess significance by <b>parametric bootstrap</b> instead of a chi-square test at the fitted knot.</div><div class="d-buys"><span class="col-label">What it buys</span>Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is 5.6, not the nominal 3.84.</div><div class="d-costs"><span class="col-label">What it costs</span>Roughly fifty per cent harder to reach significance than the test most software would report by default.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the pre-period on the <b>standardised</b> series, not the crude one.</div><div class="d-buys"><span class="col-label">What it buys</span>The counterfactual is about disease, not about the population continuing to age.</div><div class="d-costs"><span class="col-label">What it costs</span>Inherits every standardisation choice from §2, including the 20+ base.</div></div></div>
+    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.</div><div class="d-buys"><span class="col-label">What it buys</span>Sidesteps the instrument and assay changes accumulated across 11 cycles, which would otherwise be indistinguishable from a pandemic effect.</div><div class="d-costs"><span class="col-label">What it costs</span>Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Weight the series with the <b>interview</b> weight, not the examination weight.</div><div class="d-buys"><span class="col-label">What it buys</span>It is the weight the outcome is entitled to &mdash; five questions asked in the household interview &mdash; and it removes the 22% post-pandemic loss that the examination weight introduced and that was reported here as a competing explanation.</div><div class="d-costs"><span class="col-label">What it costs</span>The series is no longer directly comparable with the examination-weighted analyses in &sect;5 and &sect;6, and n rises from 58,454 to 62,877, so every published figure moved.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns an assumption into a measured quantity: it came out at 0.86, so the straight line already explains the series as well as sampling error allows.</div><div class="d-costs"><span class="col-label">What it costs</span>Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Report a <b>level difference only</b>, and state that the slope change is unidentified.</div><div class="d-buys"><span class="col-label">What it buys</span>Nothing is claimed that one post-period observation cannot support.</div><div class="d-costs"><span class="col-label">What it costs</span>The most interesting question — whether the trajectory changed — is left open.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Let a <b>joinpoint model</b> nominate the breakpoint, rather than assuming it sits at the pandemic.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns the framing into a testable claim. It is not supported: no candidate knot clears the bootstrap threshold, and the profile set for its location spans the whole series.</div><div class="d-costs"><span class="col-label">What it costs</span>The same test has well under half the power needed to catch a break the size of the trend itself, so it cannot be reported as evidence that none exists.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Assess significance by <b>parametric bootstrap</b> instead of a chi-square test at the fitted knot.</div><div class="d-buys"><span class="col-label">What it buys</span>Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is 5.5, not the nominal 3.84.</div><div class="d-costs"><span class="col-label">What it costs</span>Roughly fifty per cent harder to reach significance than the test most software would report by default.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the pre-period on the <b>standardised</b> series, not the crude one.</div><div class="d-buys"><span class="col-label">What it buys</span>The counterfactual is about disease, not about the population continuing to age.</div><div class="d-costs"><span class="col-label">What it costs</span>Inherits every standardisation choice from §2, including the 20+ base.</div></div></div>
 
     <div class="note">
       <b>What is still needed.</b> Extending this to measured risk factors — blood pressure,
