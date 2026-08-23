@@ -1,0 +1,8 @@
+variable,kept_mean,dropped_mean,difference
+age,56.4715,57.0453,0.5738
+male,0.4848,0.4486,-0.0362
+race_black,0.2042,0.328,0.1239
+cvd_death,0.0426,0.0612,0.0185
+competing_death,0.1241,0.1867,0.0626
+followup_years,11.4194,10.8578,-0.5616
+wtmec2yr,42139.686,35296.955,-6842.731
