@@ -170,12 +170,34 @@ def cluster_bootstrap_delta(risk_a: pd.Series, risk_b: pd.Series,
     """
     rng = np.random.default_rng(seed)
     clusters = d["design_cluster"].to_numpy()
-    unique = np.unique(clusters)
-    index = {c: np.flatnonzero(clusters == c) for c in unique}
+    # design_cluster is "<stratum>_<psu>". The stratum is what the bootstrap has
+    # to respect: NHANES draws PSUs WITHIN strata, so resampling PSUs from one
+    # common pool ignores the stratification and produces an interval that is
+    # too wide -- a stratified design has less variance than an unstratified one
+    # with the same number of clusters, and a bootstrap that forgets the strata
+    # gives back exactly that difference.
+    strata = np.array([c.rsplit("_", 1)[0] for c in clusters])
+    index = {c: np.flatnonzero(clusters == c) for c in np.unique(clusters)}
+    by_stratum = {h: np.unique(clusters[strata == h]) for h in np.unique(strata)}
+
+    # A stratum contributing one PSU cannot be bootstrapped: every draw returns
+    # the same unit, so it contributes no between-PSU variance and the interval
+    # comes back too narrow -- silently, and in the direction that flatters the
+    # result. The ten-year test set has 31 strata with exactly two PSUs each, so
+    # this never fires today; it exists so that a future analysis set which does
+    # have a singleton stops here rather than publishing a confident interval.
+    lonely = [h for h, psus in by_stratum.items() if len(psus) < 2]
+    if lonely:
+        raise ValueError(
+            f"{len(lonely)} stratum/strata contribute a single PSU "
+            f"({lonely[:3]}...); a stratified bootstrap over them yields no "
+            f"variance. Collapse them before resampling.")
 
     deltas = []
     for _ in range(n_boot):
-        picked = rng.choice(unique, size=len(unique), replace=True)
+        picked = np.concatenate([
+            rng.choice(psus, size=len(psus), replace=True)
+            for psus in by_stratum.values()])
         rows = np.concatenate([index[c] for c in picked])
         sub = d.iloc[rows]
         if sub["cvd_death"].sum() < 10:

@@ -298,7 +298,18 @@ def calibration_table(risk: pd.Series, observed: pd.Series, weights: pd.Series,
     cohorts, and the reason this table exists at all.
     """
     d = pd.DataFrame({"risk": risk, "obs": observed, "w": weights}).dropna()
-    d["bin"] = pd.qcut(d.risk, n_bins, labels=False, duplicates="drop")
+    # WEIGHTED quantile cut-points. `pd.qcut` splits the SAMPLE into equal-sized
+    # groups; with survey weights the sample is not the population, so its
+    # deciles are not population deciles. The means inside each bin were already
+    # weighted, which made the mismatch invisible: every number in the table was
+    # a weighted average over a group defined by an unweighted rule, and the row
+    # label "decile" was the only thing that was wrong.
+    order = np.argsort(d.risk.to_numpy(), kind="stable")
+    cw = np.cumsum(d.w.to_numpy()[order])
+    cw = cw / cw[-1]
+    edges = np.searchsorted(cw, np.linspace(0.0, 1.0, n_bins + 1)[1:-1])
+    cuts = np.unique(d.risk.to_numpy()[order][np.clip(edges, 0, len(order) - 1)])
+    d["bin"] = np.searchsorted(cuts, d.risk.to_numpy(), side="right")
     g = d.groupby("bin")
     out = pd.DataFrame({
         "n": g.size(),

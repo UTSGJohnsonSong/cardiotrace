@@ -474,7 +474,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 <a class="skip" href="#main">Skip to content</a>
 <nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html" aria-current="page">Cohort</a><a href="learning.html">Learning</a><a href="methods.html">Methods</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Cohort</h1><p class="standfirst measure">A prospective cohort of adults free of cardiovascular disease at baseline, followed for up to twenty years.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#who-among-the-currently-healthy-goes-on-to-die-of-it">Who, among the currently healthy, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li></ol></nav><section>
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Cohort</h1><p class="standfirst measure">A prospective cohort of adults free of cardiovascular disease at baseline, followed for up to twenty years.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#who-among-the-currently-healthy-goes-on-to-die-of-it">Who, among the currently healthy, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#who-the-model-is-fitted-on-which-is-not-who-the-cohort">Who the model is fitted on, which is not who the cohort is</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li></ol></nav><section>
   <div class="sec-head"><div class="sec-num">4</div>
   <h2 id="who-among-the-currently-healthy-goes-on-to-die-of-it">Who, among the currently healthy, goes on to die of it</h2></div>
   <div class="body-indent">
@@ -563,6 +563,62 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       survey imposes. A target-trial specification with treatment histories would be needed to
       say more, and none of that is available here.
     </div>
+
+    <h3 id="who-the-model-is-fitted-on-which-is-not-who-the-cohort">Who the model is fitted on, which is not who the cohort is</h3>
+    <p class="measure">Every fit here drops participants with any covariate missing. That is an
+    analysis decision made by a method call, and it changes the population being described: from
+    US adults free of cardiovascular disease at baseline, to <b>US adults free of cardiovascular
+    disease at baseline who happened to have every variable measured</b>. It removes
+    2,207 of 20,736 &mdash; 10.6% &mdash; and
+    it is not random.</p>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: What causes the deletion. “Uniquely lost” is rows this variable alone removes — missing here and complete on everything else.. Scrollable.">
+      <table>
+        <caption>What causes the deletion. &ldquo;Uniquely lost&rdquo; is rows this variable alone
+        removes &mdash; missing here and complete on everything else.</caption>
+        <thead><tr><th>Variable</th><th>Missing</th><th>%</th><th>Uniquely lost</th></tr></thead>
+        <tbody><tr><td><code>systolic_bp</code></td><td>905</td><td>4.36%</td><td class='em'>685</td></tr><tr><td><code>bmi</code></td><td>348</td><td>1.68%</td><td class='em'>215</td></tr><tr><td><code>bp_treated</code></td><td>68</td><td>0.33%</td><td class='em'>53</td></tr><tr><td><code>diabetes_dx</code></td><td>12</td><td>0.06%</td><td class='em'>10</td></tr><tr><td><code>total_cholesterol</code></td><td>1,142</td><td>5.51%</td><td class='em'>1</td></tr><tr><td><code>hdl_cholesterol</code></td><td>1,142</td><td>5.51%</td><td class='em'>0</td></tr><tr><td><code>smoke_current</code></td><td>20</td><td>0.10%</td><td class='em'>0</td></tr><tr><td><code>smoke_former</code></td><td>20</td><td>0.10%</td><td class='em'>0</td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="measure">One variable does most of it: <code>systolic_bp</code> alone
+    removes 685 rows. Total and HDL cholesterol are each missing
+    for more people, and cost almost nothing extra, because they go missing together and mostly
+    for people already lost to something else.</p>
+
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Kept against dropped, on everything observed for both. Scrollable.">
+      <table>
+        <caption>Kept against dropped, on everything observed for both</caption>
+        <thead><tr><th>Variable</th><th>Kept</th><th>Dropped</th><th>Difference</th></tr></thead>
+        <tbody><tr><td><code>age</code></td><td>56.4715</td><td>57.0453</td><td class='em'>+0.5738</td></tr><tr><td><code>male</code></td><td>0.4848</td><td>0.4486</td><td class='em'>-0.0362</td></tr><tr><td><code>race_black</code></td><td>0.2042</td><td>0.3280</td><td class='em'>+0.1239</td></tr><tr><td><code>cvd_death</code></td><td>0.0426</td><td>0.0612</td><td class='em'>+0.0185</td></tr><tr><td><code>competing_death</code></td><td>0.1241</td><td>0.1867</td><td class='em'>+0.0626</td></tr><tr><td><code>followup_years</code></td><td>11.4194</td><td>10.8578</td><td class='em'>-0.5616</td></tr><tr><td><code>wtmec2yr</code></td><td>42,139.6860</td><td>35,296.9550</td><td class='em'>-6,842.7310</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="note flag">
+      <b>The dropped are sicker and disproportionately Black, so this is a limitation and not a
+      footnote.</b> Cardiovascular mortality among those dropped is
+      6.12% against 4.26% among
+      those kept, and 32.8% of the dropped are Black against
+      20.4% of the kept. Missingness is associated with the
+      outcome, which is the case in which listwise deletion is not merely inefficient.
+    </div>
+
+    <p class="measure">So the fit is re-run with inverse-probability-of-completeness weights,
+    modelled on age, sex, race and cycle &mdash; the variables observed for everyone, which is
+    what makes the model able to see the dropped at all. The exposure barely moves: HR
+    1.1216
+    (1.0788&ndash;1.1661)
+    under the survey weight against 1.1225
+    (1.0802&ndash;1.1665)
+    under IPCW, a shift of 0.0009.</p>
+
+    <p class="measure"><b>That is reassurance about fragility, not a repair.</b> IPCW restores
+    unbiasedness only if completeness is independent of the outcome given what the completeness
+    model sees, and the variables most likely to explain both &mdash; illness severity, access to
+    care &mdash; are exactly the ones a survey that lost them does not have. What the agreement
+    establishes is that this estimate is not sensitive to <em>this</em> correction. Multiple
+    imputation, which would use the partially observed variables rather than only the fully
+    observed ones, is recorded as not done.</p>
 
     <h3 id="validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</h3>
     <p class="measure">Random cross-validation assumes observations are exchangeable. In a

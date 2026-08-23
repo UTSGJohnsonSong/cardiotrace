@@ -334,6 +334,23 @@ def build() -> str:
     p4_imp = pd.read_csv(TABLES / "part4_importance.csv")
     p4_creat = pd.read_csv(TABLES / "part4_creatinine.csv")
 
+    miss_path = ROOT / "reports" / "missingness_results.json"
+    if not miss_path.exists():
+        raise SystemExit(
+            f"{miss_path.name} is missing; run scripts/build_missingness_results.py")
+    miss = json.loads(miss_path.read_text(encoding="utf-8"))
+    miss_drivers = pd.read_csv(TABLES / "part3_missing_drivers.csv")
+    miss_compare = pd.read_csv(TABLES / "part3_missing_compare.csv")
+    rows_miss = "".join(
+        f"<tr><td><code>{r.variable}</code></td><td>{r.n_missing:,}</td>"
+        f"<td>{r.pct_missing:.2f}%</td><td class='em'>{r.n_uniquely_lost:,}</td></tr>"
+        for r in miss_drivers.itertuples() if r.n_missing > 0)
+    rows_misscmp = "".join(
+        f"<tr><td><code>{r.variable}</code></td><td>{r.kept_mean:,.4f}</td>"
+        f"<td>{r.dropped_mean:,.4f}</td>"
+        f"<td class='em'>{r.difference:+,.4f}</td></tr>"
+        for r in miss_compare.itertuples())
+
     # The R cross-validation. Optional: it needs an R installation, so the
     # section is omitted rather than the build failing on a machine without one.
     xc1_path = TABLES / "crosscheck_part1.csv"
@@ -1168,6 +1185,62 @@ def build() -> str:
       survey imposes. A target-trial specification with treatment histories would be needed to
       say more, and none of that is available here.
     </div>
+
+    <h3>Who the model is fitted on, which is not who the cohort is</h3>
+    <p class="measure">Every fit here drops participants with any covariate missing. That is an
+    analysis decision made by a method call, and it changes the population being described: from
+    US adults free of cardiovascular disease at baseline, to <b>US adults free of cardiovascular
+    disease at baseline who happened to have every variable measured</b>. It removes
+    {miss['n_dropped']:,} of {miss['n_cohort']:,} &mdash; {miss['pct_dropped']:.1f}% &mdash; and
+    it is not random.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>What causes the deletion. &ldquo;Uniquely lost&rdquo; is rows this variable alone
+        removes &mdash; missing here and complete on everything else.</caption>
+        <thead><tr><th>Variable</th><th>Missing</th><th>%</th><th>Uniquely lost</th></tr></thead>
+        <tbody>{rows_miss}</tbody>
+      </table>
+    </div>
+
+    <p class="measure">One variable does most of it: <code>{miss['top_driver']}</code> alone
+    removes {miss['top_driver_uniquely_lost']:,} rows. Total and HDL cholesterol are each missing
+    for more people, and cost almost nothing extra, because they go missing together and mostly
+    for people already lost to something else.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>Kept against dropped, on everything observed for both</caption>
+        <thead><tr><th>Variable</th><th>Kept</th><th>Dropped</th><th>Difference</th></tr></thead>
+        <tbody>{rows_misscmp}</tbody>
+      </table>
+    </div>
+
+    <div class="note flag">
+      <b>The dropped are sicker and disproportionately Black, so this is a limitation and not a
+      footnote.</b> Cardiovascular mortality among those dropped is
+      {100 * miss['cvd_death_dropped']:.2f}% against {100 * miss['cvd_death_kept']:.2f}% among
+      those kept, and {100 * miss['race_black_dropped']:.1f}% of the dropped are Black against
+      {100 * miss['race_black_kept']:.1f}% of the kept. Missingness is associated with the
+      outcome, which is the case in which listwise deletion is not merely inefficient.
+    </div>
+
+    <p class="measure">So the fit is re-run with inverse-probability-of-completeness weights,
+    modelled on age, sex, race and cycle &mdash; the variables observed for everyone, which is
+    what makes the model able to see the dropped at all. The exposure barely moves: HR
+    {miss['sensitivity']['hr_survey']:.4f}
+    ({miss['sensitivity']['hr_survey_ci'][0]:.4f}&ndash;{miss['sensitivity']['hr_survey_ci'][1]:.4f})
+    under the survey weight against {miss['sensitivity']['hr_ipcw']:.4f}
+    ({miss['sensitivity']['hr_ipcw_ci'][0]:.4f}&ndash;{miss['sensitivity']['hr_ipcw_ci'][1]:.4f})
+    under IPCW, a shift of {miss['sensitivity']['abs_shift']:.4f}.</p>
+
+    <p class="measure"><b>That is reassurance about fragility, not a repair.</b> IPCW restores
+    unbiasedness only if completeness is independent of the outcome given what the completeness
+    model sees, and the variables most likely to explain both &mdash; illness severity, access to
+    care &mdash; are exactly the ones a survey that lost them does not have. What the agreement
+    establishes is that this estimate is not sensitive to <em>this</em> correction. Multiple
+    imputation, which would use the partially observed variables rather than only the fully
+    observed ones, is recorded as not done.</p>
 
     <h3>Validation splits on survey cycle, not at random</h3>
     <p class="measure">Random cross-validation assumes observations are exchangeable. In a
