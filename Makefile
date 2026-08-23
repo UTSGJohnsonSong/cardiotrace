@@ -65,8 +65,17 @@ notebooks:
 	$(PY) scripts/build_notebooks.py
 	$(PY) -m jupyter nbconvert --to notebook --execute --inplace notebooks/*.ipynb
 
-all: up data load dbt analyze
-	@echo "Pipeline complete. See reports/ and dashboard/data/."
+# `analyze` runs the DEPRECATED run_pipeline.py, which overwrites
+# reports/results.json with the old XGBoost/SHAP analysis -- the one built on
+# imputed laboratory values for a quarter of the sample, which
+# docs/advisor-briefing.md records as not fit to show. The README used to be
+# generated from that file, so `make all` silently put those numbers back on the
+# repository front page after every run. render_readme.py now reads the current
+# artefacts instead, and `all` no longer runs `analyze`; the target is kept so
+# the old pipeline can still be reproduced deliberately, which is not the same
+# thing as reproducing it by accident.
+all: up data load dbt descriptive learning site
+	@echo "Pipeline complete. See reports/ and docs/."
 
 clean:
 	rm -rf reports/figures/*.png reports/tables/*.csv dbt/target dbt/logs
