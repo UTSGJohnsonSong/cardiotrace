@@ -48,6 +48,7 @@ descriptive:
 	$(PY) scripts/build_cohort_results.py
 	$(PY) scripts/build_descriptive_results.py
 	$(PY) scripts/build_ascertainment_results.py
+	$(PY) scripts/build_missingness_results.py
 	$(PY) scripts/make_descriptive_figures.py
 	$(PY) scripts/render_report.py
 
