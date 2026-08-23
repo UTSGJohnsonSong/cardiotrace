@@ -135,19 +135,32 @@ def main() -> None:
         test = df[df.cycle.isin(cycles)]
         risk = model.predict_cif(test, horizon)
         observed = ((test.cvd_death == 1) & (test.followup_years <= horizon)).astype(float)
-        c = concordance(risk, test.followup_years, test.cvd_death)
-        tab = calibration_table(risk, observed.reindex(risk.index),
-                                test.wtmec2yr.reindex(risk.index))
+        w = test.wtmec2yr.reindex(risk.index)
+        # Weighted, and censored at the horizon the label claims. The unweighted
+        # value is kept beside it: it is what was published, and a reader
+        # deserves to see how far the correction moved it rather than only the
+        # corrected number.
+        c = concordance(risk, test.followup_years, test.cvd_death,
+                        weights=w, horizon=horizon)
+        c_unw = concordance(risk, test.followup_years, test.cvd_death)
+        tab = calibration_table(risk, observed.reindex(risk.index), w)
         tab.to_csv(TAB / f"calibration_{horizon:g}y.csv")
         panels.append((label, tab))
 
-        pred_mean = 100 * float(np.average(risk.dropna()))
-        obs_mean = 100 * float(observed.reindex(risk.dropna().index).mean())
+        # These two were unweighted while the calibration table beside them was
+        # weighted, so a summary line and the table it summarised were different
+        # estimands. Both are weighted now.
+        keep = risk.dropna().index
+        ww = w.reindex(keep).to_numpy(float)
+        pred_mean = 100 * float(np.average(risk.reindex(keep).to_numpy(float), weights=ww))
+        obs_mean = 100 * float(np.average(observed.reindex(keep).to_numpy(float), weights=ww))
         summary[label] = {"n": len(test), "cvd_deaths": int(test.cvd_death.sum()),
                           "horizon_years": horizon, "harrell_c": round(c, 3),
+                          "harrell_c_unweighted": round(c_unw, 3),
+                          "n_evaluable": int(len(keep)),
                           "mean_predicted_pct": round(pred_mean, 2),
                           "mean_observed_pct": round(obs_mean, 2)}
-        log.info(f"\n{label}: n={len(test):,}  C={c:.3f}  "
+        log.info(f"\n{label}: n={len(test):,}  C={c:.3f} (unweighted {c_unw:.3f})  "
                  f"predicted {pred_mean:.2f}% vs observed {obs_mean:.2f}%")
         log.info(tab.to_string())
 

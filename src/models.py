@@ -6,8 +6,13 @@ TWO QUESTIONS, TWO MODELS, TWO VARIABLE SETS
 The DAG in docs/research-design.md says there is no single correct covariate
 list — each estimand gets its own, and mixing them is the Table 2 fallacy.
 
-  aetiologic (E2)   what is the total effect of blood pressure on CVD death?
-                    adjust for confounders of BP only: age, sex, race, education,
+  aetiologic (E2)   how is blood pressure associated with CVD death, adjusted for
+                    the confounders the graph names? Written as an effect estimate
+                    for a long time; it is not one. The measured pressure is already
+                    the product of unobserved treatment history, the Tobin constant
+                    is a convention rather than an identification strategy, and the
+                    survey selects on being alive. Adjust for confounders of BP
+                    only: age, sex, race, education,
                     income, smoking, adiposity. Do NOT adjust for kidney function
                     or inflammation (downstream of BP) or for antihypertensive
                     use (a collider on BP -> treatment <- healthcare access).
@@ -109,7 +114,7 @@ def _fit(d: pd.DataFrame, covariates: list[str], event_col: str,
 
 def fit_aetiologic(df: pd.DataFrame, exposure: str = "systolic_bp",
                    tobin: bool = True) -> pd.DataFrame:
-    """Cause-specific Cox for the total effect of `exposure` on CVD death.
+    """Cause-specific Cox for the association of `exposure` with CVD death.
 
     Non-CVD death is treated as censoring. That is the correct handling for the
     aetiologic question — "does blood pressure raise the rate of CVD death among
@@ -180,11 +185,107 @@ class CauseSpecificRisk:
 
 
 def concordance(risk: pd.Series, time: pd.Series, event: pd.Series,
-                weights: pd.Series | None = None) -> float:
-    """Harrell's C for a higher-is-worse risk score, competing deaths censored."""
-    from lifelines.utils import concordance_index
+                weights: pd.Series | None = None,
+                horizon: float | None = None) -> float:
+    """Harrell's C for a higher-is-worse risk score, competing deaths censored.
+
+    `weights` USED to be accepted and silently ignored. Every concordance in
+    this project was therefore an unweighted statistic sitting under prose about
+    a weighted, nationally representative analysis, and the two differ by more
+    than any effect the report goes on to discuss: 0.803 unweighted against
+    0.838 weighted on the ten-year test set. A parameter that is accepted and
+    dropped is worse than one that does not exist, because the call site reads
+    as though the question had been settled.
+
+    `horizon` administratively censors before scoring. Without it the statistic
+    ranges over the whole of follow-up while the surrounding text calls it
+    ten-year performance. On the cycles this project tests on -- chosen because
+    every survivor has at least ten years -- that distinction is worth 0.0009,
+    but it costs nothing to be right about and it will not stay that small if
+    the linkage window ever changes.
+
+    Pairs are weighted by w_i * w_j, which is the usual survey extension: the
+    estimand is the concordance in the POPULATION, and a pair of sampled people
+    stands for w_i * w_j pairs of it.
+    """
     ok = risk.notna() & time.notna() & event.notna()
-    return float(concordance_index(time[ok], -risk[ok], event[ok]))
+    r = risk[ok].to_numpy(float)
+    tm = time[ok].to_numpy(float)
+    ev = event[ok].to_numpy(float)
+    if horizon is not None:
+        ev = np.where(tm > horizon, 0.0, ev)
+        tm = np.minimum(tm, horizon)
+    w = (np.ones_like(r) if weights is None
+         else weights[ok].to_numpy(float))
+
+    if weights is None and horizon is None:
+        # Defer to lifelines when there is nothing extra to do, so the common
+        # path stays backed by a maintained implementation.
+        from lifelines.utils import concordance_index
+        return float(concordance_index(tm, -r, ev))
+    return _weighted_concordance(r, tm, ev, w)
+
+
+def _weighted_concordance(risk: np.ndarray, time: np.ndarray,
+                          event: np.ndarray, w: np.ndarray) -> float:
+    """Weighted C in O(n log n), via a Fenwick tree over risk ranks.
+
+    The naive double loop is O(events x n) and would be fine once. It is not
+    fine 3,200 times, which is what a 400-replicate paired bootstrap over four
+    arms costs, so the dominance count is done with a prefix-sum tree instead:
+    walk the sample in DECREASING time, and every point already inserted is a
+    valid comparison partner for the event currently being scored.
+
+    Ties in risk contribute a half, which is Harrell's convention. Ties in time
+    are not comparable and are excluded by the strict inequality.
+    """
+    order = np.argsort(-time, kind="stable")
+    risk, time, event, w = risk[order], time[order], event[order], w[order]
+
+    # DENSE ranks: tied risks must share a rank, or the "tied" bucket below is
+    # always empty and Harrell's half-credit never applies. argsort-of-argsort
+    # gives every element a distinct rank and silently routes each tie into
+    # either the concordant or the discordant bucket depending on sort order --
+    # which the brute-force test caught within a minute of being written.
+    ranks = np.unique(risk, return_inverse=True)[1] + 1
+    n = len(risk)
+    tree_w = np.zeros(n + 1)          # total weight, by risk rank
+    total = 0.0
+
+    num = den = 0.0
+    i = 0
+    while i < n:
+        j = i
+        while j < n and time[j] == time[i]:
+            j += 1                     # the block of exactly-tied times
+        for k in range(i, j):
+            if event[k] != 1:
+                continue
+            # concordant: an inserted point (t > t_k) with LOWER risk
+            lower = _bit_sum(tree_w, ranks[k] - 1)
+            tied = _bit_sum(tree_w, ranks[k]) - lower
+            num += w[k] * (lower + 0.5 * tied)
+            den += w[k] * total
+        for k in range(i, j):
+            _bit_add(tree_w, ranks[k], w[k])
+            total += w[k]
+        i = j
+    return float(num / den) if den > 0 else float("nan")
+
+
+def _bit_add(tree: np.ndarray, i: int, v: float) -> None:
+    n = len(tree) - 1
+    while i <= n:
+        tree[i] += v
+        i += i & (-i)
+
+
+def _bit_sum(tree: np.ndarray, i: int) -> float:
+    s = 0.0
+    while i > 0:
+        s += tree[i]
+        i -= i & (-i)
+    return s
 
 
 def calibration_table(risk: pd.Series, observed: pd.Series, weights: pd.Series,

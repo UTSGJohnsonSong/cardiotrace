@@ -201,11 +201,12 @@ def test_the_bootstrap_resamples_clusters_and_not_rows():
         "design_cluster": [f"c{c}" for c in cluster],
         "followup_years": rng.uniform(1, 10, n_clusters * per),
         "cvd_death": rng.integers(0, 2, n_clusters * per),
+        "wtmec2yr": rng.uniform(5_000, 60_000, n_clusters * per),
     })
     a = pd.Series(rng.normal(0, 1, len(d)) + shift, index=d.index)
     b = pd.Series(rng.normal(0, 1, len(d)), index=d.index)
 
-    out = cluster_bootstrap_delta(a, b, d, n_boot=120, seed=1)
+    out = cluster_bootstrap_delta(a, b, d, horizon=10.0, n_boot=120, seed=1)
     assert out["n_boot"] > 0
     assert out["lo"] <= out["delta"] <= out["hi"]
     # 12 clusters resampled with replacement is a coarse thing; the interval has
