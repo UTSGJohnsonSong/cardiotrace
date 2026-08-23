@@ -28,7 +28,7 @@ FIG = ROOT / "reports" / "figures"
 TABLES = ROOT / "reports" / "tables"
 OUT = ROOT / "reports" / "cardiotrace-report.html"
 
-BUILD_DATE = "2026-08-21"
+BUILD_DATE = "2026-08-23"
 DATA_CUTOFF = "2019-12-31"
 
 
@@ -334,6 +334,25 @@ def build() -> str:
     p4_imp = pd.read_csv(TABLES / "part4_importance.csv")
     p4_creat = pd.read_csv(TABLES / "part4_creatinine.csv")
 
+    # The R cross-validation. Optional: it needs an R installation, so the
+    # section is omitted rather than the build failing on a machine without one.
+    xc1_path = TABLES / "crosscheck_part1.csv"
+    xc3_path = TABLES / "crosscheck_part3.csv"
+    have_xc = xc1_path.exists() and xc3_path.exists()
+    if have_xc:
+        xc1 = pd.read_csv(xc1_path)
+        xc3 = pd.read_csv(xc3_path)
+        xc_se_max = float(xc1["absdiff_se_std"].abs().max())
+        xc_rel_max = float(xc1["reldiff_se_std"].abs().max())
+        xc_coef_max = float(xc3["absdiff_coef_svycoxph"].abs().max())
+        xc_se_med = float(xc3["reldiff_se_svycoxph"].abs().median())
+        xc_se_worst = float(xc3["reldiff_se_svycoxph"].abs().max())
+        xc_cluster_med = float(xc3["reldiff_se_coxph_cluster"].abs().median())
+        _exp = xc3[xc3["term"] == "systolic_bp"].iloc[0]
+        xc_exp_rel = float(abs(_exp["reldiff_se_svycoxph"]))
+        xc_dof_lo = int(xc1["r_design_df"].min())
+        xc_dof_hi = int(xc1["r_design_df"].max())
+
     rows1 = "".join(
         f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.n_cases:,}</td>"
         f"<td>{100 * r.p_crude:.2f}</td><td class='em'>{100 * r.p_std:.2f}</td>"
@@ -384,11 +403,9 @@ def build() -> str:
     strobe_n = int(strobe["n"].iloc[-1])
     rows_flow = "".join(
         f"<tr><td>{r.cycle}</td><td>{r.age_eligible:,}</td>"
-        f"<td>{r.no_exam_weight:,}</td><td>{r.analysed:,}</td>"
+        f"<td>{r.no_weight:,}</td><td>{r.analysed:,}</td>"
         f"<td class='em'>{r.lost_pct:.1f}%</td></tr>"
         for r in flow.itertuples())
-    _post_lost = float(flow.loc[flow["cycle"] == "2021-2022", "lost_pct"].iloc[0])
-    _other_lost = flow.loc[flow["cycle"] != "2021-2022", "lost_pct"]
     # The power row matching the slope actually observed, so this sentence
     # cannot describe a different trend from the one reported a page earlier.
     _slope_pp = abs(100 * p1["std_slope_per_decade"])
@@ -482,6 +499,23 @@ def build() -> str:
 
     def _codes(names):
         return ", ".join(f"<code>{v}</code>" for v in names) or "none"
+
+    _gain_excl = bool(p4_gain.excludes_zero)
+    _form_excl = bool(p4_form.excludes_zero)
+    if _gain_excl and _form_excl:
+        p4_both_excl = "excludes zero"
+    elif _gain_excl:
+        p4_both_excl = ("excludes zero for the variable set; the form comparison is wider "
+                        "and the boosted arm on the screened set is not distinguishable "
+                        "from the reference")
+    elif _form_excl:
+        p4_both_excl = ("excludes zero for the form; the variable set is not distinguishable "
+                        "from the reference")
+    else:
+        p4_both_excl = "contains zero, so neither comparison is resolved here"
+    p4_vs_floor = ("discriminates <em>worse than</em>"
+                   if p4_form.harrell_c < p4_floor.harrell_c
+                   else "still beats")
 
     p4_base_kept = p4_prev["base_selected"]
     p4_base_dropped = p4_prev["base_rejected"]
@@ -661,10 +695,13 @@ def build() -> str:
       relative to it. Over that window the standardised series falls
       {abs(100 * p1['std_slope_per_decade']):.2f} points per decade (95% CI
       {100 * p1['std_slope_ci'][0]:.2f} to {100 * p1['std_slope_ci'][1]:.2f}) while the crude
-      series rises {100 * p1['crude_slope_per_decade']:+.2f}. The interval excludes zero, so the
-      decline is not noise. Read the final point with the caveat §3 develops: that cycle lost
-      {_post_lost:.1f}% of age-eligible adults to a missing examination weight, against
-      {_other_lost.min():.1f}&ndash;{_other_lost.max():.1f}% everywhere else.</figcaption>
+      series rises {100 * p1['crude_slope_per_decade']:+.2f}. <b>The sign reversal is the
+      finding, and it does not depend on any critical value; the size of the decline does.</b>
+      Ten points with a dispersion estimated from the same ten give t({p1['slope_dof']}) =
+      {p1['slope_t_crit']:.3f} rather than 1.96, and on that interval the slope
+      {'excludes' if p1['std_slope_excludes_zero'] else 'does not exclude'} zero. The decline
+      is consistent in direction across the series and
+      {'established' if p1['std_slope_excludes_zero'] else 'not established'} at 95%.</figcaption>
     </figure>
 
     <h3>How standardisation works, and why it is not a correction factor</h3>
@@ -918,32 +955,39 @@ def build() -> str:
     </div>
 
     <h3>Who is in the one post-pandemic cycle</h3>
-    <p class="measure">The whole counterfactual rests on a single observation, so
-    it matters who that observation is made of. Every cycle loses some
-    age-eligible respondents who were interviewed but never examined and
-    therefore carry no examination weight. In 2021&ndash;2022 that loss is
-    <b>{_post_lost:.1f}%</b>, against {_other_lost.min():.1f}&ndash;
-    {_other_lost.max():.1f}% in every other cycle &mdash; a fourfold change in
-    examination coverage, concentrated on exactly the point the analysis leans
-    on.</p>
+    <p class="measure">The whole counterfactual rests on a single observation, so it matters who
+    that observation is made of &mdash; and for a while this section reported a problem that was
+    not there. Every NHANES analysis takes the weight of its most restrictive component. The
+    outcome here is five questions asked in the household interview, so the interview weight is
+    the one that matches it; the examination weight was used originally, and it silently
+    restricts the sample to people who also attended the mobile examination centre.</p>
+
+    <p class="measure">That choice mattered most exactly where the analysis is weakest. Under the
+    examination weight the post-pandemic cycle lost
+    <b>{p1['exam_weight_loss_post_pct']:.1f}%</b> of its age-eligible respondents against
+    {p1['exam_weight_loss_other_min_pct']:.1f}&ndash;{p1['exam_weight_loss_other_max_pct']:.1f}%
+    elsewhere, and that fourfold change in examination coverage was reported here as a competing
+    explanation for the whole gap. Under the interview weight no cycle loses more than
+    <b>{p1['max_loss_pct']:.2f}%</b>, and nobody at all lacks a weight. The competing explanation
+    was an artefact of the wrong weight, and it is withdrawn rather than quietly dropped.</p>
 
     <div class="twrap">
       <table>
-        <caption>Part 1 and Part 2 &mdash; participant flow by cycle</caption>
+        <caption>Part 1 and Part 2 &mdash; participant flow by cycle, interview weight</caption>
         <thead><tr><th>Cycle</th><th>Age-eligible (20+)</th>
-          <th>No examination weight</th><th>Analysed</th><th>Lost</th></tr></thead>
+          <th>No weight</th><th>Analysed</th><th>Lost</th></tr></thead>
         <tbody>{rows_flow}</tbody>
       </table>
     </div>
 
     <div class="note flag">
-      <b>This is a competing explanation, not a footnote.</b> A cycle that
-      examined a different quarter of the people it recruited could differ from
-      its predecessors for reasons that have nothing to do with the pandemic&rsquo;s
-      effect on cardiovascular disease. The survey weights are designed to
-      correct for non-response, and NCHS reweighted this cycle accordingly, but
-      that correction is an adjustment rather than a guarantee. It belongs beside
-      the gap, not below it.
+      <b>What remains a competing explanation is the cycle itself, and it comes from CDC.</b>
+      NCHS names this cycle <em>August 2021 &ndash; August 2023</em>, states that it &ldquo;is
+      based on an updated sample design and modified interview as well as examination
+      procedures&rdquo;, and urges analysts to proceed with caution before combining it with
+      earlier cycles for trend analysis, given the fifteen months in which nothing was observed.
+      A changed sample design and a changed instrument are not things a weight corrects. It is
+      why this section reports a deviation from an extrapolated trend and not a pandemic effect.
     </div>
 
     <h3>Letting the data choose the breakpoint &mdash; within the window it can reach</h3>
@@ -998,6 +1042,10 @@ def build() -> str:
         "Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.",
         f"Sidesteps the instrument and assay changes accumulated across {p1['n_cycles']} cycles, which would otherwise be indistinguishable from a pandemic effect.",
         "Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock."),
+      decision(
+        "Weight the series with the <b>interview</b> weight, not the examination weight.",
+        f"It is the weight the outcome is entitled to &mdash; five questions asked in the household interview &mdash; and it removes the {p1['exam_weight_loss_post_pct']:.0f}% post-pandemic loss that the examination weight introduced and that was reported here as a competing explanation.",
+        f"The series is no longer directly comparable with the examination-weighted analyses in &sect;5 and &sect;6, and n rises from {p1['n_adults_exam_weight']:,} to {p1['n_adults']:,}, so every published figure moved."),
       decision(
         "Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.",
         f"Turns an assumption into a measured quantity: it came out at {p1['dispersion']:.2f}, so the straight line already explains the series as well as sampling error allows.",
@@ -1104,9 +1152,22 @@ def build() -> str:
     <p class="measure">The exposure is instead reconstructed: treated participants have a constant
     added to their measured value to approximate the untreated level. The adjustment is an
     assumption, stated as one, and the model is refitted without it as a sensitivity check —
-    the effect attenuates from {sbp['hr']:.3f} to
+    the estimate attenuates from {sbp['hr']:.3f} to
     {model['aetiologic_sbp_per_10mmhg_no_tobin']['hr']:.3f} per 10 mmHg, which is the direction
     and roughly the magnitude the reasoning predicts.</p>
+
+    <div class="note flag">
+      <b>What this quantity is, stated narrowly on purpose.</b> It is the association of
+      treatment-adjusted baseline systolic pressure with subsequent cardiovascular mortality,
+      adjusted for the confounders the graph names. It is not the total causal effect of blood
+      pressure, and calling it one would claim more than this design carries: the pressure is
+      already the product of years of treatment nobody observed, the Tobin constant is a
+      convention rather than an identification strategy, there is no treatment history, kidney
+      function may precede hypertension as easily as follow it, and excluding prevalent disease
+      at baseline does not undo the selection that being alive and non-institutionalised in a
+      survey imposes. A target-trial specification with treatment histories would be needed to
+      say more, and none of that is available here.
+    </div>
 
     <h3>Validation splits on survey cycle, not at random</h3>
     <p class="measure">Random cross-validation assumes observations are exchangeable. In a
@@ -1311,9 +1372,9 @@ def build() -> str:
 
     <p class="measure">One screened variable added {p4_gain.delta_c:+.4f} to C on the same form.
     Changing the form to gradient boosting on the same eleven cost {p4_form.delta_c:+.4f}, and the
-    interval excludes zero in both directions. The floor arm is what makes those numbers readable:
-    a Cox model on age and sex alone reaches C&nbsp;=&nbsp;{p4_floor.harrell_c:.4f}, so gradient
-    boosting on all eleven variables discriminates <em>worse than age and sex</em>.</p>
+    interval on each {p4_both_excl}. The floor arm is what makes those numbers readable: a Cox
+    model on age and sex alone reaches C&nbsp;=&nbsp;{p4_floor.harrell_c:.4f}, so gradient
+    boosting on all eleven variables {p4_vs_floor} age and sex.</p>
 
     <div class="note">
       <b>Two statistics, because one of them is not a fair contest.</b> Harrell's C rewards
@@ -1490,7 +1551,11 @@ def build() -> str:
 
     <h3>Estimation</h3>
     <ul class="measure">
-      <li>Every population quantity is weighted with the examination weight. Variances are
+      <li><b>Cross-validated against R.</b> Both hand-written estimators were checked
+      against an independent implementation &mdash; see the section below.</li>
+            <li>Each analysis is weighted with the weight of its most restrictive component: the
+      <b>interview</b> weight for the self-reported prevalence series, the <b>examination</b>
+      weight for anything that needs a measured blood pressure or a laboratory value. Variances are
       Taylor-linearised and clustered on the masked variance units NCHS releases in place of
       the true design variables (<code>SDMVSTRA</code> × <code>SDMVPSU</code>).</li>
       <li>Age standardisation is direct, to the published 2000 standard bands renormalised over
@@ -1510,6 +1575,42 @@ def build() -> str:
     read the same bytes. The test suite requires no downloaded data — fixtures write synthetic
     files that round-trip through the same reader the pipeline uses.</p>
   </div>
+
+    <h3>Checked against an independent implementation</h3>
+    {"" if not have_xc else f'''
+    <p class="measure">Two of the estimators here are written by hand: the Taylor-linearised
+    variance for the standardised prevalence, and the cluster-robust Cox. Unit tests can show that
+    such an estimator does what its author meant; they cannot show that what the author meant is
+    what the method is. So both were re-fitted in R with <code>survey</code> and
+    <code>survival</code>, on exactly the rows the shipped code path uses, and compared term by
+    term.</p>
+
+    <p class="measure"><b>Part 1 agrees to machine precision.</b> Across all {p1['n_cycles']}
+    cycles the standardised prevalence and its standard error match
+    <code>svydesign</code>&nbsp;+&nbsp;<code>svyby</code>&nbsp;+&nbsp;<code>svycontrast</code> to
+    within {xc_se_max:.1e} absolute and {xc_rel_max:.1e} relative &mdash; floating-point noise. Two
+    different R routes to the same estimand agree with each other exactly as well, so this is not
+    agreement with one arbitrary choice. R also reports the design degrees of freedom directly:
+    {xc_dof_lo}&ndash;{xc_dof_hi} per cycle, which is the number the intervals above use.</p>
+
+    <p class="measure"><b>Part 3 agrees on the coefficients and disagrees on the standard
+    errors, for a reason worth stating.</b> Every coefficient matches <code>svycoxph</code> to
+    {xc_coef_max:.1e}. The robust standard errors differ by a median of
+    {100 * xc_se_med:.2f}% and at worst {100 * xc_se_worst:.1f}%. A third fit &mdash; R&rsquo;s
+    <code>coxph</code> with <code>cluster()</code>, which is the same estimator the Python code
+    computes &mdash; agrees with it to {100 * xc_cluster_med:.2f}%. The implementation is
+    therefore right and the gap is a difference of estimator: the Python fit is an
+    <em>unstratified</em> cluster sandwich, while <code>svycoxph</code> uses the stratified
+    ultimate-cluster form that NHANES guidance describes.</p>
+
+    <div class="note flag">
+      <b>So the Part 3 hazard-ratio intervals are cluster-robust, not design-based, and they are
+      labelled that way rather than the other way.</b> The difference falls on the covariates,
+      not the exposure: systolic blood pressure moves {100 * xc_exp_rel:.1f}% and no term changes
+      whether its interval covers the null. The descriptive intervals in &sect;2 are design-based
+      and are confirmed to be. Reconciling the two is recorded as open, because doing it properly
+      means implementing the stratified form rather than shipping a dependency on R.
+    </div>'''}
 </section>
 
 <footer>
