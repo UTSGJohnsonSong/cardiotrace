@@ -93,6 +93,10 @@ PAGES = {
     "4": ("cohort.html", "Cohort",
           "A prospective cohort of adults free of cardiovascular disease at "
           "baseline, followed for up to twenty years."),
+    "5": ("learning.html", "Learning",
+          "Whether the prediction model is limited by the eleven variables it "
+          "carries or by the form it takes, and what a systematic screen of the "
+          "laboratory finds."),
 }
 METHODS = ("methods.html", "Methods",
            "The comparison against the prespecified risk-score benchmark, the data "
@@ -103,7 +107,7 @@ EXPLORE = ("explore.html", "Explore",
 
 NAV = [("index.html", "Overview"), ("burden.html", "Burden"),
        ("pandemic.html", "Pandemic"), ("cohort.html", "Cohort"),
-       ("methods.html", "Methods")]
+       ("learning.html", "Learning"), ("methods.html", "Methods")]
 if TABLEAU_VIZ:
     NAV.append((EXPLORE[0], EXPLORE[1]))
 
@@ -381,6 +385,20 @@ def facts() -> dict:
         "missing":      [],
     }
 
+    p4 = ROOT / "reports" / "part4_learning_results.json"
+    if p4.exists():
+        learn = json.loads(p4.read_text(encoding="utf-8"))
+        gain = next(v for k, v in learn["arms"]["deltas"].items() if k == "cox_wide")
+        f |= {"n_candidates": learn["screen"]["n_candidates"],
+              "n_selected": len(learn["screen"]["selected"]),
+              "delta_c_wide": gain["delta"], "delta_c_wide_lo": gain["lo"],
+              "delta_c_wide_hi": gain["hi"],
+              "delta_c_gbm": learn["arms"]["deltas"]["gbm_p"]["delta"],
+              "n_top5_forbidden": learn["importance"]["n_top5_not_admissible"]}
+    else:
+        f["missing"].append(
+            "the fourth finding -- run scripts/build_learning_results.py")
+
     cohort_json = ROOT / "reports" / "cohort_results.json"
     if cohort_json.exists():
         f["followup_years"] = int(
@@ -551,6 +569,12 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
             f"cardiovascular disease at baseline, {num(f['cvd_deaths'])} "
             f"cardiovascular deaths, competing risks modelled; Harrell C "
             f"{f['harrell_c']:.3f} at {f['c_horizon']} years on held-out cycles."),
+        "learning.html": (
+            f"Learning &mdash; CardioTrace | {AUTHOR}",
+            f"Is the {f['harrell_c']:.3f} concordance limited by the variable set "
+            f"or the model form? A screen of {f['n_candidates']} laboratory "
+            f"candidates against the eleven, and gradient boosting against a "
+            f"cause-specific Cox pair on the same held-out cycles."),
         "methods.html": (
             f"Methods &mdash; CardioTrace | {AUTHOR}",
             f"Sources, estimation and reproducibility: {num(f['n_files'])} NHANES "
@@ -773,6 +797,18 @@ def build_findings(f: dict) -> str:
          "Blood pressure at examination predicts cardiovascular death up to twenty "
          "years later, validated forward in time rather than at random."),
     ]
+    if "delta_c_wide" in f:
+        cards.append(
+            ("learning.html", "What limits it", "chip result", "Result",
+             f"{f['delta_c_wide']:+.3f}".replace("-", "&minus;"),
+             "Harrell C, from one screened variable",
+             f"95% CI {f['delta_c_wide_lo']:+.3f} to {f['delta_c_wide_hi']:+.3f}"
+             f" &mdash; gradient boosting on the same eleven: "
+             f"{f['delta_c_gbm']:+.3f}".replace("-", "&minus;"),
+             "The variable set was the binding constraint, not the model form. "
+             f"And {f['n_top5_forbidden']} of the five variables the prediction "
+             "leans on hardest are ones the causal model may not simply adjust "
+             "for."))
     return "".join(
         f'<article class="finding"><span class="{cls}">{chip}</span>'
         f'<p class="fnum"><b>{value}</b> <span>{unit}</span></p>'
@@ -798,7 +834,7 @@ def build_index(style: str, masthead: str, sections: dict[str, str],
 {build_evidence(f)}
 
 <section id="findings">
-  <div class="sec-head"><div class="sec-num">THE&nbsp;THREE</div>
+  <div class="sec-head"><div class="sec-num">THE&nbsp;PARTS</div>
   <h2>What each part asks, and what it found</h2></div>
   <div class="body-indent">
     <div class="findings">{build_findings(f)}</div>
@@ -928,8 +964,8 @@ def main() -> None:
     (DOCS / "index.html").write_text(externalise_images(body), encoding="utf-8")
     written.append("index.html")
 
-    order = [PAGES[k][0] for k in ("2", "3", "4")] + [METHODS[0]]
-    for i, key in enumerate(("2", "3", "4")):
+    order = [PAGES[k][0] for k in ("2", "3", "4", "5")] + [METHODS[0]]
+    for i, key in enumerate(("2", "3", "4", "5")):
         fname, label, stand = PAGES[key]
         title, desc = meta[fname]
         seen: set[str] = set()
@@ -945,7 +981,7 @@ def main() -> None:
     fname, label, stand = METHODS
     title, desc = meta[fname]
     seen = set()
-    sec = scrollable_tables(anchor_headings(sections["5"] + sections["6"], seen))
+    sec = scrollable_tables(anchor_headings(sections["6"] + sections["7"], seen))
     body = page(title, desc, fname, style, fname,
                 f'<header class="masthead"><p class="eyebrow">CardioTrace</p>'
                 f'<h1>{label}</h1><p class="standfirst measure">{stand}</p></header>'

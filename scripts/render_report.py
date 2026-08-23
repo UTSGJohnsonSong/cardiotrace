@@ -1,4 +1,4 @@
-"""Render the single-file HTML report covering all three analyses.
+"""Render the single-file HTML report covering all four analyses.
 
 Everything the page states is read from the generated artefacts -- the result
 JSONs and the report tables -- rather than typed in, so the page cannot drift
@@ -296,6 +296,19 @@ def ledger(*decisions: str) -> str:
     return '<div class="ledger">' + "".join(decisions) + "</div>"
 
 
+
+# Arm labels for the report table. Kept beside `decision`/`stat` rather than
+# imported from the figure script, because the figure wants line breaks and the
+# table wants none.
+ARM_LABEL_HTML = {
+    "cox_p": "Cox &mdash; the eleven <i>(the published model)</i>",
+    "cox_wide": "Cox &mdash; the eleven plus what the screen chose",
+    "gbm_p": "Gradient boosting &mdash; the eleven",
+    "gbm_wide": "Gradient boosting &mdash; the eleven plus the screen",
+    "floor_age_sex": "Cox &mdash; age and sex only <i>(the floor)</i>",
+}
+
+
 def build() -> str:
     desc = json.loads((ROOT / "reports" / "descriptive_results.json").read_text())
     model = json.loads((ROOT / "reports" / "model_results.json").read_text())
@@ -306,6 +319,20 @@ def build() -> str:
     strobe = pd.read_csv(TABLES / "strobe_part3.csv")
     cif = pd.read_csv(TABLES / "cif_by_sbp.csv")
     cox = pd.read_csv(TABLES / "cox_systolic_bp.csv")
+
+    # Part 4. Guarded rather than left to raise FileNotFoundError, because
+    # `make descriptive` also runs this file and the new chain has to be run
+    # once before it will succeed.
+    p4_path = ROOT / "reports" / "part4_learning_results.json"
+    if not p4_path.exists():
+        raise SystemExit(
+            f"{p4_path.name} is missing; run scripts/build_learning_results.py "
+            "(or `make learning`) before rendering the report")
+    p4 = json.loads(p4_path.read_text(encoding="utf-8"))
+    p4_arms = pd.read_csv(TABLES / "part4_arms.csv")
+    p4_rank = pd.read_csv(TABLES / "part4_marginal_ranking.csv")
+    p4_imp = pd.read_csv(TABLES / "part4_importance.csv")
+    p4_creat = pd.read_csv(TABLES / "part4_creatinine.csv")
 
     rows1 = "".join(
         f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.n_cases:,}</td>"
@@ -405,6 +432,69 @@ def build() -> str:
     asc_aus = asc[asc["instrument"] == "auscultatory"]
     asc_peak = asc_aus.loc[asc_aus["ascertained_std"].idxmax()]
 
+
+    # ── Part 4 ────────────────────────────────────────────────────────────
+    p4_scr, p4_arm, p4_prev = p4["screen"], p4["arms"], p4["prevent"]
+    p4_ref = p4_arms[p4_arms["is_reference"]].iloc[0]
+    p4_gain = p4_arms[p4_arms["arm"] == "cox_wide"].iloc[0]
+    p4_form = p4_arms[p4_arms["arm"] == "gbm_p"].iloc[0]
+    p4_floor = p4_arms[p4_arms["arm"] == "floor_age_sex"].iloc[0]
+    p4_sel = p4_scr["selected"]
+    p4_top = p4_rank.iloc[0]
+
+    p4_rows_rank = "".join(
+        f"<tr><td>{r.label}</td><td>{r.e2_status}</td><td>{r.n:,}</td>"
+        f"<td>{r.hr_per_sd:.3f}</td><td class='em'>{r.wald:.1f}</td>"
+        f"<td>{'yes' if r.in_pool else (r.note or 'below threshold')}</td></tr>"
+        for r in p4_rank.itertuples())
+
+    p4_rows_arms = "".join(
+        f"<tr><td>{ARM_LABEL_HTML[r.arm]}</td><td>{r.n_features}</td>"
+        f"<td>{r.harrell_c:.4f}</td><td>{r.auc_horizon:.4f}</td>"
+        f"<td class='em'>{'&mdash; reference' if r.is_reference else f'{r.delta_c:+.4f}'}</td>"
+        f"<td>{'' if r.is_reference else f'{r.delta_lo:+.4f} to {r.delta_hi:+.4f}'}</td></tr>"
+        for r in p4_arms.itertuples())
+
+    p4_rows_imp = "".join(
+        f"<tr><td>{r.rank}</td><td><code>{r.variable}</code></td>"
+        f"<td class='em'>{r.delta_c:+.5f}</td><td>{r.e2_status}</td>"
+        f"<td>{r.e2_why}</td></tr>"
+        for r in p4_imp.head(8).itertuples())
+
+    p4_rows_creat = "".join(
+        f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.mean_as_loaded:.4f}</td>"
+        f"<td class='em'>{r.mean_calibrated:.4f}</td>"
+        f"<td>{'CDC correction applied' if r.corrected else '&mdash;'}</td></tr>"
+        for r in p4_creat.itertuples())
+
+    # The section states what the screen found, so it has to be able to state a
+    # null. A pre-registered claim with no failing branch is not pre-registered.
+    if p4_sel:
+        p4_screen_says = (
+            f"The screen admitted <b>{len(p4_sel)}</b> of "
+            f"{p4_scr['n_candidates']} candidates: "
+            + ", ".join(f"<code>{v}</code>" for v in p4_sel) + ".")
+    else:
+        p4_screen_says = (
+            f"The screen admitted <b>none</b> of its {p4_scr['n_candidates']} "
+            "candidates. On this cohort the eleven already carry what the "
+            "laboratory adds.")
+
+    p4_kept = p4_prev["selected"]
+    p4_dropped = p4_prev["rejected"]
+    if p4_kept and p4_dropped:
+        p4_prevent_says = (
+            f"It kept {', '.join(f'<code>{v}</code>' for v in p4_kept)} and "
+            f"rejected {', '.join(f'<code>{v}</code>' for v in p4_dropped)}. "
+            "A partial match, and the disagreement is the informative half.")
+    elif p4_kept:
+        p4_prevent_says = ("It selected every one of them, having never been "
+                           "told they were the ones to look for.")
+    else:
+        p4_prevent_says = ("It selected none of them, which is a disagreement "
+                           "with the current guideline worth explaining rather "
+                           "than smoothing over.")
+
     sbp = model["aetiologic_sbp_per_10mmhg"]
 
     return f"""<!doctype html>
@@ -421,7 +511,7 @@ def build() -> str:
 <header class="masthead">
   <p class="eyebrow">CardioTrace · NHANES 1999–2022 · NCHS Linked Mortality File</p>
   <h1>Cardiovascular Disease in the United States, 1999–2022</h1>
-  <p class="subtitle">Three estimands, three designs: a standardised prevalence series,
+  <p class="subtitle">Three estimands, three designs &mdash; and a fourth section asking what limits the third: a standardised prevalence series,
   a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
   <p class="standfirst measure">One national survey can answer more than one question, but not
   with one method. This report states each question as a quantity to be estimated, sets out the
@@ -470,12 +560,12 @@ def build() -> str:
     opposite treatment, and the only thing that decides which is correct is which question is
     being asked.</p>
 
-    <p class="measure">The three analyses below therefore use three different samples. They are
+    <p class="measure">The first three analyses below therefore use three different samples. They are
     not three views of one table.</p>
 
     <div class="twrap">
       <table>
-        <caption>The three analyses</caption>
+        <caption>The three estimands, and the samples they need</caption>
         <thead><tr><th>&nbsp;</th><th>§2 Burden</th><th>§3 Pandemic</th><th>§4 Cohort</th></tr></thead>
         <tbody>
           <tr><td>Question</td><td>How has prevalence moved?</td>
@@ -913,7 +1003,7 @@ def build() -> str:
     </div>
     <p class="lede measure">Linking survey records to the National Death Index converts a series
     of cross-sections into a cohort: exposures measured at the examination, deaths observed for up
-    to twenty years afterwards. This is the only one of the three analyses in which exposure
+    to twenty years afterwards. This is the only estimand here in which exposure
     precedes outcome, and therefore the only one where prediction is a defensible word.</p>
 
     <div class="stats">
@@ -1075,6 +1165,193 @@ def build() -> str:
 
 <section>
   <div class="sec-head"><div class="sec-num">5</div>
+  <h2>What the model is missing, and whether a different model would find it</h2></div>
+  <div class="body-indent">
+    <div class="chip-row">
+      <span class="chip">Prospective</span>
+      <span class="chip">Screened on training cycles only</span>
+      <span class="chip">Design-based Wald</span>
+      <span class="chip">Paired cluster bootstrap</span>
+    </div>
+    <p class="lede measure">The model in &sect;4 carries eleven variables and reaches
+    C&nbsp;=&nbsp;{p4_ref.harrell_c:.3f}. Two quite different things could be holding it there: the
+    eleven may not carry more, or the linear additive proportional-hazards form may not fit what
+    they carry. Those are separable, so they are separated &mdash; the variable set and the model
+    form are varied factorially on one analysis set, with a model on age and sex alone as the
+    floor.</p>
+
+    <div class="stats">
+      {stat("Candidates screened", f"{p4_scr['n_candidates']}", f"on {p4_scr['n_train']:,} training rows")}
+      {stat("Selected", f"{len(p4_sel)}", f"design-based Wald &ge; {p4_scr['wald_threshold']:.2f}")}
+      {stat("Best single addition", f"&times;{p4_top.hr_per_sd:.2f}", f"per SD of {p4_top.label}, z = {p4_top.z:.1f}")}
+      {stat("Gain in C", f"{p4_gain.delta_c:+.4f}", f"95% CI {p4_gain.delta_lo:+.4f} to {p4_gain.delta_hi:+.4f}")}
+    </div>
+
+    <h3>The screen</h3>
+    <p class="measure">Fifteen candidates, each scored against the eleven the model already has
+    rather than on its own &mdash; a univariate hazard ratio for kidney function mostly reports
+    that older people have worse kidneys. Scoring is by the design-based Wald statistic, the
+    coefficient over its cluster-robust standard error, which is what the rest of this report
+    uses for inference and is the only thing that has a null distribution here. Screening runs on
+    the <b>training cycles only</b>; a variable chosen with the test cycles in view would make the
+    concordance that follows an in-sample number wearing an out-of-sample label.</p>
+
+    <p class="measure">{p4_screen_says}</p>
+
+    <div class="twrap">
+      <table>
+        <caption>Every candidate, adjusted for the eleven &mdash; training cycles</caption>
+        <thead><tr><th>Candidate</th><th>In the causal model?</th><th>n</th>
+          <th>HR per SD</th><th>Wald</th><th>Into the forward path?</th></tr></thead>
+        <tbody>{p4_rows_rank}</tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <b>Half the candidates are measured on half the cohort, and that decides more than it
+      looks.</b> Fasting glucose, triglycerides and LDL come from the morning fasting subsample,
+      which is roughly half the participants by design, and alcohol intake is missing for a third.
+      Requiring complete data on all of them collapsed the common analysis set from
+      {p4_scr['n_train']:,} rows and {p4_scr['events_train']} events to 1,644 and 104 &mdash;
+      selecting six variables on 104 events is fitting noise. A candidate therefore joins the
+      forward path only if it is observed for at least {100 * p4_scr['min_coverage']:.0f}% of the
+      training rows. The others keep their rankings, each computed on its own rows, and are marked
+      out of the path with the reason rather than quietly dropped.
+    </div>
+
+    <h3>Against the current guideline, which was never consulted</h3>
+    <p class="measure">The 2023 PREVENT equations added three variables to the Pooled Cohort
+    Equations: {", ".join(f"<code>{k}</code>" for k in p4_prev["additions"])}. All three were
+    among the candidates here, and the screen was not told that. {p4_prevent_says}</p>
+
+    <p class="measure">The disagreement has a reason worth stating rather than explaining away.
+    This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; eGFR has little
+    variance where it would matter, while albuminuria varies across the whole range and marks
+    damage before filtration falls. A screen run on a cohort with more advanced kidney disease
+    would very likely have kept both.</p>
+
+    <h3>Form against variable set</h3>
+    <figure>
+      <img src="{data_uri('part4_arms.png')}"
+           alt="Paired differences in Harrell C against the published model, with 95% bootstrap
+                intervals. Adding one screened variable to the Cox model improves it; both
+                gradient-boosting arms are worse, and boosting on the eleven is worse than a Cox
+                model on age and sex alone.">
+      <figcaption><b>The variable set was binding; the model form was not.</b> Every arm is fitted
+      on the same training cycles and scored on the same {p4_arm['n_test']:,} held-out
+      participants and {p4_arm['events_test']} cardiovascular deaths, so no difference here is a
+      difference in who was scored. Intervals are {p4_arm['n_boot']} bootstrap replicates
+      resampling whole variance units rather than rows, for the same reason &sect;2 does.</figcaption>
+    </figure>
+
+    <div class="twrap">
+      <table>
+        <caption>Discrimination on held-out cycles, {p4_arm['horizon']:.0f}-year risk</caption>
+        <thead><tr><th>Arm</th><th>Variables</th><th>Harrell C</th>
+          <th>AUC at the horizon</th><th>&Delta;C vs published</th><th>95% CI</th></tr></thead>
+        <tbody>{p4_rows_arms}</tbody>
+      </table>
+    </div>
+
+    <p class="measure">One screened variable added {p4_gain.delta_c:+.4f} to C on the same form.
+    Changing the form to gradient boosting on the same eleven cost {p4_form.delta_c:+.4f}, and the
+    interval excludes zero in both directions. The floor arm is what makes those numbers readable:
+    a Cox model on age and sex alone reaches C&nbsp;=&nbsp;{p4_floor.harrell_c:.4f}, so gradient
+    boosting on all eleven variables discriminates <em>worse than age and sex</em>.</p>
+
+    <div class="note">
+      <b>Two statistics, because one of them is not a fair contest.</b> Harrell's C rewards
+      ordering deaths correctly in time, and the boosted arms never see a time &mdash; they are
+      fitted on a binary "dead of cardiovascular disease by the horizon", which is what a
+      general-purpose classifier can represent. Reporting only C would hand the Cox arms an
+      advantage that came from the metric. The area under the ROC at the horizon is the statistic
+      the boosted arms were actually fitted for, and it ranks the five arms in exactly the same
+      order. The result is not an artefact of the choice between them.
+    </div>
+
+    <h3>The two orderings, which do not agree</h3>
+    <figure>
+      <img src="{data_uri('part4_two_orderings.png')}"
+           alt="Permutation importance for each variable in the wide prediction model, coloured by
+                whether the aetiologic model may adjust for it. Age dominates, followed by urine
+                albumin-to-creatinine ratio, which the locked causal graph does not classify.">
+      <figcaption><b>Earning a place in one model does not earn it a place in the other.</b>
+      Permutation importance measured in the model frame rather than the raw one &mdash; three of
+      the eleven features are constructed during model preparation, so shuffling them upstream
+      would let them be rebuilt from untouched source columns and report an importance of exactly
+      zero.</figcaption>
+    </figure>
+
+    <div class="twrap">
+      <table>
+        <caption>What the prediction needs most, and what the causal model may do with it</caption>
+        <thead><tr><th>#</th><th>Variable</th><th>Fall in C when shuffled</th>
+          <th>In the causal model?</th><th>Why</th></tr></thead>
+        <tbody>{p4_rows_imp}</tbody>
+      </table>
+    </div>
+
+    <p class="measure">Of the five variables the prediction depends on most,
+    <b>{p4["importance"]["n_top5_not_admissible"]}</b> are variables the aetiologic model may not
+    simply adjust for. That is the argument of &sect;1 made concrete instead of asserted: the same
+    dataset, the same people, two questions, and a variable that is indispensable to one and
+    inadmissible in the other.</p>
+
+    <div class="note flag">
+      <b>Three of the fifteen candidates are marked "the locked DAG does not say", and that is a
+      finding about the DAG.</b> The causal graph in the design document draws the kidney node
+      with no parents and no edge to or from blood pressure, so it cannot decide whether eGFR and
+      albuminuria are confounders or mediators &mdash; and albuminuria is the one variable the
+      screen selected. Lipids sit at a collider between the unmeasured genetic node and adiposity.
+      Resolving either is a modelling decision, not a data question, and it is recorded as open
+      rather than settled here.
+    </div>
+
+    <h3>The assay change underneath all of this</h3>
+    <p class="measure">Kidney function could not be screened at all until one thing was corrected.
+    NHANES measured serum creatinine on a non-standardised method in two cycles and published a
+    Deming regression back onto the reference scale for each, describing the correction as highly
+    recommended. Those two cycles fall on <em>opposite sides</em> of the train/test split, so the
+    uncorrected series carries a step there that no population change produced: a model fitted on
+    it would learn one scale and be judged on another, which looks exactly like a model failing to
+    transport.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>Serum creatinine by cycle, mg/dL &mdash; as loaded and as corrected</caption>
+        <thead><tr><th>Cycle</th><th>n</th><th>As loaded</th><th>Corrected</th>
+          <th></th></tr></thead>
+        <tbody>{p4_rows_creat}</tbody>
+      </table>
+    </div>
+
+    <p class="measure">The equations were applied before the data was looked at, and both move
+    their cycle <em>toward</em> the untouched ones rather than away. That agreement is the check
+    that they were read the right way round.</p>
+
+    {ledger(
+      decision(
+        "Screen on the <b>training cycles only</b>, and score by the design-based Wald statistic.",
+        "The concordance that follows is genuinely out of sample, and the statistic has a null distribution under the survey design rather than borrowing one it does not have.",
+        f"A candidate observed for less than {100 * p4_scr['min_coverage']:.0f}% of the training rows cannot enter the forward path at all, so anything measured only in the fasting subsample is out by construction."),
+      decision(
+        "Compare the arms by a <b>paired</b> difference in C, bootstrapped over whole variance units.",
+        "The two scores are computed on identical people, so the difference has far less variance than either statistic alone; resampling clusters keeps the interval honest about who is independent.",
+        f"{p4_arm['n_boot']} replicates of five arms is the slowest step in the pipeline, and the interval is Monte Carlo rather than exact."),
+      decision(
+        "Fit the boosted arms on a <b>binary outcome at the horizon</b> rather than on survival time.",
+        "It is what a general-purpose classifier can represent, and it makes the comparison one of form rather than of library.",
+        "Competing deaths become negative labels rather than a competing risk, and the output ranks people instead of being an absolute risk &mdash; so this section compares discrimination and never calibration."),
+      decision(
+        "Declare every candidate's causal status by hand, with three states rather than two.",
+        "A variable the graph does not classify is reported as unclassified instead of being defaulted to admissible, which would print &lsquo;allowed&rsquo; for variables nobody decided about.",
+        "The table carries three &lsquo;undetermined&rsquo; rows that a reader may find unsatisfying, and one of them is the variable the screen chose."),
+    )}
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><div class="sec-num">6</div>
   <h2>Benchmarking against the Pooled Cohort Equations</h2></div>
   <div class="body-indent">
     <div class="chip-row">
@@ -1136,7 +1413,7 @@ def build() -> str:
 <hr>
 
 <section>
-  <div class="sec-head"><div class="sec-num">6</div>
+  <div class="sec-head"><div class="sec-num">7</div>
   <h2>Data and methods</h2></div>
   <div class="body-indent">
     <h3>Sources</h3>
