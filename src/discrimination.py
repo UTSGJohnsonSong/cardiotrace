@@ -150,15 +150,17 @@ def evaluate(risk: pd.Series, d: pd.DataFrame, horizon: float) -> dict:
     y = HorizonClassifier.label(d.loc[ok], horizon)
     auc = (float(roc_auc_score(y, risk.loc[ok], sample_weight=d.loc[ok, "wtmec2yr"]))
            if y.nunique() > 1 else float("nan"))
-    return {"c": concordance(risk, d["followup_years"], d["cvd_death"]),
+    return {"c": concordance(risk, d["followup_years"], d["cvd_death"],
+                             weights=d["wtmec2yr"], horizon=horizon),
+            "c_unweighted": concordance(risk, d["followup_years"], d["cvd_death"]),
             "auc_horizon": auc,
             "n": int(len(d)), "n_evaluable": int(ok.sum()),
             "events": int(d["cvd_death"].sum())}
 
 
 def cluster_bootstrap_delta(risk_a: pd.Series, risk_b: pd.Series,
-                            d: pd.DataFrame, n_boot: int = N_BOOT,
-                            seed: int = SEED) -> dict:
+                            d: pd.DataFrame, horizon: float,
+                            n_boot: int = N_BOOT, seed: int = SEED) -> dict:
     """Interval for C(a) - C(b) on the SAME people, resampling whole clusters.
 
     Paired, because the two scores are computed on identical rows: the
@@ -178,14 +180,19 @@ def cluster_bootstrap_delta(risk_a: pd.Series, risk_b: pd.Series,
         sub = d.iloc[rows]
         if sub["cvd_death"].sum() < 10:
             continue
-        ca = concordance(risk_a.iloc[rows], sub["followup_years"], sub["cvd_death"])
-        cb = concordance(risk_b.iloc[rows], sub["followup_years"], sub["cvd_death"])
+        ca = concordance(risk_a.iloc[rows], sub["followup_years"], sub["cvd_death"],
+                         weights=sub["wtmec2yr"], horizon=horizon)
+        cb = concordance(risk_b.iloc[rows], sub["followup_years"], sub["cvd_death"],
+                         weights=sub["wtmec2yr"], horizon=horizon)
         deltas.append(ca - cb)
 
     arr = np.asarray(deltas)
     lo, hi = np.percentile(arr, [2.5, 97.5])
-    point = float(concordance(risk_a, d["followup_years"], d["cvd_death"])
-                  - concordance(risk_b, d["followup_years"], d["cvd_death"]))
+    point = float(
+        concordance(risk_a, d["followup_years"], d["cvd_death"],
+                    weights=d["wtmec2yr"], horizon=horizon)
+        - concordance(risk_b, d["followup_years"], d["cvd_death"],
+                      weights=d["wtmec2yr"], horizon=horizon))
     return {"delta": round(point, 4), "lo": round(float(lo), 4),
             "hi": round(float(hi), 4), "half_width": round(float(hi - lo) / 2, 4),
             "n_boot": int(len(arr)),
@@ -204,7 +211,8 @@ def permutation_importance(model, d: pd.DataFrame, features: list[str],
     zero. The features that do not exist in the raw frame at all would raise.
     """
     base = concordance(model.predict_cif(d, horizon, prepared=True),
-                       d["followup_years"], d["cvd_death"])
+                       d["followup_years"], d["cvd_death"],
+                       weights=d["wtmec2yr"], horizon=horizon)
     rng = np.random.default_rng(seed)
     rows = []
     for f in features:
@@ -215,7 +223,8 @@ def permutation_importance(model, d: pd.DataFrame, features: list[str],
             rng.shuffle(col)
             shuffled[f] = col
             c = concordance(model.predict_cif(shuffled, horizon, prepared=True),
-                            shuffled["followup_years"], shuffled["cvd_death"])
+                            shuffled["followup_years"], shuffled["cvd_death"],
+                            weights=shuffled["wtmec2yr"], horizon=horizon)
             drops.append(base - c)
         rows.append({"variable": f, "delta_c": round(float(np.mean(drops)), 5),
                      "sd": round(float(np.std(drops)), 5)})
@@ -253,7 +262,8 @@ def run(cohort: pd.DataFrame, selected: list[str], horizon: float = 10.0) -> dic
         arms[name] = (model, feats)
 
     reference = "cox_p"
-    deltas = {name: cluster_bootstrap_delta(risks[name], risks[reference], test)
+    deltas = {name: cluster_bootstrap_delta(risks[name], risks[reference], test,
+                                            horizon)
               for name in arms if name != reference}
 
     imp = permutation_importance(arms["cox_wide"][0], test, wide, horizon)
