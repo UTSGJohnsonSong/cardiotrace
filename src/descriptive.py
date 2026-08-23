@@ -66,6 +66,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from src.cohort import _read, _read_required
 
@@ -80,6 +81,27 @@ DESC_CYCLES = [
 
 # Cycles fielded entirely before the pandemic, used to fit the counterfactual.
 PRE_COVID_CYCLES = DESC_CYCLES[:-1]
+
+# Which weight this analysis is entitled to use.
+#
+# NHANES publishes one weight per component and the rule is the least common
+# denominator: the analysis takes the weight of the most restrictive component
+# any of its variables came from. Part 1's outcome is MCQ160B-F -- five
+# questions asked in the household INTERVIEW -- so the interview weight is the
+# one that matches. The examination weight was used originally and is wrong in a
+# way that is invisible in the output: it restricts the sample to people who
+# also attended the mobile examination centre, and MEC attendance is not
+# random. In the post-pandemic cycle it removed 22% of age-eligible respondents
+# against 3-9% elsewhere, which put a fourfold change in examination coverage
+# directly underneath the counterfactual in section 3.
+#
+# The exam weight is kept as a sensitivity analysis rather than deleted: it is
+# the comparison that shows how much the choice moved the answer.
+#
+# Ascertainment (src/ascertainment.py) correctly keeps the EXAM weight, because
+# its denominator needs measured blood pressure, which only MEC attendees have.
+WEIGHT_INTERVIEW = "wtint2yr"
+WEIGHT_EXAM = "wtmec2yr"
 
 AGE_MIN_DESC = 20
 
@@ -123,8 +145,30 @@ RACE_LABELS = {
 }
 
 
+# CDC names the final cycle "NHANES August 2021-August 2023", not 2021-2022:
+# https://wwwn.cdc.gov/nchs/nhanes/continuousnhanes/default.aspx?Cycle=2021-2023
+# The folder and the file suffix (_L) are what this project keys on and are left
+# alone, but the position on the time axis is not a naming question. Field
+# midpoint is August 2022, so 2022.6 rather than 2021.5 -- and the extrapolation
+# in section 3 therefore reaches 5.1 years past the last pre-pandemic cycle, not
+# the 4.0 it claimed.
+#
+# CDC also states that this cycle "is based on an updated sample design and
+# modified interview as well as examination procedures", and urges caution
+# before combining it with earlier cycles for trend analysis given the 15-month
+# unobserved period. That caution is reproduced in the report; it is not a
+# reason to drop the cycle, but it is a reason not to call the comparison
+# quasi-experimental.
+CYCLE_MIDPOINT_OVERRIDE = {"2021-2022": 2022.6}
+
+# Display label, where it differs from the key this project stores.
+CYCLE_LABEL = {"2021-2022": "Aug 2021&ndash;Aug 2023"}
+
+
 def cycle_midpoint(cycle: str) -> float:
     """Midpoint year, so cycles sit on a real time axis rather than an index."""
+    if cycle in CYCLE_MIDPOINT_OVERRIDE:
+        return CYCLE_MIDPOINT_OVERRIDE[cycle]
     start = int(cycle.split("-")[0])
     return start + 0.5
 
@@ -133,7 +177,8 @@ def build_descriptive_cycle(cycle: str) -> pd.DataFrame:
     """Demographics plus the five CVD questions for one cycle."""
     demo = _read_required(
         cycle, "DEMO",
-        ["RIDAGEYR", "RIAGENDR", "RIDRETH1", "WTMEC2YR", "SDMVPSU", "SDMVSTRA"])
+        ["RIDAGEYR", "RIAGENDR", "RIDRETH1", "WTINT2YR", "WTMEC2YR",
+         "SDMVPSU", "SDMVSTRA"])
     extra = _read(cycle, "DEMO", ["RIDRETH3"])
     if extra is not None and "RIDRETH3" in extra.columns:
         demo = demo.merge(extra, on="SEQN", how="left", validate="1:1")
@@ -147,7 +192,7 @@ def build_descriptive_cycle(cycle: str) -> pd.DataFrame:
 
     df = demo.merge(mcq, on="SEQN", how="left", validate="1:1")
     df = df.rename(columns={
-        "RIDAGEYR": "age", "WTMEC2YR": "wtmec2yr",
+        "RIDAGEYR": "age", "WTINT2YR": "wtint2yr", "WTMEC2YR": "wtmec2yr",
         "SDMVPSU": "psu", "SDMVSTRA": "strata",
     })
     df["sex"] = df["RIAGENDR"].map({1: "Male", 2: "Female"})
@@ -169,35 +214,44 @@ def build_descriptive_cycle(cycle: str) -> pd.DataFrame:
     df["cycle"] = cycle
     df["year"] = cycle_midpoint(cycle)
     keep = ["SEQN", "cycle", "year", "age", "sex", "race_eth",
-            "wtmec2yr", "psu", "strata", "prev_cvd"]
+            "wtint2yr", "wtmec2yr", "psu", "strata", "prev_cvd"]
     return df[keep]
 
 
-def build_descriptive(ladder: list | None = None) -> pd.DataFrame:
+def build_descriptive(ladder: list | None = None,
+                      weight: str = WEIGHT_INTERVIEW) -> pd.DataFrame:
     """Every cycle, adults 20+, with a usable weight and outcome.
 
+    `weight` selects the analysis weight and is written to a `weight` column
+    that every estimator downstream reads; both raw weights survive on the
+    frame, so the sensitivity analysis is a parameter and not a second pipeline.
+    See WEIGHT_INTERVIEW for why the default is the interview weight.
+
     Pass a list to `ladder` to receive the per-cycle exclusion counts. Part 3 has
-    a STROBE flow table and Part 1 had nothing, so 2021-2022 could lose 22% of
-    its age-eligible respondents to a zero examination weight -- against 3 to 9%
+    a STROBE flow table and Part 1 had nothing, so under the examination weight
+    2021-2022 lost 22% of its age-eligible respondents -- against 3 to 9%
     everywhere else -- without a reader being able to see it. That cycle is the
     single post-pandemic observation the whole counterfactual rests on, and a
-    fourfold change in examination coverage there is a competing explanation for
-    the gap.
+    fourfold change in examination coverage there was a competing explanation
+    for the gap. Under the interview weight that particular competing
+    explanation largely disappears, which is a second reason the choice matters.
     """
     frames = [build_descriptive_cycle(c) for c in DESC_CYCLES]
     df = pd.concat(frames, ignore_index=True)
     df = df[df["age"] >= AGE_MIN_DESC]
+    df["weight"] = df[weight]
     if ladder is not None:
         for cycle, g in df.groupby("cycle", observed=True):
-            no_weight = int((g["wtmec2yr"].isna() | (g["wtmec2yr"] <= 0)).sum())
-            no_outcome = int(g.loc[g["wtmec2yr"] > 0, "prev_cvd"].isna().sum())
+            no_weight = int((g["weight"].isna() | (g["weight"] <= 0)).sum())
+            no_outcome = int(g.loc[g["weight"] > 0, "prev_cvd"].isna().sum())
             ladder.append({
                 "cycle": cycle, "age_eligible": len(g),
-                "no_exam_weight": no_weight, "no_outcome": no_outcome,
+                "weight_used": weight,
+                "no_weight": no_weight, "no_outcome": no_outcome,
                 "analysed": len(g) - no_weight - no_outcome,
                 "lost_pct": 100 * (no_weight + no_outcome) / len(g),
             })
-    df = df[df["wtmec2yr"].notna() & (df["wtmec2yr"] > 0)]
+    df = df[df["weight"].notna() & (df["weight"] > 0)]
     df = df[df["prev_cvd"].notna()]
     df["age_group"] = pd.cut(df["age"], bins=AGE_BINS, labels=AGE_LABELS,
                              right=False, include_lowest=True)
@@ -317,7 +371,7 @@ def age_standardised_prevalence(df: pd.DataFrame,
     p_std = 0.0
     z = np.zeros(len(df))
     ag = df["age_group"].to_numpy()
-    w_all = df["wtmec2yr"].to_numpy()
+    w_all = df["weight"].to_numpy()
     y_all = df[outcome].to_numpy()
 
     for g in present:
@@ -338,7 +392,7 @@ def crude_prevalence(df: pd.DataFrame,
                      outcome: str = "prev_cvd",
                      design: pd.DataFrame | None = None) -> tuple[float, float]:
     """Unstandardised weighted prevalence, for the standardisation contrast."""
-    w = df["wtmec2yr"].to_numpy()
+    w = df["weight"].to_numpy()
     y = df[outcome].to_numpy()
     s = w.sum()
     p = float((w * y).sum() / s)
@@ -393,7 +447,7 @@ def kish_weighting_factor(df: pd.DataFrame) -> float:
     together; attributing all of it to clustering overstates what the cluster
     structure costs, in this series by roughly a factor of 1.6.
     """
-    w = df["wtmec2yr"].to_numpy(float)
+    w = df["weight"].to_numpy(float)
     if len(w) == 0 or w.mean() == 0:
         return float("nan")
     return float(1.0 + (w.std(ddof=0) / w.mean()) ** 2)
@@ -449,11 +503,23 @@ def by_cycle(df: pd.DataFrame, group: str | None = None,
         row = dict(zip(keys, vals))
         deff_std, n_eff_std = design_effect(g, se=se_std, outcome=outcome)
         kish = kish_weighting_factor(g)
+        n_psu = int(g.groupby(["strata", "psu"], observed=True).ngroups)
+        n_str = int(g["strata"].nunique())
+        # Design degrees of freedom: sampled PSUs minus sampled strata. A cycle
+        # of NHANES resolves into roughly 30 PSUs across 15 strata, so this is
+        # about 15 -- not the several thousand a normal quantile implicitly
+        # assumes. t(15) is 2.13 against 1.96, so an interval built on 1.96 is
+        # roughly 8% too narrow, and near the boundary that is the difference
+        # between excluding zero and not.
+        dof = max(n_psu - n_str, 1)
+        crit = float(stats.t.ppf(0.975, dof))
         row.update(n=len(g), n_cases=int(g[outcome].sum()),
-                   n_psu=int(g.groupby(["strata", "psu"], observed=True).ngroups),
+                   n_psu=n_psu, n_strata=n_str, design_dof=dof, crit=crit,
                    p_std=p_std, se_std=se_std,
-                   lo_std=max(0.0, p_std - 1.96 * se_std),
-                   hi_std=p_std + 1.96 * se_std,
+                   lo_std=max(0.0, p_std - crit * se_std),
+                   hi_std=p_std + crit * se_std,
+                   lo_std_normal=max(0.0, p_std - 1.96 * se_std),
+                   hi_std_normal=p_std + 1.96 * se_std,
                    p_crude=p_crude, se_crude=se_crude,
                    deff_std=deff_std, n_effective_std=n_eff_std,
                    kish_weighting=kish,

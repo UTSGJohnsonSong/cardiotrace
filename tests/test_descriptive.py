@@ -20,7 +20,7 @@ from src.descriptive import (
 
 def frame(rows):
     """rows: (age_group, weight, outcome, strata, psu)"""
-    df = pd.DataFrame(rows, columns=["age_group", "wtmec2yr", "prev_cvd", "strata", "psu"])
+    df = pd.DataFrame(rows, columns=["age_group", "weight", "prev_cvd", "strata", "psu"])
     df["age_group"] = pd.Categorical(df["age_group"], categories=AGE_LABELS)
     return df
 
@@ -167,10 +167,20 @@ def test_absent_age_groups_renormalise_rather_than_shrink_the_estimate():
 
 
 def test_cycle_midpoint_puts_cycles_on_a_real_time_axis():
+    """The final cycle is not two years long and is not centred where its key says.
+
+    NCHS names it "NHANES August 2021-August 2023", so its field midpoint is
+    August 2022. The project keys on the folder name "2021-2022" because that is
+    what the files sit under, and taking 2021.5 from that key understated the
+    extrapolation in section 3 by more than a year -- 4.0 instead of 5.1. A rule
+    that derives the midpoint from the key is right for every other cycle and
+    wrong for this one, which is why there is an override rather than a cleverer
+    rule.
+    """
     assert cycle_midpoint("1999-2000") == 1999.5
-    assert cycle_midpoint("2021-2022") == 2021.5
-    # Four years of extrapolation from the last pre-pandemic cycle, not 3.5.
-    assert cycle_midpoint("2021-2022") - cycle_midpoint("2017-2018") == 4.0
+    assert cycle_midpoint("2017-2018") == 2017.5
+    assert cycle_midpoint("2021-2022") == 2022.6
+    assert cycle_midpoint("2021-2022") - cycle_midpoint("2017-2018") == pytest.approx(5.1)
 
 
 def test_a_nan_outcome_produces_a_nan_estimate_not_a_confident_zero():

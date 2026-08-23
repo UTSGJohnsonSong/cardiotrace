@@ -58,6 +58,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from src.cohort import _read, _read_required
 from src.descriptive import (
@@ -191,6 +192,14 @@ def build_ascertainment() -> pd.DataFrame:
     df = pd.concat(frames, ignore_index=True)
     df = df[df["age"] >= AGE_MIN_DESC]
     df = df[df["wtmec2yr"].notna() & (df["wtmec2yr"] > 0)]
+    # The analysis weight the estimators in `descriptive` read. It is the
+    # EXAMINATION weight here and that is deliberate: this denominator needs a
+    # measured blood pressure, so the most restrictive component is the MEC and
+    # the least-common-denominator rule points at wtmec2yr. Part 1's outcome is
+    # interview-only and takes wtint2yr; the two analyses use different weights
+    # because they measure different things, and the column is named so a reader
+    # of either can see which.
+    df["weight"] = df["wtmec2yr"]
     df = df[df["hypertensive"].notna() & df["told_htn"].notna()]
     df["age_group"] = pd.cut(df["age"], bins=AGE_BINS, labels=AGE_LABELS,
                              right=False, include_lowest=True)
@@ -222,14 +231,23 @@ def ascertained_by_cycle(df: pd.DataFrame) -> pd.DataFrame:
         narrow = g[g["measured_htn"] == 1]
         p_narrow, _ = age_standardised_prevalence(narrow, outcome="told_htn", design=g)
 
+        dof = max(int(g.groupby(["strata", "psu"], observed=True).ngroups)
+                  - int(g["strata"].nunique()), 1)
+        crit = float(stats.t.ppf(0.975, dof))
+
         rows.append({
             "cycle": cycle, "year": year, "instrument": instrument,
             "n_hypertensive": len(htn), "n_measured_high": len(narrow),
             "n_on_med": int(htn["on_med"].sum()),
             "n_told": int(htn["told_htn"].sum()),
             "ascertained_std": p_std, "se_std": se_std,
-            "lo_std": max(0.0, p_std - 1.96 * se_std),
-            "hi_std": p_std + 1.96 * se_std,
+            # Same design-df t quantile the prevalence series uses. Two interval
+            # conventions inside one report is not a small thing: a reader
+            # comparing a band here against one in section 2 would be comparing
+            # a 1.96 band against a 2.13 band without being told.
+            "design_dof": dof, "crit": crit,
+            "lo_std": max(0.0, p_std - crit * se_std),
+            "hi_std": p_std + crit * se_std,
             "ascertained_crude": p_crude, "se_crude": se_crude,
             "measured_only_std": p_narrow,
         })
