@@ -6,6 +6,7 @@ numbers can never drift from the actual pipeline output. Run after run_pipeline.
 """
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -60,6 +61,25 @@ readme = (ROOT / "README.md").read_text(encoding="utf-8")
 start, end = "<!-- KEY_FINDINGS_START -->", "<!-- KEY_FINDINGS_END -->"
 pre_txt = readme.split(start)[0] + start + "\n"
 post_txt = "\n" + end + readme.split(end)[1]
-(ROOT / "README.md").write_text(pre_txt + block + post_txt, encoding="utf-8")
+readme = pre_txt + block + post_txt
+
+# The test-count badge was the last hand-typed statistic on the front page, and
+# it had gone stale: it read 85 while the suite carried 114. `tests/conftest.py`
+# writes the real number on every full run, so read it rather than trusting
+# whoever last remembered to edit the badge.
+summary = ROOT / "reports" / "test_summary.json"
+if summary.exists():
+    t = json.loads(summary.read_text(encoding="utf-8"))
+    if t["failed"] == 0 and t["exit_status"] == 0:
+        readme = re.sub(r"badge/tests-\d+%20passing-brightgreen",
+                        f"badge/tests-{t['collected']}%20passing-brightgreen",
+                        readme, count=1)
+        print(f"test badge: {t['collected']} passing")
+    else:
+        print(f"test badge NOT updated: last full run had {t['failed']} failure(s)")
+else:
+    print("test badge NOT updated: no reports/test_summary.json; run the suite")
+
+(ROOT / "README.md").write_text(readme, encoding="utf-8")
 print("README Key Findings updated:")
 print(block)

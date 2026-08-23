@@ -9,6 +9,7 @@ working language inside an English report for as long as they did.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -27,6 +28,19 @@ def main() -> None:
     cohort, strobe = build_cohort()
     cohort.to_csv(PROCESSED / "cohort_part3.csv.gz", index=False)
     strobe.to_csv(TABLES / "strobe_part3.csv", index=False)
+
+    # The report and the site both state these. Until now three of them were
+    # typed into render_report.py by hand, which is the one thing this project
+    # does not allow anywhere else.
+    (ROOT / "reports" / "cohort_results.json").write_text(
+        json.dumps({
+            "n_participants":     int(len(cohort)),
+            "cvd_deaths":         int(cohort["cvd_death"].sum()),
+            "competing_deaths":   int(cohort["competing_death"].sum()),
+            "person_years":       round(float(cohort["followup_years"].sum()), 1),
+            "max_followup_years": round(float(cohort["followup_years"].max()), 2),
+            "median_followup_years": round(float(cohort["followup_years"].median()), 2),
+        }, indent=2) + "\n", encoding="utf-8")
 
     print(f"cohort: {len(cohort):,} participants, "
           f"{int(cohort['cvd_death'].sum()):,} CVD deaths, "
