@@ -134,8 +134,12 @@ class CauseSpecificRisk:
         self.cvd: CoxPHFitter | None = None
         self.competing: CoxPHFitter | None = None
 
-    def fit(self, train: pd.DataFrame) -> "CauseSpecificRisk":
-        d = prepare(train)
+    def fit(self, train: pd.DataFrame,
+            prepared: bool = False) -> "CauseSpecificRisk":
+        """`prepared=True` skips `prepare`, for callers that built the model
+        frame once and subset it -- running `prepare` again on a frame whose
+        source columns have been dropped raises rather than degrades."""
+        d = train if prepared else prepare(train)
         self.cvd = _fit(d, self.features, "cvd_death")
         self.competing = _fit(d, self.features, "competing_death")
         return self
@@ -149,11 +153,19 @@ class CauseSpecificRisk:
         return np.outer(risk, h0)                       # (n_people, n_times)
 
     def predict_cif(self, test: pd.DataFrame, horizon: float,
-                    n_grid: int = 400) -> pd.Series:
-        """Absolute probability of CVD death by `horizon`, competing risk included."""
+                    n_grid: int = 400, prepared: bool = False) -> pd.Series:
+        """Absolute probability of CVD death by `horizon`, competing risk included.
+
+        `prepared=True` takes the frame as given instead of running `prepare`
+        again. Permutation importance needs it: `male`, `smoke_current` and
+        `smoke_former` are constructed here from `sex` and `smoking`, so
+        shuffling them in a raw frame and letting `prepare` run would rebuild
+        them from the untouched source columns and report an importance of
+        exactly zero for three of the eleven features.
+        """
         if self.cvd is None:
             raise RuntimeError("fit() first")
-        d = prepare(test)
+        d = test if prepared else prepare(test)
         X = d[self.features]
         times = np.linspace(0.0, horizon, n_grid)
         h1 = self._cum_hazards(self.cvd, X, times)
