@@ -193,12 +193,19 @@ def test_the_bootstrap_resamples_clusters_and_not_rows():
     Here the outcome is constant within cluster, so a cluster bootstrap must
     show far more spread than the rows alone would suggest.
     """
-    n_clusters, per = 12, 40
-    cluster = np.repeat(np.arange(n_clusters), per)
+    # Real cluster names: "<stratum>_<psu>", two PSUs per stratum, which is the
+    # NHANES geometry the ten-year test set actually has (31 strata x 2 PSUs).
+    # A name without the separator would put every unit in its own stratum, and
+    # the stratified draw would then return the same unit every time -- zero
+    # variance, dressed as a confident interval.
+    n_strata, per_psu = 6, 40
+    names = [f"{h}_{k}" for h in range(n_strata) for k in (1, 2)]
+    cluster = np.repeat(np.arange(len(names)), per_psu)
     rng = np.random.default_rng(3)
-    shift = np.repeat(rng.normal(0, 3, n_clusters), per)
+    shift = np.repeat(rng.normal(0, 3, len(names)), per_psu)
+    n_clusters, per = len(names), per_psu
     d = pd.DataFrame({
-        "design_cluster": [f"c{c}" for c in cluster],
+        "design_cluster": [names[c] for c in cluster],
         "followup_years": rng.uniform(1, 10, n_clusters * per),
         "cvd_death": rng.integers(0, 2, n_clusters * per),
         "wtmec2yr": rng.uniform(5_000, 60_000, n_clusters * per),
@@ -209,9 +216,31 @@ def test_the_bootstrap_resamples_clusters_and_not_rows():
     out = cluster_bootstrap_delta(a, b, d, horizon=10.0, n_boot=120, seed=1)
     assert out["n_boot"] > 0
     assert out["lo"] <= out["delta"] <= out["hi"]
-    # 12 clusters resampled with replacement is a coarse thing; the interval has
+    # Twelve PSUs resampled with replacement is a coarse thing; the interval has
     # to be wide enough to show it, or clusters are not what is being drawn.
     assert out["half_width"] > 0.01
+
+
+def test_a_stratum_with_one_psu_raises_rather_than_returning_no_variance():
+    """It would return an interval, and the interval would be too narrow.
+
+    Every draw from a one-PSU stratum returns that PSU, so the stratum
+    contributes nothing to the between-cluster variance. The failure is silent
+    and points the flattering way, which is the combination this project treats
+    as worse than a crash.
+    """
+    rng = np.random.default_rng(0)
+    n = 200
+    d = pd.DataFrame({
+        "design_cluster": [f"{i // 20}_1" for i in range(n)],   # one PSU each
+        "followup_years": rng.uniform(1, 10, n),
+        "cvd_death": rng.integers(0, 2, n),
+        "wtmec2yr": rng.uniform(5_000, 60_000, n),
+    })
+    a = pd.Series(rng.normal(size=n), index=d.index)
+    b = pd.Series(rng.normal(size=n), index=d.index)
+    with pytest.raises(ValueError, match="single PSU"):
+        cluster_bootstrap_delta(a, b, d, horizon=10.0, n_boot=10, seed=1)
 
 
 def test_the_horizon_label_and_the_evaluable_mask_mean_what_they_say():

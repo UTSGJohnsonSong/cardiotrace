@@ -495,7 +495,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <div class="stat"><div class="k">Candidates screened</div><div class="v">15</div><div class="n">on 6,772 training rows</div></div>
       <div class="stat"><div class="k">Selected</div><div class="v">1</div><div class="n">design-based Wald &ge; 3.84</div></div>
       <div class="stat"><div class="k">Best single addition</div><div class="v">&times;1.46</div><div class="n">per SD of log urine albumin/creatinine, z = 7.8</div></div>
-      <div class="stat"><div class="k">Gain in C</div><div class="v">+0.0176</div><div class="n">95% CI +0.0057 to +0.0329</div></div>
+      <div class="stat"><div class="k">Gain in C</div><div class="v">+0.0176</div><div class="n">95% CI +0.0074 to +0.0275</div></div>
     </div>
 
     <h3 id="the-screen">The screen</h3>
@@ -576,14 +576,14 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
         <caption>Discrimination on held-out cycles, 10-year risk</caption>
         <thead><tr><th>Arm</th><th>Variables</th><th>Harrell C</th>
           <th>AUC at the horizon</th><th>&Delta;C vs published</th><th>95% CI</th></tr></thead>
-        <tbody><tr><td>Cox &mdash; the eleven <i>(the published model)</i></td><td>11</td><td>0.8379</td><td>0.8334</td><td class='em'>&mdash; reference</td><td></td></tr><tr><td>Cox &mdash; the eleven plus what the screen chose</td><td>12</td><td>0.8555</td><td>0.8509</td><td class='em'>+0.0176</td><td>+0.0057 to +0.0329</td></tr><tr><td>Gradient boosting &mdash; the eleven</td><td>11</td><td>0.7837</td><td>0.7763</td><td class='em'>-0.0542</td><td>-0.0904 to -0.0125</td></tr><tr><td>Gradient boosting &mdash; the eleven plus the screen</td><td>12</td><td>0.8134</td><td>0.8079</td><td class='em'>-0.0245</td><td>-0.0604 to +0.0162</td></tr><tr><td>Cox &mdash; age and sex only <i>(the floor)</i></td><td>2</td><td>0.8028</td><td>0.7969</td><td class='em'>-0.0351</td><td>-0.0602 to -0.0104</td></tr></tbody>
+        <tbody><tr><td>Cox &mdash; the eleven <i>(the published model)</i></td><td>11</td><td>0.8379</td><td>0.8334</td><td class='em'>&mdash; reference</td><td></td></tr><tr><td>Cox &mdash; the eleven plus what the screen chose</td><td>12</td><td>0.8555</td><td>0.8509</td><td class='em'>+0.0176</td><td>+0.0074 to +0.0275</td></tr><tr><td>Gradient boosting &mdash; the eleven</td><td>11</td><td>0.7837</td><td>0.7763</td><td class='em'>-0.0542</td><td>-0.0790 to -0.0284</td></tr><tr><td>Gradient boosting &mdash; the eleven plus the screen</td><td>12</td><td>0.8134</td><td>0.8079</td><td class='em'>-0.0245</td><td>-0.0499 to +0.0018</td></tr><tr><td>Cox &mdash; age and sex only <i>(the floor)</i></td><td>2</td><td>0.7981</td><td>0.7969</td><td class='em'>-0.0398</td><td>-0.0545 to -0.0233</td></tr></tbody>
       </table>
     </div>
 
     <p class="measure">One screened variable added +0.0176 to C on the same form.
     Changing the form to gradient boosting on the same eleven cost -0.0542, and the
     interval on each excludes zero. The floor arm is what makes those numbers readable: a Cox
-    model on age and sex alone reaches C&nbsp;=&nbsp;0.8028, so gradient
+    model on age and sex alone reaches C&nbsp;=&nbsp;0.7981, so gradient
     boosting on all eleven variables discriminates <em>worse than</em> age and sex.</p>
 
     <div class="note">
