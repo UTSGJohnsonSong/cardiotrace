@@ -1,8 +1,12 @@
-"""Is C = 0.804 held down by the variable set, or by the model form?
+"""Is the reference concordance held down by the variable set, or by the form?
 
-The published prediction model is a cause-specific Cox pair on eleven variables
-and reaches Harrell C = 0.804 at ten years on held-out later cycles. Two very
-different things could be limiting it, and the report cannot say which:
+The published prediction model is a cause-specific Cox pair on eleven variables.
+Its ten-year Harrell C on held-out later cycles is 0.838 survey-weighted -- the
+number this section compares against -- and 0.804 unweighted, which is what was
+published before `concordance` was made to honour the weights it had always
+accepted. Numbers are not repeated here beyond that; the artefact carries them.
+
+Two very different things could be limiting it, and the report cannot say which:
 
   the VARIABLE SET   eleven clinic-visit measurements may not carry more
   the MODEL FORM     linear, additive and proportional-hazards may not fit
@@ -162,7 +166,7 @@ def evaluate(risk: pd.Series, d: pd.DataFrame, horizon: float) -> dict:
     """Two discrimination statistics, because one of them is not a fair contest.
 
     Harrell's C is the primary, so the reference arm is directly comparable to
-    the 0.804 already published. But it rewards getting the ORDER of deaths
+    the reference arm already published. But it rewards the ORDER of deaths
     right in time, and the boosted arms never see a time -- they are fitted on a
     binary "dead of CVD by the horizon". Reporting only C would hand the Cox
     arms an advantage that comes from the metric rather than from the model.

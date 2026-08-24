@@ -83,7 +83,7 @@
       },
       "cox_wide": {
         "c": 0.8555,
-        "c_unweighted": 0.8183,
+        "c_unweighted": 0.8184,
         "auc_horizon": 0.8509,
         "n": 4641,
         "n_evaluable": 4641,
