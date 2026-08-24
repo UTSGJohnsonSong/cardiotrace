@@ -179,7 +179,8 @@ CardioTrace/
 │   └── fit_survival_models.py      # fit, validate forward in time, calibrate
 ├── tests/                          # 179 regressions for defects that shipped
 ├── docs/
-│   ├── research-design.md          # decision log - every choice, with its cost
+│   ├── research-design.md          # the protocol: estimands, node status, decision log
+│   ├── impact-tracking.md          # per defect: did it contaminate a published number?
 │   ├── methodology-review.md       # the audit that started the rework
 │   ├── pce-benchmark.md            # PCE coefficients: provenance and benchmark design
 │   └── advisor-briefing.md         # the narrative version
