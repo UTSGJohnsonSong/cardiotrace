@@ -70,6 +70,11 @@ def main() -> None:
         "race_black_dropped": float(compare.loc[compare["variable"] == "race_black",
                                                 "dropped_mean"].iloc[0]),
         "race_black_diff": diff("race_black"),
+        # Both IPCW bounds shrink the correction TOWARD the uncorrected
+        # estimate, so the paragraph that rests on the two rows agreeing has to
+        # say how much of the agreement they bought.
+        "trimming": {k: (round(v, 4) if isinstance(v, float) else v)
+                     for k, v in sens.attrs.items()},
         "sensitivity": {
             "n": int(base["n"]),
             "hr_survey": float(base["hr_per_10mmhg"]),
@@ -93,6 +98,11 @@ def main() -> None:
     print(f"  exposure HR    survey {results['sensitivity']['hr_survey']:.4f}  "
           f"IPCW {results['sensitivity']['hr_ipcw']:.4f}  "
           f"shift {results['sensitivity']['abs_shift']:.4f}")
+    tr = results["trimming"]
+    print(f"  IPCW bounds    propensity floor bound on {tr['n_floored']} rows "
+          f"(min {tr['min_propensity']:.3f}); 99th-pct cap bound on "
+          f"{tr['n_capped']} rows, removing {tr['weight_removed_pct']:.2f}% "
+          f"of the re-weighted total")
 
 
 if __name__ == "__main__":

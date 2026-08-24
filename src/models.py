@@ -88,7 +88,22 @@ TEST_5Y_CYCLES = ["2009-2010", "2011-2012", "2013-2014"]
 
 
 def prepare(df: pd.DataFrame, tobin: bool = True) -> pd.DataFrame:
-    """Model matrix: numeric encodings, Tobin adjustment, design columns."""
+    """Model matrix: numeric encodings, Tobin adjustment, design columns.
+
+    NOT IDEMPOTENT, which is why it refuses to run twice. The Tobin step adds a
+    constant to the measured pressure of treated participants IN PLACE, so a
+    second call gives them +20/+10 mmHg instead of +10/+5 -- measured: a treated
+    participant at 140 becomes 150, then 160. Nothing else here would notice:
+    `male`, `smoke_*` and `design_cluster` are all idempotent, the fit
+    converges, and the result is a plausible wrong number. The `prepared=` flags
+    on the model classes exist to avoid this; the guard is what makes forgetting
+    one of them loud.
+    """
+    if "design_cluster" in df.columns:
+        raise ValueError(
+            "prepare() has already been applied to this frame (it carries "
+            "design_cluster). Running it again would add the Tobin constant a "
+            "second time. Pass prepared=True to the caller instead.")
     d = df.copy()
     d["male"] = (d.sex == "Male").astype(float)
     d["smoke_current"] = (d.smoking == "current").astype(float).where(d.smoking.notna())
@@ -208,7 +223,13 @@ def concordance(risk: pd.Series, time: pd.Series, event: pd.Series,
     estimand is the concordance in the POPULATION, and a pair of sampled people
     stands for w_i * w_j pairs of it.
     """
+    # The weights are part of the estimator, so a missing weight removes the
+    # row rather than poisoning the whole statistic: without this one NaN in
+    # wtmec2yr makes the denominator NaN and `concordance` returns NaN, which
+    # downstream is indistinguishable from a considered null result.
     ok = risk.notna() & time.notna() & event.notna()
+    if weights is not None:
+        ok = ok & weights.notna()
     r = risk[ok].to_numpy(float)
     tm = time[ok].to_numpy(float)
     ev = event[ok].to_numpy(float)
@@ -217,6 +238,19 @@ def concordance(risk: pd.Series, time: pd.Series, event: pd.Series,
         tm = np.minimum(tm, horizon)
     w = (np.ones_like(r) if weights is None
          else weights[ok].to_numpy(float))
+
+    # One contract for both branches: a degenerate input RAISES. It used to
+    # differ -- lifelines threw ZeroDivisionError while the weighted path
+    # returned NaN -- so whether a failure was loud depended on whether the
+    # caller passed weights. NaN was the dangerous half: `np.percentile` (not
+    # nanpercentile) turned one NaN replicate into a NaN interval, and
+    # `bool(lo > 0 or hi < 0)` then encoded total failure as "contains zero",
+    # which the page reports as a considered null result.
+    if len(r) == 0 or ev.sum() == 0 or float(tm.max()) == float(tm.min()):
+        raise ValueError(
+            f"concordance is undefined here: {len(r)} rows, {int(ev.sum())} "
+            f"events, follow-up spans {float(tm.max()) - float(tm.min()):g} "
+            f"years. No pair is comparable.")
 
     if weights is None and horizon is None:
         # Defer to lifelines when there is nothing extra to do, so the common
@@ -270,7 +304,11 @@ def _weighted_concordance(risk: np.ndarray, time: np.ndarray,
             _bit_add(tree_w, ranks[k], w[k])
             total += w[k]
         i = j
-    return float(num / den) if den > 0 else float("nan")
+    if den <= 0:
+        raise ValueError(
+            "no comparable pair: every event is at the latest observed time, "
+            "so nothing can be ordered against it")
+    return float(num / den)
 
 
 def _bit_add(tree: np.ndarray, i: int, v: float) -> None:

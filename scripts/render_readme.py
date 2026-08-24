@@ -136,9 +136,17 @@ if summary.exists():
                         readme, count=1)
         print(f"test badge: {t['collected']} passing")
     else:
-        print(f"test badge NOT updated: last full run had {t['failed']} failure(s)")
+        # Leaving the old badge in place asserts a green count over a red suite,
+        # which is a stale POSITIVE claim rather than a missing one. Neutralise
+        # it instead: the front page should not say "passing" when the last full
+        # run did not.
+        readme = re.sub(r"badge/tests-\d+%20passing-brightgreen",
+                        f"badge/tests-{t['failed']}%20failing-red", readme, count=1)
+        print(f"test badge set to FAILING: last full run had {t['failed']} failure(s)")
 else:
-    print("test badge NOT updated: no reports/test_summary.json; run the suite")
+    readme = re.sub(r"badge/tests-\d+%20passing-brightgreen",
+                    "badge/tests-not%20run-lightgrey", readme, count=1)
+    print("test badge set to 'not run': no reports/test_summary.json")
 
 (ROOT / "README.md").write_text(readme, encoding="utf-8")
 print("README Key Findings rebuilt from the current artefacts:")

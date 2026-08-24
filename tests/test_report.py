@@ -79,6 +79,31 @@ def test_no_python_expression_survives_into_the_published_pages(rel):
     assert leaked == [], f"{rel} carries unsubstituted expressions: {leaked}"
 
 
+# A cell whose entire content is the literal "nan". Anchored on the tags so it
+# cannot match the letters inside an ordinary word.
+NAN_CELL = re.compile(r">\s*nan\s*<", re.I)
+
+
+@pytest.mark.parametrize("rel", PUBLISHED, ids=str)
+def test_no_missing_value_is_published_as_the_word_nan(rel):
+    """The sibling of the brace check, and the leak it did not cover.
+
+    An f-string renders float('nan') as the literal text "nan". Nine cells of
+    the candidate table published it in the column headed "Into the forward
+    path?" -- including the row for eGFR, which is the variable the PREVENT
+    comparison turns on. The cause was two steps apart: an empty string written
+    to CSV comes back from pandas as float('nan'), and float('nan') is TRUTHY,
+    so the renderer's `value or fallback` never fired.
+
+    Both ends are fixed -- every state has a name in the data, and the renderer
+    tests for absence with pd.isna rather than falsiness -- but the failure was
+    invisible to every existing test, which is why this one exists.
+    """
+    found = NAN_CELL.findall(prose_only((ROOT / rel).read_text(encoding="utf-8")))
+    assert found == [], (
+        f"{rel} publishes {len(found)} missing value(s) as the word 'nan'")
+
+
 def stylesheet_constants(tree: ast.Module) -> set[int]:
     """Ids of the constants that legitimately carry braces.
 

@@ -612,6 +612,16 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     (1.0802&ndash;1.1665)
     under IPCW, a shift of 0.0009.</p>
 
+    <p class="measure">Two bounds inside that correction are worth naming, because both shrink it
+    <em>toward</em> the uncorrected estimate and so buy part of the agreement the paragraph above
+    rests on. The propensity is floored at 0.05 &mdash; not binding here, the smallest is
+    0.774 &mdash; and the weights are trimmed at the 99th
+    percentile, which binds on 186 participants and removes
+    0.41% of the re-weighted total. Untrimmed, one
+    participant can carry several per cent of the weight, and an estimate driven by three people
+    is worse than the one it replaced; trimmed, the correction is smaller than it would otherwise
+    have been. Both numbers are here so a reader can judge which trade they prefer.</p>
+
     <p class="measure"><b>That is reassurance about fragility, not a repair.</b> IPCW restores
     unbiasedness only if completeness is independent of the outcome given what the completeness
     model sees, and the variables most likely to explain both &mdash; illness severity, access to
@@ -669,7 +679,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <table>
         <caption>Participant flow</caption>
         <thead><tr><th>step</th><th>n</th><th>excluded</th><th>pct_of_start</th><th>cvd_deaths</th></tr></thead>
-        <tbody><tr><td>NHANES 1999-2014 respondents</td><td>82091</td><td>0</td><td>100.0</td><td>nan</td></tr><tr><td>Merged with the linked mortality file</td><td>82091</td><td>0</td><td>100.0</td><td>2825.0</td></tr><tr><td>Eligible for linkage (ELIGSTAT = 1)</td><td>47281</td><td>34810</td><td>57.6</td><td>2825.0</td></tr><tr><td>Completed the MEC examination</td><td>45035</td><td>2246</td><td>54.9</td><td>2513.0</td></tr><tr><td>Aged 40-79</td><td>24106</td><td>20929</td><td>29.4</td><td>1530.0</td></tr><tr><td>Non-zero examination weight</td><td>24106</td><td>0</td><td>29.4</td><td>1530.0</td></tr><tr><td>Baseline CVD status known</td><td>24103</td><td>3</td><td>29.4</td><td>1530.0</td></tr><tr><td>Free of self-reported CVD at baseline</td><td>20737</td><td>3366</td><td>25.3</td><td>925.0</td></tr><tr><td>Cause of death coded for every decedent</td><td>20736</td><td>1</td><td>25.3</td><td>925.0</td></tr></tbody>
+        <tbody><tr><td>NHANES 1999-2014 respondents</td><td>82091</td><td>0</td><td>100.0</td><td>&mdash;</td></tr><tr><td>Merged with the linked mortality file</td><td>82091</td><td>0</td><td>100.0</td><td>2825.0</td></tr><tr><td>Eligible for linkage (ELIGSTAT = 1)</td><td>47281</td><td>34810</td><td>57.6</td><td>2825.0</td></tr><tr><td>Completed the MEC examination</td><td>45035</td><td>2246</td><td>54.9</td><td>2513.0</td></tr><tr><td>Aged 40-79</td><td>24106</td><td>20929</td><td>29.4</td><td>1530.0</td></tr><tr><td>Non-zero examination weight</td><td>24106</td><td>0</td><td>29.4</td><td>1530.0</td></tr><tr><td>Baseline CVD status known</td><td>24103</td><td>3</td><td>29.4</td><td>1530.0</td></tr><tr><td>Free of self-reported CVD at baseline</td><td>20737</td><td>3366</td><td>25.3</td><td>925.0</td></tr><tr><td>Cause of death coded for every decedent</td><td>20736</td><td>1</td><td>25.3</td><td>925.0</td></tr></tbody>
       </table>
     </div>
 

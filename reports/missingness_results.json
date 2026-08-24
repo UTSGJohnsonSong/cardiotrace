@@ -10,6 +10,12 @@
   "race_black_kept": 0.2042,
   "race_black_dropped": 0.328,
   "race_black_diff": 0.1239,
+  "trimming": {
+    "n_floored": 0,
+    "n_capped": 186,
+    "min_propensity": 0.7736,
+    "weight_removed_pct": 0.4133
+  },
   "sensitivity": {
     "n": 17890,
     "hr_survey": 1.1216,

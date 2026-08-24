@@ -166,9 +166,21 @@ CYCLE_LABEL = {"2021-2022": "Aug 2021&ndash;Aug 2023"}
 
 
 def cycle_midpoint(cycle: str) -> float:
-    """Midpoint year, so cycles sit on a real time axis rather than an index."""
+    """Midpoint year, so cycles sit on a real time axis rather than an index.
+
+    An unrecognised label raises rather than falling through to `start + 0.5`.
+    That fallback is right for every cycle except the last one, and for a
+    RELABELLED last one it silently returns 2021.5 instead of 2022.6 -- which
+    shortens the extrapolation in section 3 from 5.1 years to 4.0 and moves the
+    counterfactual gap and its interval, with no signal anywhere.
+    """
     if cycle in CYCLE_MIDPOINT_OVERRIDE:
         return CYCLE_MIDPOINT_OVERRIDE[cycle]
+    if cycle not in DESC_CYCLES:
+        raise KeyError(
+            f"unrecognised cycle {cycle!r}; the start+0.5 rule is only correct "
+            f"for the cycles in DESC_CYCLES, and CYCLE_MIDPOINT_OVERRIDE holds "
+            f"the ones it is wrong for")
     start = int(cycle.split("-")[0])
     return start + 0.5
 

@@ -569,18 +569,24 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
             f"cardiovascular disease at baseline, {num(f['cvd_deaths'])} "
             f"cardiovascular deaths, competing risks modelled; Harrell C "
             f"{f['harrell_c']:.3f} at {f['c_horizon']} years on held-out cycles."),
-        "learning.html": (
-            f"Learning &mdash; CardioTrace | {AUTHOR}",
-            f"Is the {f['harrell_c']:.3f} concordance limited by the variable set "
-            f"or the model form? A screen of {f['n_candidates']} laboratory "
-            f"candidates against the eleven, and gradient boosting against a "
-            f"cause-specific Cox pair on the same held-out cycles."),
         "methods.html": (
             f"Methods &mdash; CardioTrace | {AUTHOR}",
             f"Sources, estimation and reproducibility: {num(f['n_files'])} NHANES "
             f"public-use files catalogued before anything was downloaded, "
             f"design-based variance, and the benchmark against the ASCVD Pooled "
             f"Cohort Equations."),
+        # Guarded like every other consumer of `facts()`. Without this the
+        # build dies here with a bare KeyError, hundreds of lines before the
+        # loop that explains which artefact is missing and how to make it.
+        "learning.html": (
+            f"Learning &mdash; CardioTrace | {AUTHOR}",
+            (f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
+             f"set or the model form? A screen of {f['n_candidates']} laboratory "
+             f"candidates against the eleven, and gradient boosting against a "
+             f"cause-specific Cox pair on the same held-out cycles."
+             if "n_candidates" in f else
+             f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
+             f"set or by the model form?")),
         "explore.html": (
             f"Explore &mdash; CardioTrace | {AUTHOR}",
             f"Every published estimate, pivotable: six conditions across "
