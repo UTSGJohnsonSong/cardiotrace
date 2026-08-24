@@ -9,16 +9,29 @@ says so. That is not hypothetical: docs/consistency-audit.md found nine such
 numbers, and the mechanism was always the same, an artefact that outlived the
 code.
 
-    python scripts/verify_clean_rebuild.py            # renderers only, ~1 min
+    python scripts/verify_clean_rebuild.py --render   # ~1 min, needs no data
+    python scripts/verify_clean_rebuild.py            # + tables and models
     python scripts/verify_clean_rebuild.py --full     # + Part 4, ~15 min
 
-WHAT THIS CANNOT CHECK. Rebuilding from raw NHANES files needs ~1 GB of
-downloads and a Postgres instance, so the default run starts from the committed
-cohort. It therefore proves that the RENDERERS are consistent with the
-artefacts, not that the artefacts are consistent with the raw data. The cohort
-itself is pinned by tests/test_cohort.py against synthetic fixtures. Saying this
-out loud matters: a check whose limits are unstated gets read as covering more
-than it does, and then relied on for the part it never covered.
+THREE SCOPES, BECAUSE ONLY ONE OF THEM CAN RUN IN CI. data/processed/ and
+data/raw/ are gitignored -- the cohort is 5 MB of derived NHANES data and the
+raw files are 376 MB -- so a checkout has the ARTEFACTS but not the inputs that
+produced them.
+
+  --render   The report, the site and the README. These read only tracked files
+             in reports/, so this runs anywhere, and it catches the failure that
+             actually happened: a published page showing a number that no
+             current script produces. This is what CI runs.
+  (default)  Adds the tables, the figures and the survival models. Needs
+             data/processed/cohort_part3.csv.gz.
+  --full     Adds Part 4. Fifteen minutes, so it is opt-in.
+
+WHAT NONE OF THEM CHECK. Rebuilding the cohort itself from raw NHANES files
+needs ~1 GB of downloads and a Postgres instance. Even --full therefore proves
+the artefacts are internally consistent, not that they agree with the raw data;
+the cohort builder is pinned separately by tests/ against synthetic fixtures.
+Saying this out loud matters: a check whose limits are unstated gets read as
+covering more than it does, and then relied on for the part it never covered.
 """
 
 import argparse
@@ -48,6 +61,11 @@ RUN = {"capture_output": True, "text": True,
 # Ordered, because several of these read what the previous one wrote.
 # render_report reads part4_learning_results.json; build_site reads the report;
 # render_readme reads crosscheck_part3.csv and test_summary.json.
+NEEDS_COHORT = ROOT / "data" / "processed" / "cohort_part3.csv.gz"
+
+RENDER_STAGE = [("render", ["scripts/render_report.py",
+                            "scripts/build_site.py",
+                            "scripts/render_readme.py"])]
 STAGES = [
     ("cohort", ["scripts/build_cohort_results.py"]),
     ("descriptive", ["scripts/build_descriptive_results.py",
@@ -59,10 +77,7 @@ STAGES = [
                    "scripts/build_tableau_extract.py"]),
     ("models", ["scripts/fit_survival_models.py",
                 "scripts/make_survival_figures.py"]),
-    ("render", ["scripts/render_report.py",
-                "scripts/build_site.py",
-                "scripts/render_readme.py"]),
-]
+] + RENDER_STAGE
 FULL_ONLY = [("learning", ["scripts/build_learning_results.py",
                            "scripts/make_learning_figures.py"])]
 
@@ -101,9 +116,21 @@ def dirty() -> list[str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--render", action="store_true",
+                    help="rebuild only the report, site and README; needs no "
+                         "data beyond what is committed")
     ap.add_argument("--full", action="store_true",
                     help="also rebuild Part 4 (~15 minutes)")
     args = ap.parse_args()
+    if args.render and args.full:
+        raise SystemExit("--render and --full ask for different scopes; pick one.")
+    if not args.render and not NEEDS_COHORT.exists():
+        raise SystemExit(
+            f"{NEEDS_COHORT.relative_to(ROOT)} is not present, and every stage "
+            f"except the renderers reads it. It is gitignored, so a fresh "
+            f"checkout will never have it.\n\n"
+            f"Run `python scripts/verify_clean_rebuild.py --render` for the "
+            f"part that needs no data, or `make cohort` to build it.")
 
     before = dirty()
     if before:
@@ -116,8 +143,12 @@ def main() -> None:
             + "\n  ".join(before)
             + "\n\nCommit or stash them first.")
 
-    stages = STAGES if not args.full else (
-        STAGES[:2] + FULL_ONLY + STAGES[2:])
+    if args.render:
+        stages = RENDER_STAGE
+    elif args.full:
+        stages = STAGES[:2] + FULL_ONLY + STAGES[2:]
+    else:
+        stages = STAGES
     for name, scripts in stages:
         log.info(f"── {name}")
         for s in scripts:
