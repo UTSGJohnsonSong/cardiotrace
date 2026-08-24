@@ -1,188 +1,188 @@
-cycle,year,dimension,level,outcome,n,n_cases,n_psu,pct_standardised,se_pct,ci_lo_pct,ci_hi_pct,pct_crude,deff,n_effective
-1999-2000,1999.5,Overall,All adults 20+,Any cardiovascular disease,4444,480,27,8.8340,0.6230,7.6129,10.0550,8.0967,2.8081,1582.5
-2001-2002,2001.5,Overall,All adults 20+,Any cardiovascular disease,5027,537,30,8.5690,0.5506,7.4897,9.6482,7.8266,2.4017,2093.1
-2003-2004,2003.5,Overall,All adults 20+,Any cardiovascular disease,4740,635,30,9.9054,0.7311,8.4726,11.3383,9.7332,3.7012,1280.7
-2005-2006,2005.5,Overall,All adults 20+,Any cardiovascular disease,4773,535,30,8.8332,0.4716,7.9088,9.7576,8.7860,1.5341,3111.2
-2007-2008,2007.5,Overall,All adults 20+,Any cardiovascular disease,5706,678,32,8.5020,0.5753,7.3743,9.6296,8.5579,2.9839,1912.3
-2009-2010,2009.5,Overall,All adults 20+,Any cardiovascular disease,6058,647,31,7.8176,0.4074,7.0191,8.6161,8.0273,1.6583,3653.1
-2011-2012,2011.5,Overall,All adults 20+,Any cardiovascular disease,5317,550,31,8.4110,0.3306,7.7630,9.0590,8.6294,0.8799,6042.9
-2013-2014,2013.5,Overall,All adults 20+,Any cardiovascular disease,5587,574,30,8.2112,0.4436,7.3417,9.0807,8.7451,1.7836,3132.4
-2015-2016,2015.5,Overall,All adults 20+,Any cardiovascular disease,5474,598,30,7.7089,0.3529,7.0171,8.4007,8.6301,1.0716,5108.1
-2017-2018,2017.5,Overall,All adults 20+,Any cardiovascular disease,5264,647,30,8.3464,0.4978,7.3707,9.3220,9.5369,2.0844,2525.4
-2021-2022,2021.5,Overall,All adults 20+,Any cardiovascular disease,6064,773,30,8.2105,0.4283,7.3710,9.0500,9.6093,1.8693,3244.0
-1999-2000,1999.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1199,108,26,7.1569,0.6562,5.8707,8.4431,3.7508,0.8507,1409.3
-1999-2000,1999.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,848,86,26,8.5749,0.9633,6.6869,10.4629,6.5410,1.2087,701.6
-1999-2000,1999.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,1970,252,27,9.0692,0.7445,7.6100,10.5283,9.0792,1.6801,1172.6
-1999-2000,1999.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,283,21,21,7.4156,0.8240,5.8005,9.0306,5.6722,0.3379,837.5
-2001-2002,2001.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1057,65,25,7.3102,0.9203,5.5064,9.1141,3.5771,1.2778,827.2
-2001-2002,2001.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,965,112,28,11.4950,1.0872,9.3641,13.6258,9.3803,1.3377,721.4
-2001-2002,2001.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2621,337,30,8.4699,0.6528,7.1904,9.7494,8.5713,1.9329,1356.0
-2001-2002,2001.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,215,13,27,5.1418,1.1692,2.8501,7.4335,4.2867,0.6659,322.9
-2003-2004,2003.5,Race and ethnicity,Mexican American,Any cardiovascular disease,950,99,25,8.2756,0.7261,6.8525,9.6987,4.4940,0.8032,1182.8
-2003-2004,2003.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,934,91,28,9.8069,0.9083,8.0266,11.5871,8.1518,1.0238,912.3
-2003-2004,2003.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2510,410,30,9.9498,0.8068,8.3685,11.5312,10.7715,2.3017,1090.5
-2003-2004,2003.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,143,6,24,2.7484,0.9826,0.8224,4.6743,2.5432,0.4721,302.9
-2005-2006,2005.5,Race and ethnicity,Mexican American,Any cardiovascular disease,959,60,29,7.6631,0.6371,6.4144,8.9118,4.7754,0.4703,2039.3
-2005-2006,2005.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1090,134,30,11.3868,1.0791,9.2718,13.5019,9.6616,1.4966,728.3
-2005-2006,2005.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2384,323,30,8.6926,0.5436,7.6272,9.7581,9.6219,1.1565,2061.4
-2005-2006,2005.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,148,6,23,4.0283,1.7932,0.5137,7.5429,3.3114,0.5618,263.4
-2007-2008,2007.5,Race and ethnicity,Mexican American,Any cardiovascular disease,981,67,31,7.2002,0.5561,6.1103,8.2901,4.2570,0.4590,2137.3
-2007-2008,2007.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1184,151,31,10.9808,1.0710,8.8816,13.0800,9.6721,1.5777,750.5
-2007-2008,2007.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2670,389,31,8.1672,0.7107,6.7743,9.5601,9.1769,2.1815,1223.9
-2007-2008,2007.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,637,49,29,6.4638,1.1895,4.1324,8.7952,5.0253,1.7750,358.9
-2009-2010,2009.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1100,77,31,7.2940,1.0378,5.2598,9.3281,4.9348,1.8080,608.4
-2009-2010,2009.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1095,121,29,9.1261,0.6341,7.8833,10.3689,8.5953,0.6325,1731.1
-2009-2010,2009.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2910,377,31,7.7004,0.5506,6.6212,8.7796,8.8751,1.4766,1970.7
-2009-2010,2009.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,615,45,30,7.1776,0.9052,5.4034,8.9518,4.4995,0.7905,778.0
-2011-2012,2011.5,Race and ethnicity,Mexican American,Any cardiovascular disease,521,41,28,10.4249,1.8097,6.8778,13.9720,5.5064,1.7960,290.1
-2011-2012,2011.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1405,157,31,10.4831,0.6440,9.2209,11.7453,9.5289,0.7238,1941.1
-2011-2012,2011.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,1949,254,31,8.1010,0.3509,7.4131,8.7888,9.2103,0.3592,5425.8
-2011-2012,2011.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,539,47,30,7.9153,1.2481,5.4690,10.3615,6.1651,1.2081,446.2
-2013-2014,2013.5,Race and ethnicity,Mexican American,Any cardiovascular disease,749,53,27,7.2182,0.7306,5.7863,8.6502,4.9108,0.5208,1438.3
-2013-2014,2013.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1147,123,30,9.0024,0.6358,7.7563,10.2486,8.3681,0.6894,1663.6
-2013-2014,2013.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2396,313,30,8.2834,0.6706,6.9691,9.5978,10.0038,1.6619,1441.7
-2013-2014,2013.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,492,38,30,6.9606,1.1788,4.6502,9.2710,5.2469,1.0557,466.0
-2015-2016,2015.5,Race and ethnicity,Mexican American,Any cardiovascular disease,951,65,28,5.9588,0.5092,4.9608,6.9568,4.0831,0.5295,1796.2
-2015-2016,2015.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1161,139,28,10.3757,1.1502,8.1214,12.6300,9.9566,1.8090,641.8
-2015-2016,2015.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,1791,256,30,7.0684,0.4565,6.1736,7.9631,9.0774,0.6046,2962.1
-2015-2016,2015.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,723,80,29,9.0145,1.2815,6.5027,11.5263,6.6881,1.6184,446.7
-2017-2018,2017.5,Race and ethnicity,Mexican American,Any cardiovascular disease,698,52,25,6.7794,1.1628,4.5004,9.0584,4.4734,1.4250,489.8
-2017-2018,2017.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1240,152,30,9.2427,0.8610,7.5551,10.9303,9.2839,1.3300,932.3
-2017-2018,2017.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,1806,318,30,8.3308,0.5759,7.2020,9.4595,10.8691,0.7607,2374.3
-2017-2018,2017.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,496,43,30,7.5696,1.5193,4.5919,10.5474,5.9229,1.6303,304.2
-2021-2022,2021.5,Race and ethnicity,Mexican American,Any cardiovascular disease,405,30,29,6.6680,1.0366,4.6363,8.6997,5.3680,0.6420,630.8
-2021-2022,2021.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,753,95,30,8.7336,1.1249,6.5288,10.9384,9.2150,1.4387,523.4
-2021-2022,2021.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,3569,486,30,8.2136,0.5040,7.2258,9.2014,10.8472,1.5092,2364.9
-2021-2022,2021.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,614,75,30,9.1882,1.3596,6.5234,11.8530,7.7549,1.4948,410.8
-1999-2000,1999.5,Age band,20-34,Any cardiovascular disease,1196,,,,,,,0.8163,,
-1999-2000,1999.5,Age band,35-44,Any cardiovascular disease,767,,,,,,,2.2562,,
-1999-2000,1999.5,Age band,45-54,Any cardiovascular disease,644,,,,,,,8.2829,,
-1999-2000,1999.5,Age band,55-64,Any cardiovascular disease,641,,,,,,,15.3656,,
-1999-2000,1999.5,Age band,65-74,Any cardiovascular disease,657,,,,,,,21.1929,,
-1999-2000,1999.5,Age band,75+,Any cardiovascular disease,539,,,,,,,31.6661,,
-2001-2002,2001.5,Age band,20-34,Any cardiovascular disease,1402,,,,,,,0.8919,,
-2001-2002,2001.5,Age band,35-44,Any cardiovascular disease,907,,,,,,,3.0575,,
-2001-2002,2001.5,Age band,45-54,Any cardiovascular disease,818,,,,,,,5.2328,,
-2001-2002,2001.5,Age band,55-64,Any cardiovascular disease,658,,,,,,,13.1215,,
-2001-2002,2001.5,Age band,65-74,Any cardiovascular disease,617,,,,,,,21.7290,,
-2001-2002,2001.5,Age band,75+,Any cardiovascular disease,625,,,,,,,35.5949,,
-2003-2004,2003.5,Age band,20-34,Any cardiovascular disease,1302,,,,,,,0.6873,,
-2003-2004,2003.5,Age band,35-44,Any cardiovascular disease,756,,,,,,,2.5793,,
-2003-2004,2003.5,Age band,45-54,Any cardiovascular disease,701,,,,,,,6.8617,,
-2003-2004,2003.5,Age band,55-64,Any cardiovascular disease,609,,,,,,,16.1518,,
-2003-2004,2003.5,Age band,65-74,Any cardiovascular disease,668,,,,,,,29.3429,,
-2003-2004,2003.5,Age band,75+,Any cardiovascular disease,704,,,,,,,37.0089,,
-2005-2006,2005.5,Age band,20-34,Any cardiovascular disease,1450,,,,,,,0.9000,,
-2005-2006,2005.5,Age band,35-44,Any cardiovascular disease,809,,,,,,,2.5550,,
-2005-2006,2005.5,Age band,45-54,Any cardiovascular disease,766,,,,,,,6.1081,,
-2005-2006,2005.5,Age band,55-64,Any cardiovascular disease,623,,,,,,,12.9305,,
-2005-2006,2005.5,Age band,65-74,Any cardiovascular disease,569,,,,,,,22.1329,,
-2005-2006,2005.5,Age band,75+,Any cardiovascular disease,556,,,,,,,37.9219,,
-2007-2008,2007.5,Age band,20-34,Any cardiovascular disease,1333,,,,,,,0.9360,,
-2007-2008,2007.5,Age band,35-44,Any cardiovascular disease,965,,,,,,,2.2916,,
-2007-2008,2007.5,Age band,45-54,Any cardiovascular disease,977,,,,,,,5.6951,,
-2007-2008,2007.5,Age band,55-64,Any cardiovascular disease,963,,,,,,,11.4378,,
-2007-2008,2007.5,Age band,65-74,Any cardiovascular disease,764,,,,,,,24.7274,,
-2007-2008,2007.5,Age band,75+,Any cardiovascular disease,704,,,,,,,34.8394,,
-2009-2010,2009.5,Age band,20-34,Any cardiovascular disease,1519,,,,,,,0.8036,,
-2009-2010,2009.5,Age band,35-44,Any cardiovascular disease,1065,,,,,,,2.2437,,
-2009-2010,2009.5,Age band,45-54,Any cardiovascular disease,1052,,,,,,,6.3135,,
-2009-2010,2009.5,Age band,55-64,Any cardiovascular disease,963,,,,,,,11.5954,,
-2009-2010,2009.5,Age band,65-74,Any cardiovascular disease,791,,,,,,,18.8964,,
-2009-2010,2009.5,Age band,75+,Any cardiovascular disease,668,,,,,,,32.0957,,
-2011-2012,2011.5,Age band,20-34,Any cardiovascular disease,1424,,,,,,,1.0414,,
-2011-2012,2011.5,Age band,35-44,Any cardiovascular disease,903,,,,,,,3.9953,,
-2011-2012,2011.5,Age band,45-54,Any cardiovascular disease,912,,,,,,,4.9641,,
-2011-2012,2011.5,Age band,55-64,Any cardiovascular disease,913,,,,,,,10.0174,,
-2011-2012,2011.5,Age band,65-74,Any cardiovascular disease,637,,,,,,,22.7628,,
-2011-2012,2011.5,Age band,75+,Any cardiovascular disease,528,,,,,,,34.6571,,
-2013-2014,2013.5,Age band,20-34,Any cardiovascular disease,1420,,,,,,,1.0574,,
-2013-2014,2013.5,Age band,35-44,Any cardiovascular disease,994,,,,,,,3.0871,,
-2013-2014,2013.5,Age band,45-54,Any cardiovascular disease,938,,,,,,,4.4151,,
-2013-2014,2013.5,Age band,55-64,Any cardiovascular disease,971,,,,,,,10.6263,,
-2013-2014,2013.5,Age band,65-74,Any cardiovascular disease,733,,,,,,,25.3985,,
-2013-2014,2013.5,Age band,75+,Any cardiovascular disease,531,,,,,,,32.1520,,
-2015-2016,2015.5,Age band,20-34,Any cardiovascular disease,1409,,,,,,,0.7639,,
-2015-2016,2015.5,Age band,35-44,Any cardiovascular disease,915,,,,,,,2.8094,,
-2015-2016,2015.5,Age band,45-54,Any cardiovascular disease,927,,,,,,,4.3291,,
-2015-2016,2015.5,Age band,55-64,Any cardiovascular disease,921,,,,,,,13.3305,,
-2015-2016,2015.5,Age band,65-74,Any cardiovascular disease,728,,,,,,,20.8396,,
-2015-2016,2015.5,Age band,75+,Any cardiovascular disease,574,,,,,,,29.2185,,
-2017-2018,2017.5,Age band,20-34,Any cardiovascular disease,1198,,,,,,,1.0140,,
-2017-2018,2017.5,Age band,35-44,Any cardiovascular disease,778,,,,,,,2.2464,,
-2017-2018,2017.5,Age band,45-54,Any cardiovascular disease,801,,,,,,,6.1896,,
-2017-2018,2017.5,Age band,55-64,Any cardiovascular disease,1095,,,,,,,13.4245,,
-2017-2018,2017.5,Age band,65-74,Any cardiovascular disease,775,,,,,,,20.8988,,
-2017-2018,2017.5,Age band,75+,Any cardiovascular disease,617,,,,,,,33.0734,,
-2021-2022,2021.5,Age band,20-34,Any cardiovascular disease,1135,,,,,,,0.9370,,
-2021-2022,2021.5,Age band,35-44,Any cardiovascular disease,871,,,,,,,1.3137,,
-2021-2022,2021.5,Age band,45-54,Any cardiovascular disease,762,,,,,,,7.2679,,
-2021-2022,2021.5,Age band,55-64,Any cardiovascular disease,1290,,,,,,,12.7243,,
-2021-2022,2021.5,Age band,65-74,Any cardiovascular disease,1303,,,,,,,20.9761,,
-2021-2022,2021.5,Age band,75+,Any cardiovascular disease,703,,,,,,,32.7577,,
-1999-2000,1999.5,Condition,Any cardiovascular disease,Any cardiovascular disease,4880.0,564.0,,,,,,8.0967,,
-2001-2002,2001.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5410.0,638.0,,,,,,7.8266,,
-2003-2004,2003.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5040.0,688.0,,,,,,9.7309,,
-2005-2006,2005.5,Condition,Any cardiovascular disease,Any cardiovascular disease,4979.0,561.0,,,,,,8.7860,,
-2007-2008,2007.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5935.0,717.0,,,,,,8.5564,,
-2009-2010,2009.5,Condition,Any cardiovascular disease,Any cardiovascular disease,6218.0,668.0,,,,,,8.0271,,
-2011-2012,2011.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5559.0,581.0,,,,,,8.6289,,
-2013-2014,2013.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5769.0,595.0,,,,,,8.7443,,
-2015-2016,2015.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5719.0,635.0,,,,,,8.6301,,
-2017-2018,2017.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5569.0,691.0,,,,,,9.5357,,
-2021-2022,2021.5,Condition,Any cardiovascular disease,Any cardiovascular disease,7808.0,982.0,,,,,,9.6093,,
-1999-2000,1999.5,Condition,Coronary heart disease,Coronary heart disease,4847.0,203.0,,,,,,3.1631,,
-2001-2002,2001.5,Condition,Coronary heart disease,Coronary heart disease,5371.0,240.0,,,,,,3.3027,,
-2003-2004,2003.5,Condition,Coronary heart disease,Coronary heart disease,5012.0,264.0,,,,,,3.9766,,
-2005-2006,2005.5,Condition,Coronary heart disease,Coronary heart disease,4953.0,200.0,,,,,,3.3369,,
-2007-2008,2007.5,Condition,Coronary heart disease,Coronary heart disease,5906.0,253.0,,,,,,3.2672,,
-2009-2010,2009.5,Condition,Coronary heart disease,Coronary heart disease,6190.0,254.0,,,,,,3.1652,,
-2011-2012,2011.5,Condition,Coronary heart disease,Coronary heart disease,5538.0,196.0,,,,,,2.9996,,
-2013-2014,2013.5,Condition,Coronary heart disease,Coronary heart disease,5751.0,232.0,,,,,,3.6515,,
-2015-2016,2015.5,Condition,Coronary heart disease,Coronary heart disease,5693.0,244.0,,,,,,3.4991,,
-2017-2018,2017.5,Condition,Coronary heart disease,Coronary heart disease,5553.0,265.0,,,,,,4.1403,,
-2021-2022,2021.5,Condition,Coronary heart disease,Coronary heart disease,7773.0,402.0,,,,,,4.0601,,
-1999-2000,1999.5,Condition,Myocardial infarction,Myocardial infarction,4864.0,221.0,,,,,,3.4229,,
-2001-2002,2001.5,Condition,Myocardial infarction,Myocardial infarction,5399.0,258.0,,,,,,2.9272,,
-2003-2004,2003.5,Condition,Myocardial infarction,Myocardial infarction,5030.0,274.0,,,,,,4.0296,,
-2005-2006,2005.5,Condition,Myocardial infarction,Myocardial infarction,4971.0,215.0,,,,,,3.5881,,
-2007-2008,2007.5,Condition,Myocardial infarction,Myocardial infarction,5924.0,282.0,,,,,,3.2985,,
-2009-2010,2009.5,Condition,Myocardial infarction,Myocardial infarction,6201.0,261.0,,,,,,3.1680,,
-2011-2012,2011.5,Condition,Myocardial infarction,Myocardial infarction,5552.0,203.0,,,,,,3.1861,,
-2013-2014,2013.5,Condition,Myocardial infarction,Myocardial infarction,5766.0,230.0,,,,,,3.3411,,
-2015-2016,2015.5,Condition,Myocardial infarction,Myocardial infarction,5710.0,251.0,,,,,,3.4007,,
-2017-2018,2017.5,Condition,Myocardial infarction,Myocardial infarction,5559.0,270.0,,,,,,3.6455,,
-2021-2022,2021.5,Condition,Myocardial infarction,Myocardial infarction,7794.0,332.0,,,,,,3.3330,,
-1999-2000,1999.5,Condition,Stroke,Stroke,4877.0,190.0,,,,,,2.2781,,
-2001-2002,2001.5,Condition,Stroke,Stroke,5401.0,204.0,,,,,,2.3001,,
-2003-2004,2003.5,Condition,Stroke,Stroke,5033.0,212.0,,,,,,2.7972,,
-2005-2006,2005.5,Condition,Stroke,Stroke,4970.0,193.0,,,,,,2.9059,,
-2007-2008,2007.5,Condition,Stroke,Stroke,5917.0,258.0,,,,,,3.1659,,
-2009-2010,2009.5,Condition,Stroke,Stroke,6210.0,227.0,,,,,,2.6108,,
-2011-2012,2011.5,Condition,Stroke,Stroke,5555.0,229.0,,,,,,2.9189,,
-2013-2014,2013.5,Condition,Stroke,Stroke,5764.0,202.0,,,,,,2.8946,,
-2015-2016,2015.5,Condition,Stroke,Stroke,5714.0,209.0,,,,,,2.7178,,
-2017-2018,2017.5,Condition,Stroke,Stroke,5559.0,273.0,,,,,,3.3103,,
-2021-2022,2021.5,Condition,Stroke,Stroke,7785.0,367.0,,,,,,3.5577,,
-1999-2000,1999.5,Condition,Heart failure,Heart failure,4856.0,167.0,,,,,,2.0470,,
-2001-2002,2001.5,Condition,Heart failure,Heart failure,5387.0,187.0,,,,,,2.1465,,
-2003-2004,2003.5,Condition,Heart failure,Heart failure,5019.0,197.0,,,,,,2.5900,,
-2005-2006,2005.5,Condition,Heart failure,Heart failure,4962.0,180.0,,,,,,2.5422,,
-2007-2008,2007.5,Condition,Heart failure,Heart failure,5910.0,217.0,,,,,,2.3778,,
-2009-2010,2009.5,Condition,Heart failure,Heart failure,6199.0,174.0,,,,,,1.9874,,
-2011-2012,2011.5,Condition,Heart failure,Heart failure,5544.0,187.0,,,,,,2.7783,,
-2013-2014,2013.5,Condition,Heart failure,Heart failure,5761.0,182.0,,,,,,2.5833,,
-2015-2016,2015.5,Condition,Heart failure,Heart failure,5708.0,214.0,,,,,,2.4085,,
-2017-2018,2017.5,Condition,Heart failure,Heart failure,5552.0,201.0,,,,,,2.3372,,
-2021-2022,2021.5,Condition,Heart failure,Heart failure,7791.0,343.0,,,,,,3.0200,,
-1999-2000,1999.5,Condition,Angina,Angina,4854.0,180.0,,,,,,2.9020,,
-2001-2002,2001.5,Condition,Angina,Angina,5379.0,199.0,,,,,,2.9266,,
-2003-2004,2003.5,Condition,Angina,Angina,5021.0,212.0,,,,,,3.1437,,
-2005-2006,2005.5,Condition,Angina,Angina,4962.0,155.0,,,,,,2.5528,,
-2007-2008,2007.5,Condition,Angina,Angina,5913.0,164.0,,,,,,2.0586,,
-2009-2010,2009.5,Condition,Angina,Angina,6200.0,155.0,,,,,,1.9125,,
-2011-2012,2011.5,Condition,Angina,Angina,5541.0,129.0,,,,,,2.2615,,
-2013-2014,2013.5,Condition,Angina,Angina,5761.0,136.0,,,,,,2.1267,,
-2015-2016,2015.5,Condition,Angina,Angina,5701.0,133.0,,,,,,2.0671,,
-2017-2018,2017.5,Condition,Angina,Angina,5539.0,161.0,,,,,,2.6484,,
-2021-2022,2021.5,Condition,Angina,Angina,7783.0,181.0,,,,,,1.6919,,
+cycle,year,dimension,level,outcome,n,n_cases,n_psu,pct_standardised,se_pct,ci_lo_pct,ci_hi_pct,pct_crude,design_dof,ci_crit,deff,n_effective
+1999-2000,1999.5,Overall,All adults 20+,Any cardiovascular disease,4880,564,27,8.6920,0.6071,7.3898,9.9942,8.0208,14,2.1448,2.9195,1671.5
+2001-2002,2001.5,Overall,All adults 20+,Any cardiovascular disease,5410,638,30,8.7557,0.5396,7.6056,9.9058,8.0928,15,2.1314,2.4637,2195.9
+2003-2004,2003.5,Overall,All adults 20+,Any cardiovascular disease,5039,688,30,9.7433,0.6979,8.2557,11.2310,9.5750,15,2.1314,3.6155,1393.7
+2005-2006,2005.5,Overall,All adults 20+,Any cardiovascular disease,4979,561,30,8.8086,0.4534,7.8423,9.7749,8.7602,15,2.1314,1.4774,3370.0
+2007-2008,2007.5,Overall,All adults 20+,Any cardiovascular disease,5934,717,32,8.5751,0.5359,7.4390,9.7112,8.6495,16,2.1199,2.6948,2202.0
+2009-2010,2009.5,Overall,All adults 20+,Any cardiovascular disease,6216,668,31,7.7631,0.4102,6.8935,8.6328,7.9815,16,2.1199,1.7371,3578.4
+2011-2012,2011.5,Overall,All adults 20+,Any cardiovascular disease,5557,581,31,8.2621,0.3050,7.6186,8.9057,8.5045,17,2.1098,0.7892,7041.0
+2013-2014,2013.5,Overall,All adults 20+,Any cardiovascular disease,5768,595,30,8.2543,0.4328,7.3318,9.1768,8.7544,15,2.1314,1.7408,3313.4
+2015-2016,2015.5,Overall,All adults 20+,Any cardiovascular disease,5719,635,30,7.7002,0.3522,6.9495,8.4509,8.6534,15,2.1314,1.1209,5102.1
+2017-2018,2017.5,Overall,All adults 20+,Any cardiovascular disease,5568,691,30,8.4073,0.4587,7.4296,9.3850,9.5688,15,2.1314,1.9012,2928.7
+2021-2022,2022.6,Overall,All adults 20+,Any cardiovascular disease,7807,982,30,8.0334,0.3769,7.2301,8.8368,9.4036,15,2.1314,1.8889,4133.0
+1999-2000,1999.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1282,124,26,7.2875,0.5877,6.0178,8.5572,3.8125,13,2.1604,0.7412,1729.7
+1999-2000,1999.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,910,102,26,9.2933,1.0347,7.0580,11.5286,7.0041,13,2.1604,1.4197,641.0
+1999-2000,1999.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2214,298,27,8.8383,0.7337,7.2646,10.4119,8.9306,14,2.1448,1.8370,1205.3
+1999-2000,1999.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,310,24,21,7.4376,0.8343,5.5136,9.3616,5.5631,8,2.3060,0.4023,770.6
+2001-2002,2001.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1113,74,25,7.2900,0.7554,5.6069,8.9732,3.4868,10,2.2281,0.9422,1181.3
+2001-2002,2001.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1012,120,28,11.1627,1.0014,8.9992,13.3262,9.2030,13,2.1604,1.2111,835.6
+2001-2002,2001.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2858,413,30,8.6703,0.6395,7.3072,10.0335,8.9290,15,2.1314,1.9765,1446.0
+2001-2002,2001.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,237,16,28,5.2737,1.0737,2.9541,7.5934,4.3016,13,2.1604,0.6464,366.6
+2003-2004,2003.5,Race and ethnicity,Mexican American,Any cardiovascular disease,984,101,26,8.1978,0.7308,6.6055,9.7901,4.4846,12,2.1788,0.8304,1184.9
+2003-2004,2003.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,994,97,29,9.7095,0.7955,8.0032,11.4157,8.0623,14,2.1448,0.8501,1169.3
+2003-2004,2003.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2689,454,30,9.8104,0.7772,8.1537,11.4670,10.6634,15,2.1314,2.2824,1178.1
+2003-2004,2003.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,152,7,24,2.8544,1.0376,0.5425,5.1664,2.4710,10,2.2281,0.5143,295.6
+2005-2006,2005.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1003,62,29,7.6629,0.6857,6.1923,9.1336,4.7798,14,2.1448,0.5871,1708.4
+2005-2006,2005.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1123,136,30,11.3062,1.0577,9.0517,13.5608,9.5760,15,2.1314,1.4928,752.3
+2005-2006,2005.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2495,343,30,8.6265,0.5096,7.5403,9.7128,9.5604,15,2.1314,1.0532,2368.9
+2005-2006,2005.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,154,6,23,3.8730,1.7242,0.0000,7.7733,3.2943,9,2.2622,0.5638,273.2
+2007-2008,2007.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1032,72,31,7.3039,0.6498,5.9189,8.6890,4.2265,15,2.1314,0.6748,1529.3
+2007-2008,2007.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1227,158,31,10.9708,1.0758,8.6778,13.2638,9.7461,15,2.1314,1.6628,737.9
+2007-2008,2007.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2761,414,32,8.3060,0.6495,6.9291,9.6829,9.3489,16,2.1199,1.8611,1483.6
+2007-2008,2007.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,666,51,29,6.2057,1.1440,3.7520,8.6594,4.8791,14,2.1448,1.7719,375.9
+2009-2010,2009.5,Race and ethnicity,Mexican American,Any cardiovascular disease,1138,84,31,7.4443,0.9914,5.3426,9.5460,5.0984,16,2.1199,1.7919,635.1
+2009-2010,2009.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1122,123,29,8.9977,0.6008,7.7090,10.2864,8.4947,14,2.1448,0.6000,1870.1
+2009-2010,2009.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2976,386,31,7.6433,0.5615,6.4530,8.8335,8.8055,16,2.1199,1.5741,1890.6
+2009-2010,2009.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,632,47,30,7.2405,0.9128,5.2949,9.1861,4.4616,15,2.1314,0.8086,781.6
+2011-2012,2011.5,Race and ethnicity,Mexican American,Any cardiovascular disease,540,41,28,9.7920,1.5847,6.3932,13.1907,5.2289,14,2.1448,1.4821,364.4
+2011-2012,2011.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1455,167,31,10.4936,0.5718,9.2872,11.7000,9.5411,17,2.1098,0.5795,2510.8
+2011-2012,2011.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2040,266,31,7.9390,0.3222,7.2592,8.6187,9.0535,17,2.1098,0.3170,6434.9
+2011-2012,2011.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,577,50,30,7.5907,1.1336,5.1876,9.9938,5.8954,16,2.1199,1.1264,512.2
+2013-2014,2013.5,Race and ethnicity,Mexican American,Any cardiovascular disease,767,54,27,7.2461,0.7368,5.6543,8.8378,4.9542,13,2.1604,0.5301,1446.8
+2013-2014,2013.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1177,128,30,9.0615,0.6266,7.7259,10.3972,8.4035,15,2.1314,0.6893,1707.4
+2013-2014,2013.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,2471,325,30,8.3244,0.6612,6.9152,9.7336,10.0129,15,2.1314,1.6526,1495.2
+2013-2014,2013.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,508,38,30,6.7642,1.1536,4.3053,9.2231,5.1276,15,2.1314,1.0712,474.3
+2015-2016,2015.5,Race and ethnicity,Mexican American,Any cardiovascular disease,995,72,29,6.3965,0.3860,5.5686,7.2244,4.3466,14,2.1448,0.2949,3373.8
+2015-2016,2015.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1198,149,28,10.5849,1.1918,8.0102,13.1597,10.1823,13,2.1604,2.0106,595.8
+2015-2016,2015.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,1863,267,30,7.0094,0.4428,6.0657,7.9532,9.0356,15,2.1314,0.5965,3123.1
+2015-2016,2015.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,768,85,29,8.8414,1.2772,6.1020,11.5808,6.6224,14,2.1448,1.7520,438.4
+2017-2018,2017.5,Race and ethnicity,Mexican American,Any cardiovascular disease,735,53,25,6.2609,1.1609,3.7057,8.8161,4.2482,11,2.2010,1.5869,463.2
+2017-2018,2017.5,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,1298,162,30,9.2331,0.8503,7.4206,11.0455,9.2687,15,2.1314,1.3708,946.9
+2017-2018,2017.5,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,1934,346,30,8.5507,0.6135,7.2430,9.8584,10.9811,15,2.1314,0.9261,2088.3
+2017-2018,2017.5,Race and ethnicity,Other Hispanic,Any cardiovascular disease,517,45,30,7.7628,1.4380,4.6978,10.8279,5.9994,15,2.1314,1.5656,330.2
+2021-2022,2022.6,Race and ethnicity,Mexican American,Any cardiovascular disease,545,37,29,6.4855,0.9722,4.4002,8.5707,4.9212,14,2.1448,0.8235,661.8
+2021-2022,2022.6,Race and ethnicity,Non-Hispanic Black,Any cardiovascular disease,995,121,30,8.6709,1.0096,6.5190,10.8229,9.1996,15,2.1314,1.4966,664.8
+2021-2022,2022.6,Race and ethnicity,Non-Hispanic White,Any cardiovascular disease,4554,621,30,7.9944,0.4644,7.0045,8.9843,10.6006,15,2.1314,1.6809,2709.2
+2021-2022,2022.6,Race and ethnicity,Other Hispanic,Any cardiovascular disease,779,93,30,9.3915,1.0891,7.0702,11.7128,8.1486,15,2.1314,1.2825,607.4
+1999-2000,1999.5,Age band,20-34,Any cardiovascular disease,1290,,,,,,,0.9397,,,,
+1999-2000,1999.5,Age band,35-44,Any cardiovascular disease,820,,,,,,,2.1161,,,,
+1999-2000,1999.5,Age band,45-54,Any cardiovascular disease,694,,,,,,,7.6428,,,,
+1999-2000,1999.5,Age band,55-64,Any cardiovascular disease,684,,,,,,,15.4181,,,,
+1999-2000,1999.5,Age band,65-74,Any cardiovascular disease,713,,,,,,,21.5099,,,,
+1999-2000,1999.5,Age band,75+,Any cardiovascular disease,679,,,,,,,30.9600,,,,
+2001-2002,2001.5,Age band,20-34,Any cardiovascular disease,1476,,,,,,,0.9113,,,,
+2001-2002,2001.5,Age band,35-44,Any cardiovascular disease,932,,,,,,,3.0981,,,,
+2001-2002,2001.5,Age band,45-54,Any cardiovascular disease,846,,,,,,,5.1246,,,,
+2001-2002,2001.5,Age band,55-64,Any cardiovascular disease,694,,,,,,,14.0034,,,,
+2001-2002,2001.5,Age band,65-74,Any cardiovascular disease,667,,,,,,,21.2876,,,,
+2001-2002,2001.5,Age band,75+,Any cardiovascular disease,795,,,,,,,37.0761,,,,
+2003-2004,2003.5,Age band,20-34,Any cardiovascular disease,1364,,,,,,,0.6515,,,,
+2003-2004,2003.5,Age band,35-44,Any cardiovascular disease,795,,,,,,,2.5419,,,,
+2003-2004,2003.5,Age band,45-54,Any cardiovascular disease,731,,,,,,,6.7079,,,,
+2003-2004,2003.5,Age band,55-64,Any cardiovascular disease,655,,,,,,,15.7366,,,,
+2003-2004,2003.5,Age band,65-74,Any cardiovascular disease,704,,,,,,,28.6760,,,,
+2003-2004,2003.5,Age band,75+,Any cardiovascular disease,790,,,,,,,36.9878,,,,
+2005-2006,2005.5,Age band,20-34,Any cardiovascular disease,1513,,,,,,,0.8941,,,,
+2005-2006,2005.5,Age band,35-44,Any cardiovascular disease,846,,,,,,,2.5521,,,,
+2005-2006,2005.5,Age band,45-54,Any cardiovascular disease,781,,,,,,,6.2875,,,,
+2005-2006,2005.5,Age band,55-64,Any cardiovascular disease,650,,,,,,,12.9459,,,,
+2005-2006,2005.5,Age band,65-74,Any cardiovascular disease,591,,,,,,,22.4427,,,,
+2005-2006,2005.5,Age band,75+,Any cardiovascular disease,598,,,,,,,36.8969,,,,
+2007-2008,2007.5,Age band,20-34,Any cardiovascular disease,1382,,,,,,,0.9089,,,,
+2007-2008,2007.5,Age band,35-44,Any cardiovascular disease,998,,,,,,,2.2313,,,,
+2007-2008,2007.5,Age band,45-54,Any cardiovascular disease,1000,,,,,,,6.1341,,,,
+2007-2008,2007.5,Age band,55-64,Any cardiovascular disease,998,,,,,,,11.3628,,,,
+2007-2008,2007.5,Age band,65-74,Any cardiovascular disease,789,,,,,,,24.6491,,,,
+2007-2008,2007.5,Age band,75+,Any cardiovascular disease,767,,,,,,,35.1702,,,,
+2009-2010,2009.5,Age band,20-34,Any cardiovascular disease,1551,,,,,,,0.7891,,,,
+2009-2010,2009.5,Age band,35-44,Any cardiovascular disease,1092,,,,,,,2.1968,,,,
+2009-2010,2009.5,Age band,45-54,Any cardiovascular disease,1073,,,,,,,6.3433,,,,
+2009-2010,2009.5,Age band,55-64,Any cardiovascular disease,978,,,,,,,11.5308,,,,
+2009-2010,2009.5,Age band,65-74,Any cardiovascular disease,815,,,,,,,18.7782,,,,
+2009-2010,2009.5,Age band,75+,Any cardiovascular disease,707,,,,,,,31.7830,,,,
+2011-2012,2011.5,Age band,20-34,Any cardiovascular disease,1490,,,,,,,1.1026,,,,
+2011-2012,2011.5,Age band,35-44,Any cardiovascular disease,928,,,,,,,3.7820,,,,
+2011-2012,2011.5,Age band,45-54,Any cardiovascular disease,940,,,,,,,4.8487,,,,
+2011-2012,2011.5,Age band,55-64,Any cardiovascular disease,951,,,,,,,9.8405,,,,
+2011-2012,2011.5,Age band,65-74,Any cardiovascular disease,669,,,,,,,22.8245,,,,
+2011-2012,2011.5,Age band,75+,Any cardiovascular disease,579,,,,,,,33.7137,,,,
+2013-2014,2013.5,Age band,20-34,Any cardiovascular disease,1482,,,,,,,0.9990,,,,
+2013-2014,2013.5,Age band,35-44,Any cardiovascular disease,1021,,,,,,,3.0987,,,,
+2013-2014,2013.5,Age band,45-54,Any cardiovascular disease,964,,,,,,,4.6654,,,,
+2013-2014,2013.5,Age band,55-64,Any cardiovascular disease,996,,,,,,,10.3983,,,,
+2013-2014,2013.5,Age band,65-74,Any cardiovascular disease,748,,,,,,,25.1452,,,,
+2013-2014,2013.5,Age band,75+,Any cardiovascular disease,557,,,,,,,32.8732,,,,
+2015-2016,2015.5,Age band,20-34,Any cardiovascular disease,1476,,,,,,,0.7249,,,,
+2015-2016,2015.5,Age band,35-44,Any cardiovascular disease,951,,,,,,,2.7264,,,,
+2015-2016,2015.5,Age band,45-54,Any cardiovascular disease,956,,,,,,,4.2983,,,,
+2015-2016,2015.5,Age band,55-64,Any cardiovascular disease,958,,,,,,,13.3721,,,,
+2015-2016,2015.5,Age band,65-74,Any cardiovascular disease,758,,,,,,,21.1617,,,,
+2015-2016,2015.5,Age band,75+,Any cardiovascular disease,620,,,,,,,29.1260,,,,
+2017-2018,2017.5,Age band,20-34,Any cardiovascular disease,1270,,,,,,,0.9833,,,,
+2017-2018,2017.5,Age band,35-44,Any cardiovascular disease,825,,,,,,,2.6222,,,,
+2017-2018,2017.5,Age band,45-54,Any cardiovascular disease,835,,,,,,,6.0459,,,,
+2017-2018,2017.5,Age band,55-64,Any cardiovascular disease,1138,,,,,,,13.3683,,,,
+2017-2018,2017.5,Age band,65-74,Any cardiovascular disease,819,,,,,,,21.0446,,,,
+2017-2018,2017.5,Age band,75+,Any cardiovascular disease,681,,,,,,,33.1265,,,,
+2021-2022,2022.6,Age band,20-34,Any cardiovascular disease,1534,,,,,,,1.3087,,,,
+2021-2022,2022.6,Age band,35-44,Any cardiovascular disease,1130,,,,,,,1.4501,,,,
+2021-2022,2022.6,Age band,45-54,Any cardiovascular disease,989,,,,,,,6.4182,,,,
+2021-2022,2022.6,Age band,55-64,Any cardiovascular disease,1569,,,,,,,12.3746,,,,
+2021-2022,2022.6,Age band,65-74,Any cardiovascular disease,1594,,,,,,,21.0775,,,,
+2021-2022,2022.6,Age band,75+,Any cardiovascular disease,991,,,,,,,31.3460,,,,
+1999-2000,1999.5,Condition,Any cardiovascular disease,Any cardiovascular disease,4880.0,564.0,,,,,,8.0967,,,,
+2001-2002,2001.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5410.0,638.0,,,,,,7.8266,,,,
+2003-2004,2003.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5040.0,688.0,,,,,,9.7309,,,,
+2005-2006,2005.5,Condition,Any cardiovascular disease,Any cardiovascular disease,4979.0,561.0,,,,,,8.7860,,,,
+2007-2008,2007.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5935.0,717.0,,,,,,8.5564,,,,
+2009-2010,2009.5,Condition,Any cardiovascular disease,Any cardiovascular disease,6218.0,668.0,,,,,,8.0271,,,,
+2011-2012,2011.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5559.0,581.0,,,,,,8.6289,,,,
+2013-2014,2013.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5769.0,595.0,,,,,,8.7443,,,,
+2015-2016,2015.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5719.0,635.0,,,,,,8.6301,,,,
+2017-2018,2017.5,Condition,Any cardiovascular disease,Any cardiovascular disease,5569.0,691.0,,,,,,9.5357,,,,
+2021-2022,2021.5,Condition,Any cardiovascular disease,Any cardiovascular disease,7808.0,982.0,,,,,,9.6093,,,,
+1999-2000,1999.5,Condition,Coronary heart disease,Coronary heart disease,4847.0,203.0,,,,,,3.1631,,,,
+2001-2002,2001.5,Condition,Coronary heart disease,Coronary heart disease,5371.0,240.0,,,,,,3.3027,,,,
+2003-2004,2003.5,Condition,Coronary heart disease,Coronary heart disease,5012.0,264.0,,,,,,3.9766,,,,
+2005-2006,2005.5,Condition,Coronary heart disease,Coronary heart disease,4953.0,200.0,,,,,,3.3369,,,,
+2007-2008,2007.5,Condition,Coronary heart disease,Coronary heart disease,5906.0,253.0,,,,,,3.2672,,,,
+2009-2010,2009.5,Condition,Coronary heart disease,Coronary heart disease,6190.0,254.0,,,,,,3.1652,,,,
+2011-2012,2011.5,Condition,Coronary heart disease,Coronary heart disease,5538.0,196.0,,,,,,2.9996,,,,
+2013-2014,2013.5,Condition,Coronary heart disease,Coronary heart disease,5751.0,232.0,,,,,,3.6515,,,,
+2015-2016,2015.5,Condition,Coronary heart disease,Coronary heart disease,5693.0,244.0,,,,,,3.4991,,,,
+2017-2018,2017.5,Condition,Coronary heart disease,Coronary heart disease,5553.0,265.0,,,,,,4.1403,,,,
+2021-2022,2021.5,Condition,Coronary heart disease,Coronary heart disease,7773.0,402.0,,,,,,4.0601,,,,
+1999-2000,1999.5,Condition,Myocardial infarction,Myocardial infarction,4864.0,221.0,,,,,,3.4229,,,,
+2001-2002,2001.5,Condition,Myocardial infarction,Myocardial infarction,5399.0,258.0,,,,,,2.9272,,,,
+2003-2004,2003.5,Condition,Myocardial infarction,Myocardial infarction,5030.0,274.0,,,,,,4.0296,,,,
+2005-2006,2005.5,Condition,Myocardial infarction,Myocardial infarction,4971.0,215.0,,,,,,3.5881,,,,
+2007-2008,2007.5,Condition,Myocardial infarction,Myocardial infarction,5924.0,282.0,,,,,,3.2985,,,,
+2009-2010,2009.5,Condition,Myocardial infarction,Myocardial infarction,6201.0,261.0,,,,,,3.1680,,,,
+2011-2012,2011.5,Condition,Myocardial infarction,Myocardial infarction,5552.0,203.0,,,,,,3.1861,,,,
+2013-2014,2013.5,Condition,Myocardial infarction,Myocardial infarction,5766.0,230.0,,,,,,3.3411,,,,
+2015-2016,2015.5,Condition,Myocardial infarction,Myocardial infarction,5710.0,251.0,,,,,,3.4007,,,,
+2017-2018,2017.5,Condition,Myocardial infarction,Myocardial infarction,5559.0,270.0,,,,,,3.6455,,,,
+2021-2022,2021.5,Condition,Myocardial infarction,Myocardial infarction,7794.0,332.0,,,,,,3.3330,,,,
+1999-2000,1999.5,Condition,Stroke,Stroke,4877.0,190.0,,,,,,2.2781,,,,
+2001-2002,2001.5,Condition,Stroke,Stroke,5401.0,204.0,,,,,,2.3001,,,,
+2003-2004,2003.5,Condition,Stroke,Stroke,5033.0,212.0,,,,,,2.7972,,,,
+2005-2006,2005.5,Condition,Stroke,Stroke,4970.0,193.0,,,,,,2.9059,,,,
+2007-2008,2007.5,Condition,Stroke,Stroke,5917.0,258.0,,,,,,3.1659,,,,
+2009-2010,2009.5,Condition,Stroke,Stroke,6210.0,227.0,,,,,,2.6108,,,,
+2011-2012,2011.5,Condition,Stroke,Stroke,5555.0,229.0,,,,,,2.9189,,,,
+2013-2014,2013.5,Condition,Stroke,Stroke,5764.0,202.0,,,,,,2.8946,,,,
+2015-2016,2015.5,Condition,Stroke,Stroke,5714.0,209.0,,,,,,2.7178,,,,
+2017-2018,2017.5,Condition,Stroke,Stroke,5559.0,273.0,,,,,,3.3103,,,,
+2021-2022,2021.5,Condition,Stroke,Stroke,7785.0,367.0,,,,,,3.5577,,,,
+1999-2000,1999.5,Condition,Heart failure,Heart failure,4856.0,167.0,,,,,,2.0470,,,,
+2001-2002,2001.5,Condition,Heart failure,Heart failure,5387.0,187.0,,,,,,2.1465,,,,
+2003-2004,2003.5,Condition,Heart failure,Heart failure,5019.0,197.0,,,,,,2.5900,,,,
+2005-2006,2005.5,Condition,Heart failure,Heart failure,4962.0,180.0,,,,,,2.5422,,,,
+2007-2008,2007.5,Condition,Heart failure,Heart failure,5910.0,217.0,,,,,,2.3778,,,,
+2009-2010,2009.5,Condition,Heart failure,Heart failure,6199.0,174.0,,,,,,1.9874,,,,
+2011-2012,2011.5,Condition,Heart failure,Heart failure,5544.0,187.0,,,,,,2.7783,,,,
+2013-2014,2013.5,Condition,Heart failure,Heart failure,5761.0,182.0,,,,,,2.5833,,,,
+2015-2016,2015.5,Condition,Heart failure,Heart failure,5708.0,214.0,,,,,,2.4085,,,,
+2017-2018,2017.5,Condition,Heart failure,Heart failure,5552.0,201.0,,,,,,2.3372,,,,
+2021-2022,2021.5,Condition,Heart failure,Heart failure,7791.0,343.0,,,,,,3.0200,,,,
+1999-2000,1999.5,Condition,Angina,Angina,4854.0,180.0,,,,,,2.9020,,,,
+2001-2002,2001.5,Condition,Angina,Angina,5379.0,199.0,,,,,,2.9266,,,,
+2003-2004,2003.5,Condition,Angina,Angina,5021.0,212.0,,,,,,3.1437,,,,
+2005-2006,2005.5,Condition,Angina,Angina,4962.0,155.0,,,,,,2.5528,,,,
+2007-2008,2007.5,Condition,Angina,Angina,5913.0,164.0,,,,,,2.0586,,,,
+2009-2010,2009.5,Condition,Angina,Angina,6200.0,155.0,,,,,,1.9125,,,,
+2011-2012,2011.5,Condition,Angina,Angina,5541.0,129.0,,,,,,2.2615,,,,
+2013-2014,2013.5,Condition,Angina,Angina,5761.0,136.0,,,,,,2.1267,,,,
+2015-2016,2015.5,Condition,Angina,Angina,5701.0,133.0,,,,,,2.0671,,,,
+2017-2018,2017.5,Condition,Angina,Angina,5539.0,161.0,,,,,,2.6484,,,,
+2021-2022,2021.5,Condition,Angina,Angina,7783.0,181.0,,,,,,1.6919,,,,

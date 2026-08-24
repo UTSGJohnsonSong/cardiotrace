@@ -7,7 +7,7 @@ Two estimators, implemented directly rather than pulled from lifelines:
   aalen_johansen_cif    treats death from another cause as a COMPETING EVENT
 
 The distinction is the point of the second figure. In this cohort competing
-deaths outnumber CVD deaths 2.9 : 1 (2,712 vs 925), and the naive 1 - KM curve
+deaths outnumber CVD deaths 2.9 : 1 (2,711 vs 925), and the naive 1 - KM curve
 answers a question nobody asks: "what fraction would die of CVD if it were
 impossible to die of anything else". Aalen-Johansen answers the real one: "what
 fraction actually do". With competing events this common the gap is large enough

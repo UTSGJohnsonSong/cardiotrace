@@ -162,7 +162,24 @@ RACE_LABELS = {
 CYCLE_MIDPOINT_OVERRIDE = {"2021-2022": 2022.6}
 
 # Display label, where it differs from the key this project stores.
+# The machine key stays "2021-2022" everywhere -- it is the NHANES file suffix,
+# the folder name and the value in every CSV, and renaming it would break the
+# join to the raw files. What has to change is what a READER sees: that cycle
+# was fielded August 2021 to August 2023, on a redesigned sample, and a page
+# that calls it "2021-2022" beside ten genuine two-year cycles is telling the
+# reader it is the eleventh of the same kind.
 CYCLE_LABEL = {"2021-2022": "Aug 2021&ndash;Aug 2023"}
+
+
+def display_cycle(cycle: str, dash: str = "&ndash;") -> str:
+    """Reader-facing name for a cycle key.
+
+    Defined next to CYCLE_LABEL and exported, because for one release the map
+    existed and had no callers: every page still printed the raw key, and the
+    map read like a solved problem.
+    """
+    label = CYCLE_LABEL.get(cycle, cycle)
+    return label if dash == "&ndash;" else label.replace("&ndash;", dash)
 
 
 def cycle_midpoint(cycle: str) -> float:

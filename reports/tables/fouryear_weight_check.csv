@@ -1,0 +1,15 @@
+quantity,value
+participants with both weights,21004
+sum WTMEC4YR,278652243
+sum WTMEC2YR / 2,276064809
+aggregate gap (%),0.9373
+"per-person ratio, median",1.0475
+"per-person ratio, 1st pctile",0.7673
+"per-person ratio, 99th pctile",2.0
+share of people off by >20% (%),20.63
+cohort members from 1999-2002,4586
+their share of cohort weight (%),21.76
+"HR per 10 mmHg, WTMEC2YR throughout (published)",1.1216
+"HR per 10 mmHg, four-year weights applied",1.1233
+largest hazard-ratio shift across all terms (%),0.9051
+term carrying that shift,smoke_former

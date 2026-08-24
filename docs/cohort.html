@@ -703,7 +703,17 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       null. Exposures are measured once, which supports baseline risk prediction — the same design
       as Framingham, the Pooled Cohort Equations, SCORE2 and QRISK3 — but not dynamic risk
       updating, and a single measurement attenuates associations through regression dilution.
-      Follow-up ends 2019-12-31, entirely before the pandemic.
+      Follow-up ends 2019-12-31, entirely before the pandemic. Two design choices are
+      simplifications rather than corrections: the cohort pools eight cycles on the two-year
+      examination weight, where NCHS's guidance for an analysis spanning 1999&ndash;2002 is to use
+      the four-year weights released for those cycles, and complete-case restriction to the eleven
+      model inputs drops 9.6% of the cohort but 10.9% of the cardiovascular deaths. The first was
+      measured before being accepted: the four-year weights disagree sharply per person
+      &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
+      the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
+      which is below the precision printed here. The second is not corrected at all: the
+      inverse-probability weights described above address censoring, not selection into the
+      complete-case subsample.
     </div>
   </div>
 </section>

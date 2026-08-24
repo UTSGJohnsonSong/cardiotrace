@@ -29,7 +29,9 @@ look rather than a discrepancy nobody can adjudicate.
 | `outcome` | The condition estimated |
 | `n`, `n_cases`, `n_psu` | Unweighted denominator, cases, sampling units |
 | `pct_standardised` | Age-standardised to the 2000 U.S. standard population |
-| `se_pct`, `ci_lo_pct`, `ci_hi_pct` | Design-based standard error and 95% interval |
+| `se_pct`, `ci_lo_pct`, `ci_hi_pct` | Design-based standard error and 95% interval. The interval is **t(`design_dof`)**, not normal — see the next two rows |
+| `design_dof` | Design degrees of freedom for that row: PSUs − strata. Single-digit for most cycles |
+| `ci_crit` | The critical value actually used, so a workbook can state its own convention. t(8) = 2.306 against z = 1.96 is an 18% wider band, and a legend that says only "95% CI" hides which one is on the screen |
 | `pct_crude` | Unstandardised, for the comparison the report makes in §2 |
 | `deff`, `n_effective` | Design effect and effective sample size |
 
