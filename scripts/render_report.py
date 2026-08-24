@@ -254,6 +254,17 @@ thead th {
 }
 tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
 td.em { font-weight: 700; color: var(--ink); }
+/* Second line of a header cell: which variant of the statistic this column is.
+   Lower case against the uppercase header, because it is a qualifier and not a
+   second heading. */
+thead th .thsub {
+  display: block; margin-top: 2px;
+  font-weight: 400; letter-spacing: 0.02em; text-transform: none;
+  /* No opacity here. At 11px this is normal-size text under WCAG, so it needs
+     4.5:1, and opacity 0.85 over the page ground measured 3.71:1 -- a fail that
+     looked like a design choice. The token on its own clears it. */
+  color: var(--ink-3);
+}
 
 /* ── callouts & inline ────────────────────────────────────────────── */
 .note {
@@ -476,9 +487,16 @@ def build() -> str:
         for r in cif.itertuples(index=False))
 
     pred = model["prediction"]
+    # The unweighted concordance sits beside the weighted one because the
+    # weighted value is the headline and the gap is large: 0.804 was published
+    # for as long as concordance() accepted a weights argument its body did not
+    # read. A reader who only sees the corrected number cannot tell how far the
+    # correction moved it, and the README says both -- the page should not
+    # disclose less than the file it is generated alongside.
     rows_pred = "".join(
         f"<tr><td>{k}</td><td>{v['n']:,}</td><td>{v['cvd_deaths']}</td>"
         f"<td class='em'>{v['harrell_c']:.3f}</td>"
+        f"<td>{v['harrell_c_unweighted']:.3f}</td>"
         f"<td>{v['mean_predicted_pct']:.2f}%</td>"
         f"<td>{v['mean_observed_pct']:.2f}%</td></tr>"
         for k, v in pred.items())
@@ -1408,8 +1426,13 @@ def build() -> str:
 
     <div class="twrap">
       <table>
-        <caption>Discrimination and calibration, held-out cycles</caption>
-        <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th><th>Harrell&rsquo;s C</th>
+        <caption>Discrimination and calibration, held-out cycles. Both concordance
+        columns are censored at the horizon the row names; the weighted column is
+        the estimate for the US population the sample represents, the unweighted
+        one is the estimate for the sample itself.</caption>
+        <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th>
+          <th>Harrell&rsquo;s C<br><span class="thsub">survey-weighted</span></th>
+          <th>Harrell&rsquo;s C<br><span class="thsub">unweighted</span></th>
           <th>Mean predicted</th><th>Mean observed</th></tr></thead>
         <tbody>{rows_pred}</tbody>
       </table>
@@ -1480,7 +1503,8 @@ def build() -> str:
       simplifications rather than corrections: the cohort pools eight cycles on the two-year
       examination weight, where NCHS's guidance for an analysis spanning 1999&ndash;2002 is to use
       the four-year weights released for those cycles, and complete-case restriction to the eleven
-      model inputs drops 9.6% of the cohort but 10.9% of the cardiovascular deaths. The first was
+      model inputs drops 9.6% of the cohort and 10.9% of the cardiovascular deaths
+      (20,736 &rarr; 18,744 people, 925 &rarr; 824 deaths). The first was
       measured before being accepted: the four-year weights disagree sharply per person
       &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
       the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
