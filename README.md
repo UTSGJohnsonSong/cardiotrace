@@ -21,7 +21,7 @@ of the 1,821 published NHANES files is recorded with the rule that kept or dropp
 - **Prediction, validated forward in time:** Harrell C 0.838 at 10 years on held-out later cycles (n = 5,163), survey-weighted and censored at the horizon; 0.804 unweighted. Competing risks modelled, never censored away.
 - **What limits that model is the variable set, not its form.** A screen of 15 laboratory candidates against the eleven selected 1 (`log_uacr`), worth +0.0176 in C (95% CI +0.0074 to +0.0275). Gradient boosting on the same eleven is worth -0.0542 — worse than a Cox model on age and sex alone.
 
-_Figures in [`reports/figures/`](reports/figures). Numbers in [`reports/descriptive_results.json`](reports/descriptive_results.json), [`reports/model_results.json`](reports/model_results.json) and [`reports/tables/`](reports/tables). `reports/results.json` is the output of the deprecated `run_pipeline.py` and is not a source for anything here._
+_Figures in [`reports/figures/`](reports/figures). Numbers in [`reports/descriptive_results.json`](reports/descriptive_results.json), [`reports/model_results.json`](reports/model_results.json) and [`reports/tables/`](reports/tables). The superseded pipeline and everything it produced are in [`legacy-invalid/`](legacy-invalid), which no build target reaches._
 <!-- KEY_FINDINGS_END -->
 
 ---
@@ -184,8 +184,18 @@ CardioTrace/
 │   ├── pce-benchmark.md            # PCE coefficients: provenance and benchmark design
 │   └── advisor-briefing.md         # the narrative version
 ├── dbt/                            # staging + mart, for the descriptive analyses
-└── reports/{figures,tables}        # generated artifacts
+├── reports/{figures,tables}        # generated artifacts
+└── legacy-invalid/                 # the superseded pipeline, kept and never run
 ```
+
+`legacy-invalid/` holds the first version of this project: a cross-sectional XGBoost model
+that regressed self-reported cardiovascular disease on variables measured at the same
+visit, on a sample where a quarter of the laboratory values had been imputed because the
+downloader treated a 404 as an empty module. It is kept rather than deleted, because the
+numbers it produced were published and deleting it would leave no way to answer where they
+came from. No build target reaches it, `make verify` proves a clean rebuild does not touch
+it, and [`legacy-invalid/README.md`](legacy-invalid/README.md) says what replaced each
+file.
 
 ---
 

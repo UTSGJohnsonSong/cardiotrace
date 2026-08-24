@@ -1,7 +1,8 @@
 """Fill the README's Key Findings block from the artefacts the analysis produces.
 
 It used to read `reports/results.json`, which is written by the DEPRECATED
-`run_pipeline.py` -- the pipeline this project replaced. That block therefore
+`run_pipeline.py` -- the pipeline this project replaced, now in
+`legacy-invalid/`. That block therefore
 carried, on the repository front page:
 
     "Xgboost predicts coronary heart disease at ROC-AUC 0.8585"
@@ -136,8 +137,9 @@ if learn:
 lines += ["", "_Figures in [`reports/figures/`](reports/figures). Numbers in "
           "[`reports/descriptive_results.json`](reports/descriptive_results.json), "
           "[`reports/model_results.json`](reports/model_results.json) and "
-          "[`reports/tables/`](reports/tables). `reports/results.json` is the output "
-          "of the deprecated `run_pipeline.py` and is not a source for anything here._"]
+          "[`reports/tables/`](reports/tables). The superseded pipeline and everything it "
+          "produced are in [`legacy-invalid/`](legacy-invalid), which no build target "
+          "reaches._"]
 
 block = "\n".join(lines)
 readme = (ROOT / "README.md").read_text(encoding="utf-8")

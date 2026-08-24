@@ -449,10 +449,10 @@ catalog 驱动、1999–2004 实验室数据补回、ETL 与 dbt 重跑、LMF jo
 落到 `reports/tables/strobe_part3.csv`，README 的 Key Findings 改为由
 `scripts/render_readme.py` 从当前产物生成。那些编造出来的数字不再出现在任何对外页面。
 
-**⚠️ 仍然欠着的**：被取代的旧流水线（`data/download.py` · `src/model.py` ·
-`src/analysis.py` · `run_pipeline.py`）**还在仓库里，且 `Makefile` 的 `all:` 目标仍会调用
-其中一部分**，跑一次就会重新写出 `reports/results.json`。在它被隔离之前，
-「旧数字不会回来」这句话靠的是没人跑那条链，不是靠机制。
+**这条欠账也已经还清**（2026-08-24）：被取代的旧流水线整体移入
+[`legacy-invalid/`](legacy-invalid/)，`Makefile` 的 `data:` 改指 catalog 下载器，
+`analyze` 与 `notebooks` 两个目标删除。现在「旧数字不会回来」靠的是构建图里没有
+通向它的边，不是靠没人去跑。`make verify` 会断言一次干净重建不产生任何 diff。
 
 ---
 
