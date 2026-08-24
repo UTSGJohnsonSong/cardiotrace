@@ -278,6 +278,74 @@ footer {
 """
 
 
+def design_based_exposure(xc3: pd.DataFrame, term: str = "systolic_bp",
+                          per: float = 10.0) -> dict:
+    """Part 3's primary inference, read from the design-based R fit.
+
+    Every guard here exists because the same mistake is available in two
+    directions and neither one crashes: the columns are LOG hazard ratios, so
+    exponentiating twice gives a plausible-looking number, and forgetting to
+    exponentiate gives another one.
+
+    The decisive check is the Wald identity. A Wald interval is exactly
+    symmetric about the coefficient ON THE LOG SCALE -- lo = coef - z*se and
+    hi = coef + z*se -- and that identity is destroyed by an exp(). So if these
+    columns had already been exponentiated upstream, the reconstruction below
+    would not close, and the build stops instead of publishing a wrong interval.
+
+    The hazard ratio, its interval and the critical value all come from THIS
+    table, i.e. from one R inference. Pairing an R interval with a Python
+    p-value would be two inferences wearing one label; the report states no
+    p-value for this term, and `_forbidden` keeps it that way by refusing a
+    table that has quietly gained one.
+    """
+    import numpy as np
+
+    from src.models import E2_ADJUSTMENT
+
+    expected = set(E2_ADJUSTMENT) | {"systolic_bp"}
+    got = list(xc3["term"])
+    if len(got) != len(set(got)):
+        raise SystemExit(f"crosscheck_part3.csv has duplicate terms: {got}")
+    if set(got) != expected:
+        raise SystemExit(
+            f"crosscheck_part3.csv does not match the Python model's terms. "
+            f"Only in R: {sorted(set(got) - expected)}; only in Python: "
+            f"{sorted(expected - set(got))}")
+
+    _forbidden = [c for c in xc3.columns if c.lower() in {"p", "pvalue", "p_value"}]
+    if _forbidden:
+        raise SystemExit(
+            f"crosscheck_part3.csv now carries {_forbidden}. If a p-value is to "
+            f"be reported it must come from the same fit as the interval; wire "
+            f"it in deliberately rather than letting a column appear.")
+
+    r = xc3[xc3["term"] == term].iloc[0]
+    coef, se = float(r["svycoxph_coef"]), float(r["svycoxph_se"])
+    lo, hi, crit = (float(r["svycoxph_lo95"]), float(r["svycoxph_hi95"]),
+                    float(r["svycoxph_crit"]))
+
+    if not (abs(coef) < 5.0 and 0.0 < se < 5.0):
+        raise SystemExit(
+            f"{term}: coef={coef:g}, se={se:g} are not on the log-hazard scale; "
+            f"they look like they have already been exponentiated")
+    if not (lo < coef < hi):
+        raise SystemExit(f"{term}: the interval does not bracket the coefficient")
+    if not (np.isclose(lo, coef - crit * se, rtol=1e-6, atol=1e-9)
+            and np.isclose(hi, coef + crit * se, rtol=1e-6, atol=1e-9)):
+        raise SystemExit(
+            f"{term}: the interval does not reconstruct as coef +/- {crit:g}*se "
+            f"on the log scale, which is what a Wald interval must do. Either "
+            f"the columns are already hazard ratios, or the interval came from "
+            f"somewhere other than this standard error.")
+
+    # Exactly one exponentiation, here and nowhere else.
+    return {"hr": float(np.exp(coef * per)),
+            "lo95": float(np.exp(lo * per)),
+            "hi95": float(np.exp(hi * per)),
+            "se": se, "crit": crit, "per": per}
+
+
 def _num(x, dp: int) -> str:
     """A number, or an em dash where there is none.
 
@@ -620,6 +688,24 @@ def build() -> str:
 
     sbp = model["aetiologic_sbp_per_10mmhg"]
 
+    # PRIMARY inference for the exposure comes from the DESIGN-BASED fit, not
+    # from lifelines. The two agree on the coefficient to 3e-12 and disagree on
+    # the standard error by a median of 1.2% across the nine terms, because
+    # lifelines computes an unstratified cluster sandwich while `svycoxph` uses
+    # the stratified ultimate-cluster form NHANES guidance describes. Only the
+    # second is design-based in the sense this report claims elsewhere, so it is
+    # the one reported; the Python fit is kept beside it as a sensitivity
+    # analysis rather than replaced.
+    #
+    # The artefact is committed, so the site builds without R. Regenerating it
+    # needs `scripts/crosscheck_survey.py`, which shells out to Rscript.
+    if not have_xc:
+        raise SystemExit(
+            "reports/tables/crosscheck_part3.csv is missing; Part 3's primary "
+            "intervals come from it. Run scripts/crosscheck_survey.py (needs R "
+            "with the survey package).")
+    sbp_design = design_based_exposure(xc3)
+
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -735,13 +821,18 @@ def build() -> str:
 
     <figure>
       <img src="{data_uri('part1_standardisation.png')}"
-           alt="Crude and age-standardised prevalence of self-reported cardiovascular disease by
-                NHANES cycle, 1999 to 2022. The two series track together until roughly 2015, then
-                the crude series rises while the standardised series stays flat.">
-      <figcaption><b>Two series, opposite conclusions.</b> Both lines run all
-      {p1['n_cycles']} cycles, to {p1['last_cycle']}; the trend is fitted on the
-      {n_pre_cycles} pre-pandemic cycles only, because §3 exists to ask what the last one did
-      relative to it. Over that window the standardised series falls
+           alt="Crude and age-standardised prevalence of self-reported cardiovascular disease
+                across the ten pre-pandemic NHANES cycles, 1999 to 2018. The two series track
+                together until roughly 2015, then the crude series rises while the standardised
+                series stays flat. The August 2021 to August 2023 cycle is plotted separately in
+                grey, detached from both lines.">
+      <figcaption><b>Two series, opposite conclusions.</b> Both lines run the
+      {n_pre_cycles} pre-pandemic cycles. The last cycle is drawn <b>detached</b>, in grey, with
+      its own interval and no line joining it: NCHS names it August 2021&ndash;August 2023,
+      reports it on an updated sample design with modified interview and examination procedures,
+      and urges caution before combining it with earlier cycles for trend analysis. A continuous
+      line would assert a comparability the survey itself declines to assert. Over the fitted
+      window the standardised series falls
       {abs(100 * p1['std_slope_per_decade']):.2f} points per decade (95% CI
       {100 * p1['std_slope_ci'][0]:.2f} to {100 * p1['std_slope_ci'][1]:.2f}) while the crude
       series rises {100 * p1['crude_slope_per_decade']:+.2f}. <b>The sign reversal is the
@@ -1147,7 +1238,7 @@ def build() -> str:
       {stat("Participants", "20,736", "40–79, CVD-free at baseline")}
       {stat("CVD deaths", "925", "2,711 competing deaths")}
       {stat("Person-years", "235,553", "origin at the examination")}
-      {stat("Systolic BP", f"HR {sbp['hr']:.3f}", f"per 10 mmHg · {sbp['lo95']:.3f}–{sbp['hi95']:.3f}")}
+      {stat("Systolic BP", f"HR {sbp_design['hr']:.3f}", f"per 10 mmHg · {sbp_design['lo95']:.3f}–{sbp_design['hi95']:.3f} · survey-design-based 95% CI, stratified PSU design")}
     </div>
 
     <figure>
@@ -1255,6 +1346,16 @@ def build() -> str:
       those kept, and {100 * miss['race_black_dropped']:.1f}% of the dropped are Black against
       {100 * miss['race_black_kept']:.1f}% of the kept. Missingness is associated with the
       outcome, which is the case in which listwise deletion is not merely inefficient.
+    </div>
+
+    <div class="note">
+      <b>Two different problems, and only one of them has a correction here.</b> Censoring &mdash;
+      follow-up ending before the outcome &mdash; is handled by the survival model itself, which
+      is what censoring is for. What follows is about something else: SELECTION, caused by
+      dropping participants whose covariates were not all measured. The weights below correct for
+      the second and have nothing to say about the first, and neither of them is multiple
+      imputation, which would use the partially observed variables rather than only the fully
+      observed ones and is <b>not done</b>.
     </div>
 
     <p class="measure">So the fit is re-run with inverse-probability-of-completeness weights,
@@ -1719,12 +1820,21 @@ def build() -> str:
     ultimate-cluster form that NHANES guidance describes.</p>
 
     <div class="note flag">
-      <b>So the Part 3 hazard-ratio intervals are cluster-robust, not design-based, and they are
-      labelled that way rather than the other way.</b> The difference falls on the covariates,
-      not the exposure: systolic blood pressure moves {100 * xc_exp_rel:.1f}% and no term changes
-      whether its interval covers the null. The descriptive intervals in &sect;2 are design-based
-      and are confirmed to be. Reconciling the two is recorded as open, because doing it properly
-      means implementing the stratified form rather than shipping a dependency on R.
+      <b>So the Part 3 hazard-ratio intervals reported above are the DESIGN-BASED ones, taken
+      from <code>svycoxph</code>.</b> The Python cluster-robust fit is kept beside them as a
+      sensitivity analysis rather than replaced, because it is the same estimator every version of
+      this report until now used and a reader deserves to see how far the change moved anything.
+      It moved the exposure by {100 * xc_exp_rel:.1f}%: HR {sbp['hr']:.4f}
+      ({sbp['lo95']:.4f}&ndash;{sbp['hi95']:.4f}) cluster-robust against
+      {sbp_design['hr']:.4f} ({sbp_design['lo95']:.4f}&ndash;{sbp_design['hi95']:.4f})
+      design-based. Across the nine terms the standard errors differ by a median of
+      {100 * xc_se_med:.2f}% and at most {100 * xc_se_worst:.2f}% &mdash; and
+      <b>no term changes whether its interval covers the null</b>, so the sensitivity analysis
+      agrees with the primary one on every conclusion and differs only on precision. The
+      R script and its output are versioned in the repository, so the site builds without R; only
+      regenerating them needs it. Writing the stratified form in Python is recorded as open,
+      because doing it properly is a project of its own and shipping a second implementation
+      nobody has checked would be worse than depending on one that is checked.
     </div>'''}
 </section>
 

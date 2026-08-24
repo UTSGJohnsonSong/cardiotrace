@@ -1,8 +1,8 @@
 {
   "aetiologic_sbp_per_10mmhg": {
-    "hr": 1.1211,
-    "lo95": 1.0787,
-    "hi95": 1.1663
+    "hr": 1.1216,
+    "lo95": 1.0788,
+    "hi95": 1.1661
   },
   "aetiologic_sbp_per_10mmhg_no_tobin": {
     "hr": 1.097

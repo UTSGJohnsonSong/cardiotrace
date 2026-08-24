@@ -156,21 +156,48 @@ def _heading(fig, title, subtitle):
 
 
 def figure_standardisation(overall: pd.DataFrame, p1: dict) -> None:
-    x = overall["year"].to_numpy()
+    """Two series across the pre-pandemic cycles, with the last cycle detached.
+
+    The post-disruption cycle is NOT joined to the line. NCHS names it August
+    2021 - August 2023, reports it on an updated sample design with modified
+    interview and examination procedures, and warns against combining it with
+    earlier cycles for trend analysis. A continuous line asserts comparability
+    the survey itself declines to assert; a detached grey marker says what is
+    true -- a measurement was taken, and it is not on this trend.
+    """
+    pre = overall[overall["cycle"].isin(PRE_COVID_CYCLES)]
+    post = overall[~overall["cycle"].isin(PRE_COVID_CYCLES)]
+    x = pre["year"].to_numpy()
     fig, ax = plt.subplots(figsize=(8.6, 4.6))
 
-    ax.fill_between(x, 100 * overall["lo_std"], 100 * overall["hi_std"],
+    ax.fill_between(x, 100 * pre["lo_std"], 100 * pre["hi_std"],
                     color=SERIES, alpha=0.13, linewidth=0)
-    ax.plot(x, 100 * overall["p_crude"], color=FLAG, linewidth=2,
+    ax.plot(x, 100 * pre["p_crude"], color=FLAG, linewidth=2,
             marker="o", markersize=5, markeredgecolor=SURFACE, markeredgewidth=1.2)
-    ax.plot(x, 100 * overall["p_std"], color=SERIES, linewidth=2,
+    ax.plot(x, 100 * pre["p_std"], color=SERIES, linewidth=2,
             marker="o", markersize=5, markeredgecolor=SURFACE, markeredgewidth=1.2)
 
+    # The post-disruption cycle: same estimates, drawn as its own thing. Grey
+    # rather than the series colours, because colour here means "on this line".
+    for _, r in post.iterrows():
+        ax.errorbar(r["year"], 100 * r["p_std"],
+                    yerr=[[100 * (r["p_std"] - r["lo_std"])],
+                          [100 * (r["hi_std"] - r["p_std"])]],
+                    fmt="s", color=REFERENCE, markersize=6, capsize=3,
+                    markeredgecolor=SURFACE, markeredgewidth=1.2, zorder=4)
+        ax.plot(r["year"], 100 * r["p_crude"], "s", color=REFERENCE,
+                markersize=6, markeredgecolor=SURFACE, markeredgewidth=1.2,
+                alpha=0.55, zorder=4)
+        ax.annotate("Aug 2021 – Aug 2023\nnot on the trend",
+                    xy=(r["year"], 100 * r["p_std"]),
+                    xytext=(-6, -34), textcoords="offset points",
+                    color=INK_MUTED, fontsize=8, ha="right", va="center")
+
     # Two series, direct-labelled: the point of the figure is which is which.
-    ax.annotate("Crude", xy=(x[-1], 100 * overall["p_crude"].iloc[-1]),
+    ax.annotate("Crude", xy=(x[-1], 100 * pre["p_crude"].iloc[-1]),
                 xytext=(8, 5), textcoords="offset points", color=FLAG,
                 fontsize=9.5, fontweight="bold", va="center")
-    ax.annotate("Age-standardised", xy=(x[-1], 100 * overall["p_std"].iloc[-1]),
+    ax.annotate("Age-standardised", xy=(x[-1], 100 * pre["p_std"].iloc[-1]),
                 xytext=(8, -6), textcoords="offset points", color=SERIES,
                 fontsize=9.5, fontweight="bold", va="center")
 
@@ -178,8 +205,11 @@ def figure_standardisation(overall: pd.DataFrame, p1: dict) -> None:
     # measure off the line. The earlier version quoted the pre-pandemic movement
     # in the title and the full-series mean ages in the subtitle, so the two
     # halves of one caption covered different periods.
-    crude_d = 100 * (overall["p_crude"].iloc[-1] - overall["p_crude"].iloc[0])
-    std_d = 100 * (overall["p_std"].iloc[-1] - overall["p_std"].iloc[0])
+    # Measured across the cycles that are actually joined by the line, which is
+    # what a reader can trace with a finger. The detached point is described in
+    # its own annotation and in the caption, not folded into this sentence.
+    crude_d = 100 * (pre["p_crude"].iloc[-1] - pre["p_crude"].iloc[0])
+    std_d = 100 * (pre["p_std"].iloc[-1] - pre["p_std"].iloc[0])
     _heading(fig,
              f"Crude prevalence rose {crude_d:.1f} points. "
              f"Age-standardised fell {abs(std_d):.1f}.",
@@ -192,7 +222,12 @@ def figure_standardisation(overall: pd.DataFrame, p1: dict) -> None:
     _style(ax, "Prevalence (%)")
     ax.set_xticks(XTICKS)
     ax.set_xticklabels(XLABELS, fontsize=8.5)
-    ax.set_xlim(x[0] - 0.5, x[-1] + 2.6)
+    # The limit has to reach the detached post-disruption point, which sits
+    # nearly five years past the end of the fitted line. `x` is the pre-pandemic
+    # years now, so deriving it from x[-1] alone would put the marker outside
+    # the axes and it would simply not appear.
+    ax.set_xlim(x[0] - 0.5,
+                max(x[-1], float(overall["year"].max())) + 2.6)
     ax.set_ylim(6, 13)
     fig.savefig(FIG / "part1_standardisation.png", bbox_inches="tight",
                 facecolor=SURFACE)
@@ -248,6 +283,15 @@ def figure_by_race(race: pd.DataFrame, overall: pd.DataFrame) -> None:
 
 
 def figure_counterfactual(overall: pd.DataFrame, p2: dict) -> None:
+    """The pre-pandemic fit extrapolated, against the one post-disruption point.
+
+    This is an EXPLORATORY MODEL CONTRAST and the figure says so. It is not a
+    quasi-experimental estimate: there is one observation after the disruption,
+    it comes from a cycle NCHS reports on an updated sample design with modified
+    interview and examination procedures, and NCHS itself urges caution before
+    combining it with earlier cycles for trend analysis. The dashed extrapolation
+    is a model's expectation, not a counterfactual anyone can identify.
+    """
     pre = overall[overall["cycle"].isin(PRE_COVID_CYCLES)]
     post = overall[overall["cycle"] == "2021-2022"].iloc[0]
     fit = wls_trend(pre["year"].to_numpy(), pre["p_std"].to_numpy(),
@@ -288,17 +332,17 @@ def figure_counterfactual(overall: pd.DataFrame, p2: dict) -> None:
             f"95% CI {_lo:+.2f} to {_hi:+.2f}").replace("-", "\u2212")
     ax.annotate(_lbl, xy=(x0 + 0.75, (obs + cf) / 2),
                 ha="left", va="center", color=INK_SECONDARY, fontsize=8.5)
-    ax.annotate("observed 2021–22", xy=(x0, obs + 1.96 * se_obs),
+    ax.annotate("observed Aug 2021 – Aug 2023", xy=(x0, obs + 1.96 * se_obs),
                 xytext=(-6, 8), textcoords="offset points", color=FLAG,
                 fontsize=9.5, fontweight="bold", ha="right")
-    ax.annotate("counterfactual", xy=(x0, cf), xytext=(-8, -16),
+    ax.annotate("model expectation", xy=(x0, cf), xytext=(-8, -16),
                 textcoords="offset points", color=SERIES, fontsize=9.5,
                 fontweight="bold", ha="right")
     ax.annotate("no cycle fielded", xy=((last_obs + x0) / 2, 6.35),
                 ha="center", va="bottom", color=INK_MUTED, fontsize=8)
 
     _heading(fig,
-             "One post-pandemic point cannot carry an interrupted time series",
+             "An exploratory contrast, not an interrupted time series",
              f"Age-standardised prevalence, pre-pandemic trend extrapolated "
              f"{p2[chr(39)+chr(39)] if False else p2['extrapolation_years']:.0f} years "
              "across a cycle NHANES did not field. Band is the 95% interval on the "

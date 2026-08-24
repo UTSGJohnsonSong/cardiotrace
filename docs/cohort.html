@@ -493,7 +493,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <div class="stat"><div class="k">Participants</div><div class="v">20,736</div><div class="n">40–79, CVD-free at baseline</div></div>
       <div class="stat"><div class="k">CVD deaths</div><div class="v">925</div><div class="n">2,711 competing deaths</div></div>
       <div class="stat"><div class="k">Person-years</div><div class="v">235,553</div><div class="n">origin at the examination</div></div>
-      <div class="stat"><div class="k">Systolic BP</div><div class="v">HR 1.121</div><div class="n">per 10 mmHg · 1.079–1.166</div></div>
+      <div class="stat"><div class="k">Systolic BP</div><div class="v">HR 1.122</div><div class="n">per 10 mmHg · 1.079–1.166 · survey-design-based 95% CI, stratified PSU design</div></div>
     </div>
 
     <figure>
@@ -547,7 +547,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     <p class="measure">The exposure is instead reconstructed: treated participants have a constant
     added to their measured value to approximate the untreated level. The adjustment is an
     assumption, stated as one, and the model is refitted without it as a sensitivity check —
-    the estimate attenuates from 1.121 to
+    the estimate attenuates from 1.122 to
     1.097 per 10 mmHg, which is the direction
     and roughly the magnitude the reasoning predicts.</p>
 
@@ -601,6 +601,16 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       those kept, and 32.8% of the dropped are Black against
       20.4% of the kept. Missingness is associated with the
       outcome, which is the case in which listwise deletion is not merely inefficient.
+    </div>
+
+    <div class="note">
+      <b>Two different problems, and only one of them has a correction here.</b> Censoring &mdash;
+      follow-up ending before the outcome &mdash; is handled by the survival model itself, which
+      is what censoring is for. What follows is about something else: SELECTION, caused by
+      dropping participants whose covariates were not all measured. The weights below correct for
+      the second and have nothing to say about the first, and neither of them is multiple
+      imputation, which would use the partially observed variables rather than only the fully
+      observed ones and is <b>not done</b>.
     </div>
 
     <p class="measure">So the fit is re-run with inverse-probability-of-completeness weights,
@@ -670,8 +680,8 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     <div class="twrap" role="region" tabindex="0" aria-label="Table: Aetiologic model — cause-specific Cox, survey-weighted. Scrollable.">
       <table>
         <caption>Aetiologic model — cause-specific Cox, survey-weighted</caption>
-        <thead><tr><th>covariate</th><th>n</th><th>log_hr</th><th>hr</th><th>hr_lo95</th><th>hr_hi95</th><th>p</th></tr></thead>
-        <tbody><tr><td>systolic_bp</td><td>17890</td><td>0.0115</td><td>1.0115</td><td>1.0076</td><td>1.0155</td><td>0.0</td></tr><tr><td>age</td><td>17890</td><td>0.0988</td><td>1.1038</td><td>1.0917</td><td>1.116</td><td>0.0</td></tr><tr><td>male</td><td>17890</td><td>0.6964</td><td>2.0065</td><td>1.6468</td><td>2.4448</td><td>0.0</td></tr><tr><td>race_black</td><td>17890</td><td>0.3213</td><td>1.3789</td><td>1.1514</td><td>1.6514</td><td>0.0005</td></tr><tr><td>education</td><td>17890</td><td>-0.0615</td><td>0.9403</td><td>0.8728</td><td>1.0131</td><td>0.1058</td></tr><tr><td>pir</td><td>17890</td><td>-0.179</td><td>0.8361</td><td>0.7818</td><td>0.8943</td><td>0.0</td></tr><tr><td>smoke_current</td><td>17890</td><td>0.8957</td><td>2.4491</td><td>1.9698</td><td>3.0451</td><td>0.0</td></tr><tr><td>smoke_former</td><td>17890</td><td>0.1702</td><td>1.1856</td><td>0.9548</td><td>1.4722</td><td>0.1233</td></tr><tr><td>bmi</td><td>17890</td><td>0.0393</td><td>1.0401</td><td>1.0255</td><td>1.0548</td><td>0.0</td></tr></tbody>
+        <thead><tr><th>covariate</th><th>n</th><th>log_hr</th><th>log_lo95</th><th>log_hi95</th><th>hr</th><th>hr_lo95</th><th>hr_hi95</th><th>p</th></tr></thead>
+        <tbody><tr><td>systolic_bp</td><td>17890</td><td>0.0114745756539707</td><td>0.0075861158364981</td><td>0.0153630354714432</td><td>1.0115</td><td>1.0076</td><td>1.0155</td><td>0.0</td></tr><tr><td>age</td><td>17890</td><td>0.0987777629089211</td><td>0.0877700997256638</td><td>0.1097854260921784</td><td>1.1038</td><td>1.0917</td><td>1.116</td><td>0.0</td></tr><tr><td>male</td><td>17890</td><td>0.6963952648653177</td><td>0.4988408684230063</td><td>0.893949661307629</td><td>2.0065</td><td>1.6468</td><td>2.4448</td><td>0.0</td></tr><tr><td>race_black</td><td>17890</td><td>0.3213155721932688</td><td>0.1410116953774657</td><td>0.5016194490090718</td><td>1.3789</td><td>1.1514</td><td>1.6514</td><td>0.0005</td></tr><tr><td>education</td><td>17890</td><td>-0.0615219931391161</td><td>-0.1360750241256192</td><td>0.0130310378473869</td><td>0.9403</td><td>0.8728</td><td>1.0131</td><td>0.1058</td></tr><tr><td>pir</td><td>17890</td><td>-0.1789670248985697</td><td>-0.2462060196029554</td><td>-0.111728030194184</td><td>0.8361</td><td>0.7818</td><td>0.8943</td><td>0.0</td></tr><tr><td>smoke_current</td><td>17890</td><td>0.8957410252043948</td><td>0.677938173305613</td><td>1.1135438771031765</td><td>2.4491</td><td>1.9698</td><td>3.0451</td><td>0.0</td></tr><tr><td>smoke_former</td><td>17890</td><td>0.1702359376911885</td><td>-0.046255721500903</td><td>0.3867275968832802</td><td>1.1856</td><td>0.9548</td><td>1.4722</td><td>0.1233</td></tr><tr><td>bmi</td><td>17890</td><td>0.0392866810405378</td><td>0.0251967738239246</td><td>0.053376588257151</td><td>1.0401</td><td>1.0255</td><td>1.0548</td><td>0.0</td></tr></tbody>
       </table>
     </div>
 

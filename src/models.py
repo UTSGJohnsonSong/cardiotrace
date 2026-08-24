@@ -143,7 +143,19 @@ def fit_aetiologic(df: pd.DataFrame, exposure: str = "systolic_bp",
                        "exp(coef) upper 95%", "p"]].copy()
     out.columns = ["log_hr", "hr", "hr_lo95", "hr_hi95", "p"]
     out.insert(0, "n", int(cph.weights.shape[0]))
-    return out.round(4)
+    # The LOG hazard ratio and its bounds are kept unrounded. Rounding the
+    # per-unit hazard ratio to four places and then raising it to a power is a
+    # 0.0005 error at ten units -- which lands on the third decimal the report
+    # prints, so 1.1216 was published as 1.121. Anything scaled to a different
+    # exposure contrast has to start from `log_hr`, never from `hr`.
+    out["log_lo95"] = cph.summary["coef lower 95%"]
+    out["log_hi95"] = cph.summary["coef upper 95%"]
+    keep = ["log_hr", "log_lo95", "log_hi95"]
+    rounded = out.drop(columns=keep).round(4)
+    for c in keep:
+        rounded[c] = out[c]
+    return rounded[["n"] + keep + [c for c in rounded.columns
+                                   if c not in keep and c != "n"]]
 
 
 class CauseSpecificRisk:

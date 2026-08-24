@@ -607,12 +607,21 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     ultimate-cluster form that NHANES guidance describes.</p>
 
     <div class="note flag">
-      <b>So the Part 3 hazard-ratio intervals are cluster-robust, not design-based, and they are
-      labelled that way rather than the other way.</b> The difference falls on the covariates,
-      not the exposure: systolic blood pressure moves 0.2% and no term changes
-      whether its interval covers the null. The descriptive intervals in &sect;2 are design-based
-      and are confirmed to be. Reconciling the two is recorded as open, because doing it properly
-      means implementing the stratified form rather than shipping a dependency on R.
+      <b>So the Part 3 hazard-ratio intervals reported above are the DESIGN-BASED ones, taken
+      from <code>svycoxph</code>.</b> The Python cluster-robust fit is kept beside them as a
+      sensitivity analysis rather than replaced, because it is the same estimator every version of
+      this report until now used and a reader deserves to see how far the change moved anything.
+      It moved the exposure by 0.2%: HR 1.1216
+      (1.0788&ndash;1.1661) cluster-robust against
+      1.1216 (1.0789&ndash;1.1660)
+      design-based. Across the nine terms the standard errors differ by a median of
+      1.20% and at most 9.36% &mdash; and
+      <b>no term changes whether its interval covers the null</b>, so the sensitivity analysis
+      agrees with the primary one on every conclusion and differs only on precision. The
+      R script and its output are versioned in the repository, so the site builds without R; only
+      regenerating them needs it. Writing the stratified form in Python is recorded as open,
+      because doing it properly is a project of its own and shipping a second implementation
+      nobody has checked would be worse than depending on one that is checked.
     </div>
 </section>
 <div class="pagefoot">
