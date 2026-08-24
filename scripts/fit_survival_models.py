@@ -107,9 +107,13 @@ def main() -> None:
     aet = fit_aetiologic(df, "systolic_bp", tobin=True)
     aet.to_csv(TAB / "cox_systolic_bp.csv")
     log.info(aet.to_string())
-    hr10 = float(aet.loc["systolic_bp", "hr"]) ** 10
-    lo10 = float(aet.loc["systolic_bp", "hr_lo95"]) ** 10
-    hi10 = float(aet.loc["systolic_bp", "hr_hi95"]) ** 10
+    # exp(coef * 10), not hr ** 10. The second raises an ALREADY-ROUNDED
+    # per-unit hazard ratio to the tenth power and compounds the rounding:
+    # 1.0115 ** 10 = 1.121137 against exp(coef * 10) = 1.121588, a difference
+    # that reaches the third decimal this report prints.
+    hr10 = float(np.exp(aet.loc["systolic_bp", "log_hr"] * 10))
+    lo10 = float(np.exp(aet.loc["systolic_bp", "log_lo95"] * 10))
+    hi10 = float(np.exp(aet.loc["systolic_bp", "log_hi95"] * 10))
     log.info(f"\nper 10 mmHg: HR {hr10:.3f} (95% CI {lo10:.3f}-{hi10:.3f})")
     results["aetiologic_sbp_per_10mmhg"] = {
         "hr": round(hr10, 4), "lo95": round(lo10, 4), "hi95": round(hi10, 4)}
@@ -119,7 +123,7 @@ def main() -> None:
     # that is worth knowing.
     raw = fit_aetiologic(df, "systolic_bp", tobin=False)
     results["aetiologic_sbp_per_10mmhg_no_tobin"] = {
-        "hr": round(float(raw.loc["systolic_bp", "hr"]) ** 10, 4)}
+        "hr": round(float(np.exp(raw.loc["systolic_bp", "log_hr"] * 10)), 4)}
     log.info(f"without Tobin adjustment:   HR {results['aetiologic_sbp_per_10mmhg_no_tobin']['hr']:.3f}")
 
     log.info("\n=== prediction: forward-in-time validation ===")

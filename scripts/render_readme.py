@@ -22,10 +22,12 @@ Every number here comes from a file some other script wrote. Nothing is typed.
 
 import json
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 REPORTS = ROOT / "reports"
+sys.path.insert(0, str(ROOT))
 
 
 def load(name: str) -> dict:
@@ -47,8 +49,20 @@ if (REPORTS / "part4_learning_results.json").exists():
         (REPORTS / "part4_learning_results.json").read_text(encoding="utf-8"))
 
 tenyr = next(v for v in model["prediction"].values() if v["horizon_years"] == 10.0)
-sbp = model["aetiologic_sbp_per_10mmhg"]
-sbp_row = sbp if isinstance(sbp, dict) and "hr" in sbp else None
+
+# Part 3's primary inference is the DESIGN-BASED fit, and the README has to say
+# the same thing the report says. The loader carries every scale guard; see
+# scripts/render_report.py::design_based_exposure.
+import pandas as pd  # noqa: E402
+
+from scripts.render_report import design_based_exposure  # noqa: E402
+
+_xc = REPORTS / "tables" / "crosscheck_part3.csv"
+if not _xc.exists():
+    raise SystemExit(
+        f"{_xc.relative_to(ROOT)} is missing; Part 3's primary interval comes "
+        f"from it. Run scripts/crosscheck_survey.py (needs R with `survey`).")
+sbp_row = design_based_exposure(pd.read_csv(_xc))
 
 lines = ["## Key Findings", ""]
 
@@ -88,9 +102,10 @@ if sbp_row:
     lines.append(
         f"- **Baseline systolic blood pressure predicts later cardiovascular death.** "
         f"HR {sbp_row['hr']:.3f} per 10 mmHg "
-        f"(95% CI {sbp_row['lo95']:.3f}–{sbp_row['hi95']:.3f}), cluster-robust, "
-        f"Tobin-adjusted for treatment. Reported as an association with treatment-adjusted "
-        f"baseline pressure, not as a total causal effect.")
+        f"(95% CI {sbp_row['lo95']:.3f}–{sbp_row['hi95']:.3f}), survey-design-based on the "
+        f"stratified PSU design via R `survey::svycoxph`, Tobin-adjusted for treatment. "
+        f"Reported as an association with treatment-adjusted baseline pressure, not as a "
+        f"total causal effect.")
 lines.append(
     f"- **Prediction, validated forward in time:** Harrell C {tenyr['harrell_c']:.3f} at "
     f"{int(tenyr['horizon_years'])} years on held-out later cycles "

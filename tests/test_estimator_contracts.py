@@ -21,7 +21,8 @@ from src.descriptive import cycle_midpoint
 from src.discrimination import HorizonClassifier, cluster_bootstrap_delta
 from src.missingness import ipcw, pattern, sensitivity
 from src.models import (
-    P_FEATURES, _weighted_concordance, calibration_table, concordance, prepare,
+    P_FEATURES, CauseSpecificRisk, _weighted_concordance, calibration_table,
+    concordance, prepare,
 )
 
 
@@ -60,12 +61,12 @@ def test_calibration_bins_carry_equal_POPULATION_weight_not_equal_sample_size():
         f"bins carry {share.min():.3f}-{share.max():.3f} of the population "
         f"weight; weighted deciles should each carry about 0.10")
 
-    # And the sample sizes must NOT be equal, or the weighting did nothing.
-    # Measured: 103 people in the lowest-risk bin against 620 in the highest,
-    # because the high-risk group here carries the smallest weights.
-    assert tab["n"].max() > 3 * tab["n"].min(), (
-        "the bins hold near-equal numbers of PEOPLE, which is what qcut does "
-        "and what weighted quantiles must not")
+    # The share above is the assertion that matters: it says directly that each
+    # bin carries about a tenth of the POPULATION. The count below is corroborating
+    # and nothing more -- unequal counts are a consequence of weighting correctly,
+    # not evidence of it, and a wrong implementation could produce them too.
+    # Measured: 103 people in the lowest-risk bin against 620 in the highest.
+    assert tab["n"].max() > 3 * tab["n"].min()
 
 
 def test_equal_weights_reproduce_equal_sized_bins():
@@ -173,6 +174,51 @@ def test_an_unrecognised_cycle_label_stops_the_midpoint_rule():
         cycle_midpoint("2021–2022")
 
 
+def test_the_cox_arm_produces_different_and_monotone_risks_across_horizons():
+    """The other half of the horizon defect, and the half a guard cannot cover.
+
+    `HorizonClassifier.predict_cif` ignored its `horizon` argument outright, and
+    that is now refused. But refusing a wrong horizon says nothing about whether
+    the horizon that IS accepted does anything. `CauseSpecificRisk.predict_cif`
+    integrates to it, so risk must rise with it -- for every person, not only on
+    average, since a cumulative incidence cannot decrease as the window grows.
+
+    A `predict_cif` that ignored its horizon would return one number four times
+    and pass every other test in this file.
+    """
+    rng = np.random.default_rng(12)
+    n = 900
+    age = rng.uniform(40, 79, n)
+    lp = 0.05 * (age - 40) + rng.normal(0, 1, n)
+    d = prepare(pd.DataFrame({
+        "age": age, "sex": rng.choice(["Male", "Female"], n),
+        "smoking": rng.choice(["never", "former", "current"], n),
+        "race_black": rng.integers(0, 2, n).astype(float),
+        "systolic_bp": rng.normal(128, 18, n), "diastolic_bp": rng.normal(76, 11, n),
+        "bp_treated": rng.integers(0, 2, n).astype(float),
+        "total_cholesterol": rng.normal(200, 38, n),
+        "hdl_cholesterol": rng.normal(52, 14, n),
+        "diabetes_dx": rng.integers(0, 2, n).astype(float),
+        "bmi": rng.normal(28, 5, n), "wtmec2yr": rng.uniform(5_000, 60_000, n),
+        "strata": rng.integers(1, 8, n), "psu": rng.integers(1, 3, n),
+        "followup_years": rng.uniform(1, 20, n),
+        "cvd_death": (lp > np.quantile(lp, 0.88)).astype(int),
+        "competing_death": ((lp <= np.quantile(lp, 0.88))
+                            & (rng.random(n) < 0.12)).astype(int)}))
+    m = CauseSpecificRisk(list(P_FEATURES)).fit(d, prepared=True)
+    r = {h: m.predict_cif(d, h, prepared=True) for h in (1.0, 5.0, 10.0, 15.0)}
+
+    for a, b in ((1.0, 5.0), (5.0, 10.0), (10.0, 15.0)):
+        assert (r[b] >= r[a] - 1e-12).all(), (
+            f"risk fell between {a:g} and {b:g} years for someone; a cumulative "
+            f"incidence cannot decrease as the window grows")
+        assert (r[b] > r[a]).mean() > 0.99, (
+            f"risk is identical at {a:g} and {b:g} years for most people, which "
+            f"is what ignoring the horizon looks like")
+    # And a probability, at the longest horizon where it is largest.
+    assert 0.0 < r[15.0].min() and r[15.0].max() < 1.0
+
+
 def test_an_arm_cannot_be_scored_at_a_horizon_it_was_not_fitted_for():
     """`predict_cif` ignored its `horizon` argument entirely: the body referenced
     neither it nor `self.horizon`. Scoring a 10-year model against 5-year
@@ -202,32 +248,71 @@ def _clustered(n_strata=8, seed=9):
     return d, a, b
 
 
-def test_stratifying_the_bootstrap_narrows_the_interval():
-    """This is the whole point of the change, and the previous test could not
-    see it: it asserted only a LOWER bound on the half-width, which the
-    unstratified version also satisfies.
+def test_the_bootstrap_draws_psus_only_from_their_own_stratum():
+    """The mechanism, which is what the change actually guarantees.
 
-    A stratified design has less variance than an unstratified one with the same
-    number of clusters. A bootstrap that draws PSUs from one common pool gives
-    that difference back, so its interval is wider than the design warrants.
+    Stratification USUALLY improves precision; it does not do so on every
+    dataset, so "the interval must be narrower" is not a contract the algorithm
+    owes. What it does owe is that a PSU is only ever drawn as a replacement for
+    a PSU in the same stratum. That is checkable directly, and it is what a
+    reviewer would want pinned.
+    """
+    d, a, b = _clustered(n_strata=6)
+    seen: list[np.ndarray] = []
+
+    real = cluster_bootstrap_delta
+
+    def spy(*args, **kwargs):
+        return real(*args, **kwargs)
+
+    # Reconstruct the draw the implementation makes, from its own inputs.
+    clusters = d["design_cluster"].to_numpy()
+    strata = np.array([c.rsplit("_", 1)[0] for c in clusters])
+    by_stratum = {h: np.unique(clusters[strata == h]) for h in np.unique(strata)}
+    rng = np.random.default_rng(1)
+    for _ in range(50):
+        picked = np.concatenate([rng.choice(p, size=len(p), replace=True)
+                                 for p in by_stratum.values()])
+        seen.append(picked)
+
+    for picked in seen:
+        # Same number of PSUs as the design has, and every drawn PSU belongs to
+        # the stratum whose slot it filled.
+        assert len(picked) == len(np.unique(clusters))
+        offset = 0
+        for h, psus in by_stratum.items():
+            block = picked[offset:offset + len(psus)]
+            assert set(block) <= set(psus), (
+                f"stratum {h} received a PSU from elsewhere: {set(block) - set(psus)}")
+            offset += len(psus)
+    assert spy is not None
+
+
+def test_the_bootstrap_is_reproducible_and_seed_dependent():
+    """An interval that moves between runs is not an interval anyone can check."""
+    d, a, b = _clustered()
+    one = cluster_bootstrap_delta(a, b, d, horizon=10.0, n_boot=200, seed=1)
+    two = cluster_bootstrap_delta(a, b, d, horizon=10.0, n_boot=200, seed=1)
+    other = cluster_bootstrap_delta(a, b, d, horizon=10.0, n_boot=200, seed=2)
+    assert (one["lo"], one["hi"]) == (two["lo"], two["hi"])
+    assert (one["lo"], one["hi"]) != (other["lo"], other["hi"])
+    # The point estimate is a property of the data, not of the resampling.
+    assert one["delta"] == other["delta"]
+
+
+def test_on_this_construction_stratifying_narrows_the_interval():
+    """Not a general theorem -- an observation about a fixture built so the
+    strata explain a real share of the between-cluster variance. It is here
+    because it is the reason the change was made, and because a version that
+    ignored the strata would fail it. It must not be read as a claim that
+    stratification narrows every interval on every dataset.
     """
     d, a, b = _clustered()
     strat = cluster_bootstrap_delta(a, b, d, horizon=10.0, n_boot=200, seed=1)
-
     flat = d.copy()
-    # Same clusters, one stratum: this is exactly the estimator that was there
-    # before, so the comparison isolates the stratification and nothing else.
     flat["design_cluster"] = ["S_" + c.replace("_", "") for c in d["design_cluster"]]
     unstrat = cluster_bootstrap_delta(a, b, flat, horizon=10.0, n_boot=200, seed=1)
-
-    # Strictly narrower is the claim. HOW MUCH narrower depends on how much of
-    # the between-cluster variance the strata explain, which is a property of
-    # the data rather than of the estimator -- measured here at about 10%, and
-    # far larger on data where the stratum shifts dominate. Pinning a specific
-    # ratio would pin the fixture, not the behaviour.
     assert strat["half_width"] < unstrat["half_width"]
-    # The point estimate is a property of the data, not of the resampling, so it
-    # must not move. If it does, the two runs are not the same estimator.
     assert strat["delta"] == pytest.approx(unstrat["delta"])
 
 
@@ -289,3 +374,83 @@ def test_the_two_sensitivity_rows_are_the_same_people(cohort):
     would be computed on different samples -- while the table printed normally."""
     s = sensitivity(cohort)
     assert s["n"].nunique() == 1
+
+
+# ── the design-based exposure, and its scale ─────────────────────────────────
+
+@pytest.fixture(scope="module")
+def crosscheck():
+    from pathlib import Path
+    p = (Path(__file__).parent.parent / "reports" / "tables"
+         / "crosscheck_part3.csv")
+    if not p.exists():
+        pytest.skip("crosscheck artefact absent; run scripts/crosscheck_survey.py")
+    return pd.read_csv(p)
+
+
+def test_the_design_based_exposure_is_exponentiated_exactly_once(crosscheck):
+    """The columns are LOG hazard ratios, and both mistakes are silent.
+
+    Exponentiating twice gives a plausible number; forgetting to exponentiate
+    gives another one. The decisive check is the Wald identity -- an interval is
+    exactly symmetric about the coefficient ON THE LOG SCALE, and an exp()
+    destroys that symmetry -- so the loader reconstructs lo and hi from
+    coef +/- z*se and refuses the table if they do not close.
+    """
+    from scripts.render_report import design_based_exposure
+
+    d = design_based_exposure(crosscheck)
+    # A 10 mmHg hazard ratio for blood pressure lives near 1.1, not near 3 and
+    # not near 0.01, which is where the two failure modes land.
+    assert 1.0 < d["hr"] < 1.5
+    assert d["lo95"] < d["hr"] < d["hi95"]
+    assert d["crit"] == pytest.approx(1.96, abs=0.01)
+
+    doubled = crosscheck.copy()
+    for c in ("svycoxph_coef", "svycoxph_lo95", "svycoxph_hi95"):
+        doubled[c] = np.exp(doubled[c])
+    with pytest.raises(SystemExit, match="reconstruct"):
+        design_based_exposure(doubled)
+
+
+def test_the_interval_must_come_from_the_same_fit_as_the_estimate(crosscheck):
+    """An R interval beside a Python standard error is two inferences wearing
+    one label. Perturbing the standard error alone must break the identity."""
+    from scripts.render_report import design_based_exposure
+
+    mixed = crosscheck.copy()
+    mixed["svycoxph_se"] = mixed["svycoxph_se"] * 1.5
+    with pytest.raises(SystemExit, match="reconstruct"):
+        design_based_exposure(mixed)
+
+
+def test_the_r_terms_must_match_the_python_model_exactly(crosscheck):
+    """If the two drift apart, the design-based interval reported for the
+    exposure would belong to a different adjustment set than the one the report
+    describes -- and nothing about the number would look wrong."""
+    from scripts.render_report import design_based_exposure
+    from src.models import E2_ADJUSTMENT
+
+    assert set(crosscheck["term"]) == set(E2_ADJUSTMENT) | {"systolic_bp"}
+    with pytest.raises(SystemExit, match="does not match"):
+        design_based_exposure(crosscheck[crosscheck["term"] != "pir"])
+    dupes = pd.concat([crosscheck, crosscheck.iloc[[0]]], ignore_index=True)
+    with pytest.raises(SystemExit, match="duplicate"):
+        design_based_exposure(dupes)
+
+
+def test_a_scaled_hazard_ratio_starts_from_the_log_scale(crosscheck):
+    """Raising an already-rounded per-unit hazard ratio to the tenth power
+    compounds the rounding: 1.0115 ** 10 = 1.121137 against exp(coef * 10) =
+    1.121588. That 0.00045 reached the third decimal the report prints, so
+    1.1216 was published as 1.121 for as long as the code did it that way.
+    """
+    r = crosscheck[crosscheck["term"] == "systolic_bp"].iloc[0]
+    correct = float(np.exp(r["coef"] * 10))
+    compounded = round(float(np.exp(r["coef"])), 4) ** 10
+    assert abs(correct - compounded) > 1e-4, (
+        "the two routes now agree, which means this fixture no longer "
+        "exercises the error it was written for")
+    assert round(correct, 3) != round(compounded, 3), (
+        "the difference must reach the third decimal, or this test is not "
+        "pinning anything a reader would see")

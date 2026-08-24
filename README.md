@@ -1,7 +1,7 @@
 # CardioTrace
 ### A prospective cohort study of cardiovascular mortality, built from 11 NHANES cycles
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-157%20passing-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-164%20passing-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
 builds a prospective cohort of adults who were free of cardiovascular disease at
@@ -17,7 +17,7 @@ of the 1,821 published NHANES files is recorded with the rule that kept or dropp
 - **Crude prevalence rose and age-standardised prevalence fell.** Self-reported cardiovascular disease among US adults 20+ went from 8.0% to 9.4% crude, and from 8.7% to 8.0% once age is standardised to the 2000 US population — across 11 NHANES cycles, N = 62,877, interview weights, design-based intervals. **The reversal is the finding**; the rise is the population ageing.
 - **The standardised trend is -0.59 pp per decade** (95% CI -1.22 to +0.04, t(8)). It contains zero: with ten pre-pandemic points and a dispersion estimated from the same ten, the decline is consistent in direction and not established at 95%. The normal-quantile interval, which the earlier version reported, is -1.12 to -0.06.
 - **No detectable pandemic deviation.** 2021-2022 sits +0.45 pp from the pre-pandemic trend extrapolated 5.1 years past 2017-2018 (95% CI -0.76 to +1.66). This is an exploratory deviation from an extrapolation, not a quasi-experimental estimate: there is one post-pandemic observation, and NCHS reports that cycle on an updated sample design.
-- **Baseline systolic blood pressure predicts later cardiovascular death.** HR 1.121 per 10 mmHg (95% CI 1.079–1.166), cluster-robust, Tobin-adjusted for treatment. Reported as an association with treatment-adjusted baseline pressure, not as a total causal effect.
+- **Baseline systolic blood pressure predicts later cardiovascular death.** HR 1.122 per 10 mmHg (95% CI 1.079–1.166), survey-design-based on the stratified PSU design via R `survey::svycoxph`, Tobin-adjusted for treatment. Reported as an association with treatment-adjusted baseline pressure, not as a total causal effect.
 - **Prediction, validated forward in time:** Harrell C 0.838 at 10 years on held-out later cycles (n = 5,163), survey-weighted and censored at the horizon; 0.804 unweighted. Competing risks modelled, never censored away.
 - **What limits that model is the variable set, not its form.** A screen of 15 laboratory candidates against the eleven selected 1 (`log_uacr`), worth +0.0176 in C (95% CI +0.0074 to +0.0275). Gradient boosting on the same eleven is worth -0.0542 — worse than a Cox model on age and sex alone.
 
