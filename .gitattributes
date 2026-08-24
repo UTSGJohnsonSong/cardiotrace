@@ -1,0 +1,16 @@
+# Normalise line endings in the index regardless of anyone's core.autocrlf.
+#
+# This matters more here than in most repositories: CI regenerates committed
+# artefacts and asserts the diff is empty. A contributor on Windows with
+# autocrlf=false would commit CRLF, the Linux runner would rewrite the same
+# content with LF, and the check would fail on line endings while reporting
+# that a published number had drifted.
+* text=auto
+
+# Binary, so never touched.
+*.png binary
+*.jpg binary
+*.pdf binary
+*.xpt binary
+*.XPT binary
+*.gz binary
