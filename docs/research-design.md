@@ -28,7 +28,7 @@
 | 4 | 识别假设（DAG） | 🔒 | 本文档 §节点 4 · `src/models.py`（E1/E2/P 三套变量集） |
 | 5 | 数据源与周期选择 | 🔒 | `src/cohort.py`（`CYCLES`） · `src/descriptive.py`（`CYCLE_LABEL`） |
 | 6 | 变量普查与筛选规则 | 🔒 | `data/build_catalog.py` · `data/apply_selection_rules.py` |
-| 7 | 可重复性契约 | 🔄 | `data/download_from_catalog.py` · `data/download_mortality.py`（SHA-256 manifest 已实现）。**未收口**：`data/download.py` 是被取代的旧下载器，仍需移入 `legacy-invalid/` |
+| 7 | 可重复性契约 | 🔒 | `data/download_from_catalog.py` · `data/download_mortality.py`（SHA-256 manifest）· `Makefile`（`make verify` 断言干净重建无 diff）。被取代的下载器已移入 `legacy-invalid/`，无任何构建目标指向它 |
 | 8 | 分层架构 | 🔒 | `dbt/models/staging/` → `dbt/models/mart/` · `src/etl.py` |
 | 9 | 仪器与口径桥接 | 🔒 | `src/biomarkers.py`（`CREATININE_CALIBRATION`，CDC 官方系数） |
 | 10 | 编码决策 | 🔒 | `data/build_variable_crosswalk.py` · `src/cohort.py`（每条 CASE WHEN 附依据） |
@@ -667,7 +667,7 @@ CDC 的**标签**不稳定：同一个 LDL/甘油三酯文件有四种写法，�
 
 ### 7.1 文件层：catalog 驱动的下载器
 
-`data/download_from_catalog.py` 取代 `data/download.py`（后者已标 deprecated，保留供溯源）。
+`data/download_from_catalog.py` 取代 `data/download.py`（后者 2026-08-24 移入 `legacy-invalid/data/`，保留供溯源，不参与任何构建）。
 
 - 从 `selection_ledger.csv` 读 225 个 keep 文件的**真实 URL**（CDC 自己发布的），不再猜文件名
 - **catalog 里有、却下不到 → 报错退出**（`failed` 非零即 `SystemExit(1)`），不许静默跳过
@@ -735,10 +735,11 @@ CDC 的**标签**不稳定：同一个 LDL/甘油三酯文件有四种写法，�
 | 2026-08-09 | 6 · 取舍 | 有序规则阶梯 R0–R5，逐文件跑过：机械排除 588（32.3%）· 判断排除 1,008 · **保留 225（12.4%，20 个概念）** | 机械/判断分开报，说明多少排除是客观的、多少建立在 DAG 上 | `data/apply_selection_rules.py` · `selection_ledger.csv` |
 | 2026-08-09 | 6 · 匹配方式 | 白名单按**人工核验的模块词干**，不按文件标签 | CDC 标签不稳定（同一概念 4 种写法 + 拼写错误 + en dash），标签正则会静默少匹配 | 同上 |
 | 2026-08-09 | 6 · 断言 | 每概念声明预期周期覆盖，不足即报错退出 | 当场抓到 `^[A-Z]+Y$` 误判 `TRIGLY_D` 为青少年模块、丢掉 8 周期血脂的 bug | 同上 |
-| 2026-08-09 | 6 · 下载器 | 改为 catalog 驱动；404 不得静默跳过 | 硬编码模块名导致 1999-2004 三周期零实验室数据，15,332 人（24.4%）化验值被中位数编造 | **`data/download.py` 待重写** |
+| 2026-08-09 | 6 · 下载器 | 改为 catalog 驱动；404 不得静默跳过 | 硬编码模块名导致 1999-2004 三周期零实验室数据，15,332 人（24.4%）化验值被中位数编造 | **已完成**：`data/download_from_catalog.py`；旧文件移入 `legacy-invalid/` |
 | 2026-08-09 | 2 · 纳入排除 | 🔒 **排除基线已患 CVD，限定一级预防人群** | ①因果：`PREV_CVD` 是 `BP→PREV→DEATH` 上的中介，留在模型里即 Table 2 fallacy ②临床：与 ASCVD PCE / Framingham 口径对齐，可做基准对比 ③数据：旧结局 MCQ160B-F 转为排除标准，数据换角色不浪费 | Part 3 全部 |
 | 2026-08-18 | 15 · 基准对比 | **PCE 头对头主指标用区分度；第一层拆成 1a 原基线生存 / 1b 重校准基线生存** | PCE 结局是 hard ASCVD（含非致死性心梗与非致死性中风，Full Work Group Report Table 4 脚注），本项目结局只有 CVD 死亡。结局口径不隔离就会与人群漂移、变量集、模型形式全部混杂，第一层的系统性高估会被误读成 PCE 失效。C-index 对单调变换不变故可跨口径比较，校准不可 | Part 3 · 详见 `docs/pce-benchmark.md` · **我替你定的，可驳回** |
 | 2026-08-19 | 15 · 基准对比 | 🔒 **PCE 对比协议四条**：①主分析限 White/Black，其他族裔仅作标注的敏感性分析 ②完整病例，且**本项目模型必须在同一 17,464 人子样本上重新评估** ③喂 PCE 实测 SBP + 治疗状态，不喂 Tobin 校正值 ④终点不一致，降级为 prognostic benchmark，主比 discrimination，不宣称比较同一终点 | PCE 原为 White/Black 40–79 建立，其他族裔证据等级 Grade E；两个 C-index 在不同人群上不可比；Tobin 是为病因估计设计的，与 PCE 的变量定义冲突；PCE 结局含非致死事件，校准头对头不成立 | Part 3 · 详见 `docs/pce-benchmark.md` §3.5 · 导师审阅后锁定 · **记录更正 2026-08-24**：②里的 17,464 是当时用一条自建排除阶梯算的，按 STROBE 阶梯重算是 **18,744 人 / 824 事件**。约束本身不变——决定的内容是「同一子样本上重评」，不是那个数 |
 | 2026-08-22 | 15 · 基准对比 | **PCE 降为「预先设定的历史基准」，站点不再称其为临床标准；PREVENT-ASCVD 记为当前标准与未来比较对象** | 2026 ACC/AHA/Multisociety 血脂指南以 10 年 PREVENT-ASCVD 风险为起点，2025 ACC/AHA 高血压指南推荐 PREVENT 取代 PCE，ACC 的 CVD Risk Estimator Plus 明示 PCE 的 10 年风险 "no longer supported by ACC clinical policy or guidelines"。§3.5 四条协议与系数核验都锁定在指南更新之前，事后换比较对象等于看着答案改设计；PREVENT 需 eGFR、去种族、年龄 30–79、结局口径不同，属新工作而非改名。结局口径论证（§2 / §3.5④）不受影响 | Part 3 · `docs/pce-benchmark.md` §0 · 站点 §5 措辞同步（`scripts/render_report.py`）· 外部审阅提出 |
+| 2026-08-24 | 7 · 可重复性 | **被取代的流水线整体移入 `legacy-invalid/`，并加 `make verify` 断言干净重建不产生 diff** | 光把 `run_pipeline.py` 标 deprecated 不够——`Makefile` 的 `data:` 仍指向旧下载器、`all:` 曾串起 `analyze`，跑一次构建就会覆写 `reports/results.json`，再由 `render_readme.py` 灌回 README。这是「已发布数字被旧数字悄悄替换」的机制性成因，不是内容错误，所以要用移动路径 + 构建图来挡，不能靠记得别跑 | 全局 · `legacy-invalid/README.md` 列出每个文件被谁取代 |
 | 2026-08-24 | 12 · 抽样设计 | **不采用 1999–2002 的 4 年权重 `WTMEC4YR`，八个周期一律用 `WTMEC2YR`；记为已知简化并写进 limitations** | NCHS 指南要求跨 1999–2002 的合并分析用 4 年权重，本项目没有照做，所以先实测代价再决定：4 年权重不是两个 2 年权重的平均（它们各自做过事后分层），**个人层面差异很大**——20.63% 的人偏离 20% 以上，1–99 百分位区间 0.77–2.00；但**在总量上几乎抵消**，权重总和只差 0.94%。1999–2002 占队列 4,586 人（21.8% 的权重）。把 4 年权重接上去重拟合，血压 HR 从 1.1216 变成 1.1233，九项系数里最大变动是 smoke_former 的 0.91%，没有任何一项改变区间是否覆盖零。代价小于本报告打印的精度，因此不改；但**不能因此写成「不需要做」**——它是一条被量化过的偏离，不是一条不存在的问题 | Part 3 · 复现：`python scripts/check_fouryear_weights.py` → `reports/tables/fouryear_weight_check.csv` · 外部审阅提出 |
 | 2026-08-22 | 4 · 方差估计 | **公开档的 `SDMVPSU` 是脱敏 pseudo-PSU，不是县；报告与 README 的「county」表述全部改写** | NCHS 出于两年一次发布的披露风险不放出真实设计变量，改发 masked variance units（`SDMVSTRA` 伪层 / `SDMVPSU` 伪 PSU），官方说明只承诺方差「closely approximate」真设计。真实一阶抽样单元多为单个县，但表里那 27–32 个是脱敏单元，不可反推地理。同时 DEFF 表「Clustering」列改名为 Residual (DEFF ÷ Kish)——该残差还含分层与交互，分层方向相反，不是 clustering 的干净估计 | Part 1 · `scripts/render_report.py` §2 · README · CSV 列名 `deff_clustering` 暂不改（改需用原始 NHANES 重跑）· 外部审阅提出 |

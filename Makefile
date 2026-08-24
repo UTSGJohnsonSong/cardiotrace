@@ -3,7 +3,7 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help setup up down data load dbt analyze cohort descriptive learning site notebooks all clean
+.PHONY: help setup up down data load dbt cohort descriptive learning site benchmark verify all clean
 
 help:
 	@echo "setup      create venv + install requirements"
@@ -11,9 +11,13 @@ help:
 	@echo "data       download NHANES XPT files"
 	@echo "load       load raw XPT into Postgres"
 	@echo "dbt        build staging + mart models"
-	@echo "analyze    run analysis + models -> reports/"
-	@echo "notebooks  build and execute the four notebooks"
-	@echo "all        up -> data -> load -> dbt -> analyze"
+	@echo "cohort     build the Part 3 cohort + STROBE ladder"
+	@echo "descriptive  Part 1/2 tables, figures and the report"
+	@echo "learning   Part 4 screen and arm comparison (~15 min)"
+	@echo "site       split the report into docs/ and rebuild the README"
+	@echo "benchmark  PCE feasibility cascade + four-year weight check"
+	@echo "verify     assert a clean rebuild changes nothing tracked"
+	@echo "all        up -> data -> load -> dbt -> cohort -> learning -> descriptive -> site"
 
 setup:
 	python -m venv .venv
@@ -26,8 +30,12 @@ up:
 down:
 	docker compose down
 
+# The catalog-driven downloader, not the hardcoded one. `data/download.py`
+# named 17 modules by hand and treated a 404 as "nothing to download", which is
+# how 1999-2004 ended up with no laboratory data at all while the run reported
+# success. It now lives in legacy-invalid/ and nothing here points at it.
 data:
-	$(PY) data/download.py
+	$(PY) data/download_from_catalog.py
 
 load:
 	$(PY) -m src.etl
@@ -35,8 +43,13 @@ load:
 dbt:
 	cd dbt && ../$(PY) -m dbt build --profiles-dir .
 
-analyze:
-	$(PY) run_pipeline.py
+# `analyze` is gone. It ran run_pipeline.py, which overwrote
+# reports/results.json with the XGBoost/SHAP cross-sectional analysis built on
+# imputed laboratory values for a quarter of the sample. render_readme.py used
+# to read that file, so `make all` put those numbers back on the repository
+# front page after every run -- a defect that regenerated itself. The pipeline
+# is preserved in legacy-invalid/ with its own README; reproducing it now takes
+# a deliberate act rather than a build.
 
 # The Part 1 / Part 2 chain. It was outside the build entirely: two of its
 # outputs had no producer in the repository at all, so nobody could regenerate
@@ -68,20 +81,21 @@ site:
 	$(PY) scripts/build_site.py
 	$(PY) scripts/render_readme.py
 
-notebooks:
-	$(PY) scripts/build_notebooks.py
-	$(PY) -m jupyter nbconvert --to notebook --execute --inplace notebooks/*.ipynb
+# Two supporting tables that nothing else depends on, so they are their own
+# target rather than a silent tail on `descriptive`.
+benchmark: cohort
+	$(PY) scripts/pce_variable_cascade.py
+	$(PY) scripts/check_fouryear_weights.py
+	$(PY) scripts/build_tableau_extract.py
 
-# `analyze` runs the DEPRECATED run_pipeline.py, which overwrites
-# reports/results.json with the old XGBoost/SHAP analysis -- the one built on
-# imputed laboratory values for a quarter of the sample, which
-# docs/advisor-briefing.md records as not fit to show. The README used to be
-# generated from that file, so `make all` silently put those numbers back on the
-# repository front page after every run. render_readme.py now reads the current
-# artefacts instead, and `all` no longer runs `analyze`; the target is kept so
-# the old pipeline can still be reproduced deliberately, which is not the same
-# thing as reproducing it by accident.
-all: up data load dbt cohort learning descriptive site
+# The check that stops a committed artefact from outliving the code that wrote
+# it. Every published number is read out of a file in reports/, and those files
+# are committed; if one drifts, the site shows a number no script produces and
+# nothing says so. Runs the renderers and asserts `git status` is clean.
+verify:
+	$(PY) scripts/verify_clean_rebuild.py
+
+all: up data load dbt cohort learning descriptive benchmark site
 	@echo "Pipeline complete. See reports/ and docs/."
 
 clean:
