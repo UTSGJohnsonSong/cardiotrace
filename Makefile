@@ -3,7 +3,7 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help setup up down data load dbt analyze descriptive learning site notebooks all clean
+.PHONY: help setup up down data load dbt analyze cohort descriptive learning site notebooks all clean
 
 help:
 	@echo "setup      create venv + install requirements"
@@ -41,11 +41,17 @@ analyze:
 # The Part 1 / Part 2 chain. It was outside the build entirely: two of its
 # outputs had no producer in the repository at all, so nobody could regenerate
 # them and nothing would have detected them drifting out of step with the code.
+# The cohort is what `learning` screens and what `descriptive` reports on, so
+# it is its own target: `all` has to build it, then run `learning`, and only
+# then render. Running `descriptive` first renders the report against the
+# PREVIOUS run's Part 4 artefact -- no error, one cycle stale, no signal.
+cohort:
+	$(PY) scripts/build_cohort_results.py
+
 # `learning` must have run at least once before `descriptive`: render_report.py
 # reads reports/part4_learning_results.json and stops with a message naming this
 # target if it is absent. `site` then splits the rendered report into docs/.
-descriptive:
-	$(PY) scripts/build_cohort_results.py
+descriptive: cohort
 	$(PY) scripts/build_descriptive_results.py
 	$(PY) scripts/build_ascertainment_results.py
 	$(PY) scripts/build_missingness_results.py
@@ -54,7 +60,7 @@ descriptive:
 
 # ~15 minutes: the screen fits one Cox per candidate per step, and the arm
 # comparison bootstraps four paired differences over whole variance units.
-learning:
+learning: cohort
 	$(PY) scripts/build_learning_results.py
 	$(PY) scripts/make_learning_figures.py
 
@@ -75,7 +81,7 @@ notebooks:
 # artefacts instead, and `all` no longer runs `analyze`; the target is kept so
 # the old pipeline can still be reproduced deliberately, which is not the same
 # thing as reproducing it by accident.
-all: up data load dbt descriptive learning site
+all: up data load dbt cohort learning descriptive site
 	@echo "Pipeline complete. See reports/ and docs/."
 
 clean:

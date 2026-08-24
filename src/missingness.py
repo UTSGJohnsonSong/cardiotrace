@@ -125,9 +125,20 @@ def ipcw(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.Series:
     fit = LogisticRegression(max_iter=2000, C=1.0).fit(X, ok.astype(int))
     p = fit.predict_proba(X)[:, 1]
 
+    floored = int((p < 0.05).sum())
     w = d["wtmec2yr"].to_numpy(float) / np.clip(p, 0.05, 1.0)
     cap = np.nanpercentile(w[ok], 99)
-    return pd.Series(np.minimum(w, cap), index=d.index, name="ipcw")
+    capped = int((w[ok] > cap).sum())
+    out = pd.Series(np.minimum(w, cap), index=d.index, name="ipcw")
+    # Both bounds bind silently, and trimming shrinks the correction TOWARD the
+    # uncorrected estimate -- so a paragraph that rests on the two agreeing has
+    # to be able to say how much of the agreement the trim bought.
+    out.attrs.update(
+        n_floored=floored, n_capped=capped,
+        min_propensity=float(np.nanmin(p)),
+        weight_removed_pct=float(
+            100 * (w[ok] - np.minimum(w[ok], cap)).sum() / w[ok].sum()))
+    return out
 
 
 def sensitivity(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.DataFrame:
@@ -142,7 +153,11 @@ def sensitivity(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.D
 
     features = list(features or P_FEATURES)
     d = _model_frame(cohort)
-    d["ipcw"] = ipcw(cohort, features)
+    # Held by reference: assigning a Series into a DataFrame column discards its
+    # `.attrs`, so `d["ipcw"].attrs` would come back empty and the trimming
+    # diagnostics would be silently absent from the artefact.
+    w_ipcw = ipcw(cohort, features)
+    d["ipcw"] = w_ipcw
     covs = ["systolic_bp"] + [c for c in E2_ADJUSTMENT if c != "systolic_bp"]
 
     rows = []
@@ -159,4 +174,9 @@ def sensitivity(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.D
             "lo95": round(float(np.exp(r["coef lower 95%"] * 10)), 4),
             "hi95": round(float(np.exp(r["coef upper 95%"] * 10)), 4),
         })
-    return pd.DataFrame(rows)
+    out = pd.DataFrame(rows)
+    # Carried out with the table, because the paragraph that rests on the two
+    # rows agreeing has to be able to say how much of the agreement the trim
+    # bought. Trimming pulls the corrected estimate TOWARD the uncorrected one.
+    out.attrs.update(w_ipcw.attrs)
+    return out

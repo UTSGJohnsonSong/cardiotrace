@@ -75,6 +75,11 @@ MAX_SELECTED = 6
 # computed on its own rows, and are reported as out of the path with the reason.
 MIN_COVERAGE = 0.80
 
+# Below this the candidate is not offered to the fitter at all. Named, because
+# "did not fit" and "was never fitted" are different statements and the second
+# one used to be printed as the first.
+MIN_ROWS_TO_FIT = 300
+
 
 @dataclass(frozen=True)
 class Candidate:
@@ -151,6 +156,26 @@ INCUMBENT_STATUS: dict[str, tuple[str, str]] = {
 }
 
 STATUS = {c.name: (c.e2_status, c.why) for c in CANDIDATES} | INCUMBENT_STATUS
+
+# `|` resolves a key collision by silently taking the right-hand side. A
+# variable added to CANDIDATES that is already an incumbent would therefore lose
+# its declared status and print the incumbent's instead -- in the importance
+# table but not the ranking table, on the same page. These run at import, the
+# only moment early enough to matter. All five hold today.
+_names = [c.name for c in CANDIDATES]
+_declared = {"admissible", "forbidden", "undetermined", "exposure"}
+assert len(_names) == len(set(_names)), f"duplicate candidate names: {_names}"
+assert not (set(_names) & set(INCUMBENT_STATUS)), (
+    f"candidate is also an incumbent: {sorted(set(_names) & set(INCUMBENT_STATUS))}; "
+    f"STATUS would keep the incumbent's status and discard the candidate's")
+assert set(INCUMBENT_STATUS) == set(P_FEATURES), (
+    f"INCUMBENT_STATUS and P_FEATURES disagree: "
+    f"{sorted(set(INCUMBENT_STATUS) ^ set(P_FEATURES))}")
+_used = {v[0] for v in STATUS.values()}
+assert _used <= _declared, f"undeclared e2 state(s): {sorted(_used - _declared)}"
+assert "exposure" not in {c.e2_status for c in CANDIDATES}, (
+    "'exposure' describes the variable the aetiologic model estimates, not a "
+    "candidate for addition to the prediction model")
 
 
 def assert_declared(names) -> None:
@@ -229,13 +254,19 @@ def marginal_ranking(train: pd.DataFrame) -> pd.DataFrame:
                                      "design_cluster"]].dropna()
     denom = len(base)
 
+    absent = [c.name for c in CANDIDATES if c.name not in train.columns]
+    if absent:
+        raise KeyError(
+            f"declared candidates missing from the frame: {absent}. Skipping "
+            f"them silently would shrink n_candidates -- a number the report, "
+            f"the index card and the README all print -- with no other symptom.")
+
     rows = []
     for c in CANDIDATES:
-        if c.name not in train.columns:
-            continue
         have = base.index.intersection(train[c.name].dropna().index)
         coverage = len(have) / denom if denom else 0.0
-        stat = _wald(train.loc[have], list(P_FEATURES), c.name) if len(have) > 300 else None
+        stat = (_wald(train.loc[have], list(P_FEATURES), c.name)
+                if len(have) > MIN_ROWS_TO_FIT else None)
         rows.append({
             "variable": c.name, "label": c.label, "e2_status": c.e2_status,
             "n": int(len(have)), "coverage": round(coverage, 3),
@@ -245,9 +276,22 @@ def marginal_ranking(train: pd.DataFrame) -> pd.DataFrame:
             "wald": round(stat["wald"], 2) if stat else np.nan,
             "in_pool": bool(stat and stat["wald"] >= WALD_THRESHOLD
                             and coverage >= MIN_COVERAGE),
-            "note": ("" if stat else "did not fit")
-            or ("" if coverage >= MIN_COVERAGE
-                else f"observed for {coverage:.0%} of the training rows"),
+            # Every state gets a name, and the names distinguish things that
+            # are genuinely different. An empty string here became NaN on the
+            # way through CSV -- and NaN is truthy, so the renderer's fallback
+            # never fired and nine rows of the published table read "nan".
+            # "did not fit" also used to cover a candidate that was never
+            # OFFERED to the fitter, which is a false statement about what the
+            # code did, in a column a reader uses to judge the screen.
+            "note": ("only %d rows, below the %d needed to attempt a fit"
+                     % (len(have), MIN_ROWS_TO_FIT)
+                     if len(have) <= MIN_ROWS_TO_FIT else
+                     "the fit did not converge" if stat is None else
+                     "observed for %.0f%% of the training rows, below the %.0f%% gate"
+                     % (100 * coverage, 100 * MIN_COVERAGE)
+                     if coverage < MIN_COVERAGE else
+                     "below the Wald threshold" if stat["wald"] < WALD_THRESHOLD
+                     else "entered the pool"),
         })
     out = pd.DataFrame(rows)
     return out.sort_values("wald", ascending=False, na_position="last")
@@ -272,6 +316,7 @@ def forward_select(train: pd.DataFrame, pool: list[str]) -> pd.DataFrame:
     n, events = int(len(common)), int(common["cvd_death"].sum())
 
     chosen: list[str] = []
+    failed: list[str] = []
     remaining = list(pool)
     rows = [{"step": 0, "entered": "(the eleven already in the model)",
              "z": np.nan, "wald": np.nan, "n": n, "events": events,
@@ -283,8 +328,15 @@ def forward_select(train: pd.DataFrame, pool: list[str]) -> pd.DataFrame:
             if EXCLUDES.get(v, set()) & set(chosen):
                 continue        # linearly dependent on something already in
             stat = _wald(common, list(P_FEATURES) + chosen, v)
-            if stat is not None:
-                scored.append((stat["wald"], v, stat["z"]))
+            if stat is None:
+                # A candidate that will not fit alongside what is already chosen
+                # is a fact about the path. Dropping it silently would change
+                # which variable the report says was selected, with nothing
+                # anywhere recording that another had been considered.
+                failed.append(f"{v} (step {len(chosen) + 1})")
+                remaining.remove(v)
+                continue
+            scored.append((stat["wald"], v, stat["z"]))
         if not scored:
             break
         wald, best, z = max(scored)
@@ -297,7 +349,9 @@ def forward_select(train: pd.DataFrame, pool: list[str]) -> pd.DataFrame:
         chosen.append(best)
         remaining.remove(best)
 
-    return pd.DataFrame(rows)
+    out = pd.DataFrame(rows)
+    out.attrs["failed"] = failed
+    return out
 
 
 def screen(cohort: pd.DataFrame) -> dict:

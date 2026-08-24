@@ -278,6 +278,27 @@ footer {
 """
 
 
+def _num(x, dp: int) -> str:
+    """A number, or an em dash where there is none.
+
+    An f-string renders float('nan') as the literal text "nan", which is what a
+    reader of the published page then sees. Every numeric cell that can be
+    missing goes through here.
+    """
+    return "&mdash;" if pd.isna(x) else f"{x:.{dp}f}"
+
+
+def _text(s) -> str:
+    """Text, or an em dash.
+
+    `s or fallback` is not enough: pandas reads an empty CSV field back as
+    float('nan'), and float('nan') is truthy, so the fallback never fires and
+    the NaN is interpolated straight into the cell. That is how nine rows of
+    the candidate table came to answer "Into the forward path?" with "nan".
+    """
+    return "&mdash;" if pd.isna(s) else str(s)
+
+
 def stat(k: str, v: str, n: str = "") -> str:
     note = f'<div class="n">{n}</div>' if n else ""
     return f'<div class="stat"><div class="k">{k}</div><div class="v">{v}</div>{note}</div>'
@@ -397,8 +418,12 @@ def build() -> str:
         for r in cox.itertuples(index=False))
     cox_head = "".join(f"<th>{c}</th>" for c in cox.columns)
 
+    # `f"{v}"` on a missing cell prints the literal text "nan", which is what a
+    # reader of the flow table then sees. The first row has no cvd_deaths -- the
+    # cohort does not exist yet at that step -- and that is an absence, not a
+    # number, so it renders as one.
     rows_strobe = "".join(
-        "<tr>" + "".join(f"<td>{v}</td>" for v in r) + "</tr>"
+        "<tr>" + "".join(f"<td>{_text(v)}</td>" for v in r) + "</tr>"
         for r in strobe.itertuples(index=False))
     strobe_head = "".join(f"<th>{c}</th>" for c in strobe.columns)
 
@@ -478,13 +503,13 @@ def build() -> str:
 
     p4_rows_rank = "".join(
         f"<tr><td>{r.label}</td><td>{r.e2_status}</td><td>{r.n:,}</td>"
-        f"<td>{r.hr_per_sd:.3f}</td><td class='em'>{r.wald:.1f}</td>"
-        f"<td>{'yes' if r.in_pool else (r.note or 'below threshold')}</td></tr>"
+        f"<td>{_num(r.hr_per_sd, 3)}</td><td class='em'>{_num(r.wald, 1)}</td>"
+        f"<td>{'yes' if r.in_pool else _text(r.note)}</td></tr>"
         for r in p4_rank.itertuples())
 
     p4_rows_arms = "".join(
         f"<tr><td>{ARM_LABEL_HTML[r.arm]}</td><td>{r.n_features}</td>"
-        f"<td>{r.harrell_c:.4f}</td><td>{r.auc_horizon:.4f}</td>"
+        f"<td>{_num(r.harrell_c, 4)}</td><td>{_num(r.auc_horizon, 4)}</td>"
         f"<td class='em'>{'&mdash; reference' if r.is_reference else f'{r.delta_c:+.4f}'}</td>"
         f"<td>{'' if r.is_reference else f'{r.delta_lo:+.4f} to {r.delta_hi:+.4f}'}</td></tr>"
         for r in p4_arms.itertuples())
@@ -517,8 +542,15 @@ def build() -> str:
     def _codes(names):
         return ", ".join(f"<code>{v}</code>" for v in names) or "none"
 
-    _gain_excl = bool(p4_gain.excludes_zero)
-    _form_excl = bool(p4_form.excludes_zero)
+    # `bool()` on a possibly-missing flag reads missing as TRUE: the column is
+    # object dtype because the reference row has no delta, and bool(nan) is
+    # True. Getting that wrong here would make the page assert that a difference
+    # is established on the strength of a blank cell.
+    def _flag(x) -> bool:
+        return bool(x) and not pd.isna(x)
+
+    _gain_excl = _flag(p4_gain.excludes_zero)
+    _form_excl = _flag(p4_form.excludes_zero)
     if _gain_excl and _form_excl:
         p4_both_excl = "excludes zero"
     elif _gain_excl:
@@ -1233,6 +1265,16 @@ def build() -> str:
     under the survey weight against {miss['sensitivity']['hr_ipcw']:.4f}
     ({miss['sensitivity']['hr_ipcw_ci'][0]:.4f}&ndash;{miss['sensitivity']['hr_ipcw_ci'][1]:.4f})
     under IPCW, a shift of {miss['sensitivity']['abs_shift']:.4f}.</p>
+
+    <p class="measure">Two bounds inside that correction are worth naming, because both shrink it
+    <em>toward</em> the uncorrected estimate and so buy part of the agreement the paragraph above
+    rests on. The propensity is floored at 0.05 &mdash; not binding here, the smallest is
+    {miss['trimming']['min_propensity']:.3f} &mdash; and the weights are trimmed at the 99th
+    percentile, which binds on {miss['trimming']['n_capped']} participants and removes
+    {miss['trimming']['weight_removed_pct']:.2f}% of the re-weighted total. Untrimmed, one
+    participant can carry several per cent of the weight, and an estimate driven by three people
+    is worse than the one it replaced; trimmed, the correction is smaller than it would otherwise
+    have been. Both numbers are here so a reader can judge which trade they prefer.</p>
 
     <p class="measure"><b>That is reassurance about fragility, not a repair.</b> IPCW restores
     unbiasedness only if completeness is independent of the outcome given what the completeness

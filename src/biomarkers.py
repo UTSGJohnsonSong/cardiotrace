@@ -62,8 +62,33 @@ CREATININE_CALIBRATION: dict[str, tuple[float, float]] = {
 }
 
 
+# Every cycle this project analyses, so an unrecognised label is a typo or a
+# new cycle rather than a cycle that needs no correction. The two are
+# indistinguishable to `.fillna`, and the repo already carries two conventions
+# for cycle strings -- `model_results.json` uses an en dash where the cohort
+# uses a hyphen -- so the confusion is available today, not hypothetical.
+KNOWN_CYCLES = frozenset([
+    "1999-2000", "2001-2002", "2003-2004", "2005-2006", "2007-2008",
+    "2009-2010", "2011-2012", "2013-2014", "2015-2016", "2017-2018",
+    "2021-2022",
+])
+
+
 def calibrate_creatinine(df: pd.DataFrame, column: str = "creatinine") -> pd.Series:
-    """`column`, per row, on the IDMS-traceable scale its cycle requires."""
+    """`column`, per row, on the IDMS-traceable scale its cycle requires.
+
+    An unknown cycle label raises. `.fillna((0.0, 1.0))` is the right default
+    for a cycle CDC says needs no correction and the wrong one for a cycle the
+    map has never seen, and nothing downstream can tell those apart: the page
+    would state that 1999-2000 needed no correction, which is the opposite of
+    what this module exists to say.
+    """
+    unknown = sorted(set(df["cycle"].dropna().unique()) - KNOWN_CYCLES)
+    if unknown:
+        raise KeyError(
+            f"unrecognised cycle label(s) {unknown}. Calibration would silently "
+            f"fall back to the identity, and the report would then state that "
+            f"these cycles needed no correction.")
     scr = pd.to_numeric(df[column], errors="coerce")
     intercept = df["cycle"].map(
         {c: v[0] for c, v in CREATININE_CALIBRATION.items()}).fillna(0.0)
