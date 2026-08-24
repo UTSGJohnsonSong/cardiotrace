@@ -88,8 +88,25 @@
    这是本轮唯一一处**结论方向**改变，值得在合并说明里单独点名。
 4. **PCE 头对头仍未实现**（节点 15 = 🔄）。协议已锁定，A5 修正了它引用的 n，但对比本身没做。
    若合并说明里出现「PCE 基准」字样，需要说清是协议已定、实现未做。
-5. `make verify --full` 的结果见合并当日的运行记录；`--render` 已进 CI，`--full` 未进
-   （需要 `data/processed/`，而该目录被 gitignore）。**Part 4 产物的重建由本地负责，不由 CI 保证。**
+5. **重建验证的覆盖范围与时点，逐条写清**——上一版这里写「见合并当日的运行记录」，
+   而那份记录并不存在。一条指向不存在证据的断言，和没有断言不是一回事，是更糟。
+
+   | 范围 | 跑过没有 | 在哪个 commit | 谁保证 |
+   |---|---|---|---|
+   | `--render`（报告 / 站点 / README） | ✅ | `691ebfd`（当前 HEAD） | **CI 每次 push**（`.github/workflows/ci.yml`） |
+   | 默认范围（+ 表、图、生存模型） | ✅ | `691ebfd` | 仅本地 |
+   | `--full`（+ Part 4） | ✅ | **`1d30cb4`，不是当前 HEAD** | 仅本地 |
+
+   `--full` 之后又落了三个 commit（`b73d08f` `21b48e0` `ed50ebb` `691ebfd`），
+   其中 `691ebfd` 改了 `render_report.py`。**合并前必须在最终 commit 上重跑一次 `--full`**，
+   否则 Part 4 产物与代码是否一致，这轮没有任何证据。
+
+   `--full` 进不了 CI 的原因是它需要 `data/processed/`，而该目录被 gitignore。
+   **Part 4 产物的重建由本地负责，不由 CI 保证**——这是一条结构性缺口，不是疏忽。
+6. `verify_clean_rebuild.py` 目前不留运行凭据。第 5 条那张表是我手填的，
+   下次仍会过期。**待办**：让它把「时间 · commit · 范围 · 结果」写进
+   `reports/verify_receipt.json`（比照 `test_summary.json`，并加入 `IGNORE_PATHS`），
+   由文档引用该文件而不是引用一段记忆。
 
 ---
 
