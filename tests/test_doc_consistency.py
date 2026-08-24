@@ -85,10 +85,17 @@ def test_every_landing_path_in_the_status_table_exists(design):
     This is the whole reason the table carries a landing column: without it,
     "locked" is an assertion with no way to be wrong.
     """
-    table = design[design.index("## 当前状态"):design.index("## 路线图")]
-    paths = {m for m in re.findall(r"`([\w./-]+\.(?:py|R|csv|gz|md|sql))`", table)}
+    block = design[design.index("## 当前状态"):design.index("## 路线图")]
+    # Table rows only. The prose above the table links to sibling documents by a
+    # docs/-relative name, and scanning it resolved those against the repository
+    # root and reported them missing -- a failure caused by the test, in the one
+    # test whose job is to make a failure mean something.
+    rows = [l for l in block.splitlines() if re.match(r"^\| \d+ \|", l)]
+    paths = {m for row in rows
+             for m in re.findall(r"`([\w./-]+\.(?:py|R|csv|gz|sql))`", row)}
     assert len(paths) >= 15, (
-        f"only found {len(paths)} landing paths; the table looks truncated")
+        f"only found {len(paths)} landing paths across {len(rows)} rows; "
+        f"the table looks truncated")
     missing = sorted(p for p in paths if not (ROOT / p).exists())
     assert not missing, f"the status table points at files that do not exist: {missing}"
 

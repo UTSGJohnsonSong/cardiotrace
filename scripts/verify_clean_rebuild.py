@@ -99,19 +99,27 @@ def git(*args: str) -> str:
     return r.stdout
 
 
-def dirty() -> list[str]:
-    """Tracked files that differ from HEAD, excluding what cannot be compared."""
-    out = []
+def dirty() -> tuple[list[str], list[str]]:
+    """(changed tracked files, untracked files), excluding the incomparable.
+
+    The two are kept apart because they mean different things and the same
+    sentence cannot explain both. A modified tracked file is an artefact that no
+    longer matches the code. An untracked file is something the rebuild
+    PRODUCED that nobody committed -- or, just as often, an unrelated file
+    someone left in the tree, which is not a rebuild failure at all. Reporting
+    the second as the first is how a check earns a reputation for false alarms.
+    """
+    changed, untracked = [], []
     for line in git("status", "--porcelain").splitlines():
-        path = line[3:].strip().strip('"')
+        code, path = line[:2], line[3:].strip().strip('"')
         if " -> " in path:                       # a rename; take the destination
             path = path.split(" -> ", 1)[1]
         if path in IGNORE_PATHS:
             continue
         if Path(path).suffix.lower() in IGNORE_SUFFIXES:
             continue
-        out.append(f"{line[:2]} {path}")
-    return sorted(out)
+        (untracked if code == "??" else changed).append(f"{code} {path}")
+    return sorted(changed), sorted(untracked)
 
 
 def main() -> None:
@@ -132,7 +140,7 @@ def main() -> None:
             f"Run `python scripts/verify_clean_rebuild.py --render` for the "
             f"part that needs no data, or `make cohort` to build it.")
 
-    before = dirty()
+    before, before_untracked = dirty()
     if before:
         # Running the rebuild on a dirty tree would report the user's own edits
         # as a rebuild failure, which is the fastest way to teach someone that
@@ -142,6 +150,11 @@ def main() -> None:
             "the rebuild would not mean anything:\n  "
             + "\n  ".join(before)
             + "\n\nCommit or stash them first.")
+    # Untracked files present BEFORE the run are the user's, not the rebuild's.
+    # Recorded rather than refused, so that a file created while a fifteen-minute
+    # rebuild is running does not get reported as a stale artefact afterwards --
+    # which is exactly what happened the first time this ran to completion.
+    preexisting = set(before_untracked)
 
     if args.render:
         stages = RENDER_STAGE
@@ -158,7 +171,17 @@ def main() -> None:
                 tail = "\n".join((r.stderr or r.stdout).splitlines()[-25:])
                 raise SystemExit(f"\n{s} failed:\n{tail}")
 
-    after = dirty()
+    after, after_untracked = dirty()
+    produced = [u for u in after_untracked if u not in preexisting]
+    if produced:
+        # Not a failure on its own: the rebuild wrote a file that is not in the
+        # repository. That is worth saying -- a published number could be read
+        # from it while no checkout has it -- but it is a different fault from a
+        # stale artefact, so it gets its own sentence and does not exit 1.
+        log.warning("\nThe rebuild produced files that are not tracked:\n  "
+                    + "\n  ".join(produced))
+        log.warning("If any of these feeds a published page, commit it; a fresh "
+                    "checkout does not have it.")
     if after:
         log.error("\nA clean rebuild changed tracked files:\n  " + "\n  ".join(after))
         log.error("\nEvery one of these is a committed artefact that no longer "
