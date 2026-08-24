@@ -21,7 +21,9 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from src.descriptive import AGE_LABELS, PRE_COVID_CYCLES, STD_2000  # noqa: E402
+from src.descriptive import (  # noqa: E402
+    AGE_LABELS, PRE_COVID_CYCLES, STD_2000, display_cycle,
+)
 
 ROOT = Path(__file__).parent.parent
 FIG = ROOT / "reports" / "figures"
@@ -460,7 +462,7 @@ def build() -> str:
         xc_dof_hi = int(xc1["r_design_df"].max())
 
     rows1 = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.n_cases:,}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.n:,}</td><td>{r.n_cases:,}</td>"
         f"<td>{100 * r.p_crude:.2f}</td><td class='em'>{100 * r.p_std:.2f}</td>"
         f"<td>{100 * r.lo_std:.2f} – {100 * r.hi_std:.2f}</td></tr>"
         for r in overall.itertuples())
@@ -512,7 +514,7 @@ def build() -> str:
     p_lo, p_hi = 100 * overall["p_std"].min(), 100 * overall["p_std"].max()
     strobe_n = int(strobe["n"].iloc[-1])
     rows_flow = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.age_eligible:,}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.age_eligible:,}</td>"
         f"<td>{r.no_weight:,}</td><td>{r.analysed:,}</td>"
         f"<td class='em'>{r.lost_pct:.1f}%</td></tr>"
         for r in flow.itertuples())
@@ -533,13 +535,13 @@ def build() -> str:
         for band in AGE_LABELS)
 
     rows_deff = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.n_psu}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.n:,}</td><td>{r.n_psu}</td>"
         f"<td>{r.deff_std:.2f}</td><td>{r.kish_weighting:.2f}</td>"
         f"<td class='em'>{r.deff_clustering:.2f}</td></tr>"
         for r in overall.itertuples())
 
     rows_asc = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.instrument}</td><td>{r.n_hypertensive:,}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.instrument}</td><td>{r.n_hypertensive:,}</td>"
         f"<td class='em'>{100 * r.ascertained_std:.1f}%</td>"
         f"<td>{100 * r.lo_std:.1f} – {100 * r.hi_std:.1f}</td>"
         f"<td>{100 * r.measured_only_std:.1f}%</td></tr>"
@@ -589,7 +591,7 @@ def build() -> str:
         for r in p4_imp.head(8).itertuples())
 
     p4_rows_creat = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.mean_as_loaded:.4f}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.n:,}</td><td>{r.mean_as_loaded:.4f}</td>"
         f"<td class='em'>{r.mean_calibrated:.4f}</td>"
         f"<td>{'CDC correction applied' if r.corrected else '&mdash;'}</td></tr>"
         for r in p4_creat.itertuples())
@@ -727,7 +729,7 @@ def build() -> str:
   design that identifies it, and prices the choices that design requires.</p>
   <div class="masthead-meta">
     <span><b>Prepared</b> {BUILD_DATE}</span>
-    <span><b>Survey cycles</b> {p1['n_cycles']}, {overall.iloc[0]['cycle']} to {p1['last_cycle']}</span>
+    <span><b>Survey cycles</b> {p1['n_cycles']}, {display_cycle(overall.iloc[0]['cycle'])} to {display_cycle(p1['last_cycle'])}</span>
     <span><b>Descriptive sample</b> {p1['n_adults']:,} adults 20+</span>
     <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
     <span><b>Mortality follow-up through</b> {DATA_CUTOFF}</span>
@@ -813,9 +815,10 @@ def build() -> str:
     reverses its sign.</p>
 
     <div class="stats">
-      {stat("Adults 20+", f"{p1['n_adults']:,}", f"{p1['n_cycles']} cycles, {overall.iloc[0]['cycle']} to {p1['last_cycle']}")}
-      {stat("Crude", f"{pct(p1['crude_first'], 1)} → {pct(p1['crude_last'], 1)}", f"rising, to {p1['last_cycle']}")}
-      {stat("Standardised", f"{pct(p1['std_first'], 1)} → {pct(p1['std_last'], 1)}", f"falling, to {p1['last_cycle']}")}
+      {stat("Adults 20+", f"{p1['n_adults']:,}", f"{p1['n_cycles']} cycles, {display_cycle(overall.iloc[0]['cycle'])} to "
+         f"{display_cycle(p1['last_cycle'])}")}
+      {stat("Crude", f"{pct(p1['crude_first'], 1)} → {pct(p1['crude_last'], 1)}", f"rising, to {display_cycle(p1['last_cycle'])}")}
+      {stat("Standardised", f"{pct(p1['std_first'], 1)} → {pct(p1['std_last'], 1)}", f"falling, to {display_cycle(p1['last_cycle'])}")}
       {stat("Weighted mean age", f"{p1['mean_age_first']:.1f} → {p1['mean_age_last']:.1f}", "years — the driver")}
     </div>
 
@@ -997,7 +1000,7 @@ def build() -> str:
                 narrower measured-only denominator, which is markedly lower and flatter.">
       <figcaption><b>Ascertainment improved by
       {100 * (asc_aus['ascertained_std'].iloc[-1] - asc_aus['ascertained_std'].iloc[0]):.1f} points
-      overall, peaking in {asc_peak['cycle']}.</b> The share climbs from
+      overall, peaking in {display_cycle(asc_peak['cycle'])}.</b> The share climbs from
       {100 * asc_aus['ascertained_std'].iloc[0]:.1f}% to
       {100 * asc_peak['ascertained_std']:.1f}%, then falls back to
       {100 * asc_aus['ascertained_std'].iloc[-1]:.1f}%. The peak cycle straddles the 2014 coverage
@@ -1061,7 +1064,7 @@ def build() -> str:
       <img src="{data_uri('part2_counterfactual.png')}"
            alt="Age-standardised prevalence with a fitted pre-pandemic trend extrapolated across
                 the gap where NHANES fielded no cycle, compared against the single observed
-                2021-2022 point with its confidence interval.">
+                Aug 2021&ndash;Aug 2023 point with its confidence interval.">
       <figcaption><b>The gap in the horizontal axis is the analytical problem.</b> NHANES
       suspended field operations, so no 2019–2020 cycle exists and the counterfactual must be
       carried {p2['extrapolation_years']:.0f} years beyond the last observation. With one point
@@ -1473,7 +1476,17 @@ def build() -> str:
       null. Exposures are measured once, which supports baseline risk prediction — the same design
       as Framingham, the Pooled Cohort Equations, SCORE2 and QRISK3 — but not dynamic risk
       updating, and a single measurement attenuates associations through regression dilution.
-      Follow-up ends {DATA_CUTOFF}, entirely before the pandemic.
+      Follow-up ends {DATA_CUTOFF}, entirely before the pandemic. Two design choices are
+      simplifications rather than corrections: the cohort pools eight cycles on the two-year
+      examination weight, where NCHS's guidance for an analysis spanning 1999&ndash;2002 is to use
+      the four-year weights released for those cycles, and complete-case restriction to the eleven
+      model inputs drops 9.6% of the cohort but 10.9% of the cardiovascular deaths. The first was
+      measured before being accepted: the four-year weights disagree sharply per person
+      &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
+      the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
+      which is below the precision printed here. The second is not corrected at all: the
+      inverse-probability weights described above address censoring, not selection into the
+      complete-case subsample.
     </div>
   </div>
 </section>
@@ -1735,11 +1748,18 @@ def build() -> str:
     and one recalibrating it to this cohort, so that the definitional gap is isolated instead of
     silently absorbed.</p>
 
-    <p class="measure">Three decisions remain open and are recorded as open: how to handle race
-    categories the equations do not cover, whether to restrict the comparison to the subsample
-    with all nine inputs observed, and whether treated blood pressure enters through the
-    equations' own treated branch rather than this project's reconstruction of the untreated
-    level. Each changes the answer, so none is being made silently.</p>
+    <p class="measure">The comparison protocol was fixed in advance, before any of it was run,
+    and it commits to four things. The primary comparison covers non-Hispanic White and
+    non-Hispanic Black adults only, because those are the groups the equations were derived in;
+    other groups appear as a labelled sensitivity analysis rather than in the headline. It runs on
+    the subsample with all nine inputs observed — and this project's own model is refitted and
+    re-evaluated on that same subsample, because two numbers both called a concordance statistic
+    look comparable while measuring different populations. Blood pressure enters through the
+    equations' own treated and untreated branches, not through this project's reconstruction of an
+    untreated level, which was built for a different estimand. And because the outcomes differ, the
+    comparison is a prognostic benchmark on discrimination, not a claim about the same endpoint.
+    What remains is implementation, not judgement: the coefficient tables and baseline survival
+    have still to be written down and pinned by tests.</p>
   </div>
 </section>
 

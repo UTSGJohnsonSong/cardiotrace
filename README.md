@@ -1,7 +1,7 @@
 # CardioTrace
-### A prospective cohort study of cardiovascular mortality, built from 11 NHANES cycles
+### A prospective cohort study of cardiovascular mortality, built from linked NHANES cycles
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-164%20passing-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-179%20passing-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
 builds a prospective cohort of adults who were free of cardiovascular disease at
@@ -50,10 +50,16 @@ Every non-obvious decision has a written reason in
   cause-of-death groups, so cerebrovascular deaths disappear into "other" and the
   outcome definition would change mid-series. Those cycles contribute only ~4% of
   events anyway, because follow-up is short.
-- **Survey weights, everywhere.** NHANES is a stratified multi-stage probability
-  sample. Population estimates use the pooled MEC exam weight; the variance is robust
-  and clustered on the masked variance units NCHS releases (`SDMVSTRA` × `SDMVPSU`), which
-  stand in for the true strata and PSUs withheld for disclosure control.
+- **Survey weights, everywhere, and the right one each time.** NHANES is a stratified
+  multi-stage probability sample. The rule is to take the weight of the most restrictive
+  component an estimate depends on: the Part 1 prevalence series is built from interview
+  responses, so it carries `WTINT2YR`, and Part 3 and the ascertainment series need a
+  measured blood pressure, so they carry `WTMEC2YR`. Using the exam weight for an
+  interview-only estimate discards the ~9% of respondents who were interviewed but never
+  examined, and NCHS's own guidance is to weight to the smallest component. Variance is
+  robust and clustered on the masked variance units NCHS releases (`SDMVSTRA` ×
+  `SDMVPSU`), which stand in for the true strata and PSUs withheld for disclosure
+  control — masked units, not counties.
 
 ### What went wrong, and how it was caught
 
@@ -73,7 +79,7 @@ downstream turned the gaps into plausible numbers.
 
 The pipeline now enumerates all 1,821 published files before selecting any, records one
 rule per file, resolves column names through a verified per-cycle crosswalk, and fails
-the run on any cycle-wide gap that is not explicitly declared. The 85 tests are
+the run on any cycle-wide gap that is not explicitly declared. The 179 tests are
 regressions for defects that actually shipped.
 
 ---
@@ -124,7 +130,7 @@ python data/build_variable_crosswalk.py     # resolve per-cycle column names
 python -c "from src.cohort import build_cohort; build_cohort()"
 python scripts/make_survival_figures.py     # descriptive curves
 python scripts/fit_survival_models.py       # Cox + absolute risk + calibration
-pytest tests/ -q                            # 85 tests
+pytest tests/ -q                            # 179 tests
 ```
 
 Every download writes a SHA-256 manifest; `--verify` re-hashes against it. CDC revises
@@ -171,7 +177,7 @@ CardioTrace/
 │   ├── pce_variable_cascade.py     # what each PCE alignment filter costs
 │   ├── make_survival_figures.py    # descriptive curves
 │   └── fit_survival_models.py      # fit, validate forward in time, calibrate
-├── tests/                          # 85 regressions for defects that shipped
+├── tests/                          # 179 regressions for defects that shipped
 ├── docs/
 │   ├── research-design.md          # decision log - every choice, with its cost
 │   ├── methodology-review.md       # the audit that started the rework
@@ -214,8 +220,25 @@ Stated because they bound what the numbers mean, not as a disclaimer.
   remain in a cohort described as primary-prevention, biasing effects toward the null.
 - **Follow-up ends 2019-12-31.** The model is trained and validated entirely on
   pre-pandemic data; its transportability after 2020 cannot be tested with public data.
-- **Point estimates only.** Design-based confidence intervals via Taylor linearisation
-  are not yet implemented.
+- **Two design-based estimators, still 1.2% apart.** Intervals are design-based
+  throughout: Taylor linearisation for the prevalence series, `survey::svycoxph` for the
+  exposure model. The Python cluster-robust sandwich run beside it differs by a median of
+  1.2% on the standard errors, because it does not stratify the ultimate clusters. No term
+  changes whether its interval covers the null. See
+  [`docs/crosscheck-survey.md`](docs/crosscheck-survey.md).
+- **Eight cycles pooled on two-year weights.** NCHS releases four-year examination weights for
+  1999–2002 and its guidance is to use them for an analysis spanning those cycles; this one does
+  not. The cost was measured rather than assumed: the four-year weights disagree with the
+  two-year weights sharply per person (20.6% of participants by more than a fifth) but almost
+  cancel in aggregate, moving the blood-pressure hazard ratio from 1.1216 to 1.1233 and no
+  coefficient by more than 0.91%. Reproduce with `python scripts/check_fouryear_weights.py`.
+- **Complete-case selection is not fully resolved.** The prediction model requires all
+  eleven inputs, which drops 9.6% of the cohort (20,736 → 18,744) but 10.9% of the CVD
+  deaths (925 → 824) — the people dropped are not a random sample of the cohort.
+  [`docs/`](docs/) reports an IPCW sensitivity analysis, but IPCW here reweights for
+  CENSORING; it does not repair selection into the complete-case subsample, which remains
+  an open limitation rather than a corrected one. Costs per filter:
+  [`reports/tables/pce_cascade.csv`](reports/tables/pce_cascade.csv).
 - **Diet is unmeasured.** It sits in the causal graph as an unmeasured confounder of the
   blood-pressure effect.
 

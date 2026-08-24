@@ -38,7 +38,7 @@ REPORT = ROOT / "reports" / "cardiotrace-report.html"
 DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 
-from src.descriptive import DESC_CYCLES  # noqa: E402
+from src.descriptive import DESC_CYCLES, display_cycle  # noqa: E402
 
 N_CYCLES = len(DESC_CYCLES)
 
@@ -378,7 +378,10 @@ def facts() -> dict:
         "std_slope_ci": p1["std_slope_ci"],
         "gap":          p2["gap"],
         "gap_ci":       p2["gap_ci"],
-        "post_cycle":   p2["post_cycle"],
+        # display_cycle here, not at each of the four use sites: the last one
+        # to be added would have been the one that forgot.
+        "post_cycle":   display_cycle(p2["post_cycle"]),
+        "post_cycle_key": p2["post_cycle"],
         "harrell_c":    tenyr["harrell_c"],
         "c_horizon":    int(tenyr["horizon_years"]),
         "c_n":          tenyr["n"],

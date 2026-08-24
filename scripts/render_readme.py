@@ -27,6 +27,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 REPORTS = ROOT / "reports"
+
+# Defined as a raw string at module scope, not inline: written inline it was
+# escaped twice on the way into the file and the leading word boundary
+# became a literal backspace, so the pattern matched nothing and the sync
+# reported "0 mentions" instead of failing.
+TEST_COUNT_IN_PROSE = re.compile(r"\b\d+ (tests|regressions)\b")
 sys.path.insert(0, str(ROOT))
 
 
@@ -149,7 +155,27 @@ if summary.exists():
         readme = re.sub(r"badge/tests-\d+%20passing-brightgreen",
                         f"badge/tests-{t['collected']}%20passing-brightgreen",
                         readme, count=1)
-        print(f"test badge: {t['collected']} passing")
+        # The badge was not the only place the count appeared. Three sentences
+        # of prose carried a hand-typed 85 while the badge said 128, so fixing
+        # only the badge would have left the front page disagreeing with itself
+        # in three places instead of four. Every occurrence of "<n> tests" and
+        # "<n> regressions" now comes from the same run that wrote the badge.
+        readme, n_prose = re.subn(TEST_COUNT_IN_PROSE,
+                                  lambda m: f"{t['collected']} {m.group(1)}",
+                                  readme)
+        if n_prose == 0:
+            # A substitution that matches nothing looks exactly like a
+            # substitution that had nothing to do. That is how the pattern above
+            # stayed broken: it reported "0 mentions" while three sentences on
+            # the front page carried a stale count.
+            raise SystemExit(
+                "the test count was not found anywhere in the README prose. "
+                "Either the three sentences that carry it were reworded, or "
+                "TEST_COUNT_IN_PROSE no longer matches them. Fix one or the "
+                "other rather than shipping a badge that disagrees with the "
+                "body text.")
+        print(f"test badge: {t['collected']} passing "
+              f"({n_prose} prose mention(s) synced)")
     else:
         # Leaving the old badge in place asserts a green count over a red suite,
         # which is a stale POSITIVE claim rather than a missing one. Neutralise

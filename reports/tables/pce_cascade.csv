@@ -1,14 +1,19 @@
-section,step,n,lost,pct_of_section_start
-cohort,start: all 1999-2014 respondents,82091,0,100.0
-cohort,age 40-79,25150,56941,30.6
-cohort,MEC exam weight > 0,24143,1007,29.4
-cohort,free of self-reported CVD at baseline,20771,3372,25.3
-pce_inputs,require age 40-79 non-null,20771,0,100.0
-pce_inputs,require sex non-null,20771,0,100.0
-pce_inputs,require race (Black vs other) non-null,20771,0,100.0
-pce_inputs,require diabetes non-null,20759,12,99.9
-pce_inputs,require current smoker non-null,20740,19,99.9
-pce_inputs,require on BP medication non-null,20673,67,99.5
-pce_inputs,require systolic BP non-null,19771,902,95.2
-pce_inputs,require total cholesterol non-null,18769,1002,90.4
-pce_inputs,require HDL cholesterol non-null,18769,0,90.4
+section,step,n,lost,cvd_deaths,pct_of_section_start
+cohort,NHANES 1999-2014 respondents,82091,0,,100.0
+cohort,Merged with the linked mortality file,82091,0,2825,100.0
+cohort,Eligible for linkage (ELIGSTAT = 1),47281,34810,2825,57.6
+cohort,Completed the MEC examination,45035,2246,2513,54.9
+cohort,Aged 40-79,24106,20929,1530,29.4
+cohort,Non-zero examination weight,24106,0,1530,29.4
+cohort,Baseline CVD status known,24103,3,1530,29.4
+cohort,Free of self-reported CVD at baseline,20737,3366,925,25.3
+cohort,Cause of death coded for every decedent,20736,1,925,25.3
+pce_inputs,require age 40-79 non-null,20736,0,925,100.0
+pce_inputs,require sex non-null,20736,0,925,100.0
+pce_inputs,require race (Black vs other) non-null,20736,0,925,100.0
+pce_inputs,require diabetes non-null,20724,12,924,99.9
+pce_inputs,require current smoker non-null,20705,19,923,99.9
+pce_inputs,require on BP medication non-null,20638,67,914,99.5
+pce_inputs,require systolic BP non-null,19742,896,878,95.2
+pce_inputs,require total cholesterol non-null,18744,998,824,90.4
+pce_inputs,require HDL cholesterol non-null,18744,0,824,90.4

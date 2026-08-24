@@ -31,6 +31,12 @@ FIELDS = [
     "cycle", "year", "dimension", "level", "outcome",
     "n", "n_cases", "n_psu",
     "pct_standardised", "se_pct", "ci_lo_pct", "ci_hi_pct", "pct_crude",
+    # A published interval that does not say which critical value produced it
+    # cannot be read. These cycles carry 14-17 PSUs across 7-8 strata, so the
+    # design df is single-digit and t(8) = 2.306 against z = 1.96 -- an 18%
+    # wider band. Two workbooks built a month apart would otherwise plot bands
+    # of different meaning under one legend.
+    "design_dof", "ci_crit",
     "deff", "n_effective",
 ]
 
@@ -77,6 +83,7 @@ def main() -> None:
             "pct_standardised": pct(r["p_std"]), "se_pct": pct(r["se_std"]),
             "ci_lo_pct": pct(r["lo_std"]), "ci_hi_pct": pct(r["hi_std"]),
             "pct_crude": pct(r["p_crude"]),
+            "design_dof": r["design_dof"], "ci_crit": f"{float(r['crit']):.4f}",
             "deff": f"{float(r['deff_std']):.4f}",
             "n_effective": f"{float(r['n_effective_std']):.1f}",
         })
@@ -91,6 +98,7 @@ def main() -> None:
             "pct_standardised": pct(r["p_std"]), "se_pct": pct(r["se_std"]),
             "ci_lo_pct": pct(r["lo_std"]), "ci_hi_pct": pct(r["hi_std"]),
             "pct_crude": pct(r["p_crude"]),
+            "design_dof": r["design_dof"], "ci_crit": f"{float(r['crit']):.4f}",
             "deff": f"{float(r['deff_std']):.4f}",
             "n_effective": f"{float(r['n_effective_std']):.1f}",
         })
@@ -106,6 +114,7 @@ def main() -> None:
             "outcome": "Any cardiovascular disease",
             "n": r["n"], "n_cases": "", "n_psu": "",
             "pct_standardised": "", "se_pct": "", "ci_lo_pct": "", "ci_hi_pct": "",
+            "design_dof": "", "ci_crit": "",
             "pct_crude": pct(r["p"]),
             "deff": "", "n_effective": "",
         })
@@ -118,6 +127,7 @@ def main() -> None:
                 "dimension": "Condition", "level": label, "outcome": label,
                 "n": r["n_unweighted"], "n_cases": r["n_cases"], "n_psu": "",
                 "pct_standardised": "", "se_pct": "", "ci_lo_pct": "", "ci_hi_pct": "",
+            "design_dof": "", "ci_crit": "",
                 "pct_crude": f"{float(r['prevalence_pct']):.4f}",
                 "deff": "", "n_effective": "",
             })
