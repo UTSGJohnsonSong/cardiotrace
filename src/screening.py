@@ -1,6 +1,6 @@
 """Systematic screening of the variables the prediction model does not carry.
 
-The published model uses eleven variables and reaches C = 0.804. The advisor
+The published model uses eleven variables. The advisor
 asked whether anything outside that set carries independent information. This
 module answers that, and it answers it under the constraint the rest of the
 project runs on: a variable that helps a prediction is not thereby a variable a

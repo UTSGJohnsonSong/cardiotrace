@@ -193,7 +193,16 @@ class CauseSpecificRisk:
         # S(u-) uses the ALL-CAUSE hazard: a person who has died of anything is
         # no longer at risk of dying of CVD. Dropping h2 here is exactly the
         # error the descriptive figure quantifies.
-        surv_prev = np.exp(-(h1 + h2))
+        # S(u-), not S(u): the survival that multiplies dH_1(u) is the one just
+        # BEFORE u, because a person has to be alive entering the interval in
+        # order to die in it. Evaluating both on the same grid point is a
+        # first-order error that shrinks the estimate; on this cohort it is
+        # +0.0040 pp on a ~2% risk and vanishes as the grid refines, so it never
+        # reached a printed digit -- but the module docstring states the formula
+        # with S(u-) and the code has to be the thing the docstring describes.
+        surv = np.exp(-(h1 + h2))
+        surv_prev = np.concatenate(
+            [np.ones((surv.shape[0], 1)), surv[:, :-1]], axis=1)
         dh1 = np.diff(h1, axis=1, prepend=0.0)
         cif = (surv_prev * dh1).cumsum(axis=1)[:, -1]
         return pd.Series(cif, index=d.index, name=f"cif_{horizon:g}y")
