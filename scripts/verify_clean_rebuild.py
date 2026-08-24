@@ -166,13 +166,25 @@ def main() -> None:
                   "stale -- commit the regenerated one -- or the code changed "
                   "and the published pages have been showing the old number "
                   "since. Diff them before deciding which.")
-        if not args.full:
+        if args.render:
+            log.error("\nOnly the renderers ran. A table or a JSON result in "
+                      "the list above means that artefact is stale relative to "
+                      "the code that writes it, and this scope cannot tell you "
+                      "which -- rerun without --render on a machine that has "
+                      "data/processed/cohort_part3.csv.gz.")
+        elif not args.full:
             log.error("\n(Part 4 was not rebuilt. Re-run with --full if a "
                       "part4_* artefact is in the list above.)")
         raise SystemExit(1)
 
-    scope = "including Part 4" if args.full else "excluding Part 4 (use --full)"
-    log.info(f"\nClean rebuild reproduces every tracked artefact, {scope}.")
+    # Naming the scope is the point. A pass that says more than it checked is
+    # worse than no check: the render scope touches three files and would
+    # happily report "every tracked artefact" while every table went unexamined.
+    scope = ("the report, the site and the README, and nothing else"
+             if args.render else
+             "every tracked artefact including Part 4" if args.full else
+             "every tracked artefact except Part 4 (use --full for those)")
+    log.info(f"\nClean rebuild reproduces {scope}.")
 
 
 if __name__ == "__main__":
