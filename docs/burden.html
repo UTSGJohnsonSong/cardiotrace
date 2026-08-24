@@ -233,6 +233,17 @@ thead th {
 }
 tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
 td.em { font-weight: 700; color: var(--ink); }
+/* Second line of a header cell: which variant of the statistic this column is.
+   Lower case against the uppercase header, because it is a qualifier and not a
+   second heading. */
+thead th .thsub {
+  display: block; margin-top: 2px;
+  font-weight: 400; letter-spacing: 0.02em; text-transform: none;
+  /* No opacity here. At 11px this is normal-size text under WCAG, so it needs
+     4.5:1, and opacity 0.85 over the page ground measured 3.71:1 -- a fail that
+     looked like a design choice. The token on its own clears it. */
+  color: var(--ink-3);
+}
 
 /* ── callouts & inline ────────────────────────────────────────────── */
 .note {
