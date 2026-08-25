@@ -37,7 +37,14 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
+      # Full history here too. The suite contains the receipt check, and that
+      # check fails closed under CI rather than skipping -- so giving only the
+      # rebuild job the history meant this job asserted a configuration fault
+      # that was real: its own. Both jobs run the same suite; both need the
+      # same checkout.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -53,10 +60,7 @@ jobs:
   rebuild:
     runs-on: ubuntu-latest
     steps:
-      # Full history, not the default depth-1. The receipt test looks up the
-      # commit a verification run recorded, and in a shallow clone every commit
-      # but the tip is absent -- so the check could not run at all, in the one
-      # place it is most worth running.
+      # Full history, for the same reason as the tests job above.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
