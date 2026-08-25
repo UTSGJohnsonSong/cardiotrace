@@ -117,7 +117,7 @@ body {
 /* ── masthead ─────────────────────────────────────────────────────── */
 .masthead { padding: 76px 0 34px; border-bottom: 2px solid var(--ink); }
 .eyebrow {
-  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
   margin: 0 0 20px;
 }
@@ -132,7 +132,7 @@ h1 {
 .standfirst { font-size: 18px; line-height: 1.55; color: var(--ink-2); margin: 0; }
 .masthead-meta {
   display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 30px;
-  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-3);
 }
 .masthead-meta b { color: var(--ink-2); font-weight: 600; }
 
@@ -140,7 +140,7 @@ h1 {
 section { padding-top: 62px; }
 .sec-head { display: flex; gap: 20px; align-items: baseline; margin-bottom: 8px; }
 .sec-num {
-  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
   letter-spacing: 0.1em; color: var(--ink-3); padding-top: 8px;
   min-width: 74px; flex-shrink: 0;
 }
@@ -149,7 +149,7 @@ h2 {
   font-weight: 700; letter-spacing: -0.012em; text-wrap: balance;
 }
 h3 {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  font-family: var(--sans); font-size: 13.5px; font-weight: 700;
   letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2);
   margin: 44px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-soft);
 }
@@ -160,7 +160,7 @@ p { margin: 0 0 18px; }
 /* ── method chips ─────────────────────────────────────────────────── */
 .chip {
   display: inline-flex; align-items: center; gap: 7px;
-  font-family: var(--sans); font-size: 10.5px; font-weight: 700;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 5px 11px; border: 1px solid var(--rule); border-radius: 2px;
   background: var(--chip-bg); color: var(--ink-2); white-space: nowrap;
@@ -185,12 +185,12 @@ p { margin: 0 0 18px; }
 .decision .d-choice { font-size: 16px; line-height: 1.45; }
 .decision .d-choice b { font-weight: 700; }
 .decision .col-label {
-  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
   letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-3);
   display: block; margin-bottom: 6px;
 }
 .decision .d-buys, .decision .d-costs {
-  font-family: var(--sans); font-size: 13.5px; line-height: 1.52; color: var(--ink-2);
+  font-family: var(--sans); font-size: 14.5px; line-height: 1.52; color: var(--ink-2);
 }
 .decision .d-costs { color: var(--ink-2); }
 .decision .d-costs .col-label { color: var(--flag-text); }
@@ -208,7 +208,7 @@ figure {
 }
 figure img { display: block; width: 100%; height: auto; }
 figcaption {
-  font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.55;
   color: #6b6a65; margin-top: 16px; padding-top: 14px;
   border-top: 1px solid #e1e0d9;
 }
@@ -222,7 +222,7 @@ figcaption b { color: #34332f; font-weight: 600; }
 }
 .stat { background: var(--plate); padding: 16px 18px; }
 .stat .k {
-  font-family: var(--sans); font-size: 10.5px; font-weight: 600;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
   letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3);
   margin-bottom: 7px;
 }
@@ -231,24 +231,24 @@ figcaption b { color: #34332f; font-weight: 600; }
   font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ink);
   line-height: 1.12;
 }
-.stat .n { font-family: var(--sans); font-size: 11.5px; color: var(--ink-3); margin-top: 5px; }
+.stat .n { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin-top: 5px; }
 
 /* ── tables ───────────────────────────────────────────────────────── */
 .twrap { overflow-x: auto; margin: 26px 0; }
 table {
   width: 100%; border-collapse: collapse;
-  font-family: var(--sans); font-size: 13.5px;
+  font-family: var(--sans); font-size: 14.5px;
   font-variant-numeric: tabular-nums;
 }
 caption {
-  text-align: left; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  text-align: left; font-family: var(--sans); font-size: 13px; font-weight: 600;
   letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3);
   padding-bottom: 10px;
 }
 th, td { padding: 9px 14px 9px 0; text-align: right; border-bottom: 1px solid var(--rule-soft); }
 th:first-child, td:first-child { text-align: left; }
 thead th {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em;
   text-transform: uppercase; color: var(--ink-3);
   border-bottom: 1px solid var(--rule);
 }
@@ -283,7 +283,7 @@ li { margin-bottom: 10px; }
 hr { border: 0; border-top: 1px solid var(--rule-soft); margin: 58px 0 0; }
 footer {
   margin-top: 58px; padding-top: 26px; border-top: 2px solid var(--ink);
-  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-3);
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -849,15 +849,15 @@ def build() -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cardiovascular Disease in the United States, 1999–2022 — CardioTrace</title>
+<title>Cardiovascular Disease in the United States, 1999–2023 — CardioTrace</title>
 <style>{CSS}</style>
 </head>
 <body>
 <div class="wrap">
 
 <header class="masthead">
-  <p class="eyebrow">CardioTrace · NHANES 1999–2022 · NCHS Linked Mortality File</p>
-  <h1>Cardiovascular Disease in the United States, 1999–2022</h1>
+  <p class="eyebrow">CardioTrace · NHANES 1999–2023 · NCHS Linked Mortality File</p>
+  <h1>Cardiovascular Disease in the United States, 1999–2023</h1>
   <p class="subtitle">Three estimands, three designs &mdash; and a fourth section asking what limits the third: a standardised prevalence series,
   a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
   <p class="standfirst measure">One national survey can answer more than one question, but not
@@ -918,7 +918,7 @@ def build() -> str:
           <tr><td>Question</td><td>How has prevalence moved?</td>
               <td>Did 2020 bend the trend?</td>
               <td>Who among the healthy dies of it?</td></tr>
-          <tr><td>Kind</td><td>Descriptive</td><td>Causal (quasi-experimental)</td>
+          <tr><td>Kind</td><td>Descriptive</td><td>Exploratory model contrast</td>
               <td>Predictive + causal</td></tr>
           <tr><td>Sample</td><td>{p1['n_adults']:,} adults 20+, {p1['n_cycles']} cycles</td>
               <td>Same series, one post-pandemic point</td>
@@ -1269,6 +1269,26 @@ def build() -> str:
       why this section reports a deviation from an extrapolated trend and not a pandemic effect.
     </div>
 
+    <div class="note">
+      <b>A second post-pandemic point is not available to anyone, and will not be soon.</b>
+      The obvious repair for a one-observation contrast is another observation, so it is worth
+      saying why there is not one. <em>August 2021 &ndash; August 2023</em> is the most recent
+      NHANES cycle with released public-use files; NCHS announced its first wave in October
+      2024. The field period that would have supplied a point between them &mdash; 2019 to March
+      2020 &mdash; was cut short when operations were suspended, and the 18 of 30 primary
+      sampling units that were completed are not nationally representative on their own, which
+      is why NCHS distributes them merged into 2017-2018 as a single
+      <em>2017 &ndash; March 2020 pre-pandemic</em> file rather than as a cycle. That file
+      cannot extend this series: it overlaps 2017-2018 and reassigns its sampling units to the
+      2015-2018 design strata, so it is a substitute for a point already here, not an addition.
+      Collection for the next cycle began in 2025, and NCHS releases a cycle only after its
+      collection is complete.
+      <br><br>
+      The same boundary sets the cohort. The public-use Linked Mortality File covers NHANES
+      1999-2018 with follow-up through 31 December 2019, which is why Part 3 ends there and
+      why its follow-up is entirely pre-pandemic. Neither cutoff is a choice made here.
+    </div>
+
     <h3>Letting the data choose the breakpoint &mdash; within the window it can reach</h3>
     <div class="note flag">
       <b>This test cannot address the pandemic, and is not offered as if it could.</b> Three
@@ -1360,7 +1380,7 @@ def build() -> str:
 
 <section>
   <div class="sec-head"><div class="sec-num">4</div>
-  <h2>Who, among the currently healthy, goes on to die of it</h2></div>
+  <h2>Who, among adults CVD-free at baseline, goes on to die of it</h2></div>
   <div class="body-indent">
     <div class="chip-row">
       <span class="chip">Prospective cohort</span>
@@ -1914,12 +1934,20 @@ def build() -> str:
   <div class="body-indent">
     <h3>Sources</h3>
     <ul class="measure">
-      <li><b>NHANES 1999–2022</b>, CDC public-use files. All 1,821 published files are enumerated
+      <li><b>NHANES 1999–2023</b>, CDC public-use files. All 1,821 published files are enumerated
       and recorded with the rule that retained or dropped each one, before anything is
       downloaded.</li>
-      <li><b>NCHS Public-Use Linked Mortality Files</b>, follow-up through {DATA_CUTOFF}. NCHS
-      substitutes synthetic follow-up time or cause of death for a small number of records to
-      prevent re-identification.</li>
+      <li><b>NCHS Public-Use Linked Mortality Files</b>, covering NHANES 1999-2018 with
+      follow-up through {DATA_CUTOFF}. NCHS substitutes synthetic follow-up time or cause of
+      death for a small number of records to prevent re-identification. The 1999-2018 coverage
+      is what sets this cohort's boundary: no public linkage extends past it.</li>
+      <li><b>Where the series stops.</b>
+      <a href="https://blogs.cdc.gov/nchs/2024/10/17/7686/">NCHS announced the first wave of
+      August 2021 &ndash; August 2023 files in October 2024</a>; it is the most recent released
+      cycle. The truncated 2019 &ndash; March 2020 field period is distributed
+      <a href="https://wwwn.cdc.gov/nchs/nhanes/continuousnhanes/overviewbrief.aspx?Cycle=2017-2020">merged
+      into 2017-2018 as a pre-pandemic file</a>, not as a cycle, because the 18 of 30 completed
+      sampling units are not nationally representative alone.</li>
       <li><b>2000 projected U.S. standard population</b>, NCHS <i>Health, United States 2019</i>,
       Appendix II Table 2.</li>
       <li><b>ASCVD Pooled Cohort Equations</b>, 2013 ACC/AHA Full Work Group Report, Table 4 —

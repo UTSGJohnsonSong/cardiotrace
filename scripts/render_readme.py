@@ -109,7 +109,8 @@ lines.append(
     f"{100 * p1['std_first']:.1f}% to {100 * p1['std_last']:.1f}% once age is standardised "
     f"to the 2000 US population — across {p1['n_cycles']} NHANES cycles, "
     f"N = {p1['n_adults']:,}, interview weights, design-based intervals. "
-    f"**The reversal is the finding**; the rise is the population ageing.")
+    f"**The reversal is the finding**: crude growth is largely the ageing of the "
+    f"population, and the age-standardised series declines modestly.")
 
 excl = p1["std_slope_excludes_zero"]
 lines.append(
