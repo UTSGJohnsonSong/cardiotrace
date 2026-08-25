@@ -67,8 +67,11 @@ MAX_SELECTED = 6
 # A candidate joins the forward path only if it is observed for at least this
 # share of the training rows the eleven incumbents are complete on.
 #
-# Without the gate the common analysis set collapsed from 6,772 rows and 538
-# events to 1,644 and 104, because fasting glucose, triglycerides and LDL are
+# Without the gate the common analysis set collapsed to 1,644 rows and 104
+# events, from the 5,916 and 447 the forward path actually runs on. (The
+# like-for-like starting point is that pair, not the 6,772 / 538 raw training
+# count this comment used to cite: comparing an unrestricted count against a
+# complete-case one overstates the collapse.) It happens because fasting glucose, triglycerides and LDL are
 # measured only in the morning fasting subsample -- half the cohort by design --
 # and alcohol intake is missing for a third. Selecting six variables on 104
 # events is fitting noise. Those candidates keep their marginal rankings, each
@@ -324,7 +327,16 @@ def forward_select(train: pd.DataFrame, pool: list[str]) -> pd.DataFrame:
 
     while remaining and len(chosen) < MAX_SELECTED:
         scored = []
-        for v in remaining:
+        # Iterate a SNAPSHOT. The body removes from `remaining`, and removing
+        # the element a for-loop is standing on shifts everything left, so the
+        # next index lands one past the following candidate -- which is then
+        # never scored on this pass. If the pass then ends (`not scored`, or a
+        # best below threshold), that candidate is never scored at all, and
+        # because it never failed to fit it is not in `failed` either. It
+        # disappears from the path table with nothing anywhere recording that it
+        # had been considered. Verified: pool ["const_bad", "real_good"] with a
+        # zero-variance first entry produced a path containing neither.
+        for v in list(remaining):
             if EXCLUDES.get(v, set()) & set(chosen):
                 continue        # linearly dependent on something already in
             stat = _wald(common, list(P_FEATURES) + chosen, v)

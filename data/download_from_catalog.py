@@ -1,5 +1,5 @@
 """
-Catalog-driven NHANES downloader. Replaces data/download.py.
+Catalog-driven NHANES downloader. Replaces data/download.py, now at legacy-invalid/data/download.py.
 
 WHY
 ---

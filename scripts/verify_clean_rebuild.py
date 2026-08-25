@@ -1,13 +1,18 @@
 """
-Assert that regenerating every artefact changes nothing tracked.
+Assert that regenerating the artefacts in scope changes nothing tracked.
 
-The point is not tidiness. Every published number on the site and in the README
-is read out of a file in reports/ or data/tableau/, and those files are
-committed. If a committed artefact and the code that writes it disagree, the
-pages are showing a number no current script produces -- and nothing anywhere
-says so. That is not hypothetical: docs/consistency-audit.md found nine such
-numbers, and the mechanism was always the same, an artefact that outlived the
-code.
+The point is not tidiness. Almost every published number on the site and in the
+README is read out of a committed file under reports/ or data/tableau/. If a
+committed artefact and the code that writes it disagree, the pages show a number
+no current script produces, and nothing anywhere says so. Not hypothetical:
+docs/consistency-audit.md lists 36 such inconsistencies and
+docs/impact-tracking.md records seven that reached a published number. The
+mechanism was the same every time -- an artefact that outlived its code.
+
+"Almost every" is exact. scripts/build_site.py:359 reads
+data/catalog/nhanes_file_catalog.csv and publishes its row count as "Public-use
+files catalogued". That file is tracked, so --render still runs anywhere, but it
+is the one published figure that does not come from reports/ or data/tableau/.
 
     python scripts/verify_clean_rebuild.py --render   # ~1 min, needs no data
     python scripts/verify_clean_rebuild.py            # + tables and models
@@ -18,17 +23,20 @@ data/raw/ are gitignored -- the cohort is 5 MB of derived NHANES data and the
 raw files are 376 MB -- so a checkout has the ARTEFACTS but not the inputs that
 produced them.
 
-  --render   The report, the site and the README. These read only tracked files
-             in reports/, so this runs anywhere, and it catches the failure that
+  --render   The report, the site and the README. These read only tracked
+             files, so this runs anywhere, and it catches the failure that
              actually happened: a published page showing a number that no
              current script produces. This is what CI runs.
   (default)  Adds the tables, the figures and the survival models. Needs
              data/processed/cohort_part3.csv.gz.
   --full     Adds Part 4. Fifteen minutes, so it is opt-in.
 
-WHAT NONE OF THEM CHECK. Rebuilding the cohort itself from raw NHANES files
-needs ~1 GB of downloads and a Postgres instance. Even --full therefore proves
-the artefacts are internally consistent, not that they agree with the raw data;
+WHAT NONE OF THEM CHECK. Rebuilding the cohort itself needs data/raw -- about
+1 GB of NHANES .XPT files, which are gitignored. (No database: src/cohort.py
+reads the XPT files directly with pyreadstat. Postgres belongs to the separate
+`load` and `dbt` targets, which the cohort does not depend on.) Even --full
+therefore proves the artefacts are internally consistent, not that they agree
+with the raw data;
 the cohort builder is pinned separately by tests/ against synthetic fixtures.
 Saying this out loud matters: a check whose limits are unstated gets read as
 covering more than it does, and then relied on for the part it never covered.
@@ -159,7 +167,14 @@ def main() -> None:
     if args.render:
         stages = RENDER_STAGE
     elif args.full:
-        stages = STAGES[:2] + FULL_ONLY + STAGES[2:]
+        # Spliced by NAME, not by index. `STAGES[:2] + FULL_ONLY + STAGES[2:]`
+        # was correct only while "benchmark" happened to sit at index 2, and
+        # inserting any stage above it would have moved `learning` after
+        # `render` -- so render_report.py would read the PREVIOUS
+        # part4_learning_results.json and the check would report a clean rebuild
+        # having rebuilt in the wrong order. Naming it raises instead.
+        at = [n for n, _ in STAGES].index("benchmark")
+        stages = STAGES[:at] + FULL_ONLY + STAGES[at:]
     else:
         stages = STAGES
     for name, scripts in stages:

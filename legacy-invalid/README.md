@@ -48,3 +48,22 @@ make all → analyze → run_pipeline.py → reports/results.json → render_rea
 不建议。真要跑，先把 `reports/` 备份出去，因为这些脚本会覆写产物路径；
 且它们 import 的是仓库根的 `src/`，路径已变，需要自己处理。
 **跑出来的数字不得进入任何对外页面。**
+
+## 2026-08-24 追加：`artefacts/tables/prevalence_has_*.csv`
+
+这六张表是 `run_pipeline.py` 的产出，**但一直到 2026-08-24 都还在被现役代码读**：
+`scripts/build_tableau_extract.py` 用它们生成 Tableau 数据源里 66 行 Condition 数据。
+后果全部落到了已发布的 `data/tableau/cardiotrace_prevalence.csv` 上：
+
+| 症状 | 实测 |
+|---|---|
+| 同一个周期两个横轴位置 | Condition 行用旧的 `midyear`（2021-2022 → **2021.5**），其余全部用 `cycle_midpoint`（**2022.6**）。时间序列上这 66 行整体左移 1.1 年 |
+| 同一列里同一个结局两个值 | 1999-2000 的 Any CVD 粗患病率，Overall 行 **8.0208%**，Condition 行 **8.0967%**——不同权重、不同缺失过滤 |
+| 干净重建查不出来 | 构建图里没有任何目标重新生成这六个文件，所以它们**永远不会产生 diff** |
+
+而 `build_tableau_extract.py` 自己的 docstring 写着「Nothing is recomputed, so the
+dashboard cannot disagree with the report」。它当时确实在 disagree。
+
+取代它们的是 `reports/tables/part1_prevalence_{prev_cvd,has_chd,has_mi,has_stroke,has_heart_failure,has_angina}.csv`，
+由 `scripts/build_descriptive_results.py` 生成，与首页序列同一个估计量：
+年龄标准化 · 访谈权重 · 设计基区间。

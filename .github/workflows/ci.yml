@@ -6,10 +6,12 @@ name: CI
 #   tests    Does the code still do what it claims? Runs on synthetic XPT
 #            fixtures, so it needs no NHANES download and no database.
 #   rebuild  Do the committed artefacts still match the code that writes them?
-#            Every published number on the site is read out of a file in
-#            reports/, and those files are committed. When one drifts, the site
-#            shows a number no current script produces -- silently. That is not
-#            hypothetical: docs/consistency-audit.md found nine of them.
+#            Almost every published number on the site is read out of a
+#            committed file under reports/ or data/tableau/. When one drifts,
+#            the site shows a number no current script produces -- silently.
+#            Not hypothetical: docs/consistency-audit.md lists 36
+#            inconsistencies and docs/impact-tracking.md records seven that
+#            reached a published number.
 
 on:
   push:

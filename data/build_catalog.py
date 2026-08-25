@@ -3,7 +3,7 @@ Stage 0 — enumerate EVERY NHANES public data file, before deciding what to kee
 
 WHY THIS EXISTS
 ---------------
-`data/download.py` hardcodes 17 module names (TCHOL, GLU, BIOPRO, ...) and
+`legacy-invalid/data/download.py` hardcoded 17 module names (TCHOL, GLU, BIOPRO, ...) and
 HEAD-probes them in every cycle, treating a 404 as "that panel wasn't run this
 cycle". That assumption is false. CDC renamed the laboratory modules partway
 through the series: the 1999-2004 cycles publish the same assays under LAB##

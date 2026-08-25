@@ -219,3 +219,118 @@ def test_the_narrative_briefing_defers_to_the_authorities():
     head = (DOCS / "advisor-briefing.md").read_text(encoding="utf-8")[:900]
     assert "不是权威版本" in head
     assert "research-design.md" in head and "reports/" in head
+
+
+def _lift_from_script(relpath: str, *names: str) -> dict:
+    """Execute only the named top-level definitions from a script.
+
+    The scripts in this repository do their work at import time, so importing
+    one to test a single function would run a whole render. Selecting nodes by
+    name keeps the test attached to the definition rather than to its position
+    in the file.
+    """
+    import ast
+
+    src = (ROOT / relpath).read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    wanted = []
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef)) and node.name in names:
+            wanted.append(node)
+        elif isinstance(node, ast.Assign) and any(
+                isinstance(t, ast.Name) and t.id in names for t in node.targets):
+            wanted.append(node)
+    found = {getattr(n, "name", None) or n.targets[0].id for n in wanted}
+    missing = set(names) - found
+    assert not missing, f"{relpath} no longer defines {sorted(missing)} at module level"
+    ns: dict = {"re": re}
+    exec(compile(ast.Module(body=wanted, type_ignores=[]), relpath, "exec"), ns)
+    return ns
+
+
+
+# -- the test badge has to be writable from every state it can reach ----------
+
+def test_the_badge_can_be_rewritten_from_any_state_it_can_reach():
+    """It used to be a one-way trapdoor.
+
+    All three branches of render_readme.py matched
+    `badge/tests-\d+%20passing-brightgreen` while writing three different
+    values. The first failing run made the badge `tests-3%20failing-red`, which
+    that pattern cannot match again -- so a later green run left it red, a later
+    red run left the old failure count, and `re.sub` says nothing when it
+    matches nothing. Stuck, in the one routine whose job is to stop the front
+    page asserting something stale.
+    """
+    # render_readme.py renders at import, so lift the two definitions out by AST
+    # rather than importing it. Locating them by node name survives reformatting
+    # and reordering; slicing the source by offsets did not.
+    ns = _lift_from_script("scripts/render_readme.py", "BADGE", "_set_badge")
+    set_badge = ns["_set_badge"]
+
+    md = "![pytest](https://img.shields.io/badge/tests-179%20passing-brightgreen)"
+    for value in ["3%20failing-red", "not%20run-lightgrey",
+                  "181%20passing-brightgreen", "7%20failing-red"]:
+        md = set_badge(md, value)
+        assert f"badge/tests-{value}" in md, (
+            f"could not write {value!r}; the badge is stuck at {md!r}")
+
+    # And it refuses rather than silently doing nothing.
+    with pytest.raises(SystemExit, match="no test badge"):
+        set_badge("a README with no badge in it at all", "1%20passing-brightgreen")
+
+
+# -- the published extract must not read the pipeline that was retired --------
+
+def test_the_tableau_extract_reads_only_current_artefacts():
+    """Every input it names must have a producer in the current build.
+
+    It read `reports/tables/prevalence_has_*.csv` for a release after the
+    pipeline that writes them moved to legacy-invalid/. Because nothing
+    regenerates those files, verify_clean_rebuild could never have produced a
+    diff for them -- the exact "artefact outliving its code" failure it exists
+    to catch, arriving through the one door it cannot watch.
+    """
+    src = (ROOT / "scripts" / "build_tableau_extract.py").read_text(encoding="utf-8")
+    named = set(re.findall(r'rows\(f?"([\w{}.]+\.csv)"\)', src))
+    assert named, "no input tables found; this test has lost its subject"
+
+    producers = "\n".join(
+        (ROOT / "scripts" / f).read_text(encoding="utf-8")
+        for f in ("build_descriptive_results.py", "build_cohort_results.py"))
+    for name in named:
+        stem = name.replace("{stem}", "").replace(".csv", "")
+        assert stem and stem in producers, (
+            f"{name} is read by the extract but no current build script writes "
+            f"it; check whether it is a legacy-invalid/ artefact")
+
+
+def test_one_cycle_has_one_position_on_the_time_axis():
+    """The Condition rows dated the redesigned cycle 2021.5 while every other
+    block dated it 2022.6, so a Tableau time series plotted 66 rows 1.1 years
+    to the left of the rest of the workbook."""
+    extract = ROOT / "data" / "tableau" / "cardiotrace_prevalence.csv"
+    if not extract.exists():
+        pytest.skip("extract absent; run scripts/build_tableau_extract.py")
+    d = pd.read_csv(extract)
+    per_cycle = d.groupby("cycle")["year"].nunique()
+    bad = per_cycle[per_cycle > 1]
+    assert bad.empty, f"cycles plotted at more than one year: {dict(bad)}"
+
+
+def test_the_extract_does_not_publish_two_values_for_one_estimate():
+    """`Overall` and `Condition / Any cardiovascular disease` are the same
+    quantity. They disagreed -- 8.0208% against 8.0967% for 1999-2000 -- because
+    one came from the current estimator and one from the retired pipeline, in
+    one column, under one legend."""
+    extract = ROOT / "data" / "tableau" / "cardiotrace_prevalence.csv"
+    if not extract.exists():
+        pytest.skip("extract absent; run scripts/build_tableau_extract.py")
+    d = pd.read_csv(extract)
+    cols = ["pct_crude", "pct_standardised", "ci_lo_pct", "ci_hi_pct"]
+    a = d[d.dimension == "Overall"].set_index("cycle")[cols]
+    b = (d[(d.dimension == "Condition")
+           & (d.outcome == "Any cardiovascular disease")]
+         .set_index("cycle")[cols])
+    assert not a.empty and not b.empty
+    pd.testing.assert_frame_equal(a.sort_index(), b.sort_index())

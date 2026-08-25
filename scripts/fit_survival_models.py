@@ -144,9 +144,23 @@ def main() -> None:
         # value is kept beside it: it is what was published, and a reader
         # deserves to see how far the correction moved it rather than only the
         # corrected number.
+        # BOTH take the horizon. The point of printing them side by side is to
+        # show what the weighting correction cost, and a pair that differs by
+        # weighting AND censoring measures neither: without `horizon` the
+        # unweighted call ranges over the whole of follow-up and takes the
+        # lifelines branch rather than this project's estimator, so the tie
+        # convention differs too. src/discrimination.py:186 states this rule;
+        # this call site did not follow it, and the report's caption asserted
+        # that it did. Measured cost of the omission: 5-year 0.797 -> 0.791
+        # (max follow-up there is 11.25 years against a 5-year horizon, so the
+        # published figure was not a five-year statistic), 10-year 0.804 ->
+        # 0.805. It also halved the apparent weighting gap at 5 years, from a
+        # true 0.0115 to a printed 0.0050 -- understating the very correction
+        # the column exists to disclose.
         c = concordance(risk, test.followup_years, test.cvd_death,
                         weights=w, horizon=horizon)
-        c_unw = concordance(risk, test.followup_years, test.cvd_death)
+        c_unw = concordance(risk, test.followup_years, test.cvd_death,
+                            horizon=horizon)
         tab = calibration_table(risk, observed.reindex(risk.index), w)
         tab.to_csv(TAB / f"calibration_{horizon:g}y.csv")
         panels.append((label, tab))

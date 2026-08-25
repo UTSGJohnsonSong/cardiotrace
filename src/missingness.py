@@ -149,7 +149,7 @@ def sensitivity(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.D
     a coefficient is; re-weighting it would add a second moving part without
     answering the question the reviewer asked.
     """
-    from src.models import E2_ADJUSTMENT, _fit
+    from src.models import _fit, aetiologic_covariates
 
     features = list(features or P_FEATURES)
     d = _model_frame(cohort)
@@ -158,7 +158,7 @@ def sensitivity(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.D
     # diagnostics would be silently absent from the artefact.
     w_ipcw = ipcw(cohort, features)
     d["ipcw"] = w_ipcw
-    covs = ["systolic_bp"] + [c for c in E2_ADJUSTMENT if c != "systolic_bp"]
+    covs = aetiologic_covariates()
 
     rows = []
     for label, weight_col in (("complete case, survey weight", "wtmec2yr"),

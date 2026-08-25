@@ -15,9 +15,9 @@ help:
 	@echo "descriptive  Part 1/2 tables, figures and the report"
 	@echo "learning   Part 4 screen and arm comparison (~15 min)"
 	@echo "site       split the report into docs/ and rebuild the README"
-	@echo "benchmark  PCE feasibility cascade + four-year weight check"
-	@echo "verify     assert a clean rebuild changes nothing tracked"
-	@echo "all        up -> data -> load -> dbt -> cohort -> learning -> descriptive -> site"
+	@echo "benchmark  PCE cascade, four-year weight check, Tableau extract"
+	@echo "verify     assert a clean rebuild changes nothing tracked (Part 4 needs --full)"
+	@echo "all        up -> data -> load -> dbt -> cohort -> learning -> descriptive -> benchmark -> site"
 
 setup:
 	python -m venv .venv
@@ -81,17 +81,21 @@ site:
 	$(PY) scripts/build_site.py
 	$(PY) scripts/render_readme.py
 
-# Two supporting tables that nothing else depends on, so they are their own
-# target rather than a silent tail on `descriptive`.
+# Three artefacts nothing else depends on, so they are their own target rather
+# than a silent tail on `descriptive`: the PCE cascade, the four-year weight
+# check and the Tableau extract.
 benchmark: cohort
 	$(PY) scripts/pce_variable_cascade.py
 	$(PY) scripts/check_fouryear_weights.py
 	$(PY) scripts/build_tableau_extract.py
 
 # The check that stops a committed artefact from outliving the code that wrote
-# it. Every published number is read out of a file in reports/, and those files
+# it. Almost every published number is read out of a file in reports/ or
+# data/tableau/, and those files
 # are committed; if one drifts, the site shows a number no script produces and
-# nothing says so. Runs the renderers and asserts `git status` is clean.
+# nothing says so. No flag here means the DEFAULT scope: cohort, descriptive,
+# benchmark, models and the renderers -- everything except Part 4, which needs
+# `verify_clean_rebuild.py --full` and about fifteen minutes.
 verify:
 	$(PY) scripts/verify_clean_rebuild.py
 
