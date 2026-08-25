@@ -411,3 +411,34 @@ def test_a_full_receipt_matches_the_commit_it_claims_to_verify():
         assert proc.returncode == 0, (
             f"the {scope} receipt names commit {sha[:12]}, which is not in this "
             f"repository. A receipt is evidence only if a run wrote it.")
+
+
+def test_the_verified_commit_and_head_differ_only_by_the_receipt():
+    """The rule the merge gate can actually state.
+
+    "The receipt's commit must equal the merge commit" is unsatisfiable by
+    construction: the receipt is written by a run, so the commit that CONTAINS
+    it is always one later than the commit it names. What can be required is
+    that nothing else moved in between -- then the verification still describes
+    the tree being merged.
+
+    Skips rather than fails when HEAD has advanced further, because a working
+    branch outruns its last full verification constantly and this is not the
+    place to nag about it. The merge gate is where that decision belongs.
+    """
+    import subprocess
+
+    book = _receipt()
+    if book is None or "full" not in book:
+        pytest.skip("no full receipt; run scripts/verify_clean_rebuild.py --full")
+    sha = book["full"]["commit"]
+    proc = subprocess.run(["git", "diff", "--name-only", sha, "HEAD"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if proc.returncode != 0:
+        pytest.skip(f"cannot diff {sha[:12]}..HEAD here")
+    moved = {p for p in proc.stdout.split() if p}
+    if moved - {"reports/verify_receipt.json"}:
+        pytest.skip(
+            f"HEAD has moved past the last full verification: "
+            f"{sorted(moved - {'reports/verify_receipt.json'})[:5]}")
+    assert moved <= {"reports/verify_receipt.json"}

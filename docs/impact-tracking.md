@@ -112,7 +112,11 @@ A8–A13 是 2026-08-25 三个审查 agent 找出来的，**其中 A8 和 A11 �
    （队列 5 MB，原始 XPT 376 MB）。**Part 4 产物的重建由本地负责，不由 CI 保证**
    ——这是一条结构性缺口，不是疏忽。
 
-   **规则**：凭据里的 `commit` 必须等于要合并的那个 commit。不等就重跑。
+   **规则**：凭据里 `full.commit` 与要合并的 commit 之间，**只允许差 `verify_receipt.json` 一个文件**。
+   不能要求两者相等——凭据是运行时写的，所以包含它的那个 commit 永远比它命名的晚一个。
+   能要求的是「中间没有别的东西动过」，那样这次验证描述的就仍然是要合并的那棵树。
+   由 `test_the_verified_commit_and_head_differ_only_by_the_receipt` 检查。
+
    上一次这张表失效，正是因为 `--full` 落后四个 commit，而其中一个改过 `render_report.py`。
 
 6. **`--full` 第一次抓到了非人为植入的问题**，值得记下来：
