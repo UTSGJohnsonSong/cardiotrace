@@ -2,7 +2,7 @@
 
 > **状态**：提案。本文件是本次唯一新增，**没有改动任何其它文件**。
 > **不做的事**：不宣布任何文件为权威版本，不重排目录结构（按全局约定，这由你定）。
-> **审查基线**：`HEAD = c72b818` + **当前未提交的工作区改动**。
+> **审查基线**：`HEAD = 98d96cd` + **当前未提交的工作区改动**。
 >
 > ⚠️ **审查过程中工作区被并发修改过两轮。** 开始时 `git status` 干净；
 > 第一轮出现 17 个修改 + 6 个新文件（`src/descriptive.py` 换访谈权重 ·
@@ -69,7 +69,7 @@
 | 31 | **S4** | `src/models.py:35` | `CIF_1(t\|X) = sum over u<=t of  S(u-\|X) * dH_1(u\|X)` | `src/models.py:176-178` 实际算的是同格点的 `S(u)`：`surv_prev = np.exp(-(h1 + h2))` 与 `dh1 = np.diff(h1, prepend=0.0)` 逐元素相乘，没有错开一格（变量名 `surv_prev` 也说明本意是 `S(u-)`） | **docstring 的公式对，代码差一格** | 量级极小（10 年平均预测风险 1.96% 上约 +0.004 pp，`n_grid=400`），但公式与实现不符要收口：**要么改代码对齐 `S(u-)`，要么改 docstring 承认用的是 `S(u)`** |
 | 32 | **S4** | `src/ascertainment.py:231-232` | `"lo_std": max(0.0, p_std - 1.96 * se_std)` / `"hi_std": p_std + 1.96 * se_std` | **这是这轮修改新造成的不一致**：`src/descriptive.py:511-522` 已改用 `stats.t.ppf(0.975, dof)` 并同时导出 `lo_std_normal`，`part1_prevalence_by_cycle.csv` 也新增了 `design_dof / crit` 两列；而 `ascertainment.py` 仍是固定 1.96，`reports/tables/part1_ascertainment.csv` 未重跑 | **t 版本对**（同一份报告里两种区间口径并存，读者无法分辨） | `ascertainment.py` 跟着改用设计自由度，或在报告里标明该表用的是正态近似 |
 | 33 | **S4** | `docs/tableau-dashboard.md:32` | `\| \`se_pct\`, \`ci_lo_pct\`, \`ci_hi_pct\` \| Design-based standard error and 95% interval \|` | 源表 `part1_prevalence_by_cycle.csv` 现在同时有 `lo_std/hi_std`（t）与 `lo_std_normal/hi_std_normal`（1.96），文档没说导出的是哪一套 | **需要指明** | 写明导出的是 t(design_dof) 版本还是正态版本；`scripts/build_tableau_extract.py` 也要跟着确认 |
-| 34 | **S2** | `docs/methodology-review.md:4` `:673` | `审查对象：commit \`632e92e\`（main，工作区干净）` / `_审查基于 commit \`632e92e\`_` | 其中 `§5.2【严重】没有任何置信区间`、`§6.3【README 与实现不符】模型根本没用权重`、`§4.1 三层漏斗是死代码` 等均已修复；`README.md:177` 把它描述为 "the audit that started the rework" | **该文件本身没错**，它是历史快照；风险在于没有醒目的过期标记，读者会把 §5–§8 的「现状」读成今天的现状 | 顶部加一行状态横幅：「本文件是 `632e92e` 的历史审查快照，不反映当前代码」。**正文不要改**——保留原始诊断的价值 |
+| 34 | **S2** | `docs/methodology-review.md:4` `:673` | `审查对象：commit \`c523561\`（main，工作区干净）` / `_审查基于 commit \`c523561\`_` | 其中 `§5.2【严重】没有任何置信区间`、`§6.3【README 与实现不符】模型根本没用权重`、`§4.1 三层漏斗是死代码` 等均已修复；`README.md:177` 把它描述为 "the audit that started the rework" | **该文件本身没错**，它是历史快照；风险在于没有醒目的过期标记，读者会把 §5–§8 的「现状」读成今天的现状 | 顶部加一行状态横幅：「本文件是 `c523561` 的历史审查快照，不反映当前代码」。**正文不要改**——保留原始诊断的价值 |
 | 35 | **S3** | `docs/advisor-briefing.md:435-445` | `## 第 6 部分 · 当前进度与欠账` / `**⚠️ 但原有分析代码一行未改。**` / `**下一步**：重写下载器为 catalog 驱动 → 补回 1999–2004 实验室数据 → 重跑 ETL 与 dbt → LMF join → STROBE 流程表 → 第一版 Kaplan-Meier` | 这五步全部完成（`data/download_from_catalog.py` · `data/raw/` 231 个 XPT · `src/cohort.py` · `strobe_part3.csv` · `src/survival.py`） | **代码对**——但「原有分析代码一行未改」这半句**仍然成立**：`run_pipeline.py` / `src/model.py` / `src/analysis.py` 确实没改，且仍挂在 `make all` 上 | 第 6 部分重写为当前进度；**保留「旧流水线仍在 Makefile 里」这条欠账**（与第 5 条同一件事） |
 
 ---
@@ -195,7 +195,7 @@ OFF-DAG = **1,008**、机械排除 = 265+122+17+128+56 = **588**。
 1. **第 5 条（Makefile 仍跑旧流水线）必须先修。** 只要 `make all` 还会覆写
    `reports/results.json`，任何协议文档都会被 `render_readme.py` 重新灌回旧数字。
    这是第 1、2 条的**机制性成因**，不是内容错误。
-2. **`methodology-review.md` 不参与协议。** 它是 `632e92e` 的历史快照，价值就在于冻结；
+2. **`methodology-review.md` 不参与协议。** 它是 `c523561` 的历史快照，价值就在于冻结；
    加一行过期横幅即可（第 34 条），不要并进任何「当前状态」文档。
 3. **数字的唯一来源已经是 `reports/*.json`**，这一点项目已经做对了
    （`build_site.py:770-778` 明确写了每张卡片读哪个键）。缺的只是「散文里的数字也走同一条路」。

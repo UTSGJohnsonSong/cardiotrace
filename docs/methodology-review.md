@@ -1,6 +1,6 @@
 # CardioTrace 方法学审查与重设计
 
-> ⚠️ **这是 commit `632e92e` 的历史审查快照，不反映当前代码。**
+> ⚠️ **这是 commit `c523561` 的历史审查快照，不反映当前代码。**
 > 正文一个字没改，这是有意的：它的价值在于冻结——当时诊断出的问题、当时的推理、
 > 当时的 `file:line`，改了就读不出「哪些问题是真的、修得对不对」。
 > 下面提到的绝大部分缺陷已经修复，但**不要用本文档判断任何东西的当前状态**：
@@ -8,7 +8,7 @@
 > 数字看 `reports/` 下的产物。
 >
 > 目的：把当时流水线里**每一个未经论证的选择**摊开，给出权衡、依据、和可执行的替代方案。
-> 审查对象：commit `632e92e`（main，工作区干净）。所有断言带 `file:line` 出处。
+> 审查对象：commit `c523561`（main，工作区干净）。所有断言带 `file:line` 出处。
 > 立场：这份文档不是"挑毛病"，是把项目从 *engineering demo* 升级成 *defensible research* 的施工图。
 
 ---
@@ -677,4 +677,4 @@ WHEN rf.systolic_bp_avg IS NULL AND rf.hypertension_diagnosed IS NULL THEN NULL
 
 ---
 
-_审查基于 commit `632e92e`。所有 file:line 引用对应该 commit 的工作区状态。_
+_审查基于 commit `c523561`。所有 file:line 引用对应该 commit 的工作区状态。_

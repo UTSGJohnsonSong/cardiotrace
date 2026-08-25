@@ -214,7 +214,7 @@ def test_fine_gray_is_not_described_as_the_prediction_model():
 
 def test_the_frozen_review_says_it_is_frozen():
     head = (DOCS / "methodology-review.md").read_text(encoding="utf-8")[:900]
-    assert "历史审查快照" in head and "632e92e" in head
+    assert "历史审查快照" in head and "c523561" in head
 
 
 def test_the_narrative_briefing_defers_to_the_authorities():

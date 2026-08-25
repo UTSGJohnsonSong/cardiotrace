@@ -5,7 +5,7 @@
 > **节点状态**以 [`research-design.md` §当前状态](research-design.md#当前状态唯一权威) 为准；
 > **任何数字**以 `reports/` 下的产物为准（`descriptive_results.json` ·
 > `model_results.json` · `tables/`），本文档不是数字的出处；
-> **问题诊断**在 [`methodology-review.md`](methodology-review.md)（`632e92e` 的历史快照）。
+> **问题诊断**在 [`methodology-review.md`](methodology-review.md)（`c523561` 的历史快照）。
 >
 > **用途**：面向导师的完整设计陈述。可以照着讲。
 > **技术名词保留英文**，方便中英切换。
