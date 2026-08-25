@@ -15,9 +15,9 @@
     "covers": "every tracked artefact including Part 4"
   },
   "render": {
-    "commit": "d6b0755420ec41d1db1dc35de91e04e76e4e96ab",
+    "commit": "9bf454af1ee9d8381921e7d7edae4e713ac84155",
     "branch": "analysis-refresh",
-    "ran_at": "2026-08-25T04:27:54+00:00",
+    "ran_at": "2026-08-25T06:11:59+00:00",
     "stages": [
       "render"
     ],
