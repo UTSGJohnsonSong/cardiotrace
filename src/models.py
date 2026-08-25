@@ -75,6 +75,28 @@ TOBIN_SBP, TOBIN_DBP = 10.0, 5.0
 E2_ADJUSTMENT = ["age", "male", "race_black", "education", "pir",
                  "smoke_current", "smoke_former", "bmi"]
 
+
+def aetiologic_covariates(exposure: str = "systolic_bp") -> list[str]:
+    """The E2 specification, exposure first: one definition, four callers.
+
+    The expression `[exposure] + [c for c in E2_ADJUSTMENT if c != exposure]`
+    was written out at three sites -- fit_aetiologic here, the IPCW sensitivity
+    fit in src/missingness.py, and the R export in scripts/crosscheck_survey.py.
+    Those three produce, respectively, the published hazard ratio, the
+    sensitivity analysis the report describes as barely moving it, and the
+    design-based interval the report leads with. The report sets them beside
+    each other, so a specification that differed between them would read as a
+    finding about IPCW or about the estimator rather than as two different
+    models.
+
+    Sharing the constant was not enough, and the comment in
+    crosscheck_survey.py said so in the wrong direction: it claimed to mirror
+    fit_aetiologic's assembly "rather than restating it" while restating it.
+    Membership was shared; ordering and the exposure-first convention were not.
+    """
+    return [exposure] + [c for c in E2_ADJUSTMENT if c != exposure]
+
+
 # Prediction: everything cheaply measurable at a clinic visit.
 P_FEATURES = ["age", "male", "race_black", "systolic_bp", "bp_treated",
               "total_cholesterol", "hdl_cholesterol", "diabetes_dx",
@@ -137,7 +159,7 @@ def fit_aetiologic(df: pd.DataFrame, exposure: str = "systolic_bp",
     `predict_cif` is for.
     """
     d = prepare(df, tobin=tobin)
-    covs = [exposure] + [c for c in E2_ADJUSTMENT if c != exposure]
+    covs = aetiologic_covariates(exposure)
     cph = _fit(d, covs, "cvd_death")
     out = cph.summary[["coef", "exp(coef)", "exp(coef) lower 95%",
                        "exp(coef) upper 95%", "p"]].copy()
@@ -212,6 +234,9 @@ class CauseSpecificRisk:
         # +0.0040 pp on a ~2% risk and vanishes as the grid refines, so it never
         # reached a printed digit -- but the module docstring states the formula
         # with S(u-) and the code has to be the thing the docstring describes.
+        # The two halves of that sentence come from the same estimator: +0.0040
+        # pp is on the UNWEIGHTED mean of 2.827%; on the weighted 1.959% the
+        # report actually prints, the shift is +0.0022 pp.
         surv = np.exp(-(h1 + h2))
         surv_prev = np.concatenate(
             [np.ones((surv.shape[0], 1)), surv[:, :-1]], axis=1)
@@ -228,17 +253,19 @@ def concordance(risk: pd.Series, time: pd.Series, event: pd.Series,
     `weights` USED to be accepted and silently ignored. Every concordance in
     this project was therefore an unweighted statistic sitting under prose about
     a weighted, nationally representative analysis, and the two differ by more
-    than any effect the report goes on to discuss: 0.803 unweighted against
+    than any effect the report goes on to discuss: 0.805 unweighted against
     0.838 weighted on the ten-year test set. A parameter that is accepted and
     dropped is worse than one that does not exist, because the call site reads
     as though the question had been settled.
 
     `horizon` administratively censors before scoring. Without it the statistic
     ranges over the whole of follow-up while the surrounding text calls it
-    ten-year performance. On the cycles this project tests on -- chosen because
-    every survivor has at least ten years -- that distinction is worth 0.0009,
-    but it costs nothing to be right about and it will not stay that small if
-    the linkage window ever changes.
+    ten-year performance. That is not a rounding-level distinction even on the
+    cycles this project tests on: the published weighted C moves from 0.841 to
+    0.838 at ten years -- a printed digit -- and the unweighted from 0.804 to
+    0.805. At five years it is larger still, because the five-year test set has
+    follow-up out to 11.25 years, so an uncensored statistic there is not a
+    five-year statistic at all: 0.797 against 0.791.
 
     Pairs are weighted by w_i * w_j, which is the usual survey extension: the
     estimand is the concordance in the POPULATION, and a pair of sampled people

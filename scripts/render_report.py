@@ -314,9 +314,13 @@ def design_based_exposure(xc3: pd.DataFrame, term: str = "systolic_bp",
     """
     import numpy as np
 
-    from src.models import E2_ADJUSTMENT
+    from src.models import aetiologic_covariates
 
-    expected = set(E2_ADJUSTMENT) | {"systolic_bp"}
+    # The same list the Python fit uses, not a set rebuilt from the constant.
+    # Rebuilding it here meant a covariate dropped inside fit_aetiologic alone
+    # would still satisfy this guard, which is the one place that is supposed to
+    # notice the R table and the Python model describing different adjustments.
+    expected = set(aetiologic_covariates(term))
     got = list(xc3["term"])
     if len(got) != len(set(got)):
         raise SystemExit(f"crosscheck_part3.csv has duplicate terms: {got}")
@@ -352,11 +356,39 @@ def design_based_exposure(xc3: pd.DataFrame, term: str = "systolic_bp",
             f"the columns are already hazard ratios, or the interval came from "
             f"somewhere other than this standard error.")
 
+    # Seventh guard: the multiplier has to BE the design-df t, not merely be
+    # self-consistent with the interval it produced. The Wald reconstruction
+    # above passes for any multiplier at all, so for one release Part 3's
+    # primary interval was built on z = 1.96 -- survey's confint default for a
+    # svycoxph -- while Part 1, the ascertainment series and the Tableau
+    # extract all used a t on the design degrees of freedom. Nothing in the
+    # artefact recorded which was which, because design_df was printed to the R
+    # console instead of written to the file.
+    from scipy import stats
+
+    if "svycoxph_design_df" not in xc3.columns:
+        raise SystemExit(
+            "crosscheck_part3.csv has no svycoxph_design_df column, so the "
+            "critical value cannot be checked against anything. Regenerate it "
+            "with scripts/crosscheck_survey.py.")
+    ddf = float(r["svycoxph_design_df"])
+    if not np.isfinite(ddf) or ddf < 1:
+        raise SystemExit(f"{term}: design df is {ddf!r}, which cannot be right")
+    expect = float(stats.t.ppf(0.975, ddf))
+    if not np.isclose(crit, expect, rtol=1e-6):
+        raise SystemExit(
+            f"{term}: the interval uses a multiplier of {crit:.6f}, but the "
+            f"design has {ddf:g} degrees of freedom and t(0.975) = "
+            f"{expect:.6f}. z = 1.959964 is what survey's confint returns by "
+            f"default; the rest of this project uses the design-df t, and two "
+            f"conventions under one \"95% CI\" legend is the thing this guard "
+            f"exists to stop.")
+
     # Exactly one exponentiation, here and nowhere else.
     return {"hr": float(np.exp(coef * per)),
             "lo95": float(np.exp(lo * per)),
             "hi95": float(np.exp(hi * per)),
-            "se": se, "crit": crit, "per": per}
+            "se": se, "crit": crit, "design_df": ddf, "per": per}
 
 
 def _num(x, dp: int) -> str:
@@ -369,6 +401,21 @@ def _num(x, dp: int) -> str:
     return "&mdash;" if pd.isna(x) else f"{x:.{dp}f}"
 
 
+def _pval(x) -> str:
+    """A p-value, or the bound it is below.
+
+    `fit_aetiologic` rounds to four decimals, so every p below 5e-5 arrives here
+    as exactly 0.0. Printing that asserts a probability of zero, which is not a
+    quantity any model returns -- and unlike a NaN it looks like a result. The
+    rounding is deliberate (the log columns beside it are the unrounded source),
+    so the fix belongs at the point of display.
+    """
+    if pd.isna(x):
+        return "&mdash;"
+    return "&lt;0.0001" if float(x) < 0.0001 else f"{float(x):.4f}"
+
+
+
 def _text(s) -> str:
     """Text, or an em dash.
 
@@ -378,6 +425,29 @@ def _text(s) -> str:
     the candidate table came to answer "Into the forward path?" with "nan".
     """
     return "&mdash;" if pd.isna(s) else str(s)
+
+
+def _head_cells(df: pd.DataFrame) -> str:
+    """Header row for a table rendered whole."""
+    return "".join(f"<th>{c}</th>" for c in df.columns)
+
+
+def _full_rows(df: pd.DataFrame, em_last: bool = False) -> str:
+    """Body rows for a table rendered whole, every cell through `_text`.
+
+    Three tables were assembled by three near-identical comprehensions and only
+    one of them guarded against NaN. Whether a missing cell reaches a reader as
+    an em dash or as the word "nan" should not depend on which comprehension a
+    table happens to be rendered by.
+    """
+    last = len(df.columns) - 1
+    em = ' class="em"'
+    return "".join(
+        "<tr>" + "".join(
+            f"<td{em if em_last and i == last else ''}>{_text(v)}</td>"
+            for i, v in enumerate(r)) + "</tr>"
+        for r in df.itertuples(index=False))
+
 
 
 def stat(k: str, v: str, n: str = "") -> str:
@@ -441,6 +511,17 @@ def build() -> str:
         raise SystemExit(
             f"{miss_path.name} is missing; run scripts/build_missingness_results.py")
     miss = json.loads(miss_path.read_text(encoding="utf-8"))
+    # The limitations paragraph quotes the complete-case cost. It quoted the
+    # PCE NINE-input figures (18,744 / 824) under a sentence naming the ELEVEN
+    # model inputs, which understated the thing it was disclosing: the eleven
+    # cost 14.6% of the deaths, not 10.9%. Interpolated from the artefact now,
+    # so the label and the number cannot disagree again.
+    miss_pct_people = float(miss["pct_dropped"])
+    miss_n_kept = int(miss["n_analysed"])
+    miss_n_cohort = int(miss["n_cohort"])
+    miss_deaths_cohort = int(miss["cvd_deaths_cohort"])
+    miss_deaths_kept = int(miss["cvd_deaths_analysed"])
+    miss_pct_deaths = 100 * (1 - miss_deaths_kept / miss_deaths_cohort)
     miss_drivers = pd.read_csv(TABLES / "part3_missing_drivers.csv")
     miss_compare = pd.read_csv(TABLES / "part3_missing_compare.csv")
     rows_miss = "".join(
@@ -453,24 +534,34 @@ def build() -> str:
         f"<td class='em'>{r.difference:+,.4f}</td></tr>"
         for r in miss_compare.itertuples())
 
-    # The R cross-validation. Optional: it needs an R installation, so the
-    # section is omitted rather than the build failing on a machine without one.
+    # The R cross-validation. NOT optional any more, and the comment here used
+    # to say it was: "the section is omitted rather than the build failing on a
+    # machine without one". That stopped being true when Part 3's primary
+    # interval moved to svycoxph -- the build now raises without these tables,
+    # so `have_xc` was False on no reachable path and the "omit the section"
+    # branch below could never be selected. Fail here, where the flag is
+    # computed, and name whichever file is actually missing.
     xc1_path = TABLES / "crosscheck_part1.csv"
     xc3_path = TABLES / "crosscheck_part3.csv"
-    have_xc = xc1_path.exists() and xc3_path.exists()
-    if have_xc:
-        xc1 = pd.read_csv(xc1_path)
-        xc3 = pd.read_csv(xc3_path)
-        xc_se_max = float(xc1["absdiff_se_std"].abs().max())
-        xc_rel_max = float(xc1["reldiff_se_std"].abs().max())
-        xc_coef_max = float(xc3["absdiff_coef_svycoxph"].abs().max())
-        xc_se_med = float(xc3["reldiff_se_svycoxph"].abs().median())
-        xc_se_worst = float(xc3["reldiff_se_svycoxph"].abs().max())
-        xc_cluster_med = float(xc3["reldiff_se_coxph_cluster"].abs().median())
-        _exp = xc3[xc3["term"] == "systolic_bp"].iloc[0]
-        xc_exp_rel = float(abs(_exp["reldiff_se_svycoxph"]))
-        xc_dof_lo = int(xc1["r_design_df"].min())
-        xc_dof_hi = int(xc1["r_design_df"].max())
+    absent = [p.name for p in (xc1_path, xc3_path) if not p.exists()]
+    if absent:
+        raise SystemExit(
+            f"missing from reports/tables/: {', '.join(absent)}. Part 3's "
+            f"primary intervals come from crosscheck_part3.csv and section 7 "
+            f"reports both. Run scripts/crosscheck_survey.py (needs R with the "
+            f"survey package).")
+    xc1 = pd.read_csv(xc1_path)
+    xc3 = pd.read_csv(xc3_path)
+    xc_se_max = float(xc1["absdiff_se_std"].abs().max())
+    xc_rel_max = float(xc1["reldiff_se_std"].abs().max())
+    xc_coef_max = float(xc3["absdiff_coef_svycoxph"].abs().max())
+    xc_se_med = float(xc3["reldiff_se_svycoxph"].abs().median())
+    xc_se_worst = float(xc3["reldiff_se_svycoxph"].abs().max())
+    xc_cluster_med = float(xc3["reldiff_se_coxph_cluster"].abs().median())
+    _exp = xc3[xc3["term"] == "systolic_bp"].iloc[0]
+    xc_exp_rel = float(abs(_exp["reldiff_se_svycoxph"]))
+    xc_dof_lo = int(xc1["r_design_df"].min())
+    xc_dof_hi = int(xc1["r_design_df"].max())
 
     rows1 = "".join(
         f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.n:,}</td><td>{r.n_cases:,}</td>"
@@ -501,19 +592,34 @@ def build() -> str:
         f"<td>{v['mean_observed_pct']:.2f}%</td></tr>"
         for k, v in pred.items())
 
-    rows_cox = "".join(
-        "<tr>" + "".join(f"<td>{v}</td>" for v in r) + "</tr>"
-        for r in cox.itertuples(index=False))
-    cox_head = "".join(f"<th>{c}</th>" for c in cox.columns)
-
     # `f"{v}"` on a missing cell prints the literal text "nan", which is what a
-    # reader of the flow table then sees. The first row has no cvd_deaths -- the
-    # cohort does not exist yet at that step -- and that is an absence, not a
-    # number, so it renders as one.
-    rows_strobe = "".join(
-        "<tr>" + "".join(f"<td>{_text(v)}</td>" for v in r) + "</tr>"
-        for r in strobe.itertuples(index=False))
-    strobe_head = "".join(f"<th>{c}</th>" for c in strobe.columns)
+    # reader then sees. `_text` is the default here for every whole-table
+    # render, not just the flow table: the flow table got it because its first
+    # row legitimately has no cvd_deaths, and the aetiologic table went without
+    # for no reason other than having no missing cell on the day it was written.
+    # An absent Cox estimate is an absence, so it renders as one.
+    # A DISPLAY projection, not the CSV dumped whole. Two things were reaching
+    # the page that no model produced. `fit_aetiologic` rounds `p` to 4dp, so
+    # anything below 5e-5 became exactly `0.0` and six of the nine rows
+    # published a p-value of zero. And the log columns are deliberately left
+    # unrounded -- that was the fix for the hazard-ratio scaling bug -- so the
+    # table printed `0.011474575653970712` at sixteen significant figures beside
+    # hazard ratios given to four. Both are presentation faults of correct
+    # numbers, which is why neither showed up as a wrong value anywhere.
+    # The CSV keeps every column at full precision; it is linked from the page.
+    cox_display = pd.DataFrame({
+        "covariate": cox["covariate"],
+        "n": cox["n"].map(lambda v: f"{int(v):,}"),
+        "HR": cox["hr"].map(lambda v: _num(v, 4)),
+        "95% CI": [f"{_num(lo, 4)}&ndash;{_num(hi, 4)}"
+                   for lo, hi in zip(cox["hr_lo95"], cox["hr_hi95"])],
+        "log HR": cox["log_hr"].map(lambda v: _num(v, 6)),
+        "p": cox["p"].map(_pval),
+    })
+    rows_cox = _full_rows(cox_display)
+    cox_head = _head_cells(cox_display)
+    rows_strobe = _full_rows(strobe)
+    strobe_head = _head_cells(strobe)
 
     asc = pd.read_csv(TABLES / "part1_ascertainment.csv")
     cp = json.loads((TABLES / "part2_changepoint.json").read_text())
@@ -717,13 +823,9 @@ def build() -> str:
     # the one reported; the Python fit is kept beside it as a sensitivity
     # analysis rather than replaced.
     #
-    # The artefact is committed, so the site builds without R. Regenerating it
-    # needs `scripts/crosscheck_survey.py`, which shells out to Rscript.
-    if not have_xc:
-        raise SystemExit(
-            "reports/tables/crosscheck_part3.csv is missing; Part 3's primary "
-            "intervals come from it. Run scripts/crosscheck_survey.py (needs R "
-            "with the survey package).")
+    # The artefacts are committed, so the site builds without R. Regenerating
+    # them needs `scripts/crosscheck_survey.py`, which shells out to Rscript.
+    # Their presence is checked where they are read, not here.
     sbp_design = design_based_exposure(xc3)
 
     return f"""<!doctype html>
@@ -1503,8 +1605,9 @@ def build() -> str:
       simplifications rather than corrections: the cohort pools eight cycles on the two-year
       examination weight, where NCHS's guidance for an analysis spanning 1999&ndash;2002 is to use
       the four-year weights released for those cycles, and complete-case restriction to the eleven
-      model inputs drops 9.6% of the cohort and 10.9% of the cardiovascular deaths
-      (20,736 &rarr; 18,744 people, 925 &rarr; 824 deaths). The first was
+      model inputs drops {miss_pct_people:.1f}% of the cohort and {miss_pct_deaths:.1f}% of the
+      cardiovascular deaths ({miss_n_cohort:,} &rarr; {miss_n_kept:,} people,
+      {miss_deaths_cohort} &rarr; {miss_deaths_kept} deaths). The first was
       measured before being accepted: the four-year weights disagree sharply per person
       &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
       the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
@@ -1837,7 +1940,7 @@ def build() -> str:
   </div>
 
     <h3>Checked against an independent implementation</h3>
-    {"" if not have_xc else f'''
+    {f'''
     <p class="measure">Two of the estimators here are written by hand: the Taylor-linearised
     variance for the standardised prevalence, and the cluster-robust Cox. Unit tests can show that
     such an estimator does what its author meant; they cannot show that what the author meant is

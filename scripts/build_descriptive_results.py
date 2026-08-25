@@ -12,7 +12,7 @@ identified and is not reported. What is reported is the gap between the
 observed 2021-2022 value and the value the pre-pandemic trend predicts for it.
 
 The series also has a hole: NHANES suspended field operations, so there is no
-2019-2020 cycle and the extrapolation reaches 4 years past the last observed
+2019-2020 cycle and the extrapolation reaches 5.1 years past the last observed
 point instead of the usual 2. The prediction interval widens accordingly, but
 the gap is still an extrapolation and is labelled as one.
 
@@ -36,7 +36,7 @@ from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.descriptive import (  # noqa: E402
-    build_descriptive, by_cycle, PRE_COVID_CYCLES, cycle_midpoint,
+    CONDITION_LABELS, build_descriptive, by_cycle, PRE_COVID_CYCLES, cycle_midpoint,
     AGE_LABELS, AGE_MIN_DESC, STD_2000, WEIGHT_EXAM, WEIGHT_INTERVIEW,
 )
 from src.changepoint import bootstrap_test, power_curve, profile_set  # noqa: E402
@@ -120,6 +120,25 @@ def main() -> None:
         comp_rows.append(row)
     comp = pd.DataFrame(comp_rows).sort_values("year")
     comp.to_csv(TABLES / "part1_age_composition.csv", index=False)
+
+    # ── Part 1: each condition on its own ─────────────────────────────────
+    # These exist because the Tableau extract was still reading
+    # reports/tables/prevalence_has_*.csv, whose only writer is
+    # legacy-invalid/run_pipeline.py. Two wrong things reached the published
+    # extract as a result: those rows carried the deprecated pipeline's crude
+    # pooled-weight prevalence beside this one's (8.0967% against 8.0208% for
+    # the same outcome and cycle, in the same column), and they dated the
+    # redesigned cycle 2021.5 where every other block dates it 2022.6 -- so a
+    # time series plotted 66 rows 1.1 years to the left of everything else.
+    #
+    # Same estimator as the headline series, so they are comparable with it:
+    # age-standardised, interview-weighted, design-based interval.
+    for outcome, label in CONDITION_LABELS.items():
+        cond = by_cycle(df[df[outcome].notna()], outcome=outcome)
+        cond.insert(0, "outcome", label)
+        cond.to_csv(TABLES / f"part1_prevalence_{outcome}.csv", index=False)
+    print(f"condition series -> {len(CONDITION_LABELS)} tables in "
+          f"{TABLES.relative_to(ROOT)}")
 
     # ── Part 1: by race/ethnicity ─────────────────────────────────────────
     race = by_cycle(df[df["race_eth"].isin(RACE_ALL_CYCLES)], group="race_eth")

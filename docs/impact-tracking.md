@@ -97,7 +97,7 @@
    | 默认范围（+ 表、图、生存模型） | ✅ | `691ebfd` | 仅本地 |
    | `--full`（+ Part 4） | ✅ | **`1d30cb4`，不是当前 HEAD** | 仅本地 |
 
-   `--full` 之后又落了三个 commit（`b73d08f` `21b48e0` `ed50ebb` `691ebfd`），
+   `--full` 之后又落了四个 commit（`b73d08f` `21b48e0` `ed50ebb` `691ebfd`），
    其中 `691ebfd` 改了 `render_report.py`。**合并前必须在最终 commit 上重跑一次 `--full`**，
    否则 Part 4 产物与代码是否一致，这轮没有任何证据。
 

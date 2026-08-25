@@ -17,7 +17,7 @@ import pandas as pd
 import pytest
 
 from src.biomarkers import calibrate_creatinine
-from src.descriptive import cycle_midpoint
+from src.descriptive import AGE_LABELS, cycle_midpoint
 from src.discrimination import HorizonClassifier, cluster_bootstrap_delta
 from src.missingness import ipcw, pattern, sensitivity
 from src.models import (
@@ -404,7 +404,11 @@ def test_the_design_based_exposure_is_exponentiated_exactly_once(crosscheck):
     # not near 0.01, which is where the two failure modes land.
     assert 1.0 < d["hr"] < 1.5
     assert d["lo95"] < d["hr"] < d["hi95"]
-    assert d["crit"] == pytest.approx(1.96, abs=0.01)
+    # This used to read `pytest.approx(1.96, abs=0.01)`, which pinned the defect
+    # rather than the contract: the multiplier is supposed to be the design-df
+    # t, and z = 1.96 was what needed catching. A tolerance wide enough to admit
+    # both told nothing apart. See the dedicated test below.
+    assert 1.9 < d["crit"] < 2.5
 
     doubled = crosscheck.copy()
     for c in ("svycoxph_coef", "svycoxph_lo95", "svycoxph_hi95"):
@@ -429,9 +433,9 @@ def test_the_r_terms_must_match_the_python_model_exactly(crosscheck):
     exposure would belong to a different adjustment set than the one the report
     describes -- and nothing about the number would look wrong."""
     from scripts.render_report import design_based_exposure
-    from src.models import E2_ADJUSTMENT
+    from src.models import aetiologic_covariates
 
-    assert set(crosscheck["term"]) == set(E2_ADJUSTMENT) | {"systolic_bp"}
+    assert set(crosscheck["term"]) == set(aetiologic_covariates())
     with pytest.raises(SystemExit, match="does not match"):
         design_based_exposure(crosscheck[crosscheck["term"] != "pir"])
     dupes = pd.concat([crosscheck, crosscheck.iloc[[0]]], ignore_index=True)
@@ -454,3 +458,198 @@ def test_a_scaled_hazard_ratio_starts_from_the_log_scale(crosscheck):
     assert round(correct, 3) != round(compounded, 3), (
         "the difference must reach the third decimal, or this test is not "
         "pinning anything a reader would see")
+
+
+def test_every_aetiologic_fit_in_the_project_uses_one_specification():
+    """Three fits feed numbers the report prints beside each other.
+
+    fit_aetiologic gives the hazard ratio, src/missingness.py gives the IPCW
+    sensitivity the report describes as barely moving it, and
+    scripts/crosscheck_survey.py exports the design-based fit the report leads
+    with. Each used to assemble the covariate list itself. Sharing
+    E2_ADJUSTMENT made the MEMBERSHIP agree while leaving the assembly copied,
+    and a specification that differed between them would read as a finding
+    about IPCW or about the estimator rather than as two different models.
+
+    This asserts that no site rebuilds the list, which is a stronger and much
+    cheaper check than comparing three fitted outputs.
+    """
+    import ast
+    from pathlib import Path
+
+    root = Path(__file__).parent.parent
+    sites = ["src/models.py", "src/missingness.py", "scripts/crosscheck_survey.py",
+             "scripts/render_report.py"]
+    rebuilt = []
+    for rel in sites:
+        src = (root / rel).read_text(encoding="utf-8")
+        tree = ast.parse(src)
+        for node in ast.walk(tree):
+            # `[... for c in E2_ADJUSTMENT if c != <anything>]` -- the assembly,
+            # in any spelling, anywhere but inside aetiologic_covariates itself.
+            if not isinstance(node, ast.ListComp):
+                continue
+            gen = node.generators[0]
+            if (isinstance(gen.iter, ast.Name) and gen.iter.id == "E2_ADJUSTMENT"
+                    and gen.ifs):
+                rebuilt.append(f"{rel}:{node.lineno}")
+
+    stray = [r for r in rebuilt if not r.startswith("src/models.py")]
+    assert not stray, (
+        f"the E2 covariate list is assembled outside src.models: {stray}. "
+        f"Call aetiologic_covariates() instead.")
+    assert len(rebuilt) == 1, (
+        f"expected exactly one assembly -- the one inside "
+        f"aetiologic_covariates -- but found {rebuilt}")
+
+
+def test_the_shared_specification_puts_the_exposure_first_and_drops_no_confounder():
+    from src.models import E2_ADJUSTMENT, aetiologic_covariates
+
+    covs = aetiologic_covariates()
+    assert covs[0] == "systolic_bp"
+    assert set(covs) == set(E2_ADJUSTMENT) | {"systolic_bp"}
+    assert len(covs) == len(set(covs)), "a covariate appears twice"
+
+    # An exposure already in the adjustment set must not be duplicated.
+    covs_age = aetiologic_covariates("age")
+    assert covs_age[0] == "age"
+    assert len(covs_age) == len(set(covs_age)) == len(E2_ADJUSTMENT)
+
+
+def test_the_two_published_concordances_differ_only_by_weighting():
+    """They are printed side by side so a reader can see what weighting cost.
+
+    A pair that differs by weighting AND by censoring measures neither. The
+    published unweighted value was computed without `horizon`, so it ranged over
+    the whole of follow-up and took the lifelines branch instead of this
+    project's estimator -- differing in three ways while the caption said one.
+
+    At five years it mattered most: max follow-up in that test set is 11.25
+    years, so an uncensored statistic is not a five-year statistic at all. The
+    printed weighting gap was 0.0050 against a true 0.0115.
+    """
+    import inspect
+
+    from pathlib import Path
+    src = (Path(__file__).parent.parent / "scripts"
+           / "fit_survival_models.py").read_text(encoding="utf-8")
+    calls = [l for l in src.splitlines() if "concordance(" in l and "def " not in l]
+    assert calls, "no concordance call found; this test has lost its subject"
+
+    # Every call in the script that feeds model_results.json must carry a
+    # horizon. Checking the source is deliberate: checking only the numbers
+    # would pass again the moment someone adds a third, unbounded call.
+    block = src[src.index("c = concordance("):src.index("tab = calibration_table")]
+    assert block.count("horizon=horizon") == 2, (
+        f"expected both concordance calls to pass horizon=; source reads:\n{block}")
+
+    from src.models import concordance
+    assert "horizon" in inspect.signature(concordance).parameters
+
+
+def test_horizon_censoring_moves_the_unweighted_concordance():
+    """The guard above is a source check, so this pins the reason for it: the
+    two are genuinely different numbers, not a stylistic preference."""
+    rng = np.random.default_rng(11)
+    n = 800
+    risk = pd.Series(rng.uniform(0, 1, n))
+    # Follow-up runs well past the horizon, which is the situation that makes
+    # the two disagree; events late in follow-up are ranked by a risk score
+    # that was only ever meant to order the first five years.
+    time = pd.Series(rng.uniform(0.5, 12.0, n))
+    event = pd.Series((rng.uniform(0, 1, n) < 0.3 * risk).astype(int))
+
+    full = concordance(risk, time, event)
+    at_5 = concordance(risk, time, event, horizon=5.0)
+    assert full != at_5, (
+        "horizon censoring changed nothing on a sample built to make it "
+        "change something; the parameter may be being ignored again")
+
+
+# ── a domain interval takes df from the design, not from the domain ──────────
+
+def test_a_subgroup_interval_takes_its_df_from_the_design_it_took_variance_from():
+    """A design-based variance with a domain-based multiplier is neither.
+
+    `by_cycle(..., group=...)` computes the standard error over the whole
+    cycle's sampling structure -- deliberately, because a domain does not have a
+    sampling structure of its own. The critical value was taken from the domain
+    anyway, which is smaller, so the interval came out too wide. Standard
+    subpopulation practice (Stata `svy, subpop()`, svyby on a full design
+    object) keeps the design df.
+
+    Measured before the fix: wrong in 24 of 44 published race rows, by up to
+    7.0% on the width, and one row's lower bound was clipped to exactly zero as
+    a result.
+    """
+    from src.descriptive import by_cycle
+
+    rng = np.random.default_rng(17)
+    n = 3000
+    d = pd.DataFrame({
+        "cycle": "2001-2002",
+        "year": 2001.5,
+        "strata": rng.integers(1, 9, n),
+        "psu": rng.integers(1, 3, n),
+        "weight": rng.uniform(1000, 9000, n),
+        "age_group": rng.choice(list(AGE_LABELS), n),
+        "has_any_cvd": (rng.random(n) < 0.09).astype(float),
+    })
+    # The thin group has to occupy strictly FEWER PSU cells than the cycle, or
+    # the two dfs coincide and the test pins nothing. Confining it to two strata
+    # guarantees that; a 5% random draw does not, because 150 people scattered
+    # over 16 cells land in all of them.
+    d["race_eth"] = np.where(d["strata"] <= 2, "rare",
+                             np.where(d["psu"] == 1, "A", "B"))
+
+    whole = by_cycle(d, outcome="has_any_cvd")
+    per_group = by_cycle(d, outcome="has_any_cvd", group="race_eth")
+
+    design_dof = int(whole["design_dof"].iloc[0])
+    rare = per_group[per_group["race_eth"] == "rare"].iloc[0]
+    assert int(rare["n_psu"]) == int(whole["n_psu"].iloc[0]), (
+        "the subgroup row is counting its own PSUs again")
+    assert int(rare["design_dof"]) == design_dof, (
+        f"subgroup df {int(rare['design_dof'])} against design df {design_dof}")
+    assert set(per_group["design_dof"]) == {design_dof}
+
+
+def test_the_design_based_interval_uses_the_design_degrees_of_freedom(crosscheck):
+    """Six guards checked the SCALE; none checked the multiplier.
+
+    A Wald reconstruction passes for any multiplier at all, so Part 3's primary
+    interval was built on z = 1.96 -- survey's `confint` default for a
+    svycoxph -- while Part 1, the ascertainment series and the Tableau extract
+    all used a t on the design degrees of freedom. Two conventions under one
+    "95% CI" legend, and the artefact could not settle which was which because
+    design_df was printed to the R console rather than written to the file.
+
+    Small, at 123 design df: 1.079-1.166 against 1.078-1.166 per 10 mmHg. One
+    printed digit in the headline stat card.
+    """
+    from scipy import stats
+
+    from scripts.render_report import design_based_exposure
+
+    d = design_based_exposure(crosscheck)
+    assert d["design_df"] >= 1
+    assert d["crit"] == pytest.approx(
+        float(stats.t.ppf(0.975, d["design_df"])), rel=1e-6)
+    # And it is NOT the normal quantile, which is the specific thing that was
+    # wrong. If the design ever has enough df that the two agree to 1e-6, this
+    # assertion should be revisited rather than deleted.
+    assert d["crit"] != pytest.approx(1.959964, rel=1e-6)
+
+    z_based = crosscheck.copy()
+    z_based["svycoxph_lo95"] = (z_based["svycoxph_coef"]
+                                - 1.959964 * z_based["svycoxph_se"])
+    z_based["svycoxph_hi95"] = (z_based["svycoxph_coef"]
+                                + 1.959964 * z_based["svycoxph_se"])
+    z_based["svycoxph_crit"] = 1.959964
+    with pytest.raises(SystemExit, match="degrees of freedom"):
+        design_based_exposure(z_based)
+
+    no_df = crosscheck.drop(columns=["svycoxph_design_df"])
+    with pytest.raises(SystemExit, match="design_df"):
+        design_based_exposure(no_df)

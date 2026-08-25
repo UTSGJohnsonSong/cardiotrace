@@ -259,3 +259,55 @@ def test_the_horizon_label_and_the_evaluable_mask_mean_what_they_say():
     short = pd.DataFrame({"followup_years": [4.0], "cvd_death": [0],
                           "competing_death": [0]})
     assert HorizonClassifier.evaluable(short, 10.0).tolist() == [False]
+
+
+# ── forward selection must consider every candidate it does not reject ───────
+
+def _wald_reject(d):
+    """A column `_wald` cannot fit: zero variance, so the Cox fit degenerates.
+
+    Not an all-NaN column, which would be the obvious choice -- `forward_select`
+    builds its common analysis set with `dropna()` over every pooled candidate,
+    so an all-NaN candidate empties the frame and nothing gets fitted at all.
+    """
+    d = d.copy()
+    d["const_bad"] = 0.0
+    d["real_good"] = (d["systolic_bp"] * 0.9
+                      + np.random.default_rng(3).normal(0, 4, len(d)))
+    return d
+
+
+def test_a_candidate_after_an_unfittable_one_is_still_scored():
+    """The loop removed from the list it was iterating.
+
+    `remaining.remove(v)` on the element a for-loop is standing on shifts
+    everything left, so the next index lands one past the following candidate.
+    That candidate is not scored on this pass, and if the pass then ends -- no
+    scores, or a best below threshold -- it is never scored at all. It also
+    never failed to fit, so it is not in `failed` either: it disappears from the
+    path table with nothing recording that it was ever considered.
+
+    Before the fix this produced a path with only the step-0 row.
+    """
+    from src.models import prepare
+    from src.screening import forward_select
+
+    d = _wald_reject(prepare(_synthetic(n=1400, seed=7)))
+    path = forward_select(d, ["const_bad", "real_good"])
+
+    assert "real_good" in set(path["entered"]), (
+        f"real_good was never scored; the path is {list(path['entered'])}. It "
+        f"is not in failed either: {path.attrs.get('failed')}")
+    assert "const_bad (step 1)" in path.attrs["failed"]
+
+
+def test_the_order_of_the_pool_does_not_change_which_candidates_are_scored():
+    """The sharper statement of the same property: a candidate's fate must not
+    depend on whether an unfittable one happens to sit in front of it."""
+    from src.models import prepare
+    from src.screening import forward_select
+
+    d = _wald_reject(prepare(_synthetic(n=1400, seed=7)))
+    first = forward_select(d, ["const_bad", "real_good"])
+    second = forward_select(d, ["real_good", "const_bad"])
+    assert set(first["entered"]) == set(second["entered"])

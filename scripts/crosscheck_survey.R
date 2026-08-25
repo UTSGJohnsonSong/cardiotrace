@@ -126,22 +126,35 @@ run_part1 <- function() {
 
 # ------------------------------------------------------------------ part 3 ---
 
-part3_terms <- function(m, label) {
+part3_terms <- function(m, label, design_df = NA_integer_) {
   b <- coef(m)
   se <- sqrt(diag(vcov(m)))
-  ci <- confint(m)
+
+  # NOT confint(m). survey's confint for a svycoxph returns a NORMAL interval,
+  # so Part 3's primary interval was built on z = 1.96 while Part 1, the
+  # ascertainment series and the Tableau extract all use a t on the design
+  # degrees of freedom. Two conventions under one "95% CI" legend, with nothing
+  # in the artefact recording which was which -- and design_df was printed to
+  # the console rather than written to the file, so the Python loader could not
+  # have checked it even if it had wanted to.
+  #
+  # Pooling eight cycles does buy a lot of df: 123 here, against 8-17 per cycle
+  # in Part 1. So the correction is small -- on the exposure, 1.0789-1.1660
+  # against 1.0785-1.1664 per 10 mmHg. That is one printed digit in the
+  # headline stat card, and being small is not a reason to use a different rule
+  # from the rest of the project without saying so.
+  crit <- if (is.na(design_df)) qnorm(0.975) else qt(0.975, design_df)
   data.frame(
     fit  = label,
     term = names(b),
     coef = as.numeric(b),
     se   = as.numeric(se),
-    lo95 = as.numeric(ci[, 1L]),
-    hi95 = as.numeric(ci[, 2L]),
-    # (hi - lo) / (2 se) recovers the multiplier R actually used. Printing it
-    # is cheaper than reading survey's source to find out whether the interval
-    # is a normal one or a t on the design degrees of freedom -- and that
-    # distinction is exactly what is under review elsewhere in this project.
-    crit = as.numeric((ci[, 2L] - ci[, 1L]) / (2 * se)),
+    lo95 = as.numeric(b - crit * se),
+    hi95 = as.numeric(b + crit * se),
+    crit = crit,
+    # Written, not printed. A multiplier the loader cannot re-derive is a
+    # multiplier the loader cannot check.
+    design_df = design_df,
     stringsAsFactors = FALSE
   )
 }
@@ -166,14 +179,12 @@ run_part3 <- function() {
                      data = d, nest = TRUE)
     m <- svycoxph(f, design = des)
     lab <- if (lp == "adjust") "svycoxph" else paste0("svycoxph_", lp)
+    ddf <- degf(des)
     if (lp == "adjust") {
-      # Printed rather than folded into the table because coxph_cluster has no
-      # design and would need a blank column. It is the number that says
-      # whether a 1.96 multiplier is defensible here: pooling eight cycles buys
-      # far more design degrees of freedom than any single cycle in Part 1 has.
-      cat(sprintf("part3: design df = %d (PSUs - strata)\n", degf(des)))
+      cat(sprintf("part3: design df = %d (PSUs - strata), t = %.5f\n",
+                  ddf, qt(0.975, ddf)))
     }
-    out[[length(out) + 1L]] <- part3_terms(m, lab)
+    out[[length(out) + 1L]] <- part3_terms(m, lab, ddf)
   }
 
   # The same estimator lifelines computes: cluster-robust sandwich, no strata,
@@ -183,6 +194,9 @@ run_part3 <- function() {
                          paste(covs, collapse = " + "),
                          "+ cluster(design_cluster)"))
   mc <- coxph(fc, data = d, weights = d$wtmec2yr, robust = TRUE)
+  # No design object, so no design df: this one keeps the normal quantile,
+  # and the NA in the column is what says so rather than leaving a reader to
+  # guess which multiplier produced it.
   out[[length(out) + 1L]] <- part3_terms(mc, "coxph_cluster")
 
   res <- do.call(rbind, out)

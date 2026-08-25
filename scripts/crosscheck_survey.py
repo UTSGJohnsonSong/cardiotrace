@@ -202,10 +202,13 @@ def export_part3() -> pd.DataFrame:
     df = pd.read_csv(COHORT)
     d = models.prepare(df, tobin=True)
 
-    # Mirrors fit_aetiologic's covariate assembly rather than restating it, so
-    # a change to E2_ADJUSTMENT reaches the crosscheck without a second edit.
+    # The same call fit_aetiologic makes, so the R fit and the Python fit
+    # cannot end up specifying different models. This comment used to claim it
+    # "mirrors fit_aetiologic's covariate assembly rather than restating it"
+    # while doing exactly the restating: the constant was shared, the assembly
+    # was copied.
     exposure = "systolic_bp"
-    covs = [exposure] + [c for c in models.E2_ADJUSTMENT if c != exposure]
+    covs = models.aetiologic_covariates(exposure)
     model_cols = covs + ["followup_years", "cvd_death", "wtmec2yr",
                          "design_cluster"]
     fit_df = d[model_cols].dropna()
@@ -241,8 +244,12 @@ def compare_part3(py: pd.DataFrame) -> pd.DataFrame:
     # `crit` comes along so the table records which multiplier each side used.
     # Comparing two intervals that were built with different quantiles and
     # calling the gap a variance difference is the error this column prevents.
+    # design_df travels with crit. A multiplier the loader cannot re-derive is a
+    # multiplier the loader cannot check, and Part 3's primary interval was
+    # built on a normal quantile for a release with nothing in the artefact
+    # saying so.
     wide = r.pivot(index="term", columns="fit",
-                   values=["coef", "se", "lo95", "hi95", "crit"])
+                   values=["coef", "se", "lo95", "hi95", "crit", "design_df"])
     wide.columns = [f"{fit}_{stat}" for stat, fit in wide.columns]
     m = py.set_index("term").join(wide, how="outer").reset_index()
 

@@ -109,6 +109,32 @@ AGE_MIN_DESC = 20
 # and losing it silently redefines the outcome.
 CVD_ITEMS = ["MCQ160B", "MCQ160C", "MCQ160D", "MCQ160E", "MCQ160F"]
 
+# The five questions individually, not only their union. `prev_cvd` was the one
+# thing that survived build_descriptive_cycle for a long time, and the
+# condition-level rows in the Tableau extract were therefore still being read
+# out of `reports/tables/prevalence_has_*.csv` -- files whose only writer is
+# legacy-invalid/run_pipeline.py. Two consequences reached the published
+# extract: those rows carried the DEPRECATED pipeline's crude pooled-weight
+# prevalence beside this one's (8.0967% against 8.0208% for the same outcome and
+# cycle, in the same column), and they dated the redesigned cycle 2021.5 where
+# every other block dates it 2022.6, so a time series plotted them 1.1 years to
+# the left. Same item codes as dbt/models/staging/stg_cardiovascular.sql.
+CONDITION_ITEMS = {
+    "has_heart_failure": "MCQ160B",
+    "has_chd":           "MCQ160C",
+    "has_angina":        "MCQ160D",
+    "has_mi":            "MCQ160E",
+    "has_stroke":        "MCQ160F",
+}
+CONDITION_LABELS = {
+    "prev_cvd":          "Any cardiovascular disease",
+    "has_chd":           "Coronary heart disease",
+    "has_mi":            "Myocardial infarction",
+    "has_stroke":        "Stroke",
+    "has_heart_failure": "Heart failure",
+    "has_angina":        "Angina",
+}
+
 # 2000 projected U.S. standard population, proportion distribution, on the
 # all-ages base of 274,634 thousand. Each entry is the sum of the Master List
 # five-year weights it spans, written out so the arithmetic is auditable rather
@@ -240,10 +266,16 @@ def build_descriptive_cycle(cycle: str) -> pd.DataFrame:
         stacked.eq(1).any(axis=1), 1.0,
         np.where(stacked.notna().any(axis=1), 0.0, np.nan))
 
+    # Each condition on its own, recoded exactly as prev_cvd's components are:
+    # 7 and 9 stay missing rather than becoming "no".
+    for name, col in CONDITION_ITEMS.items():
+        df[name] = df[col].replace({7: np.nan, 9: np.nan}).map({1: 1.0, 2: 0.0})
+
     df["cycle"] = cycle
     df["year"] = cycle_midpoint(cycle)
     keep = ["SEQN", "cycle", "year", "age", "sex", "race_eth",
-            "wtint2yr", "wtmec2yr", "psu", "strata", "prev_cvd"]
+            "wtint2yr", "wtmec2yr", "psu", "strata", "prev_cvd",
+            *CONDITION_ITEMS]
     return df[keep]
 
 
@@ -297,15 +329,24 @@ def _linearised_variance(df: pd.DataFrame, z: pd.Series) -> float:
     within-stratum degrees of freedom, so dropping it removes its contribution
     entirely instead of borrowing one.
 
-    That is not a hypothetical. The overall series has no singleton strata, but
-    the race subgroups have 47 across 44 published subgroup-cycles, and in
-    2001-2002 Other Hispanic the dropped strata held 36% of the sample -- a
-    standard error of 0.92 pp where the collapsed-stratum estimate gives 1.26.
-    The symptom was visible in the output all along: an understated variance
-    drives the design effect below one and makes the effective sample size
-    exceed the nominal one. Some rows still do -- see `design_effect`, which
-    reports rather than suppresses them, because at 14-17 design degrees of
-    freedom a per-cycle DEFF below one is usually noise rather than evidence.
+    NO PUBLISHED ESTIMATE REACHES THIS BRANCH TODAY, and the paragraph that
+    used to stand here said the opposite -- "that is not a hypothetical" --
+    which is the reverse of the truth and would be the thing a future
+    maintainer trusted when deciding whether the collapse could be deleted.
+    `by_cycle` computes a subgroup's variance over the WHOLE cycle's design
+    (see its `design` argument), and a full cycle has about two PSUs in every
+    stratum and no singletons. Instrumented across a full rebuild of both
+    published prevalence tables: 110 variance calls, 0 of which see one.
+
+    It is a guard for a case that is one refactor away. Restrict a domain to its
+    own rows -- which is what an estimator without the `design` argument does --
+    and the four race groups produce 46 singleton strata across the 44
+    subgroup-cycles. The symptom of getting it wrong is visible in the output:
+    an understated variance drives the design effect below one and makes the
+    effective sample size exceed the nominal one. Twenty of the 44 subgroup rows
+    are below one anyway -- see `design_effect`, which reports rather than
+    suppresses them, because at 14-17 design degrees of freedom a per-cycle DEFF
+    below one is usually noise rather than evidence.
 
     Collapsing is the remedy NCHS documents for exactly this case in a domain
     analysis. It is mildly conservative -- the pooled pseudo-stratum treats
@@ -390,7 +431,11 @@ def age_standardised_prevalence(df: pd.DataFrame,
     zero for people outside the domain; restricting to the domain's own rows
     deletes the units that contain none of its members and recomputes stratum
     means over what is left, which understates the variance. That understatement
-    is what drove design effects below one in 19 of 44 published subgroup rows.
+    drove design effects below one in 19 of the 44 subgroup rows BEFORE this
+    argument existed. Twenty of the 44 are below one now, which is not the same
+    fault returning: at 14-17 design degrees of freedom a per-cycle DEFF below
+    one is ordinary noise. Written in the past tense on purpose -- a reader who
+    checks the current table finds 20 and needs to know which claim it answers.
     """
     present = [g for g in AGE_LABELS if (df["age_group"] == g).any()]
     total_w = sum(STD_2000[g] for g in present)
@@ -532,14 +577,24 @@ def by_cycle(df: pd.DataFrame, group: str | None = None,
         row = dict(zip(keys, vals))
         deff_std, n_eff_std = design_effect(g, se=se_std, outcome=outcome)
         kish = kish_weighting_factor(g)
-        n_psu = int(g.groupby(["strata", "psu"], observed=True).ngroups)
-        n_str = int(g["strata"].nunique())
-        # Design degrees of freedom: sampled PSUs minus sampled strata. A cycle
-        # of NHANES resolves into roughly 30 PSUs across 15 strata, so this is
-        # about 15 -- not the several thousand a normal quantile implicitly
-        # assumes. t(15) is 2.13 against 1.96, so an interval built on 1.96 is
-        # roughly 8% too narrow, and near the boundary that is the difference
-        # between excluding zero and not.
+        # Degrees of freedom come from the SAME frame the variance came from.
+        # For a subgroup row that is the whole cycle, not the subgroup: the
+        # variance three lines up is already computed over the cycle's sampling
+        # structure (see age_standardised_prevalence's `design` argument and the
+        # paragraph in its docstring), and taking df from the domain instead
+        # paired a design-based variance with a domain-based multiplier.
+        #
+        # It is the standard subpopulation rule -- Stata's `svy, subpop()` and
+        # svyby on a full design object both keep the design df -- and it was
+        # wrong in 24 of the 44 published race rows, by up to 7.0% on the width.
+        # One of them mattered: 2005-2006 Other Hispanic came out at df 9, and
+        # `max(0.0, ...)` then clipped its lower bound to exactly zero, so the
+        # published band said the prevalence could be nil. At the design df it
+        # does not reach zero. src/ascertainment.py had the pairing right; this
+        # is the file that drifted.
+        dof_frame = design if design is not None else g
+        n_psu = int(dof_frame.groupby(["strata", "psu"], observed=True).ngroups)
+        n_str = int(dof_frame["strata"].nunique())
         dof = max(n_psu - n_str, 1)
         crit = float(stats.t.ppf(0.975, dof))
         row.update(n=len(g), n_cases=int(g[outcome].sum()),

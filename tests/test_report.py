@@ -20,6 +20,8 @@ only plain strings in this project that legitimately contain braces.
 
 import ast
 import re
+
+import pandas as pd
 from pathlib import Path
 
 import pytest
@@ -136,3 +138,66 @@ def test_no_plain_string_in_the_generators_carries_a_format_field(name):
            if isinstance(n, ast.Constant) and isinstance(n.value, str)
            and id(n) not in skip and INTERPOLATION.search(n.value)]
     assert bad == [], f"{name}: plain strings carrying format fields at {bad}"
+
+
+# ── nothing on the page asserts a quantity the model did not produce ─────────
+
+def _published_pages():
+    root = Path(__file__).parent.parent
+    pages = sorted((root / "docs").glob("*.html"))
+    report = root / "reports" / "cardiotrace-report.html"
+    if report.exists():
+        pages.append(report)
+    return pages
+
+
+def _visible(path):
+    """Page text with CSS and embedded images removed.
+
+    Base64 image payloads are megabytes of arbitrary characters and will match
+    almost any pattern, so a scan that leaves them in reports noise.
+    """
+    h = path.read_text(encoding="utf-8")
+    h = re.sub(r"<style>.*?</style>", "", h, flags=re.S)
+    return re.sub(r'data:image/[^"]*', "", h)
+
+
+def test_no_published_p_value_is_exactly_zero():
+    """`fit_aetiologic` rounds p to four decimals, so anything below 5e-5
+    becomes 0.0 -- and the Cox table was rendered from the CSV verbatim, so six
+    of its nine rows published a p-value of zero.
+
+    A zero probability is not a value any model returns, and unlike a NaN it
+    reads as a result rather than as an absence. The rounding is deliberate, so
+    the fix is at the point of display.
+    """
+    offenders = {p.name: n for p in _published_pages()
+                 if (n := len(re.findall(r"<td>0\.0+</td>", _visible(p))))}
+    assert not offenders, f"p-value of exactly zero on: {offenders}"
+
+
+def test_no_published_cell_carries_more_precision_than_it_earned():
+    """The log columns are left unrounded on purpose -- that was the fix for
+    the hazard-ratio scaling bug -- so dumping the CSV printed
+    0.011474575653970712 beside hazard ratios given to four decimals."""
+    offenders = {p.name: n for p in _published_pages()
+                 if (n := len(re.findall(r">\s*-?\d\.\d{10,}", _visible(p))))}
+    assert not offenders, f"over-precise cells on: {offenders}"
+
+
+def test_the_p_value_formatter_states_a_bound_rather_than_a_zero():
+    import importlib.util
+
+    root = Path(__file__).parent.parent
+    src = (root / "scripts" / "render_report.py").read_text(encoding="utf-8")
+    ns = {"pd": pd}
+    start = src.index("def _pval")
+    exec(src[start:src.index("\n\n\n", start)], ns)
+    pval = ns["_pval"]
+
+    assert pval(0.0) == "&lt;0.0001"
+    assert pval(1e-9) == "&lt;0.0001"
+    assert pval(0.0005) == "0.0005"
+    assert pval(0.1058) == "0.1058"
+    assert pval(float("nan")) == "&mdash;"
+    assert importlib.util  # the import is the documentation of why exec is used

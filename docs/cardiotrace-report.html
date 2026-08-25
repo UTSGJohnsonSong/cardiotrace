@@ -961,7 +961,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       <div class="stat"><div class="k">Participants</div><div class="v">20,736</div><div class="n">40–79, CVD-free at baseline</div></div>
       <div class="stat"><div class="k">CVD deaths</div><div class="v">925</div><div class="n">2,711 competing deaths</div></div>
       <div class="stat"><div class="k">Person-years</div><div class="v">235,553</div><div class="n">origin at the examination</div></div>
-      <div class="stat"><div class="k">Systolic BP</div><div class="v">HR 1.122</div><div class="n">per 10 mmHg · 1.079–1.166 · survey-design-based 95% CI, stratified PSU design</div></div>
+      <div class="stat"><div class="k">Systolic BP</div><div class="v">HR 1.122</div><div class="n">per 10 mmHg · 1.078–1.166 · survey-design-based 95% CI, stratified PSU design</div></div>
     </div>
 
     <figure>
@@ -1136,7 +1136,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
           <th>Harrell&rsquo;s C<br><span class="thsub">survey-weighted</span></th>
           <th>Harrell&rsquo;s C<br><span class="thsub">unweighted</span></th>
           <th>Mean predicted</th><th>Mean observed</th></tr></thead>
-        <tbody><tr><td>Test 2005–2008, 10-year risk</td><td>5,163</td><td>217</td><td class='em'>0.838</td><td>0.804</td><td>1.96%</td><td>2.02%</td></tr><tr><td>Test 2009–2014, 5-year risk</td><td>8,801</td><td>170</td><td class='em'>0.802</td><td>0.797</td><td>0.69%</td><td>0.74%</td></tr></tbody>
+        <tbody><tr><td>Test 2005–2008, 10-year risk</td><td>5,163</td><td>217</td><td class='em'>0.838</td><td>0.805</td><td>1.96%</td><td>2.02%</td></tr><tr><td>Test 2009–2014, 5-year risk</td><td>8,801</td><td>170</td><td class='em'>0.802</td><td>0.791</td><td>0.69%</td><td>0.74%</td></tr></tbody>
       </table>
     </div>
 
@@ -1153,8 +1153,8 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     <div class="twrap" role="region" tabindex="0" aria-label="Table: Aetiologic model — cause-specific Cox, survey-weighted. Scrollable.">
       <table>
         <caption>Aetiologic model — cause-specific Cox, survey-weighted</caption>
-        <thead><tr><th>covariate</th><th>n</th><th>log_hr</th><th>log_lo95</th><th>log_hi95</th><th>hr</th><th>hr_lo95</th><th>hr_hi95</th><th>p</th></tr></thead>
-        <tbody><tr><td>systolic_bp</td><td>17890</td><td>0.0114745756539707</td><td>0.0075861158364981</td><td>0.0153630354714432</td><td>1.0115</td><td>1.0076</td><td>1.0155</td><td>0.0</td></tr><tr><td>age</td><td>17890</td><td>0.0987777629089211</td><td>0.0877700997256638</td><td>0.1097854260921784</td><td>1.1038</td><td>1.0917</td><td>1.116</td><td>0.0</td></tr><tr><td>male</td><td>17890</td><td>0.6963952648653177</td><td>0.4988408684230063</td><td>0.893949661307629</td><td>2.0065</td><td>1.6468</td><td>2.4448</td><td>0.0</td></tr><tr><td>race_black</td><td>17890</td><td>0.3213155721932688</td><td>0.1410116953774657</td><td>0.5016194490090718</td><td>1.3789</td><td>1.1514</td><td>1.6514</td><td>0.0005</td></tr><tr><td>education</td><td>17890</td><td>-0.0615219931391161</td><td>-0.1360750241256192</td><td>0.0130310378473869</td><td>0.9403</td><td>0.8728</td><td>1.0131</td><td>0.1058</td></tr><tr><td>pir</td><td>17890</td><td>-0.1789670248985697</td><td>-0.2462060196029554</td><td>-0.111728030194184</td><td>0.8361</td><td>0.7818</td><td>0.8943</td><td>0.0</td></tr><tr><td>smoke_current</td><td>17890</td><td>0.8957410252043948</td><td>0.677938173305613</td><td>1.1135438771031765</td><td>2.4491</td><td>1.9698</td><td>3.0451</td><td>0.0</td></tr><tr><td>smoke_former</td><td>17890</td><td>0.1702359376911885</td><td>-0.046255721500903</td><td>0.3867275968832802</td><td>1.1856</td><td>0.9548</td><td>1.4722</td><td>0.1233</td></tr><tr><td>bmi</td><td>17890</td><td>0.0392866810405378</td><td>0.0251967738239246</td><td>0.053376588257151</td><td>1.0401</td><td>1.0255</td><td>1.0548</td><td>0.0</td></tr></tbody>
+        <thead><tr><th>covariate</th><th>n</th><th>HR</th><th>95% CI</th><th>log HR</th><th>p</th></tr></thead>
+        <tbody><tr><td>systolic_bp</td><td>17,890</td><td>1.0115</td><td>1.0076&ndash;1.0155</td><td>0.011475</td><td>&lt;0.0001</td></tr><tr><td>age</td><td>17,890</td><td>1.1038</td><td>1.0917&ndash;1.1160</td><td>0.098778</td><td>&lt;0.0001</td></tr><tr><td>male</td><td>17,890</td><td>2.0065</td><td>1.6468&ndash;2.4448</td><td>0.696395</td><td>&lt;0.0001</td></tr><tr><td>race_black</td><td>17,890</td><td>1.3789</td><td>1.1514&ndash;1.6514</td><td>0.321316</td><td>0.0005</td></tr><tr><td>education</td><td>17,890</td><td>0.9403</td><td>0.8728&ndash;1.0131</td><td>-0.061522</td><td>0.1058</td></tr><tr><td>pir</td><td>17,890</td><td>0.8361</td><td>0.7818&ndash;0.8943</td><td>-0.178967</td><td>&lt;0.0001</td></tr><tr><td>smoke_current</td><td>17,890</td><td>2.4491</td><td>1.9698&ndash;3.0451</td><td>0.895741</td><td>&lt;0.0001</td></tr><tr><td>smoke_former</td><td>17,890</td><td>1.1856</td><td>0.9548&ndash;1.4722</td><td>0.170236</td><td>0.1233</td></tr><tr><td>bmi</td><td>17,890</td><td>1.0401</td><td>1.0255&ndash;1.0548</td><td>0.039287</td><td>&lt;0.0001</td></tr></tbody>
       </table>
     </div>
 
@@ -1180,8 +1180,9 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       simplifications rather than corrections: the cohort pools eight cycles on the two-year
       examination weight, where NCHS's guidance for an analysis spanning 1999&ndash;2002 is to use
       the four-year weights released for those cycles, and complete-case restriction to the eleven
-      model inputs drops 9.6% of the cohort and 10.9% of the cardiovascular deaths
-      (20,736 &rarr; 18,744 people, 925 &rarr; 824 deaths). The first was
+      model inputs drops 10.6% of the cohort and 14.6% of the
+      cardiovascular deaths (20,736 &rarr; 18,529 people,
+      925 &rarr; 790 deaths). The first was
       measured before being accepted: the four-year weights disagree sharply per person
       &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
       the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
@@ -1530,7 +1531,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       this report until now used and a reader deserves to see how far the change moved anything.
       It moved the exposure by 0.2%: HR 1.1216
       (1.0788&ndash;1.1661) cluster-robust against
-      1.1216 (1.0789&ndash;1.1660)
+      1.1216 (1.0785&ndash;1.1664)
       design-based. Across the nine terms the standard errors differ by a median of
       1.20% and at most 9.36% &mdash; and
       <b>no term changes whether its interval covers the null</b>, so the sensitivity analysis

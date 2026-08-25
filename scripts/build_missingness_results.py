@@ -52,11 +52,28 @@ def main() -> None:
     def diff(v):
         return float(compare.loc[compare["variable"] == v, "difference"].iloc[0])
 
+    # Counts of the OUTCOME, not only of people. The report's limitations
+    # paragraph states the cost of complete-case restriction, and it stated it
+    # in people until someone reached for the event figures and took them from
+    # the PCE cascade instead -- a table about a different, nine-variable
+    # subsample. The eleven inputs cost 14.6% of the deaths against 10.6% of the
+    # people; the nine cost 10.9% and 9.6%. Close enough to look right, and the
+    # difference is the whole point of disclosing it.
+    from src.missingness import P_FEATURES, _complete, _model_frame  # noqa: E402
+
+    _mf = _model_frame(cohort)
+    kept_rows = _mf[_complete(_mf, list(P_FEATURES))]
+    deaths_cohort = int((cohort["cvd_death"] == 1).sum())
+    deaths_kept = int((kept_rows["cvd_death"] == 1).sum())
+
     results = {
         "n_cohort": int(len(cohort)),
         "n_analysed": kept,
         "n_dropped": dropped,
         "pct_dropped": round(100 * dropped / (kept + dropped), 2),
+        "cvd_deaths_cohort": deaths_cohort,
+        "cvd_deaths_analysed": deaths_kept,
+        "pct_deaths_dropped": round(100 * (1 - deaths_kept / deaths_cohort), 2),
         "top_driver": str(top["variable"]),
         "top_driver_uniquely_lost": int(top["n_uniquely_lost"]),
         # The two differences that decide whether this is a footnote or a

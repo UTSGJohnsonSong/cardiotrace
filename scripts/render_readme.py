@@ -34,6 +34,34 @@ REPORTS = ROOT / "reports"
 # became a literal backspace, so the pattern matched nothing and the sync
 # reported "0 mentions" instead of failing.
 TEST_COUNT_IN_PROSE = re.compile(r"\b\d+ (tests|regressions)\b")
+
+# Matches the badge in ANY state it can be written into, not just the green one.
+# All three branches below used to match `tests-\d+%20passing-brightgreen` while
+# writing three different values, so the first red run made the badge
+# `tests-3%20failing-red` -- which none of the three patterns can match again. A
+# later green run left it red, a later red run left the old failure count, and
+# re.sub reports nothing when it matches nothing. A one-way trapdoor, in the one
+# routine whose entire job is to stop the front page asserting something stale.
+BADGE = re.compile(r"badge/tests-[^)\s]+")
+
+
+def _set_badge(readme: str, value: str) -> str:
+    """Write the test badge, whatever state it is currently in.
+
+    Raises rather than returning the text unchanged: a substitution that matches
+    nothing is indistinguishable from one that had nothing to do, and that is
+    exactly how the badge could get stuck. If the badge markup is ever reworded,
+    this should stop the build, not quietly leave the old claim on the page.
+    """
+    out, n = BADGE.subn(f"badge/tests-{value}", readme, count=1)
+    if n == 0:
+        raise SystemExit(
+            "no test badge found in README.md. Either it was removed or its "
+            "markup changed; BADGE in this file has to match it, because a "
+            "badge nobody can rewrite is a permanent assertion.")
+    return out
+
+
 sys.path.insert(0, str(ROOT))
 
 
@@ -154,9 +182,7 @@ summary = REPORTS / "test_summary.json"
 if summary.exists():
     t = json.loads(summary.read_text(encoding="utf-8"))
     if t["failed"] == 0 and t["exit_status"] == 0:
-        readme = re.sub(r"badge/tests-\d+%20passing-brightgreen",
-                        f"badge/tests-{t['collected']}%20passing-brightgreen",
-                        readme, count=1)
+        readme = _set_badge(readme, f"{t['collected']}%20passing-brightgreen")
         # The badge was not the only place the count appeared. Three sentences
         # of prose carried a hand-typed 85 while the badge said 128, so fixing
         # only the badge would have left the front page disagreeing with itself
@@ -183,12 +209,10 @@ if summary.exists():
         # which is a stale POSITIVE claim rather than a missing one. Neutralise
         # it instead: the front page should not say "passing" when the last full
         # run did not.
-        readme = re.sub(r"badge/tests-\d+%20passing-brightgreen",
-                        f"badge/tests-{t['failed']}%20failing-red", readme, count=1)
+        readme = _set_badge(readme, f"{t['failed']}%20failing-red")
         print(f"test badge set to FAILING: last full run had {t['failed']} failure(s)")
 else:
-    readme = re.sub(r"badge/tests-\d+%20passing-brightgreen",
-                    "badge/tests-not%20run-lightgrey", readme, count=1)
+    readme = _set_badge(readme, "not%20run-lightgrey")
     print("test badge set to 'not run': no reports/test_summary.json")
 
 (ROOT / "README.md").write_text(readme, encoding="utf-8")
