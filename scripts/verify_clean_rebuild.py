@@ -43,10 +43,12 @@ covering more than it does, and then relied on for the part it never covered.
 """
 
 import argparse
+import json
 import logging
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -97,7 +99,16 @@ FULL_ONLY = [("learning", ["scripts/build_learning_results.py",
 IGNORE_SUFFIXES = {".png", ".jpg", ".pdf"}
 # Written by the test suite, not by the pipeline; its value depends on whether
 # tests ran, which is not what this check is about.
-IGNORE_PATHS = {"reports/test_summary.json"}
+IGNORE_PATHS = {"reports/test_summary.json", "reports/verify_receipt.json"}
+
+# What ran, when, at which commit, over which scope. Written because
+# docs/impact-tracking.md carried a hand-maintained table of exactly those four
+# facts, and the first version of that table was wrong: it cited a --full run
+# four commits stale, one of which had changed a renderer. A merge gate whose
+# evidence is somebody's memory is the failure this project keeps rediscovering.
+# Excluded from the diff for the same reason test_summary.json is: it describes
+# the run rather than being produced by the pipeline.
+RECEIPT = ROOT / "reports" / "verify_receipt.json"
 
 
 def git(*args: str) -> str:
@@ -223,6 +234,17 @@ def main() -> None:
              "every tracked artefact including Part 4" if args.full else
              "every tracked artefact except Part 4 (use --full for those)")
     log.info(f"\nClean rebuild reproduces {scope}.")
+
+    RECEIPT.write_text(json.dumps({
+        "scope": "render" if args.render else "full" if args.full else "default",
+        "commit": git("rev-parse", "HEAD").strip(),
+        "branch": git("rev-parse", "--abbrev-ref", "HEAD").strip(),
+        "ran_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "stages": [name for name, _ in stages],
+        "result": "clean",
+        "covers": scope,
+    }, indent=2) + "\n", encoding="utf-8")
+    log.info(f"receipt -> {RECEIPT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
