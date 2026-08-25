@@ -337,6 +337,13 @@ def test_the_extract_does_not_publish_two_values_for_one_estimate():
     pd.testing.assert_frame_equal(a.sort_index(), b.sort_index())
 
 
+def _receipt() -> dict | None:
+    """The verification book, or None if no run has written one."""
+    p = ROOT / "reports" / "verify_receipt.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+
+
+
 # -- the merge gate cites a file, not a memory ---------------------------------
 
 def test_the_merge_gate_points_at_the_receipt_rather_than_at_a_recollection():
@@ -360,18 +367,27 @@ def test_the_merge_gate_points_at_the_receipt_rather_than_at_a_recollection():
 
 
 def test_the_verification_receipt_is_readable_and_says_what_it_covered():
-    receipt = ROOT / "reports" / "verify_receipt.json"
-    if not receipt.exists():
+    """One entry per scope.
+
+    It was a single object for one commit, and the next --render overwrote the
+    --full entry the merge gate had just been pointed at -- letting the cheapest
+    run decide what the repository claims to have verified.
+    """
+    book = _receipt()
+    if book is None:
         pytest.skip("no receipt; run scripts/verify_clean_rebuild.py")
-    r = json.loads(receipt.read_text(encoding="utf-8"))
-    assert r["result"] == "clean"
-    assert r["scope"] in {"render", "default", "full"}
-    assert r["covers"] and r["commit"] and r["ran_at"]
-    # A receipt that does not name its stages cannot be read as coverage.
-    assert r["stages"], "the receipt records no stages"
-    if r["scope"] == "full":
-        assert set(r["stages"]) >= {"cohort", "descriptive", "learning",
-                                    "benchmark", "models", "render"}
+    assert set(book) <= {"render", "default", "full"}, (
+        f"unexpected scopes in the receipt: {sorted(book)}")
+    for scope, r in book.items():
+        assert r["result"] == "clean"
+        assert r["covers"] and r["commit"] and r["ran_at"]
+        # A receipt that does not name its stages cannot be read as coverage.
+        assert r["stages"], f"{scope} records no stages"
+    if "full" in book:
+        assert set(book["full"]["stages"]) >= {
+            "cohort", "descriptive", "learning", "benchmark", "models", "render"}
+    if "render" in book:
+        assert book["render"]["stages"] == ["render"]
 
 
 def test_a_full_receipt_matches_the_commit_it_claims_to_verify():
@@ -385,12 +401,13 @@ def test_a_full_receipt_matches_the_commit_it_claims_to_verify():
     """
     import subprocess
 
-    receipt = ROOT / "reports" / "verify_receipt.json"
-    if not receipt.exists():
+    book = _receipt()
+    if book is None:
         pytest.skip("no receipt; run scripts/verify_clean_rebuild.py")
-    sha = json.loads(receipt.read_text(encoding="utf-8"))["commit"]
-    r = subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"],
-                       cwd=ROOT, capture_output=True, text=True)
-    assert r.returncode == 0, (
-        f"the receipt names commit {sha[:12]}, which is not in this "
-        f"repository. A receipt is evidence only if it was written by a run.")
+    for scope, r in book.items():
+        sha = r["commit"]
+        proc = subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"],
+                              cwd=ROOT, capture_output=True, text=True)
+        assert proc.returncode == 0, (
+            f"the {scope} receipt names commit {sha[:12]}, which is not in this "
+            f"repository. A receipt is evidence only if a run wrote it.")
