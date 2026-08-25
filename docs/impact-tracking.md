@@ -23,20 +23,28 @@
 
 ## A. 已污染 —— 发布过的数字是错的
 
-这七条改变了对外可见的内容。旧值一并留着，因为「这个数变过」本身是读者需要知道的。
+这十三条改变了对外可见的内容。旧值一并留着，因为「这个数变过」本身是读者需要知道的。
+A8–A13 是 2026-08-25 三个审查 agent 找出来的，**其中 A8 和 A11 是我自己在这一轮写进去的**。
 
 | # | 缺陷 | 旧（已发布） | 新（当前） | 证据 |
 |---|---|---|---|---|
-| A1 | `concordance()` 接受 `weights=` 但函数体从不读它，调用方也没传 | 10 年 Harrell C = **0.804** | **0.838** 加权，0.804 作未加权对照保留 | `reports/model_results.json` → `prediction.*.harrell_c` / `harrell_c_unweighted`。同时 10 年平均预测风险 2.82% → **1.96%** |
+| A1 | `concordance()` 接受 `weights=` 但函数体从不读它，调用方也没传 | 10 年 Harrell C = **0.804** | **0.838** 加权，0.805 作未加权对照（见 A8） | `reports/model_results.json` → `prediction.*.harrell_c` / `harrell_c_unweighted`。同时 10 年平均预测风险 2.82% → **1.96%** |
 | A2 | Part 1 用体检权重（`WTMEC2YR`）估计只来自访谈的结局 | 疫情后周期「损失 22.3% 样本」被当作趋势解释的一部分 | 换 `WTINT2YR` 后该损失 **≤0.05%**，这条竞争性解释消失 | `src/descriptive.py:WEIGHT_INTERVIEW` · `reports/tables/part1_flow.csv` 与 `part1_flow_examweight.csv` 并列保留两条阶梯 |
 | A3 | 趋势区间用正态分位 1.96，而设计自由度只有 8 | 95% CI **−1.16 到 −0.06 pp**，报告写「区间不含零，所以下降不是噪声」 | t(8)=2.306 → **−1.218 到 +0.035 pp**，`std_slope_excludes_zero: false` | `reports/descriptive_results.json` → `part1.std_slope_ci` / `slope_dof` / `slope_t_crit`。**这条改的不是数字，是结论**——原句现由该布尔字段驱动 |
 | A4 | 血压 HR 以 `hr ** 10` 缩放，而 `hr` 已被四舍五入到 4 位 | **1.121** | **1.122**（`exp(coef×10)` = 1.1216） | `1.0115 ** 10 = 1.121137` vs `exp(coef*10) = 1.121588`。四舍五入被复利十次，进到报告打印的第三位。测试：`tests/test_estimator_contracts.py::test_a_scaled_hazard_ratio_starts_from_the_log_scale` |
 | A5 | `scripts/pce_variable_cascade.py` 自建排除阶梯，比 STROBE 少三级 | 完整病例子样本 **17,464 人 / 756 事件**，写进四处文档并进了一条已锁定的协议决定 | **18,744 人 / 824 事件** | 它从 20,771 起步（漏了 linkage 资格、MEC 完成、死因编码），分析样本是 20,736。现改为直接读 `strobe_part3.csv` 与 `cohort_part3.csv.gz`，测试 `test_the_pce_cascade_starts_where_the_strobe_ladder_ends` 钉住接缝 |
 | A6 | 两处 `decision()` 调用漏了 `f` 前缀 | 线上页面直接印出 `{...}` 模板变量 | 渲染为 0.85 / 5.6 | 目视 + `tests/test_report.py` 断言无 `{…}` 残留 |
 | A7 | 候选表空字符串 → CSV → 读回为 `NaN`，`bool(nan)` 为真 | 页面上 **9 个 `nan`** | 两端都修 + 守卫测试 | `tests/test_report.py` 的 nan 守卫；构建后扫描 `docs/*.html` 现为 0 |
+| A8 | 未加权 C 没传 `horizon`，而报告 caption 声称两列都按时间截断 | 10 年 **0.804** · 5 年 **0.797** | 10 年 **0.805** · 5 年 **0.791** | 那句 caption 是我 2026-08-24 加列时写的，代码没做它声称的事。于是两列差的是「加权 + 截断 + 并列约定」三件事，哪一件都测不出。5 年那行最糟：该测试集随访到 11.25 年，**未截断的 0.797 根本不是五年统计量**；而且它把加权造成的差距从真实的 0.0115 印成 0.0050——正好低估了这一列存在的理由。`src/discrimination.py:186` 早就写下了这条规则，喂报告的脚本没照做 |
+| A9 | 子群区间的自由度取自域，方差取自整周期设计 | 44 行族裔行中 **24 行**自由度偏小，最宽的一条区间宽了 **7.01%** | 自由度改与方差同源 | 2005-2006 Other Hispanic 在 df=9 下 `max(0.0, ...)` 把下界夹到**正好 0**，等于说该族裔患病率可能为零；用设计自由度则不触零。`src/ascertainment.py` 一直是对的，是 `descriptive.py` 漂了。测试：`test_a_subgroup_interval_takes_its_df_from_the_design_it_took_variance_from` |
+| A10 | Tableau extract 仍在读 `legacy-invalid/run_pipeline.py` 的产物 | 同一周期两个横轴位置（**2021.5** vs 2022.6）；同一列同一结局两个粗患病率（**8.0967%** vs 8.0208%） | 分病种行改由 `build_descriptive_results.py` 生成，与首页同一估计量 | 66 行 Condition 数据整体左移 1.1 年。而且**干净重建查不出来**——构建图里没有目标重新生成那六个输入文件，永远不产生 diff。`build_descriptive_cycle` 现在保留五个 MCQ 分项；旧表移入 `legacy-invalid/artefacts/tables/` |
+| A11 | 报告与 README 的 limitations 把 **PCE 九项**的完整病例数字贴在写着**十一项模型输入**的句子下 | 掉 **9.6%** 的人 / **10.9%** 的死亡（20,736 → 18,744，925 → 824） | 掉 **10.6%** 的人 / **14.6%** 的死亡（20,736 → **18,529**，925 → **790**） | 也是我这一轮写的。方向是**低估**了自己正在披露的选择偏差。现由 `missingness_results.json` 插值，该产物新增了事件数字段 |
+| A12 | 六个 p 值印成字面的 `0.0`；log 系数印到 16 位有效数字 | 页面上 `<td>0.0</td>` × 6，以及 `0.011474575653970712` | `&lt;0.0001`；log 系数 6 位 | `fit_aetiologic` 把 p 四舍五入到 4 位（有意），Cox 表却直接 dump CSV。**零概率不是任何模型的输出**，而且它不像 NaN，看起来像个结果。测试：`test_no_published_p_value_is_exactly_zero` |
+| A13 | Part 3 主区间用正态分位 z=1.96（survey 对 `svycoxph` 的 `confint` 默认），而项目其余部分一律用设计自由度 t | HR 1.122 per 10 mmHg，95% CI **1.079**–1.166 | t(123)=1.97944 → 95% CI **1.078**–1.166 | 六道 scale 守卫全部看不见它——**Wald 重构对任何乘数都成立**。而且 `design_df` 当时只 `cat` 到 R 控制台、没写进文件，所以 Python 侧连校验的材料都没有。现在 R 输出 `design_df`，并加第七道守卫断言 `crit == t(0.975, design_df)`。Part 1 用 t(8)、ascertainment 用 t、Tableau extract 专门发布 `ci_crit` 就是为了让两条带子不在同一个图例下含义不同 |
 
-**共同点值得记下**：A1、A3、A4 都不是「算错了」，是**接口默默接受了一个它不使用的参数、或在错误的尺度上做了一次运算**。
-三条都不会报错，都返回合理数值，都需要一个独立参照才能发现。
+**共同点值得记下**：A1、A3、A4、A8、A13 都不是「算错了」，是**接口默默接受了一个它不使用的参数、在错误的尺度上做了一次运算、或用了与项目其余部分不同的约定**。全部不报错，全部返回合理数值，全部需要一个独立参照才能发现。
+
+**另一个共同点更难受**：A8 和 A11 是我在修前面几条的同一轮里写进去的——一条 caption 声称了代码没做的事，一处把邻近表格的数字贴到了另一个标签下。两条都不是算错，是**说明与实现脱节**，和这份文件在追踪的东西是同一类。
 
 ---
 
@@ -61,7 +69,7 @@
 |---|---|---|
 | C1 | `design_cluster` 的 strata×psu 编码会碰撞 | 实测 **241 个编码，0 个跨层共享**。编码方式本身不产生碰撞 |
 | C2 | 校准十分位是未加权的 | `calibration_table` 本来就用加权分位切点。**但**切点此前由 `pd.qcut` 给出（按人数等分），已改为按累积权重等分——这是另一个问题，不是报告的那个 |
-| C3 | `predict_cif` 用 S(u) 而非 S(u−)，高估绝对风险 | 方向对，**量级可忽略**：10 年平均预测风险 1.96% 上约 **+0.0040 个百分点**。仍然改了代码，理由是公式与实现必须一致，不是因为数字错 |
+| C3 | `predict_cif` 用 S(u) 而非 S(u−)，高估绝对风险 | 方向对，**量级可忽略**：**未加权**均值 2.827% 上 +0.0040 pp，报告实际印的**加权**均值 1.959% 上只有 +0.0022 pp（`n_grid=400`；加密到 4000 降到 +0.0004）。仍然改了代码，理由是公式与实现必须一致，不是因为数字错 |
 
 ---
 
@@ -93,13 +101,13 @@
 
    | 范围 | 跑过没有 | 在哪个 commit | 谁保证 |
    |---|---|---|---|
-   | `--render`（报告 / 站点 / README） | ✅ | `691ebfd`（当前 HEAD） | **CI 每次 push**（`.github/workflows/ci.yml`） |
-   | 默认范围（+ 表、图、生存模型） | ✅ | `691ebfd` | 仅本地 |
-   | `--full`（+ Part 4） | ✅ | **`1d30cb4`，不是当前 HEAD** | 仅本地 |
+   | `--render`（报告 / 站点 / README） | ✅ | `PLACEHOLDER_HEAD` | **CI 每次 push**（`.github/workflows/ci.yml`） |
+   | 默认范围（+ 表、图、生存模型） | ✅ | `PLACEHOLDER_HEAD` | 仅本地 |
+   | `--full`（+ Part 4） | ✅ | `PLACEHOLDER_HEAD` | 仅本地 |
 
-   `--full` 之后又落了四个 commit（`b73d08f` `21b48e0` `ed50ebb` `691ebfd`），
-   其中 `691ebfd` 改了 `render_report.py`。**合并前必须在最终 commit 上重跑一次 `--full`**，
-   否则 Part 4 产物与代码是否一致，这轮没有任何证据。
+   这张表在 2026-08-25 的审查修复之后重跑过一次全量，三个范围都落在同一个 commit 上。
+   **规则不变：合并前若再有任何 commit，必须重跑 `--full`**——上一次这张表就是因为
+   `--full` 落后四个 commit 而不成立，其中一个改过 `render_report.py`。
 
    `--full` 进不了 CI 的原因是它需要 `data/processed/`，而该目录被 gitignore。
    **Part 4 产物的重建由本地负责，不由 CI 保证**——这是一条结构性缺口，不是疏忽。
