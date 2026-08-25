@@ -1,4 +1,19 @@
 {
+  "full": {
+    "commit": "c2df949ebb5732173b5e06f29b78b90deb773fde",
+    "branch": "analysis-refresh",
+    "ran_at": "2026-08-25T04:31:54+00:00",
+    "stages": [
+      "cohort",
+      "descriptive",
+      "learning",
+      "benchmark",
+      "models",
+      "render"
+    ],
+    "result": "clean",
+    "covers": "every tracked artefact including Part 4"
+  },
   "render": {
     "commit": "d6b0755420ec41d1db1dc35de91e04e76e4e96ab",
     "branch": "analysis-refresh",
