@@ -96,25 +96,30 @@ A8–A13 是 2026-08-25 三个审查 agent 找出来的，**其中 A8 和 A11 �
    这是本轮唯一一处**结论方向**改变，值得在合并说明里单独点名。
 4. **PCE 头对头仍未实现**（节点 15 = 🔄）。协议已锁定，A5 修正了它引用的 n，但对比本身没做。
    若合并说明里出现「PCE 基准」字样，需要说清是协议已定、实现未做。
-5. **重建验证的覆盖范围与时点，逐条写清**——上一版这里写「见合并当日的运行记录」，
-   而那份记录并不存在。一条指向不存在证据的断言，和没有断言不是一回事，是更糟。
+5. **重建验证已跑，凭据在仓库里，不在我的记忆里。**
+   上一版这里写「见合并当日的运行记录」，而那份记录并不存在——
+   一条指向不存在证据的断言，和没有断言不是一回事，是更糟。
 
-   | 范围 | 跑过没有 | 在哪个 commit | 谁保证 |
-   |---|---|---|---|
-   | `--render`（报告 / 站点 / README） | ✅ | `PLACEHOLDER_HEAD` | **CI 每次 push**（`.github/workflows/ci.yml`） |
-   | 默认范围（+ 表、图、生存模型） | ✅ | `PLACEHOLDER_HEAD` | 仅本地 |
-   | `--full`（+ Part 4） | ✅ | `PLACEHOLDER_HEAD` | 仅本地 |
+   出处：[`reports/verify_receipt.json`](../reports/verify_receipt.json)，
+   由 `scripts/verify_clean_rebuild.py` 在通过时自己写下。
 
-   这张表在 2026-08-25 的审查修复之后重跑过一次全量，三个范围都落在同一个 commit 上。
-   **规则不变：合并前若再有任何 commit，必须重跑 `--full`**——上一次这张表就是因为
-   `--full` 落后四个 commit 而不成立，其中一个改过 `render_report.py`。
+   | 范围 | 谁保证 |
+   |---|---|
+   | `--render`（报告 / 站点 / README） | **CI 每次 push**（`.github/workflows/ci.yml`） |
+   | `--full`（全部六个阶段，含 Part 4） | 本地，凭据记录 commit 与时间 |
 
-   `--full` 进不了 CI 的原因是它需要 `data/processed/`，而该目录被 gitignore。
-   **Part 4 产物的重建由本地负责，不由 CI 保证**——这是一条结构性缺口，不是疏忽。
-6. `verify_clean_rebuild.py` 目前不留运行凭据。第 5 条那张表是我手填的，
-   下次仍会过期。**待办**：让它把「时间 · commit · 范围 · 结果」写进
-   `reports/verify_receipt.json`（比照 `test_summary.json`，并加入 `IGNORE_PATHS`），
-   由文档引用该文件而不是引用一段记忆。
+   `--full` 进不了 CI 的原因是它需要 `data/processed/`，而该目录被 gitignore
+   （队列 5 MB，原始 XPT 376 MB）。**Part 4 产物的重建由本地负责，不由 CI 保证**
+   ——这是一条结构性缺口，不是疏忽。
+
+   **规则**：凭据里的 `commit` 必须等于要合并的那个 commit。不等就重跑。
+   上一次这张表失效，正是因为 `--full` 落后四个 commit，而其中一个改过 `render_report.py`。
+
+6. **`--full` 第一次抓到了非人为植入的问题**，值得记下来：
+   我改了子群自由度、重算了 `part1_prevalence_by_race.csv`，
+   但没重跑 `make_descriptive_figures.py`。于是**站点上那张 `part1_by_race.png`
+   一直画着修复前偏宽的区间带**，而页面上没有任何东西说图和表不一致。
+   这就是这个检查存在的全部理由。
 
 ---
 
