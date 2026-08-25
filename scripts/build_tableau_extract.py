@@ -1,8 +1,8 @@
 """Flatten the published estimates into one long table Tableau can pivot.
 
-The report chooses its views: six figures, each answering one question. That is
+The report chooses its views: ten figures, each answering one question. That is
 the right shape for an argument and the wrong shape for a reader who wants to ask
-their own. The estimates already cover 6 outcomes x 11 cycles x 6 age bands x 5
+their own. The estimates already cover 6 outcomes x 11 cycles x 6 age bands x 4
 race groups, which is far more cells than a static page can show, so the extract
 exists to expose the cells the report had to leave out -- not to restate it.
 
@@ -31,12 +31,21 @@ FIELDS = [
     "cycle", "year", "dimension", "level", "outcome",
     "n", "n_cases", "n_psu",
     "pct_standardised", "se_pct", "ci_lo_pct", "ci_hi_pct", "pct_crude",
+    # A published interval that does not say which critical value produced it
+    # cannot be read. These rows carry 21-32 PSUs across 13-16 strata, so the
+    # design df runs 8-17 and the critical value runs t(17) = 2.110 to
+    # t(8) = 2.306 against z = 1.96 -- up to 18% wider. Two workbooks built a
+    # month apart would otherwise plot bands of different meaning under one
+    # legend. (The earlier version of this comment said "14-17 PSUs across 7-8
+    # strata, single-digit df": 14-17 is the df range of the overall series,
+    # written into the PSU slot and halved into the strata slot.)
+    "design_dof", "ci_crit",
     "deff", "n_effective",
 ]
 
 # The six conditions, in the order the report introduces them.
 OUTCOMES = [
-    ("has_any_cvd", "Any cardiovascular disease"),
+    ("prev_cvd", "Any cardiovascular disease"),
     ("has_chd", "Coronary heart disease"),
     ("has_mi", "Myocardial infarction"),
     ("has_stroke", "Stroke"),
@@ -77,6 +86,7 @@ def main() -> None:
             "pct_standardised": pct(r["p_std"]), "se_pct": pct(r["se_std"]),
             "ci_lo_pct": pct(r["lo_std"]), "ci_hi_pct": pct(r["hi_std"]),
             "pct_crude": pct(r["p_crude"]),
+            "design_dof": r["design_dof"], "ci_crit": f"{float(r['crit']):.4f}",
             "deff": f"{float(r['deff_std']):.4f}",
             "n_effective": f"{float(r['n_effective_std']):.1f}",
         })
@@ -91,6 +101,7 @@ def main() -> None:
             "pct_standardised": pct(r["p_std"]), "se_pct": pct(r["se_std"]),
             "ci_lo_pct": pct(r["lo_std"]), "ci_hi_pct": pct(r["hi_std"]),
             "pct_crude": pct(r["p_crude"]),
+            "design_dof": r["design_dof"], "ci_crit": f"{float(r['crit']):.4f}",
             "deff": f"{float(r['deff_std']):.4f}",
             "n_effective": f"{float(r['n_effective_std']):.1f}",
         })
@@ -106,20 +117,38 @@ def main() -> None:
             "outcome": "Any cardiovascular disease",
             "n": r["n"], "n_cases": "", "n_psu": "",
             "pct_standardised": "", "se_pct": "", "ci_lo_pct": "", "ci_hi_pct": "",
+            "design_dof": "", "ci_crit": "",
             "pct_crude": pct(r["p"]),
             "deff": "", "n_effective": "",
         })
 
-    # ── the other five conditions, crude only ─────────────────────────────
+    # ── each condition, on the same estimator as everything else ──────────
+    # These used to read reports/tables/prevalence_has_*.csv, whose only writer
+    # is legacy-invalid/run_pipeline.py -- the pipeline this project replaced.
+    # Three things followed, all of them in the committed extract:
+    #   * `midyear` came from the legacy helper, which dates the redesigned
+    #     cycle 2021.5 where every other block dates it 2022.6, so these 66 rows
+    #     plotted 1.1 years to the left of the rest of the workbook;
+    #   * the prevalence was crude, pooled-weighted and differently filtered, so
+    #     the same outcome and cycle appeared twice in one column with two
+    #     values (8.0967% against 8.0208%);
+    #   * nothing in the build regenerated the inputs, so verify_clean_rebuild
+    #     could not have caught either -- the exact "artefact outliving its
+    #     code" mode it exists for.
+    # They are now age-standardised, interview-weighted and design-based, like
+    # the Overall series, which is what makes the docstring's promise true.
     for stem, label in OUTCOMES:
-        for r in rows(f"prevalence_{stem}.csv"):
+        for r in rows(f"part1_prevalence_{stem}.csv"):
             out.append({
-                "cycle": r["cycle"], "year": r["midyear"],
+                "cycle": r["cycle"], "year": r["year"],
                 "dimension": "Condition", "level": label, "outcome": label,
-                "n": r["n_unweighted"], "n_cases": r["n_cases"], "n_psu": "",
-                "pct_standardised": "", "se_pct": "", "ci_lo_pct": "", "ci_hi_pct": "",
-                "pct_crude": f"{float(r['prevalence_pct']):.4f}",
-                "deff": "", "n_effective": "",
+                "n": r["n"], "n_cases": r["n_cases"], "n_psu": r["n_psu"],
+                "pct_standardised": pct(r["p_std"]), "se_pct": pct(r["se_std"]),
+                "ci_lo_pct": pct(r["lo_std"]), "ci_hi_pct": pct(r["hi_std"]),
+                "design_dof": r["design_dof"], "ci_crit": f"{float(r['crit']):.4f}",
+                "pct_crude": pct(r["p_crude"]),
+                "deff": f"{float(r['deff_std']):.4f}",
+                "n_effective": f"{float(r['n_effective_std']):.1f}",
             })
 
     OUT.mkdir(parents=True, exist_ok=True)

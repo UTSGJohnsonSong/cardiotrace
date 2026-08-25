@@ -73,7 +73,8 @@
     "n_boot": 400,
     "scores": {
       "cox_p": {
-        "c": 0.8034,
+        "c": 0.8379,
+        "c_unweighted": 0.8039,
         "auc_horizon": 0.8334,
         "n": 4641,
         "n_evaluable": 4641,
@@ -81,7 +82,8 @@
         "n_features": 11
       },
       "cox_wide": {
-        "c": 0.8185,
+        "c": 0.8555,
+        "c_unweighted": 0.8184,
         "auc_horizon": 0.8509,
         "n": 4641,
         "n_evaluable": 4641,
@@ -89,7 +91,8 @@
         "n_features": 12
       },
       "gbm_p": {
-        "c": 0.7526,
+        "c": 0.7837,
+        "c_unweighted": 0.7624,
         "auc_horizon": 0.7763,
         "n": 4641,
         "n_evaluable": 4641,
@@ -97,7 +100,8 @@
         "n_features": 11
       },
       "gbm_wide": {
-        "c": 0.7684,
+        "c": 0.8134,
+        "c_unweighted": 0.7763,
         "auc_horizon": 0.8079,
         "n": 4641,
         "n_evaluable": 4641,
@@ -105,7 +109,8 @@
         "n_features": 12
       },
       "floor_age_sex": {
-        "c": 0.7706,
+        "c": 0.7981,
+        "c_unweighted": 0.766,
         "auc_horizon": 0.7969,
         "n": 4641,
         "n_evaluable": 4641,
@@ -115,35 +120,43 @@
     },
     "deltas": {
       "cox_wide": {
-        "delta": 0.0151,
-        "lo": 0.0069,
-        "hi": 0.0245,
-        "half_width": 0.0088,
+        "delta": 0.0176,
+        "lo": 0.0074,
+        "hi": 0.0275,
+        "half_width": 0.01,
         "n_boot": 400,
+        "n_boot_requested": 400,
+        "n_boot_dropped": 0,
         "excludes_zero": true
       },
       "gbm_p": {
-        "delta": -0.0508,
-        "lo": -0.07,
-        "hi": -0.0272,
-        "half_width": 0.0214,
+        "delta": -0.0542,
+        "lo": -0.079,
+        "hi": -0.0284,
+        "half_width": 0.0253,
         "n_boot": 400,
+        "n_boot_requested": 400,
+        "n_boot_dropped": 0,
         "excludes_zero": true
       },
       "gbm_wide": {
-        "delta": -0.035,
-        "lo": -0.0539,
-        "hi": -0.0146,
-        "half_width": 0.0196,
+        "delta": -0.0245,
+        "lo": -0.0499,
+        "hi": 0.0018,
+        "half_width": 0.0258,
         "n_boot": 400,
-        "excludes_zero": true
+        "n_boot_requested": 400,
+        "n_boot_dropped": 0,
+        "excludes_zero": false
       },
       "floor_age_sex": {
-        "delta": -0.0328,
-        "lo": -0.0518,
-        "hi": -0.012,
-        "half_width": 0.0199,
+        "delta": -0.0398,
+        "lo": -0.0545,
+        "hi": -0.0233,
+        "half_width": 0.0156,
         "n_boot": 400,
+        "n_boot_requested": 400,
+        "n_boot_dropped": 0,
         "excludes_zero": true
       }
     }
@@ -151,8 +164,8 @@
   "importance": {
     "top5": [
       "age",
-      "log_uacr",
       "smoke_current",
+      "log_uacr",
       "male",
       "bp_treated"
     ],
@@ -161,7 +174,7 @@
       "bp_treated"
     ],
     "n_top5_not_admissible": 2,
-    "largest_null_half_width": null
+    "largest_null_half_width": 0.0258
   },
   "creatinine": {
     "corrected_cycles": [

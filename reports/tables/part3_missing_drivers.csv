@@ -1,0 +1,12 @@
+variable,n_missing,pct_missing,n_uniquely_lost
+systolic_bp,905,4.36,685
+bmi,348,1.68,215
+bp_treated,68,0.33,53
+diabetes_dx,12,0.06,10
+total_cholesterol,1142,5.51,1
+age,0,0.0,0
+male,0,0.0,0
+race_black,0,0.0,0
+hdl_cholesterol,1142,5.51,0
+smoke_current,20,0.1,0
+smoke_former,20,0.1,0

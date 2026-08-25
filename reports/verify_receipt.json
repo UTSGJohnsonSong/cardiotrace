@@ -1,0 +1,27 @@
+{
+  "full": {
+    "commit": "1a1dfae4602f93c1b45e888a1b69ec10a35dc680",
+    "branch": "analysis-refresh",
+    "ran_at": "2026-08-25T06:16:48+00:00",
+    "stages": [
+      "cohort",
+      "descriptive",
+      "learning",
+      "benchmark",
+      "models",
+      "render"
+    ],
+    "result": "clean",
+    "covers": "every tracked artefact including Part 4"
+  },
+  "render": {
+    "commit": "9bf454af1ee9d8381921e7d7edae4e713ac84155",
+    "branch": "analysis-refresh",
+    "ran_at": "2026-08-25T06:11:59+00:00",
+    "stages": [
+      "render"
+    ],
+    "result": "clean",
+    "covers": "the report, the site and the README, and nothing else"
+  }
+}

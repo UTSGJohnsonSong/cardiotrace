@@ -1,44 +1,67 @@
 {
   "part1": {
-    "n_adults": 58454,
+    "n_adults": 62877,
     "n_cycles": 11,
     "age_floor": 20,
-    "crude_first": 0.08096667620547218,
-    "crude_last_pre": 0.09536875154046827,
-    "std_first": 0.08833994237873001,
-    "std_last_pre": 0.08346350149346132,
-    "crude_last": 0.09609307987158705,
-    "std_last": 0.08210483747715198,
+    "weight": "wtint2yr",
+    "weight_sensitivity": "wtmec2yr",
+    "max_loss_pct": 0.0539568345323741,
+    "max_loss_cycle": "2011-2012",
+    "exam_weight_loss_post_pct": 22.346011012933793,
+    "exam_weight_loss_other_min_pct": 2.5731746542296556,
+    "exam_weight_loss_other_max_pct": 8.934426229508198,
+    "n_adults_exam_weight": 58454,
+    "crude_first": 0.0802078674642744,
+    "crude_last_pre": 0.09568809616935225,
+    "std_first": 0.08692008202313004,
+    "std_last_pre": 0.08407303248577151,
+    "crude_last": 0.09403574715200153,
+    "std_last": 0.08033408928443259,
     "last_cycle": "2021-2022",
     "pre_last_cycle": "2017-2018",
-    "mean_age_first": 44.99385395801411,
-    "mean_age_last": 48.79903802373179,
-    "std_slope_per_decade": -0.006118570290430472,
+    "mean_age_first": 45.04142934925414,
+    "mean_age_last": 48.75277852945473,
+    "std_slope_per_decade": -0.00591130612310734,
     "std_slope_ci": [
-      -0.011631056884176452,
-      -0.0006060836966844908
+      -0.012177077794283096,
+      0.0003544655480684153
     ],
-    "crude_slope_per_decade": 0.00448410947920121,
-    "dispersion": 0.8491567605367174
+    "std_slope_ci_normal": [
+      -0.011236930777469536,
+      -0.0005856814687451445
+    ],
+    "slope_dof": 8,
+    "slope_t_crit": 2.306004135204166,
+    "std_slope_excludes_zero": false,
+    "std_slope_excludes_zero_normal": true,
+    "crude_slope_per_decade": 0.004260384830798809,
+    "dispersion": 0.8594336417639932
   },
   "part2": {
     "post_cycle": "2021-2022",
-    "observed": 0.08210483747715198,
-    "observed_se": 0.0042832228676787255,
-    "counterfactual": 0.07635374772991188,
-    "counterfactual_se": 0.0035019405501797185,
-    "gap": 0.005751089747240104,
-    "gap_se": 0.005532593040446676,
+    "observed": 0.08033408928443259,
+    "observed_se": 0.0037689953018645384,
+    "counterfactual": 0.07583590718088118,
+    "counterfactual_se": 0.0036470204386961935,
+    "gap": 0.004498182103551407,
+    "gap_se": 0.005244624263543075,
     "gap_ci": [
-      -0.005092792612035381,
-      0.016594972106515588
+      -0.007595943135771027,
+      0.01659230734287384
+    ],
+    "gap_ci_normal": [
+      -0.005781281452993021,
+      0.014777645660095835
     ],
     "gap_ci_unfloored": [
-      -0.004760013352150776,
-      0.016262192846630982
+      -0.007177680576729847,
+      0.01617404478383266
     ],
-    "z": 1.039492640285682,
-    "extrapolation_years": 4.0,
+    "gap_dof": 8,
+    "gap_t_crit": 2.306004135204166,
+    "extrapolation_from_cycle": "2017-2018",
+    "z": 0.8576748071009763,
+    "extrapolation_years": 5.099999999999909,
     "n_post_cycles": 1,
     "slope_change_identified": false
   }

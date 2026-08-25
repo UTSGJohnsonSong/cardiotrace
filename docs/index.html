@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CardioTrace &mdash; Population Cardiovascular Research | Zekun Song</title>
-<meta name="description" content="Survey-weighted analysis of cardiovascular disease in 58,454 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
+<meta name="description" content="Survey-weighted analysis of cardiovascular disease in 62,877 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/">
@@ -12,20 +12,20 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
 <meta property="og:title" content="CardioTrace &mdash; Population Cardiovascular Research | Zekun Song">
-<meta property="og:description" content="Survey-weighted analysis of cardiovascular disease in 58,454 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
+<meta property="og:description" content="Survey-weighted analysis of cardiovascular disease in 62,877 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
 <meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
+<meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="CardioTrace &mdash; Population Cardiovascular Research | Zekun Song">
-<meta name="twitter:description" content="Survey-weighted analysis of cardiovascular disease in 58,454 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
+<meta name="twitter:description" content="Survey-weighted analysis of cardiovascular disease in 62,877 US adults across 11 NHANES cycles, with a linked-mortality cohort of 20,736. Designed and built end to end by Zekun Song.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
-<meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2022: the crude series rises while the age-standardised series falls.">
+<meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <style>
 :root {
   color-scheme: light;
@@ -96,7 +96,7 @@ body {
 /* ── masthead ─────────────────────────────────────────────────────── */
 .masthead { padding: 76px 0 34px; border-bottom: 2px solid var(--ink); }
 .eyebrow {
-  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
   margin: 0 0 20px;
 }
@@ -111,7 +111,7 @@ h1 {
 .standfirst { font-size: 18px; line-height: 1.55; color: var(--ink-2); margin: 0; }
 .masthead-meta {
   display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 30px;
-  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-3);
 }
 .masthead-meta b { color: var(--ink-2); font-weight: 600; }
 
@@ -119,7 +119,7 @@ h1 {
 section { padding-top: 62px; }
 .sec-head { display: flex; gap: 20px; align-items: baseline; margin-bottom: 8px; }
 .sec-num {
-  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
   letter-spacing: 0.1em; color: var(--ink-3); padding-top: 8px;
   min-width: 74px; flex-shrink: 0;
 }
@@ -128,7 +128,7 @@ h2 {
   font-weight: 700; letter-spacing: -0.012em; text-wrap: balance;
 }
 h3 {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  font-family: var(--sans); font-size: 13.5px; font-weight: 700;
   letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2);
   margin: 44px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-soft);
 }
@@ -139,7 +139,7 @@ p { margin: 0 0 18px; }
 /* ── method chips ─────────────────────────────────────────────────── */
 .chip {
   display: inline-flex; align-items: center; gap: 7px;
-  font-family: var(--sans); font-size: 10.5px; font-weight: 700;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 5px 11px; border: 1px solid var(--rule); border-radius: 2px;
   background: var(--chip-bg); color: var(--ink-2); white-space: nowrap;
@@ -164,12 +164,12 @@ p { margin: 0 0 18px; }
 .decision .d-choice { font-size: 16px; line-height: 1.45; }
 .decision .d-choice b { font-weight: 700; }
 .decision .col-label {
-  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
   letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-3);
   display: block; margin-bottom: 6px;
 }
 .decision .d-buys, .decision .d-costs {
-  font-family: var(--sans); font-size: 13.5px; line-height: 1.52; color: var(--ink-2);
+  font-family: var(--sans); font-size: 14.5px; line-height: 1.52; color: var(--ink-2);
 }
 .decision .d-costs { color: var(--ink-2); }
 .decision .d-costs .col-label { color: var(--flag-text); }
@@ -187,7 +187,7 @@ figure {
 }
 figure img { display: block; width: 100%; height: auto; }
 figcaption {
-  font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.55;
   color: #6b6a65; margin-top: 16px; padding-top: 14px;
   border-top: 1px solid #e1e0d9;
 }
@@ -201,7 +201,7 @@ figcaption b { color: #34332f; font-weight: 600; }
 }
 .stat { background: var(--plate); padding: 16px 18px; }
 .stat .k {
-  font-family: var(--sans); font-size: 10.5px; font-weight: 600;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
   letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3);
   margin-bottom: 7px;
 }
@@ -210,29 +210,40 @@ figcaption b { color: #34332f; font-weight: 600; }
   font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ink);
   line-height: 1.12;
 }
-.stat .n { font-family: var(--sans); font-size: 11.5px; color: var(--ink-3); margin-top: 5px; }
+.stat .n { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin-top: 5px; }
 
 /* ── tables ───────────────────────────────────────────────────────── */
 .twrap { overflow-x: auto; margin: 26px 0; }
 table {
   width: 100%; border-collapse: collapse;
-  font-family: var(--sans); font-size: 13.5px;
+  font-family: var(--sans); font-size: 14.5px;
   font-variant-numeric: tabular-nums;
 }
 caption {
-  text-align: left; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  text-align: left; font-family: var(--sans); font-size: 13px; font-weight: 600;
   letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3);
   padding-bottom: 10px;
 }
 th, td { padding: 9px 14px 9px 0; text-align: right; border-bottom: 1px solid var(--rule-soft); }
 th:first-child, td:first-child { text-align: left; }
 thead th {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em;
   text-transform: uppercase; color: var(--ink-3);
   border-bottom: 1px solid var(--rule);
 }
 tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
 td.em { font-weight: 700; color: var(--ink); }
+/* Second line of a header cell: which variant of the statistic this column is.
+   Lower case against the uppercase header, because it is a qualifier and not a
+   second heading. */
+thead th .thsub {
+  display: block; margin-top: 2px;
+  font-weight: 400; letter-spacing: 0.02em; text-transform: none;
+  /* No opacity here. At 11px this is normal-size text under WCAG, so it needs
+     4.5:1, and opacity 0.85 over the page ground measured 3.71:1 -- a fail that
+     looked like a design choice. The token on its own clears it. */
+  color: var(--ink-3);
+}
 
 /* ── callouts & inline ────────────────────────────────────────────── */
 .note {
@@ -251,7 +262,7 @@ li { margin-bottom: 10px; }
 hr { border: 0; border-top: 1px solid var(--rule-soft); margin: 58px 0 0; }
 footer {
   margin-top: 58px; padding-top: 26px; border-top: 2px solid var(--ink);
-  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-3);
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
@@ -273,7 +284,7 @@ footer {
      block, so on a scrolled page the focused link lands at document top and is
      never seen. */
   position: fixed; left: 8px; top: -64px; z-index: 40;
-  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
   background: var(--ink); color: var(--paper);
   padding: 10px 16px; border-radius: 2px; text-decoration: none;
   transition: top 120ms ease;
@@ -309,12 +320,12 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   min-height: 54px;
 }
 .sitenav .brand {
-  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
   text-decoration: none; margin-right: auto;
 }
 .sitenav a {
-  font-family: var(--sans); font-size: 13px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 14px; color: var(--ink-3);
   text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent;
 }
 .sitenav a:hover { color: var(--ink-2); }
@@ -333,7 +344,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   .sitenav-inner > * { flex: 0 0 auto; scroll-snap-align: start; }
   /* margin-right:auto strands every link off-screen inside a scroller. */
   .sitenav .brand { margin-right: 6px; }
-  .sitenav a { font-size: 12.5px; padding: 3px 0; }
+  .sitenav a { font-size: 13.5px; padding: 3px 0; }
   .masthead { padding: 40px 0 26px; }     /* the bar already costs 46px */
   h1, h2, h3, [id] { scroll-margin-top: 62px; }
 }
@@ -342,13 +353,13 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .colophon { padding-top: 34px; }
 .colophon h2 { font-size: clamp(21px, 2.4vw, 26px); }
 .colophon-affil {
-  font-family: var(--sans); font-size: 13.5px; color: var(--ink-2); margin: 0;
+  font-family: var(--sans); font-size: 14.5px; color: var(--ink-2); margin: 0;
 }
 .colophon-stmt { font-size: 17px; line-height: 1.55; color: var(--ink-2);
                  margin: 14px 0 0; }
 .colophon-links {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 22px;
-  margin-top: 18px; font-family: var(--sans); font-size: 13.5px;
+  margin-top: 18px; font-family: var(--sans); font-size: 14.5px;
 }
 .colophon-links a {
   font-weight: 600; text-decoration: none; color: var(--series-text);
@@ -356,6 +367,53 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 }
 .colophon-links a:hover { border-bottom-color: var(--series-text); }
 .colophon-links a.lead::after { content: " \2192"; }
+
+/* --- front-page hero ------------------------------------------------------ */
+/* The contact row sits in the first screen rather than at the foot: a reader
+   who is convinced at the top should not have to scroll a 50,000-character
+   report to act on it. */
+.hero { padding-bottom: 12px; }
+.cta {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 20px;
+  margin: 22px 0 4px; font-family: var(--sans); font-size: 15px;
+}
+.cta a {
+  font-weight: 600; text-decoration: none; color: var(--series-text);
+  border-bottom: 1px solid var(--rule); padding-bottom: 3px;
+}
+.cta a:hover { border-bottom-color: var(--series-text); }
+.cta a.lead {
+  border: 1px solid var(--series-text); border-radius: 3px; padding: 7px 14px;
+  border-bottom-width: 1px;
+}
+.cta a.lead:hover { background: var(--series-text); color: var(--paper); }
+.stats.hero-strip {
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  margin: 30px 0 0;
+}
+/* The thirty-second path, separated from the contact row by a rule so the two
+   do not read as one undifferentiated list of links. */
+.quickpath {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px;
+  margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--rule-soft);
+  font-family: var(--sans); font-size: 14.5px; color: var(--ink-3);
+}
+.quickpath span {
+  font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: 13.5px;
+}
+.quickpath a {
+  color: var(--ink-2); text-decoration: none;
+  border-bottom: 1px solid var(--rule); padding-bottom: 2px;
+}
+.quickpath a:hover { border-bottom-color: var(--ink-2); }
+@media (max-width: 640px) {
+  .cta { font-size: 14.5px; gap: 12px 16px; }
+  /* 11px of vertical padding, not 8: the boxed links are the two the page most
+     wants tapped, and at 8px they measured 41px tall against the 44px minimum
+     target size. Measured, not assumed -- 41px is a thumb missing a link. */
+  .cta a.lead { padding: 11px 14px; }
+}
 
 /* --- evidence strip ------------------------------------------------------ */
 .evidence { padding-top: 46px; }
@@ -371,12 +429,12 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   font-family: var(--sans);
 }
 .toc-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.11em;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.11em;
   text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px;
 }
 .toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 34px; }
 @media (max-width: 700px) { .toc ol { columns: 1; } }
-.toc li { margin: 0 0 8px; break-inside: avoid; font-size: 13.5px; line-height: 1.4; }
+.toc li { margin: 0 0 8px; break-inside: avoid; font-size: 14.5px; line-height: 1.4; }
 .toc li.toc-h3 { padding-left: 16px; }
 .toc a { color: var(--ink-2); text-decoration: none;
          border-bottom: 1px solid transparent; }
@@ -394,7 +452,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   .toplink {
     position: fixed; right: 20px; bottom: 20px; z-index: 20;
     display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--sans); font-size: 11.5px; font-weight: 700;
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
     letter-spacing: 0.09em; text-transform: uppercase;
     color: var(--ink-2); background: var(--plate);
     border: 1px solid var(--rule); border-radius: 2px;
@@ -427,20 +485,20 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   line-height: 1.05; color: var(--ink);
 }
 .finding .fnum span {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
+  font-family: var(--sans); font-size: 13.5px; font-weight: 600;
   letter-spacing: 0.02em; color: var(--ink-2);
 }
 .finding h3 { font-family: var(--serif); font-size: 19px; font-weight: 700;
               text-transform: none; letter-spacing: 0; color: var(--ink);
               margin: 8px 0 0; padding: 0; border: 0; }
 .finding .fci {
-  font-family: var(--sans); font-size: 12px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13px; color: var(--ink-3);
   font-variant-numeric: tabular-nums; margin: 2px 0 0;
 }
 .finding .what { margin: 10px 0 0; color: var(--ink-2); font-size: 16px;
                  line-height: 1.5; max-width: 60ch; }
 .finding .go { margin: 6px 0 0; font-family: var(--sans);
-               font-size: 13px; font-weight: 600; }
+               font-size: 14px; font-weight: 600; }
 @media (max-width: 640px) {
   .finding { grid-template-columns: 1fr; }
   /* fnum has to give up its pinned row here, or the chip auto-places after it
@@ -463,7 +521,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .pagefoot {
   margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule);
   display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
-  font-family: var(--sans); font-size: 13px;
+  font-family: var(--sans); font-size: 14px;
 }
 .pagefoot a { font-weight: 600; }
 .pagefoot .byline { color: var(--ink-2); font-weight: 600; }
@@ -472,42 +530,26 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Learning</a><a href="methods.html">Methods</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead">
-  <p class="eyebrow">CardioTrace · NHANES 1999–2022 · NCHS Linked Mortality File</p>
-  <h1>Cardiovascular Disease in the United States, 1999–2022</h1>
-  <p class="subtitle">Three estimands, three designs &mdash; and a fourth section asking what limits the third: a standardised prevalence series,
-  a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
-  <p class="standfirst measure">One national survey can answer more than one question, but not
-  with one method. This report states each question as a quantity to be estimated, sets out the
-  design that identifies it, and prices the choices that design requires.</p>
-  <div class="masthead-meta">
-    <span><b>Prepared</b> 2026-08-21</span>
-    <span><b>Survey cycles</b> 11, 1999-2000 to 2021-2022</span>
-    <span><b>Descriptive sample</b> 58,454 adults 20+</span>
-    <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
-    <span><b>Mortality follow-up through</b> 2019-12-31</span>
-  </div>
+<header class="masthead hero">
+  <p class="eyebrow">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</p>
+  <h1>CardioTrace</h1>
+  <p class="standfirst measure">An end-to-end population health research
+  pipeline over 11 NHANES cycles and linked mortality records
+  &mdash; complex-survey inference, competing-risk survival modelling,
+  validation forward in time, and a report that regenerates from the data.</p>
+  <nav class="cta" aria-label="Contact and source"><a href="assets/Zekun_Song_Resume.pdf" class="lead">R&eacute;sum&eacute;</a><a href="mailto:zekun.song@mail.utoronto.ca" class="lead">Email</a><a href="https://www.linkedin.com/in/zekun-song/">LinkedIn</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="cardiotrace-report.html">Read the research</a></nav>
+  <div class="stats hero-strip"><div class="stat"><div class="k">11 survey cycles</div><div class="v">1999&ndash;2023</div><div class="n">harmonised from the published files</div></div><div class="stat"><div class="k">62,877 adults</div><div class="v">survey-weighted</div><div class="n">design-based intervals throughout</div></div><div class="stat"><div class="k">20,736-person cohort</div><div class="v">925 CVD deaths</div><div class="n">linked to the National Death Index</div></div><div class="stat"><div class="k">Discrimination</div><div class="v">C&nbsp;=&nbsp;0.838</div><div class="n">at 10 years, on cycles held out in time</div></div></div>
+  <nav class="quickpath" aria-label="Thirty-second path through this site">
+    <span>30&nbsp;seconds:</span><a href="#built">What I built</a><a href="#findings">Three findings</a><a href="methods.html">Methods &amp; engineering</a><a href="#limits">What it cannot show</a><a href="#colophon-h">Contact</a></nav>
 </header>
 
-<section class="colophon" aria-labelledby="colophon-h">
-  <div class="sec-head"><div class="sec-num">AUTHOR</div>
-  <h2 id="colophon-h">Zekun Song</h2></div>
-  <div class="body-indent">
-    <p class="colophon-affil">Computer Science &amp; Data Science, University of Toronto</p>
-    <p class="colophon-stmt measure">I designed and built CardioTrace end to end &mdash; from reproducible CDC data acquisition to survey-weighted inference and prospective risk modelling.</p>
-    <nav class="colophon-links" aria-label="Author and project links">
-      <a href="#findings" class="lead">Explore findings</a><a href="methods.html" class="lead">View methodology</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a>
-    </nav>
-  </div>
-</section>
-
-<section class="evidence" aria-labelledby="evidence-h">
+<section class="evidence" id="built" aria-labelledby="evidence-h">
   <div class="sec-head"><div class="sec-num">BUILT</div>
   <h2 id="evidence-h">What it took to answer them</h2></div>
   <div class="body-indent">
-    <div class="stats evidence-strip"><div class="stat"><div class="k">Survey cycles</div><div class="v">11</div><div class="n">NHANES 1999&ndash;2022, harmonised</div></div><div class="stat"><div class="k">Public-use files catalogued</div><div class="v">1,821</div><div class="n">each recorded with the rule that kept or dropped it</div></div><div class="stat"><div class="k">Adults 20+ analysed</div><div class="v">58,454</div><div class="n">survey-weighted, design-based intervals</div></div><div class="stat"><div class="k">Automated tests</div><div class="v">128</div><div class="n">the whole suite, green, on synthetic fixtures</div></div><div class="stat"><div class="k">Mortality follow-up</div><div class="v">20 yr</div><div class="n">record linkage to the National Death Index</div></div></div>
+    <div class="stats evidence-strip"><div class="stat"><div class="k">Survey cycles</div><div class="v">11</div><div class="n">NHANES 1999&ndash;2022, harmonised</div></div><div class="stat"><div class="k">Public-use files catalogued</div><div class="v">1,821</div><div class="n">each recorded with the rule that kept or dropped it</div></div><div class="stat"><div class="k">Adults 20+ analysed</div><div class="v">62,877</div><div class="n">survey-weighted, design-based intervals</div></div><div class="stat"><div class="k">Automated tests</div><div class="v">198</div><div class="n">the whole suite, green, on synthetic fixtures</div></div><div class="stat"><div class="k">Mortality follow-up</div><div class="v">20 yr</div><div class="n">record linkage to the National Death Index</div></div></div>
   </div>
 </section>
 
@@ -515,10 +557,18 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   <div class="sec-head"><div class="sec-num">THE&nbsp;PARTS</div>
   <h2>What each part asks, and what it found</h2></div>
   <div class="body-indent">
-    <div class="findings"><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>&minus;0.61&nbsp;pp</b> <span>per decade, age-standardised</span></p><h3>The burden across 11 cycles</h3><p class="fci">95% CI &minus;1.16 to &minus;0.06 pp</p><p class="what">Crude prevalence rose while the age-standardised series fell. The rise is the population ageing, not the disease spreading.</p><p class="go"><a href="burden.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip quiet">No detectable change</span><p class="fnum"><b>+0.58&nbsp;pp</b> <span>2021-2022 against the extrapolated trend</span></p><h3>The pandemic</h3><p class="fci">95% CI &minus;0.51 to +1.66 pp &mdash; contains zero</p><p class="what">The observed level sits above the pre-pandemic trend, but the interval contains zero. One post-pandemic cycle cannot settle it.</p><p class="go"><a href="pandemic.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>0.804</b> <span>Harrell C, 10-year risk</span></p><h3>Who dies of it</h3><p class="fci">held-out later cycles, n&nbsp;=&nbsp;5,163</p><p class="what">Blood pressure at examination predicts cardiovascular death up to twenty years later, validated forward in time rather than at random.</p><p class="go"><a href="cohort.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>+0.015</b> <span>Harrell C, from one screened variable</span></p><h3>What limits it</h3><p class="fci">95% CI +0.007 to +0.025 &mdash; gradient boosting on the same eleven: &minus;0.051</p><p class="what">The variable set was the binding constraint, not the model form. And 2 of the five variables the prediction leans on hardest are ones the causal model may not simply adjust for.</p><p class="go"><a href="learning.html">Read this part &rarr;</a></p></article></div>
+    <div class="findings"><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>&minus;0.59&nbsp;pp</b> <span>per decade, age-standardised</span></p><h3>The burden across 11 cycles</h3><p class="fci">95% CI &minus;1.22 to +0.04 pp</p><p class="what">Crude growth was largely explained by the ageing of the population; the age-standardised estimate declined modestly over the same window.</p><p class="go"><a href="burden.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip quiet">No detectable change</span><p class="fnum"><b>+0.45&nbsp;pp</b> <span>Aug 2021&ndash;Aug 2023 against the extrapolated trend</span></p><h3>The pandemic</h3><p class="fci">95% CI &minus;0.76 to +1.66 pp &mdash; contains zero</p><p class="what">The observed level sits above the pre-pandemic trend, but the interval contains zero. One post-pandemic cycle cannot settle it.</p><p class="go"><a href="pandemic.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>0.838</b> <span>Harrell C, 10-year risk</span></p><h3>Prospective cardiovascular mortality</h3><p class="fci">held-out later cycles, n&nbsp;=&nbsp;5,163</p><p class="what">Blood pressure at examination predicts cardiovascular death up to twenty years later, validated forward in time rather than at random.</p><p class="go"><a href="cohort.html">Read this part &rarr;</a></p></article><article class="finding"><span class="chip result">Result</span><p class="fnum"><b>+0.018</b> <span>Harrell C, from one screened variable</span></p><h3>What limits it</h3><p class="fci">95% CI +0.007 to +0.028 &mdash; gradient boosting on the same eleven: &minus;0.054</p><p class="what">The gain is in the variable set, not the model form &mdash; though boosting on the wider set is not separable from the reference. And 2 of the five variables the prediction leans on hardest are ones the causal model may not simply adjust for.</p><p class="go"><a href="learning.html">Read this part &rarr;</a></p></article></div>
     <p class="measure" style="margin-top:26px">The full write-up is also available
     as <a href="cardiotrace-report.html">a single page</a>, which carries every
     section, table and figure in one file.</p>
+  </div>
+</section>
+
+<section class="evidence" id="limits" aria-labelledby="limits-h">
+  <div class="sec-head"><div class="sec-num">LIMITS</div>
+  <h2 id="limits-h">What this design cannot show</h2></div>
+  <div class="body-indent">
+    <div class="stats evidence-strip"><div class="stat"><div class="k">One post-pandemic observation</div><div class="n" style="margin-top:6px">The trend comparison rests on a single cycle, Aug 2021&ndash;Aug 2023, reported on a redesigned sample. It is a contrast against an extrapolation, not a quasi-experiment, and the interval says so.</div></div><div class="stat"><div class="k">Mortality, not incidence</div><div class="n" style="margin-top:6px">The linkage adds a cause of death, not a non-fatal event. Someone who has a heart attack and survives is not an event here.</div></div><div class="stat"><div class="k">Complete-case selection is not repaired</div><div class="n" style="margin-top:6px">The prediction model needs all eleven inputs, which drops 10.6% of the cohort but 14.6% of the deaths. Inverse-probability weights address censoring; they do not fix this.</div></div></div>
   </div>
 </section>
 
@@ -568,9 +618,9 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
           <tr><td>Question</td><td>How has prevalence moved?</td>
               <td>Did 2020 bend the trend?</td>
               <td>Who among the healthy dies of it?</td></tr>
-          <tr><td>Kind</td><td>Descriptive</td><td>Causal (quasi-experimental)</td>
+          <tr><td>Kind</td><td>Descriptive</td><td>Exploratory model contrast</td>
               <td>Predictive + causal</td></tr>
-          <tr><td>Sample</td><td>58,454 adults 20+, 11 cycles</td>
+          <tr><td>Sample</td><td>62,877 adults 20+, 11 cycles</td>
               <td>Same series, one post-pandemic point</td>
               <td>20,736 adults 40–79, CVD-free at baseline</td></tr>
           <tr><td>Outcome</td><td>Self-reported diagnosis</td><td>Self-reported diagnosis</td>
@@ -583,10 +633,22 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     </div>
   </div>
 </section>
+
+<section class="colophon" aria-labelledby="colophon-h">
+  <div class="sec-head"><div class="sec-num">AUTHOR</div>
+  <h2 id="colophon-h">Zekun Song</h2></div>
+  <div class="body-indent">
+    <p class="colophon-affil">Computer Science &amp; Data Science, University of Toronto</p>
+    <p class="colophon-stmt measure">I designed and built CardioTrace end to end &mdash; from reproducible CDC data acquisition to survey-weighted inference and prospective risk modelling.</p>
+    <nav class="colophon-links" aria-label="Author and project links">
+      <a href="#findings" class="lead">Explore findings</a><a href="methods.html" class="lead">View methodology</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="assets/Zekun_Song_Resume.pdf">Resume</a><a href="https://www.linkedin.com/in/zekun-song/">LinkedIn</a>
+    </nav>
+  </div>
+</section>
 <div class="pagefoot">
   <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
   <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
-  <span class="footlinks"><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
+  <span class="footlinks"><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="assets/Zekun_Song_Resume.pdf">Resume</a><a href="https://www.linkedin.com/in/zekun-song/">LinkedIn</a><a href="#top">Back to top &uarr;</a></span>
 </div>
 </main>
 <a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>

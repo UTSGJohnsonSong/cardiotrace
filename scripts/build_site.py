@@ -38,7 +38,7 @@ REPORT = ROOT / "reports" / "cardiotrace-report.html"
 DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 
-from src.descriptive import DESC_CYCLES  # noqa: E402
+from src.descriptive import DESC_CYCLES, display_cycle  # noqa: E402
 
 N_CYCLES = len(DESC_CYCLES)
 
@@ -56,18 +56,23 @@ AUTHOR_STATEMENT = (
 # thing is left off the site entirely and `main()` says so on stdout; nothing is
 # ever rendered as a dead link or a "coming soon" page.
 #
+# The résumé is served from this repository rather than linked off-site, so the
+# page cannot rot when a file-host link expires -- and so that what a reader
+# downloads is a version this commit can be checked against.
+#
 # TABLEAU_VIZ is the workbook path out of a Tableau Public share URL, e.g.
 # "CardioTraceExplorer/Dashboard1". Publishing is a manual step -- it needs a
 # Tableau account -- and docs/tableau-dashboard.md is the recipe. Setting it
 # here adds the Explore page and its nav entry; leaving it empty adds neither.
-RESUME_URL = ""     # e.g. "https://.../zekun-song-resume.pdf"
-LINKEDIN_URL = ""   # e.g. "https://www.linkedin.com/in/<handle>/"
+RESUME_URL = "assets/Zekun_Song_Resume.pdf"
+LINKEDIN_URL = "https://www.linkedin.com/in/zekun-song/"
+EMAIL = "zekun.song@mail.utoronto.ca"
 TABLEAU_VIZ = ""    # e.g. "CardioTraceExplorer/Dashboard1"
 # ────────────────────────────────────────────────────────────────────────────
 
 CARD = "assets/cardiotrace-card.png"
 CARD_ALT = ("Crude and age-standardised cardiovascular disease prevalence in US "
-            "adults, NHANES 1999-2022: the crude series rises while the "
+            "adults, NHANES 1999-2023: the crude series rises while the "
             "age-standardised series falls.")
 
 # An ECG trace in the categorical series blue on the paper ground, so the tab
@@ -93,7 +98,7 @@ PAGES = {
     "4": ("cohort.html", "Cohort",
           "A prospective cohort of adults free of cardiovascular disease at "
           "baseline, followed for up to twenty years."),
-    "5": ("learning.html", "Learning",
+    "5": ("learning.html", "Predictive Modeling",
           "Whether the prediction model is limited by the eleven variables it "
           "carries or by the form it takes, and what a systematic screen of the "
           "laboratory finds."),
@@ -107,7 +112,7 @@ EXPLORE = ("explore.html", "Explore",
 
 NAV = [("index.html", "Overview"), ("burden.html", "Burden"),
        ("pandemic.html", "Pandemic"), ("cohort.html", "Cohort"),
-       ("learning.html", "Learning"), ("methods.html", "Methods")]
+       ("learning.html", "Predictive Modeling"), ("methods.html", "Methods")]
 if TABLEAU_VIZ:
     NAV.append((EXPLORE[0], EXPLORE[1]))
 
@@ -128,7 +133,7 @@ EXTRA_CSS = """
      block, so on a scrolled page the focused link lands at document top and is
      never seen. */
   position: fixed; left: 8px; top: -64px; z-index: 40;
-  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
   background: var(--ink); color: var(--paper);
   padding: 10px 16px; border-radius: 2px; text-decoration: none;
   transition: top 120ms ease;
@@ -164,12 +169,12 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   min-height: 54px;
 }
 .sitenav .brand {
-  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
   text-decoration: none; margin-right: auto;
 }
 .sitenav a {
-  font-family: var(--sans); font-size: 13px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 14px; color: var(--ink-3);
   text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent;
 }
 .sitenav a:hover { color: var(--ink-2); }
@@ -188,7 +193,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   .sitenav-inner > * { flex: 0 0 auto; scroll-snap-align: start; }
   /* margin-right:auto strands every link off-screen inside a scroller. */
   .sitenav .brand { margin-right: 6px; }
-  .sitenav a { font-size: 12.5px; padding: 3px 0; }
+  .sitenav a { font-size: 13.5px; padding: 3px 0; }
   .masthead { padding: 40px 0 26px; }     /* the bar already costs 46px */
   h1, h2, h3, [id] { scroll-margin-top: 62px; }
 }
@@ -197,13 +202,13 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .colophon { padding-top: 34px; }
 .colophon h2 { font-size: clamp(21px, 2.4vw, 26px); }
 .colophon-affil {
-  font-family: var(--sans); font-size: 13.5px; color: var(--ink-2); margin: 0;
+  font-family: var(--sans); font-size: 14.5px; color: var(--ink-2); margin: 0;
 }
 .colophon-stmt { font-size: 17px; line-height: 1.55; color: var(--ink-2);
                  margin: 14px 0 0; }
 .colophon-links {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 22px;
-  margin-top: 18px; font-family: var(--sans); font-size: 13.5px;
+  margin-top: 18px; font-family: var(--sans); font-size: 14.5px;
 }
 .colophon-links a {
   font-weight: 600; text-decoration: none; color: var(--series-text);
@@ -211,6 +216,53 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 }
 .colophon-links a:hover { border-bottom-color: var(--series-text); }
 .colophon-links a.lead::after { content: " \\2192"; }
+
+/* --- front-page hero ------------------------------------------------------ */
+/* The contact row sits in the first screen rather than at the foot: a reader
+   who is convinced at the top should not have to scroll a 50,000-character
+   report to act on it. */
+.hero { padding-bottom: 12px; }
+.cta {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 20px;
+  margin: 22px 0 4px; font-family: var(--sans); font-size: 15px;
+}
+.cta a {
+  font-weight: 600; text-decoration: none; color: var(--series-text);
+  border-bottom: 1px solid var(--rule); padding-bottom: 3px;
+}
+.cta a:hover { border-bottom-color: var(--series-text); }
+.cta a.lead {
+  border: 1px solid var(--series-text); border-radius: 3px; padding: 7px 14px;
+  border-bottom-width: 1px;
+}
+.cta a.lead:hover { background: var(--series-text); color: var(--paper); }
+.stats.hero-strip {
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  margin: 30px 0 0;
+}
+/* The thirty-second path, separated from the contact row by a rule so the two
+   do not read as one undifferentiated list of links. */
+.quickpath {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px;
+  margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--rule-soft);
+  font-family: var(--sans); font-size: 14.5px; color: var(--ink-3);
+}
+.quickpath span {
+  font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: 13.5px;
+}
+.quickpath a {
+  color: var(--ink-2); text-decoration: none;
+  border-bottom: 1px solid var(--rule); padding-bottom: 2px;
+}
+.quickpath a:hover { border-bottom-color: var(--ink-2); }
+@media (max-width: 640px) {
+  .cta { font-size: 14.5px; gap: 12px 16px; }
+  /* 11px of vertical padding, not 8: the boxed links are the two the page most
+     wants tapped, and at 8px they measured 41px tall against the 44px minimum
+     target size. Measured, not assumed -- 41px is a thumb missing a link. */
+  .cta a.lead { padding: 11px 14px; }
+}
 
 /* --- evidence strip ------------------------------------------------------ */
 .evidence { padding-top: 46px; }
@@ -226,12 +278,12 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   font-family: var(--sans);
 }
 .toc-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.11em;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.11em;
   text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px;
 }
 .toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 34px; }
 @media (max-width: 700px) { .toc ol { columns: 1; } }
-.toc li { margin: 0 0 8px; break-inside: avoid; font-size: 13.5px; line-height: 1.4; }
+.toc li { margin: 0 0 8px; break-inside: avoid; font-size: 14.5px; line-height: 1.4; }
 .toc li.toc-h3 { padding-left: 16px; }
 .toc a { color: var(--ink-2); text-decoration: none;
          border-bottom: 1px solid transparent; }
@@ -249,7 +301,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   .toplink {
     position: fixed; right: 20px; bottom: 20px; z-index: 20;
     display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--sans); font-size: 11.5px; font-weight: 700;
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
     letter-spacing: 0.09em; text-transform: uppercase;
     color: var(--ink-2); background: var(--plate);
     border: 1px solid var(--rule); border-radius: 2px;
@@ -282,20 +334,20 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   line-height: 1.05; color: var(--ink);
 }
 .finding .fnum span {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
+  font-family: var(--sans); font-size: 13.5px; font-weight: 600;
   letter-spacing: 0.02em; color: var(--ink-2);
 }
 .finding h3 { font-family: var(--serif); font-size: 19px; font-weight: 700;
               text-transform: none; letter-spacing: 0; color: var(--ink);
               margin: 8px 0 0; padding: 0; border: 0; }
 .finding .fci {
-  font-family: var(--sans); font-size: 12px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13px; color: var(--ink-3);
   font-variant-numeric: tabular-nums; margin: 2px 0 0;
 }
 .finding .what { margin: 10px 0 0; color: var(--ink-2); font-size: 16px;
                  line-height: 1.5; max-width: 60ch; }
 .finding .go { margin: 6px 0 0; font-family: var(--sans);
-               font-size: 13px; font-weight: 600; }
+               font-size: 14px; font-weight: 600; }
 @media (max-width: 640px) {
   .finding { grid-template-columns: 1fr; }
   /* fnum has to give up its pinned row here, or the chip auto-places after it
@@ -318,7 +370,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .pagefoot {
   margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule);
   display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
-  font-family: var(--sans); font-size: 13px;
+  font-family: var(--sans); font-size: 14px;
 }
 .pagefoot a { font-weight: 600; }
 .pagefoot .byline { color: var(--ink-2); font-weight: 600; }
@@ -378,7 +430,10 @@ def facts() -> dict:
         "std_slope_ci": p1["std_slope_ci"],
         "gap":          p2["gap"],
         "gap_ci":       p2["gap_ci"],
-        "post_cycle":   p2["post_cycle"],
+        # display_cycle here, not at each of the four use sites: the last one
+        # to be added would have been the one that forgot.
+        "post_cycle":   display_cycle(p2["post_cycle"]),
+        "post_cycle_key": p2["post_cycle"],
         "harrell_c":    tenyr["harrell_c"],
         "c_horizon":    int(tenyr["horizon_years"]),
         "c_n":          tenyr["n"],
@@ -569,18 +624,24 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
             f"cardiovascular disease at baseline, {num(f['cvd_deaths'])} "
             f"cardiovascular deaths, competing risks modelled; Harrell C "
             f"{f['harrell_c']:.3f} at {f['c_horizon']} years on held-out cycles."),
-        "learning.html": (
-            f"Learning &mdash; CardioTrace | {AUTHOR}",
-            f"Is the {f['harrell_c']:.3f} concordance limited by the variable set "
-            f"or the model form? A screen of {f['n_candidates']} laboratory "
-            f"candidates against the eleven, and gradient boosting against a "
-            f"cause-specific Cox pair on the same held-out cycles."),
         "methods.html": (
             f"Methods &mdash; CardioTrace | {AUTHOR}",
             f"Sources, estimation and reproducibility: {num(f['n_files'])} NHANES "
             f"public-use files catalogued before anything was downloaded, "
             f"design-based variance, and the benchmark against the ASCVD Pooled "
             f"Cohort Equations."),
+        # Guarded like every other consumer of `facts()`. Without this the
+        # build dies here with a bare KeyError, hundreds of lines before the
+        # loop that explains which artefact is missing and how to make it.
+        "learning.html": (
+            f"Predictive Modeling &mdash; CardioTrace | {AUTHOR}",
+            (f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
+             f"set or the model form? A screen of {f['n_candidates']} laboratory "
+             f"candidates against the eleven, and gradient boosting against a "
+             f"cause-specific Cox pair on the same held-out cycles."
+             if "n_candidates" in f else
+             f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
+             f"set or by the model form?")),
         "explore.html": (
             f"Explore &mdash; CardioTrace | {AUTHOR}",
             f"Every published estimate, pivotable: six conditions across "
@@ -715,6 +776,68 @@ def page(title: str, description: str, canonical: str, style: str, current: str,
 
 # ── the index ────────────────────────────────────────────────────────────────
 
+
+def build_hero(f: dict) -> str:
+    """The front page's first screen: what was built, how to reach me, four numbers.
+
+    The report's own masthead opens "Three estimands, three designs" -- right for
+    a statistical reader and wrong for the first ten seconds of a recruiter's
+    visit, who needs to know what the thing IS before being told how it is
+    partitioned. The report keeps that opening; the index gets this one.
+
+    The contact row is here rather than at the foot because a reader who is
+    convinced at the top should not have to scroll 50,000 characters to act on
+    it, and because a portfolio with no way to reach its author is a portfolio
+    that converts nothing.
+    """
+    contact = [
+        (RESUME_URL, "R&eacute;sum&eacute;", "lead"),
+        (f"mailto:{EMAIL}", "Email", "lead"),
+        (LINKEDIN_URL, "LinkedIn", ""),
+        (REPO_URL, "GitHub", ""),
+        ("cardiotrace-report.html", "Read the research", ""),
+    ]
+    links = "".join(
+        '<a href="{}"{}>{}</a>'.format(href, f' class="{cls}"' if cls else "", text)
+        for href, text, cls in contact if href)
+
+    tiles = [
+        (f"{f['n_cycles']} survey cycles", "1999&ndash;2023",
+         "harmonised from the published files"),
+        (f"{num(f['n_adults'])} adults", "survey-weighted",
+         "design-based intervals throughout"),
+        (f"{num(f['cohort_n'])}-person cohort",
+         f"{num(f['cvd_deaths'])} CVD deaths",
+         "linked to the National Death Index"),
+        ("Discrimination", f"C&nbsp;=&nbsp;{f['harrell_c']:.3f}",
+         f"at {f['c_horizon']} years, on cycles held out in time"),
+    ]
+    cells = "".join(f'<div class="stat"><div class="k">{k}</div>'
+                    f'<div class="v">{v}</div><div class="n">{n}</div></div>'
+                    for k, v, n in tiles)
+
+    # The thirty-second path. The full report is long on purpose -- it is the
+    # artefact a methods reader wants -- so the index has to offer a way through
+    # it that does not require reading it.
+    steps = [("#built", "What I built"), ("#findings", "Three findings"),
+             ("methods.html", "Methods &amp; engineering"),
+             ("#limits", "What it cannot show"), ("#colophon-h", "Contact")]
+    path = "".join(f'<a href="{h}">{s}</a>' for h, s in steps)
+
+    return f"""<header class="masthead hero">
+  <p class="eyebrow">{AUTHOR} &middot; {AUTHOR_PROGRAM}</p>
+  <h1>CardioTrace</h1>
+  <p class="standfirst measure">An end-to-end population health research
+  pipeline over {f['n_cycles']} NHANES cycles and linked mortality records
+  &mdash; complex-survey inference, competing-risk survival modelling,
+  validation forward in time, and a report that regenerates from the data.</p>
+  <nav class="cta" aria-label="Contact and source">{links}</nav>
+  <div class="stats hero-strip">{cells}</div>
+  <nav class="quickpath" aria-label="Thirty-second path through this site">
+    <span>30&nbsp;seconds:</span>{path}</nav>
+</header>"""
+
+
 def build_colophon() -> str:
     """The author line, in the register a journal uses: name, affiliation and a
     contribution statement, set in the same gutter grid as every section head.
@@ -758,7 +881,7 @@ def build_evidence(f: dict) -> str:
     cells = "".join(f'<div class="stat"><div class="k">{k}</div>'
                     f'<div class="v">{v}</div><div class="n">{n}</div></div>'
                     for k, v, n in tiles)
-    return f"""<section class="evidence" aria-labelledby="evidence-h">
+    return f"""<section class="evidence" id="built" aria-labelledby="evidence-h">
   <div class="sec-head"><div class="sec-num">BUILT</div>
   <h2 id="evidence-h">What it took to answer them</h2></div>
   <div class="body-indent">
@@ -782,8 +905,8 @@ def build_findings(f: dict) -> str:
          f"{signed_html(f['std_slope'])}&nbsp;pp", "per decade, age-standardised",
          f"95% CI {signed_html(f['std_slope_ci'][0])} to "
          f"{signed_html(f['std_slope_ci'][1])} pp",
-         "Crude prevalence rose while the age-standardised series fell. The rise "
-         "is the population ageing, not the disease spreading."),
+         "Crude growth was largely explained by the ageing of the population; "
+         "the age-standardised estimate declined modestly over the same window."),
         ("pandemic.html", "The pandemic", "chip quiet", "No detectable change",
          f"{signed_html(f['gap'])}&nbsp;pp",
          f"{f['post_cycle']} against the extrapolated trend",
@@ -791,7 +914,7 @@ def build_findings(f: dict) -> str:
          f"&mdash; contains zero",
          "The observed level sits above the pre-pandemic trend, but the interval "
          "contains zero. One post-pandemic cycle cannot settle it."),
-        ("cohort.html", "Who dies of it", "chip result", "Result",
+        ("cohort.html", "Prospective cardiovascular mortality", "chip result", "Result",
          f"{f['harrell_c']:.3f}", f"Harrell C, {f['c_horizon']}-year risk",
          f"held-out later cycles, n&nbsp;=&nbsp;{num(f['c_n'])}",
          "Blood pressure at examination predicts cardiovascular death up to twenty "
@@ -805,7 +928,8 @@ def build_findings(f: dict) -> str:
              f"95% CI {f['delta_c_wide_lo']:+.3f} to {f['delta_c_wide_hi']:+.3f}"
              f" &mdash; gradient boosting on the same eleven: "
              f"{f['delta_c_gbm']:+.3f}".replace("-", "&minus;"),
-             "The variable set was the binding constraint, not the model form. "
+             "The gain is in the variable set, not the model form &mdash; though "
+             "boosting on the wider set is not separable from the reference. "
              f"And {f['n_top5_forbidden']} of the five variables the prediction "
              "leans on hardest are ones the causal model may not simply adjust "
              "for."))
@@ -817,7 +941,42 @@ def build_findings(f: dict) -> str:
         for href, name, cls, chip, value, unit, ci, what in cards)
 
 
-def build_index(style: str, masthead: str, sections: dict[str, str],
+
+def build_limits(f: dict) -> str:
+    """What the design cannot answer, on the front page rather than at the end.
+
+    A portfolio that only lists what it found reads as advocacy. The three here
+    are the ones a methods reader would raise first, and each is a property of
+    the data rather than of the effort: one post-pandemic observation, an
+    outcome that is mortality and not incidence, and a complete-case restriction
+    that is disclosed rather than repaired.
+    """
+    items = [
+        ("One post-pandemic observation",
+         f"The trend comparison rests on a single cycle, {f['post_cycle']}, "
+         f"reported on a redesigned sample. It is a contrast against an "
+         f"extrapolation, not a quasi-experiment, and the interval says so."),
+        ("Mortality, not incidence",
+         "The linkage adds a cause of death, not a non-fatal event. Someone who "
+         "has a heart attack and survives is not an event here."),
+        ("Complete-case selection is not repaired",
+         "The prediction model needs all eleven inputs, which drops 10.6% of the "
+         "cohort but 14.6% of the deaths. Inverse-probability weights address "
+         "censoring; they do not fix this."),
+    ]
+    cells = "".join(
+        f'<div class="stat"><div class="k">{k}</div>'
+        f'<div class="n" style="margin-top:6px">{v}</div></div>' for k, v in items)
+    return f"""<section class="evidence" id="limits" aria-labelledby="limits-h">
+  <div class="sec-head"><div class="sec-num">LIMITS</div>
+  <h2 id="limits-h">What this design cannot show</h2></div>
+  <div class="body-indent">
+    <div class="stats evidence-strip">{cells}</div>
+  </div>
+</section>"""
+
+
+def build_index(style: str, sections: dict[str, str],
                 f: dict, meta: dict) -> str:
     """Overview: who made it, what it took, and what each part found."""
     title, desc = meta["index.html"]
@@ -827,9 +986,7 @@ def build_index(style: str, masthead: str, sections: dict[str, str],
         explore = ('<p class="measure" style="margin-top:14px">Every published '
                    f'estimate is also <a href="{EXPLORE[0]}">pivotable</a> &mdash; '
                    'the cells these three pages had no room for.</p>')
-    body = f"""{masthead}
-
-{build_colophon()}
+    body = f"""{build_hero(f)}
 
 {build_evidence(f)}
 
@@ -844,7 +1001,11 @@ def build_index(style: str, masthead: str, sections: dict[str, str],
   </div>
 </section>
 
-{scrollable_tables(anchor_headings(sections["1"], seen))}"""
+{build_limits(f)}
+
+{scrollable_tables(anchor_headings(sections["1"], seen))}
+
+{build_colophon()}"""
     return page(title, desc, "", style, "index.html", body)
 
 
@@ -949,7 +1110,6 @@ def chrome_single_file(html: str, meta: dict) -> str:
 def main() -> None:
     html = read_report()
     style = extract_style(html)
-    masthead = extract_masthead(html)
     sections = split_sections(html)
     f = facts()
     meta = titles_and_descriptions(f)
@@ -960,7 +1120,7 @@ def main() -> None:
 
     written = []
 
-    body = build_index(style, masthead, sections, f, meta)
+    body = build_index(style, sections, f, meta)
     (DOCS / "index.html").write_text(externalise_images(body), encoding="utf-8")
     written.append("index.html")
 

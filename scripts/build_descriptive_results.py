@@ -12,15 +12,21 @@ identified and is not reported. What is reported is the gap between the
 observed 2021-2022 value and the value the pre-pandemic trend predicts for it.
 
 The series also has a hole: NHANES suspended field operations, so there is no
-2019-2020 cycle and the extrapolation reaches 4 years past the last observed
+2019-2020 cycle and the extrapolation reaches 5.1 years past the last observed
 point instead of the usual 2. The prediction interval widens accordingly, but
 the gap is still an extrapolation and is labelled as one.
 
-Residual dispersion is estimated from the pre-pandemic fit rather than assumed
-to be 1. The design-based standard errors describe sampling error only; real
-cycle-to-cycle movement in a national prevalence is larger than that, and
-pretending otherwise produces a counterfactual interval that is too narrow and
-therefore a "significant" COVID effect that is an artefact of the model.
+Residual dispersion is estimated from the pre-pandemic fit AND FLOORED AT 1.
+The reasoning for estimating it is that design-based standard errors describe
+sampling error only, and real cycle-to-cycle movement in a national prevalence
+could be larger; pretending otherwise would give a counterfactual interval too
+narrow and a "significant" COVID effect that is an artefact of the model.
+
+On this series the estimate comes out at 0.86 -- the series moves LESS than
+sampling error alone explains -- so the floor binds and the published interval
+is the design-based one. Both are in the artefact (`gap_ci` against
+`gap_ci_unfloored`) because which one is on the page is not something a reader
+should have to infer.
 """
 
 from __future__ import annotations
@@ -32,11 +38,12 @@ import sys
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.descriptive import (  # noqa: E402
-    build_descriptive, by_cycle, PRE_COVID_CYCLES, cycle_midpoint,
-    AGE_LABELS, AGE_MIN_DESC, STD_2000,
+    CONDITION_LABELS, build_descriptive, by_cycle, PRE_COVID_CYCLES, cycle_midpoint,
+    AGE_LABELS, AGE_MIN_DESC, STD_2000, WEIGHT_EXAM, WEIGHT_INTERVIEW,
 )
 from src.changepoint import bootstrap_test, power_curve, profile_set  # noqa: E402
 
@@ -62,6 +69,12 @@ def wls_trend(x: np.ndarray, y: np.ndarray, se: np.ndarray) -> dict:
     dof = len(x) - 2
     # Dispersion > 1 means the series moves more than sampling error explains.
     phi = float((w * resid ** 2).sum() / dof)
+    # Floored at 1: never let an estimated dispersion below one NARROW the
+    # interval past the design-based one. Ten points cannot establish that a
+    # national series is more stable than its own sampling error, and a phi of
+    # 0.86 -- which is what this series gives -- would shrink the band on the
+    # strength of that claim. The floor binds here; `gap_ci_unfloored` records
+    # what it would have been.
     cov = XtWX_inv * max(phi, 1.0)
     return {"beta": beta, "cov": cov, "cov_unfloored": XtWX_inv * phi,
             "phi": phi, "dof": dof,
@@ -80,7 +93,19 @@ def main() -> None:
     TABLES.mkdir(parents=True, exist_ok=True)
     ladder = []
     df = build_descriptive(ladder=ladder)
-    pd.DataFrame(ladder).to_csv(TABLES / "part1_flow.csv", index=False)
+    flow = pd.DataFrame(ladder)
+    flow.to_csv(TABLES / "part1_flow.csv", index=False)
+
+    # The same ladder under the examination weight. It is not an alternative
+    # analysis -- it is the evidence for why the analysis weight changed. Under
+    # the exam weight the post-pandemic cycle loses 22% of its age-eligible
+    # respondents and every other cycle loses 3-9%, and that gap was reported
+    # for a while as a competing explanation for the pandemic effect. It was an
+    # artefact of asking a self-reported outcome to carry an examination weight.
+    exam_ladder = []
+    build_descriptive(ladder=exam_ladder, weight=WEIGHT_EXAM)
+    exam_flow = pd.DataFrame(exam_ladder)
+    exam_flow.to_csv(TABLES / "part1_flow_examweight.csv", index=False)
 
     # ── Part 1: overall series ────────────────────────────────────────────
     overall = by_cycle(df)
@@ -89,7 +114,7 @@ def main() -> None:
     # Age-group detail, to show what standardisation is correcting for.
     age_rows = []
     for (cycle, year, ag), g in df.groupby(["cycle", "year", "age_group"], observed=True):
-        w, y = g["wtmec2yr"].to_numpy(), g["prev_cvd"].to_numpy()
+        w, y = g["weight"].to_numpy(), g["prev_cvd"].to_numpy()
         age_rows.append({"cycle": cycle, "year": year, "age_group": str(ag),
                          "n": len(g), "p": float((w * y).sum() / w.sum())})
     age_detail = pd.DataFrame(age_rows).sort_values(["year", "age_group"])
@@ -98,7 +123,7 @@ def main() -> None:
     # The sample itself aged, which is the whole reason standardisation matters.
     comp_rows = []
     for (cycle, year), g in df.groupby(["cycle", "year"], observed=True):
-        w = g["wtmec2yr"]
+        w = g["weight"]
         row = {"cycle": cycle, "year": year,
                "mean_age_weighted": float((w * g["age"]).sum() / w.sum())}
         for lab in AGE_LABELS:
@@ -107,6 +132,25 @@ def main() -> None:
         comp_rows.append(row)
     comp = pd.DataFrame(comp_rows).sort_values("year")
     comp.to_csv(TABLES / "part1_age_composition.csv", index=False)
+
+    # ── Part 1: each condition on its own ─────────────────────────────────
+    # These exist because the Tableau extract was still reading
+    # reports/tables/prevalence_has_*.csv, whose only writer is
+    # legacy-invalid/run_pipeline.py. Two wrong things reached the published
+    # extract as a result: those rows carried the deprecated pipeline's crude
+    # pooled-weight prevalence beside this one's (8.0967% against 8.0208% for
+    # the same outcome and cycle, in the same column), and they dated the
+    # redesigned cycle 2021.5 where every other block dates it 2022.6 -- so a
+    # time series plotted 66 rows 1.1 years to the left of everything else.
+    #
+    # Same estimator as the headline series, so they are comparable with it:
+    # age-standardised, interview-weighted, design-based interval.
+    for outcome, label in CONDITION_LABELS.items():
+        cond = by_cycle(df[df[outcome].notna()], outcome=outcome)
+        cond.insert(0, "outcome", label)
+        cond.to_csv(TABLES / f"part1_prevalence_{outcome}.csv", index=False)
+    print(f"condition series -> {len(CONDITION_LABELS)} tables in "
+          f"{TABLES.relative_to(ROOT)}")
 
     # ── Part 1: by race/ethnicity ─────────────────────────────────────────
     race = by_cycle(df[df["race_eth"].isin(RACE_ALL_CYCLES)], group="race_eth")
@@ -117,7 +161,16 @@ def main() -> None:
     fit = wls_trend(pre["year"].to_numpy(), pre["p_std"].to_numpy(),
                     pre["se_std"].to_numpy())
     slope_per_decade = fit["slope"] * 10
+    # Two critical values, because with ten points and a dispersion estimated
+    # from the same ten the normal quantile is not the honest one. The residual
+    # degrees of freedom are n_cycles - 2 = 8, and t(8) = 2.306 against 1.960 --
+    # an 18% wider interval, which is enough to move this particular slope
+    # across zero. Both are reported; the conclusion is stated against the wider
+    # one, because claiming the narrower is claiming a precision ten points do
+    # not carry.
     slope_ci = (1.96 * fit["slope_se"] * 10)
+    t_crit = float(stats.t.ppf(0.975, fit["dof"]))
+    slope_ci_t = (t_crit * fit["slope_se"] * 10)
 
     crude_fit = wls_trend(pre["year"].to_numpy(), pre["p_crude"].to_numpy(),
                           pre["se_crude"].to_numpy())
@@ -143,12 +196,28 @@ def main() -> None:
     # the un-floored pair was previously typed into the prose by hand.
     se_fit_raw = float(np.sqrt(x0v_unfloored))
     se_gap_raw = float(np.sqrt(se_fit_raw ** 2 + se_obs ** 2))
+    # Same argument as the slope: the fitted half of this standard error comes
+    # from ten points and a dispersion estimated from them, so the interval is
+    # built on t(dof) and the normal one is kept for comparison.
+    gap_ci_t = t_crit * se_gap
+    gap_ci_normal = 1.96 * se_gap
 
     results = {
         "part1": {
             "n_adults": int(len(df)),
             "n_cycles": int(df["cycle"].nunique()),
             "age_floor": AGE_MIN_DESC,
+            "weight": WEIGHT_INTERVIEW,
+            "weight_sensitivity": WEIGHT_EXAM,
+            "max_loss_pct": float(flow["lost_pct"].max()),
+            "max_loss_cycle": str(flow.loc[flow["lost_pct"].idxmax(), "cycle"]),
+            "exam_weight_loss_post_pct": float(
+                exam_flow.loc[exam_flow["cycle"] == "2021-2022", "lost_pct"].iloc[0]),
+            "exam_weight_loss_other_min_pct": float(
+                exam_flow.loc[exam_flow["cycle"] != "2021-2022", "lost_pct"].min()),
+            "exam_weight_loss_other_max_pct": float(
+                exam_flow.loc[exam_flow["cycle"] != "2021-2022", "lost_pct"].max()),
+            "n_adults_exam_weight": int(exam_flow["analysed"].sum()),
             "crude_first": float(overall.iloc[0]["p_crude"]),
             "crude_last_pre": float(pre.iloc[-1]["p_crude"]),
             "std_first": float(overall.iloc[0]["p_std"]),
@@ -168,8 +237,16 @@ def main() -> None:
             "mean_age_first": float(comp.iloc[0]["mean_age_weighted"]),
             "mean_age_last": float(comp.iloc[-1]["mean_age_weighted"]),
             "std_slope_per_decade": float(slope_per_decade),
-            "std_slope_ci": [float(slope_per_decade - slope_ci),
-                             float(slope_per_decade + slope_ci)],
+            "std_slope_ci": [float(slope_per_decade - slope_ci_t),
+                             float(slope_per_decade + slope_ci_t)],
+            "std_slope_ci_normal": [float(slope_per_decade - slope_ci),
+                                    float(slope_per_decade + slope_ci)],
+            "slope_dof": int(fit["dof"]),
+            "slope_t_crit": t_crit,
+            "std_slope_excludes_zero": bool(
+                (slope_per_decade - slope_ci_t) * (slope_per_decade + slope_ci_t) > 0),
+            "std_slope_excludes_zero_normal": bool(
+                (slope_per_decade - slope_ci) * (slope_per_decade + slope_ci) > 0),
             "crude_slope_per_decade": float(crude_fit["slope"] * 10),
             "dispersion": float(fit["phi"]),
         },
@@ -181,9 +258,14 @@ def main() -> None:
             "counterfactual_se": float(se_fit),
             "gap": float(gap),
             "gap_se": se_gap,
-            "gap_ci": [float(gap - 1.96 * se_gap), float(gap + 1.96 * se_gap)],
-            "gap_ci_unfloored": [float(gap - 1.96 * se_gap_raw),
-                                 float(gap + 1.96 * se_gap_raw)],
+            "gap_ci": [float(gap - gap_ci_t), float(gap + gap_ci_t)],
+            "gap_ci_normal": [float(gap - gap_ci_normal),
+                              float(gap + gap_ci_normal)],
+            "gap_ci_unfloored": [float(gap - t_crit * se_gap_raw),
+                                 float(gap + t_crit * se_gap_raw)],
+            "gap_dof": int(fit["dof"]),
+            "gap_t_crit": t_crit,
+            "extrapolation_from_cycle": str(pre.iloc[-1]["cycle"]),
             "z": float(z),
             "extrapolation_years": float(x0 - cycle_midpoint(PRE_COVID_CYCLES[-1])),
             "n_post_cycles": 1,

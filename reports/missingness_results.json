@@ -1,0 +1,36 @@
+{
+  "n_cohort": 20736,
+  "n_analysed": 18529,
+  "n_dropped": 2207,
+  "pct_dropped": 10.64,
+  "cvd_deaths_cohort": 925,
+  "cvd_deaths_analysed": 790,
+  "pct_deaths_dropped": 14.59,
+  "top_driver": "systolic_bp",
+  "top_driver_uniquely_lost": 685,
+  "cvd_death_kept": 0.0426,
+  "cvd_death_dropped": 0.0612,
+  "race_black_kept": 0.2042,
+  "race_black_dropped": 0.328,
+  "race_black_diff": 0.1239,
+  "trimming": {
+    "n_floored": 0,
+    "n_capped": 186,
+    "min_propensity": 0.7736,
+    "weight_removed_pct": 0.4133
+  },
+  "sensitivity": {
+    "n": 17890,
+    "hr_survey": 1.1216,
+    "hr_survey_ci": [
+      1.0788,
+      1.1661
+    ],
+    "hr_ipcw": 1.1225,
+    "hr_ipcw_ci": [
+      1.0802,
+      1.1665
+    ],
+    "abs_shift": 0.0009
+  }
+}

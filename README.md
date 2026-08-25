@@ -1,7 +1,7 @@
 # CardioTrace
-### A prospective cohort study of cardiovascular mortality, built from 11 NHANES cycles
+### A prospective cohort study of cardiovascular mortality, built from linked NHANES cycles
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-128%20passing-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-198%20passing-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
 builds a prospective cohort of adults who were free of cardiovascular disease at
@@ -14,13 +14,14 @@ of the 1,821 published NHANES files is recorded with the rule that kept or dropp
 <!-- KEY_FINDINGS_START -->
 ## Key Findings
 
-- **Any-CVD prevalence, survey-weighted:** 8.1% of US adults in 1999-2000 → 9.61% in 2021-2022 (pooled N = 62,890 adults across 11 cycles).
-- **Best model:** Xgboost predicts coronary heart disease at ROC-AUC 0.8585 / PR-AUC 0.209 (5-fold cross-validated, survey design retained).
-- **Top risk drivers (SHAP, Any-CVD model):** age, hypertension_flag, poverty_income_ratio.
-- **Health equity (2021-2022):** Any-CVD prevalence ranges from 10.87% (Other/Multiracial) to 4.74% (Non-Hispanic Asian).
-- **Pre vs post-COVID:** Any-CVD 8.67% → 9.61%; mean HbA1c 5.62 → 5.71%; mean BMI 28.76 → 29.68.
+- **Crude prevalence rose and age-standardised prevalence fell.** Self-reported cardiovascular disease among US adults 20+ went from 8.0% to 9.4% crude, and from 8.7% to 8.0% once age is standardised to the 2000 US population — across 11 NHANES cycles, N = 62,877, interview weights, design-based intervals. **The reversal is the finding**: crude growth is largely the ageing of the population, and the age-standardised series declines modestly.
+- **The standardised trend is -0.59 pp per decade** (95% CI -1.22 to +0.04, t(8)). It contains zero: with ten pre-pandemic points and a dispersion estimated from the same ten, the decline is consistent in direction and not established at 95%. The normal-quantile interval, which the earlier version reported, is -1.12 to -0.06.
+- **No detectable pandemic deviation.** 2021-2022 sits +0.45 pp from the pre-pandemic trend extrapolated 5.1 years past 2017-2018 (95% CI -0.76 to +1.66). This is an exploratory deviation from an extrapolation, not a quasi-experimental estimate: there is one post-pandemic observation, and NCHS reports that cycle on an updated sample design.
+- **Baseline systolic blood pressure predicts later cardiovascular death.** HR 1.122 per 10 mmHg (95% CI 1.078–1.166), survey-design-based on the stratified PSU design via R `survey::svycoxph`, Tobin-adjusted for treatment. Reported as an association with treatment-adjusted baseline pressure, not as a total causal effect.
+- **Prediction, validated forward in time:** Harrell C 0.838 at 10 years on held-out later cycles (n = 5,163), survey-weighted and censored at the horizon; 0.805 unweighted. Competing risks modelled, never censored away.
+- **What limits that model is the variable set, not its form.** A screen of 15 laboratory candidates against the eleven selected 1 (`log_uacr`), worth +0.0176 in C (95% CI +0.0074 to +0.0275). Gradient boosting on the same eleven is worth -0.0542 — worse than a Cox model on age and sex alone.
 
-_Figures in [`reports/figures/`](reports/figures); full numbers in [`reports/results.json`](reports/results.json)._
+_Figures in [`reports/figures/`](reports/figures). Numbers in [`reports/descriptive_results.json`](reports/descriptive_results.json), [`reports/model_results.json`](reports/model_results.json) and [`reports/tables/`](reports/tables). The superseded pipeline and everything it produced are in [`legacy-invalid/`](legacy-invalid), which no build target reaches._
 <!-- KEY_FINDINGS_END -->
 
 ---
@@ -49,10 +50,16 @@ Every non-obvious decision has a written reason in
   cause-of-death groups, so cerebrovascular deaths disappear into "other" and the
   outcome definition would change mid-series. Those cycles contribute only ~4% of
   events anyway, because follow-up is short.
-- **Survey weights, everywhere.** NHANES is a stratified multi-stage probability
-  sample. Population estimates use the pooled MEC exam weight; the variance is robust
-  and clustered on the masked variance units NCHS releases (`SDMVSTRA` × `SDMVPSU`), which
-  stand in for the true strata and PSUs withheld for disclosure control.
+- **Survey weights, everywhere, and the right one each time.** NHANES is a stratified
+  multi-stage probability sample. The rule is to take the weight of the most restrictive
+  component an estimate depends on: the Part 1 prevalence series is built from interview
+  responses, so it carries `WTINT2YR`, and Part 3 and the ascertainment series need a
+  measured blood pressure, so they carry `WTMEC2YR`. Using the exam weight for an
+  interview-only estimate discards the ~9% of respondents who were interviewed but never
+  examined, and NCHS's own guidance is to weight to the smallest component. Variance is
+  robust and clustered on the masked variance units NCHS releases (`SDMVSTRA` ×
+  `SDMVPSU`), which stand in for the true strata and PSUs withheld for disclosure
+  control — masked units, not counties.
 
 ### What went wrong, and how it was caught
 
@@ -72,7 +79,7 @@ downstream turned the gaps into plausible numbers.
 
 The pipeline now enumerates all 1,821 published files before selecting any, records one
 rule per file, resolves column names through a verified per-cycle crosswalk, and fails
-the run on any cycle-wide gap that is not explicitly declared. The 85 tests are
+the run on any cycle-wide gap that is not explicitly declared. The 198 tests are
 regressions for defects that actually shipped.
 
 ---
@@ -123,7 +130,7 @@ python data/build_variable_crosswalk.py     # resolve per-cycle column names
 python -c "from src.cohort import build_cohort; build_cohort()"
 python scripts/make_survival_figures.py     # descriptive curves
 python scripts/fit_survival_models.py       # Cox + absolute risk + calibration
-pytest tests/ -q                            # 85 tests
+pytest tests/ -q                            # 198 tests
 ```
 
 Every download writes a SHA-256 manifest; `--verify` re-hashes against it. CDC revises
@@ -170,15 +177,26 @@ CardioTrace/
 │   ├── pce_variable_cascade.py     # what each PCE alignment filter costs
 │   ├── make_survival_figures.py    # descriptive curves
 │   └── fit_survival_models.py      # fit, validate forward in time, calibrate
-├── tests/                          # 85 regressions for defects that shipped
+├── tests/                          # 198 regressions for defects that shipped
 ├── docs/
-│   ├── research-design.md          # decision log - every choice, with its cost
+│   ├── research-design.md          # the protocol: estimands, node status, decision log
+│   ├── impact-tracking.md          # per defect: did it contaminate a published number?
 │   ├── methodology-review.md       # the audit that started the rework
 │   ├── pce-benchmark.md            # PCE coefficients: provenance and benchmark design
 │   └── advisor-briefing.md         # the narrative version
 ├── dbt/                            # staging + mart, for the descriptive analyses
-└── reports/{figures,tables}        # generated artifacts
+├── reports/{figures,tables}        # generated artifacts
+└── legacy-invalid/                 # the superseded pipeline, kept and never run
 ```
+
+`legacy-invalid/` holds the first version of this project: a cross-sectional XGBoost model
+that regressed self-reported cardiovascular disease on variables measured at the same
+visit, on a sample where a quarter of the laboratory values had been imputed because the
+downloader treated a 404 as an empty module. It is kept rather than deleted, because the
+numbers it produced were published and deleting it would leave no way to answer where they
+came from. No build target reaches it, `make verify` proves a clean rebuild does not touch
+it, and [`legacy-invalid/README.md`](legacy-invalid/README.md) says what replaced each
+file.
 
 ---
 
@@ -213,8 +231,25 @@ Stated because they bound what the numbers mean, not as a disclaimer.
   remain in a cohort described as primary-prevention, biasing effects toward the null.
 - **Follow-up ends 2019-12-31.** The model is trained and validated entirely on
   pre-pandemic data; its transportability after 2020 cannot be tested with public data.
-- **Point estimates only.** Design-based confidence intervals via Taylor linearisation
-  are not yet implemented.
+- **Two design-based estimators, still 1.2% apart.** Intervals are design-based
+  throughout: Taylor linearisation for the prevalence series, `survey::svycoxph` for the
+  exposure model. The Python cluster-robust sandwich run beside it differs by a median of
+  1.2% on the standard errors, because it does not stratify the ultimate clusters. No term
+  changes whether its interval covers the null. See
+  [`docs/crosscheck-survey.md`](docs/crosscheck-survey.md).
+- **Eight cycles pooled on two-year weights.** NCHS releases four-year examination weights for
+  1999–2002 and its guidance is to use them for an analysis spanning those cycles; this one does
+  not. The cost was measured rather than assumed: the four-year weights disagree with the
+  two-year weights sharply per person (20.6% of participants by more than a fifth) but almost
+  cancel in aggregate, moving the blood-pressure hazard ratio from 1.1216 to 1.1233 and no
+  coefficient by more than 0.91%. Reproduce with `python scripts/check_fouryear_weights.py`.
+- **Complete-case selection is not fully resolved.** The prediction model requires all
+  eleven inputs, which drops 10.6% of the cohort (20,736 → 18,529) but 14.6% of the CVD
+  deaths (925 → 790) — the people dropped are not a random sample of the cohort.
+  [`docs/`](docs/) reports an IPCW sensitivity analysis, but IPCW here reweights for
+  CENSORING; it does not repair selection into the complete-case subsample, which remains
+  an open limitation rather than a corrected one. Costs per filter:
+  [`reports/tables/pce_cascade.csv`](reports/tables/pce_cascade.csv).
 - **Diet is unmeasured.** It sits in the causal graph as an unmeasured confounder of the
   blood-pressure effect.
 

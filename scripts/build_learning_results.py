@@ -29,7 +29,7 @@ from src.discrimination import run  # noqa: E402
 from src.models import P_FEATURES  # noqa: E402
 from src.screening import STATUS, screen  # noqa: E402
 
-# lifelines is loud about ties and step sizes on every one of the ~90 fits this
+# lifelines is loud about ties and step sizes on every one of the ~25 fits this
 # script performs. ConvergenceWarning is deliberately NOT suppressed: a fold
 # that failed to converge inside the bootstrap is the one thing here that must
 # not pass in silence.

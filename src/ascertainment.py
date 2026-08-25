@@ -21,14 +21,20 @@ Conditioning on measured hypertension alone inverts the answer. Someone who was
 diagnosed, put on medication and successfully controlled measures normal, so a
 denominator of "currently measures high" drops exactly the people the diagnostic
 pipeline worked for -- and drops more of them as treatment improves. In this
-series the share of the already-diagnosed who no longer measure high rises from
-50% to 68%, so the omission grows monotonically over precisely the window the
-trend is read from.
+series the share of the already-diagnosed who no longer measure high goes from
+47.5% in 1999-2000 to a peak of 65.5% in 2013-2014 and back to 56.4% by
+2017-2018. It grows over most of the auscultatory window and then falls for the
+last two cycles -- NOT monotonically, which is what an earlier version of this
+paragraph claimed with endpoints of 50% and 68%. The argument does not need
+monotonicity: the omission is large throughout and moves, which is enough to
+make a denominator that excludes those people the wrong one.
 
 Measured on that denominator, ascertainment looks flat: 50.0% to 50.8% across
 the auscultatory window. On the conventional NHANES awareness denominator --
-measured high OR currently taking antihypertensive medication -- it rises from
-63.7% to 69.2%. The two readings support opposite conclusions, and only the
+measured high OR currently taking antihypertensive medication -- it goes from
+64.4% to 69.7%, having peaked at 80.9% in 2013-2014. (63.7% and 69.2% were the
+values before this branch switched the ascertainment series to the examination
+weight; the endpoints were not recomputed at the time.) The two readings support opposite conclusions, and only the
 second one answers the question being asked.
 
 THE INSTRUMENT CHANGE IS THE CATCH
@@ -58,6 +64,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from src.cohort import _read, _read_required
 from src.descriptive import (
@@ -191,6 +198,14 @@ def build_ascertainment() -> pd.DataFrame:
     df = pd.concat(frames, ignore_index=True)
     df = df[df["age"] >= AGE_MIN_DESC]
     df = df[df["wtmec2yr"].notna() & (df["wtmec2yr"] > 0)]
+    # The analysis weight the estimators in `descriptive` read. It is the
+    # EXAMINATION weight here and that is deliberate: this denominator needs a
+    # measured blood pressure, so the most restrictive component is the MEC and
+    # the least-common-denominator rule points at wtmec2yr. Part 1's outcome is
+    # interview-only and takes wtint2yr; the two analyses use different weights
+    # because they measure different things, and the column is named so a reader
+    # of either can see which.
+    df["weight"] = df["wtmec2yr"]
     df = df[df["hypertensive"].notna() & df["told_htn"].notna()]
     df["age_group"] = pd.cut(df["age"], bins=AGE_BINS, labels=AGE_LABELS,
                              right=False, include_lowest=True)
@@ -222,14 +237,23 @@ def ascertained_by_cycle(df: pd.DataFrame) -> pd.DataFrame:
         narrow = g[g["measured_htn"] == 1]
         p_narrow, _ = age_standardised_prevalence(narrow, outcome="told_htn", design=g)
 
+        dof = max(int(g.groupby(["strata", "psu"], observed=True).ngroups)
+                  - int(g["strata"].nunique()), 1)
+        crit = float(stats.t.ppf(0.975, dof))
+
         rows.append({
             "cycle": cycle, "year": year, "instrument": instrument,
             "n_hypertensive": len(htn), "n_measured_high": len(narrow),
             "n_on_med": int(htn["on_med"].sum()),
             "n_told": int(htn["told_htn"].sum()),
             "ascertained_std": p_std, "se_std": se_std,
-            "lo_std": max(0.0, p_std - 1.96 * se_std),
-            "hi_std": p_std + 1.96 * se_std,
+            # Same design-df t quantile the prevalence series uses. Two interval
+            # conventions inside one report is not a small thing: a reader
+            # comparing a band here against one in section 2 would be comparing
+            # a 1.96 band against a 2.13 band without being told.
+            "design_dof": dof, "crit": crit,
+            "lo_std": max(0.0, p_std - crit * se_std),
+            "hi_std": p_std + crit * se_std,
             "ascertained_crude": p_crude, "se_crude": se_crude,
             "measured_only_std": p_narrow,
         })

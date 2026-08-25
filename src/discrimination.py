@@ -1,8 +1,12 @@
-"""Is C = 0.804 held down by the variable set, or by the model form?
+"""Is the reference concordance held down by the variable set, or by the form?
 
-The published prediction model is a cause-specific Cox pair on eleven variables
-and reaches Harrell C = 0.804 at ten years on held-out later cycles. Two very
-different things could be limiting it, and the report cannot say which:
+The published prediction model is a cause-specific Cox pair on eleven variables.
+Its ten-year Harrell C on held-out later cycles is 0.838 survey-weighted -- the
+number this section compares against -- and 0.804 unweighted, which is what was
+published before `concordance` was made to honour the weights it had always
+accepted. Numbers are not repeated here beyond that; the artefact carries them.
+
+Two very different things could be limiting it, and the report cannot say which:
 
   the VARIABLE SET   eleven clinic-visit measurements may not carry more
   the MODEL FORM     linear, additive and proportional-hazards may not fit
@@ -52,6 +56,19 @@ from src.models import (
 # interval too narrow -- the same error the intervals in §2 exist to avoid.
 N_BOOT = 400
 SEED = 20260822
+
+# A replicate carrying fewer events than this is discarded. The threshold is
+# named because the discard SELECTS ON THE OUTCOME: replicates with few events
+# are the ones with unstable, extreme differences, so dropping them narrows the
+# interval in the direction that flatters the result.
+MIN_EVENTS_PER_REPLICATE = 10
+
+# ...and at least this FRACTION of the replicates asked for must survive. A
+# fraction rather than a count, because the quantity that matters is how much
+# of the resampling distribution was thrown away, not how much was requested --
+# an absolute floor would have failed a caller that legitimately wanted a small
+# run while passing one that silently discarded three quarters of a large one.
+MIN_REPLICATE_FRACTION = 0.5
 
 
 class HorizonClassifier:
@@ -109,6 +126,20 @@ class HorizonClassifier:
 
     def predict_cif(self, test: pd.DataFrame, horizon: float,
                     prepared: bool = False) -> pd.Series:
+        """Named for structural compatibility with `CauseSpecificRisk`; it does
+        NOT return a cumulative incidence. It returns the classifier's
+        probability of the binary horizon event, which is a ranking rather than
+        an absolute risk.
+
+        The horizon is fixed when the arm is built, because it is what the label
+        was built from. Scoring at a different one would compare a prediction
+        for one horizon against outcomes at another: no error, no warning, and a
+        concordance that looks entirely reasonable.
+        """
+        if horizon != self.horizon:
+            raise ValueError(
+                f"this arm was fitted for a {self.horizon:g}-year horizon and "
+                f"cannot be scored at {horizon:g}")
         d = test if prepared else prepare(test)
         p = self.model.predict_proba(d[self.features])[:, 1]
         return pd.Series(p, index=d.index, name="risk")
@@ -135,7 +166,7 @@ def evaluate(risk: pd.Series, d: pd.DataFrame, horizon: float) -> dict:
     """Two discrimination statistics, because one of them is not a fair contest.
 
     Harrell's C is the primary, so the reference arm is directly comparable to
-    the 0.804 already published. But it rewards getting the ORDER of deaths
+    the reference arm already published. But it rewards the ORDER of deaths
     right in time, and the boosted arms never see a time -- they are fitted on a
     binary "dead of CVD by the horizon". Reporting only C would hand the Cox
     arms an advantage that comes from the metric rather than from the model.
@@ -150,15 +181,22 @@ def evaluate(risk: pd.Series, d: pd.DataFrame, horizon: float) -> dict:
     y = HorizonClassifier.label(d.loc[ok], horizon)
     auc = (float(roc_auc_score(y, risk.loc[ok], sample_weight=d.loc[ok, "wtmec2yr"]))
            if y.nunique() > 1 else float("nan"))
-    return {"c": concordance(risk, d["followup_years"], d["cvd_death"]),
+    return {"c": concordance(risk, d["followup_years"], d["cvd_death"],
+                             weights=d["wtmec2yr"], horizon=horizon),
+            # Same horizon, so this differs from `c` by the WEIGHTS alone.
+            # Without it the pair differs by weighting, censoring AND the tie
+            # convention, and any prose attributing the gap to one of the three
+            # is wrong about the other two.
+            "c_unweighted": concordance(risk, d["followup_years"], d["cvd_death"],
+                                        horizon=horizon),
             "auc_horizon": auc,
             "n": int(len(d)), "n_evaluable": int(ok.sum()),
             "events": int(d["cvd_death"].sum())}
 
 
 def cluster_bootstrap_delta(risk_a: pd.Series, risk_b: pd.Series,
-                            d: pd.DataFrame, n_boot: int = N_BOOT,
-                            seed: int = SEED) -> dict:
+                            d: pd.DataFrame, horizon: float,
+                            n_boot: int = N_BOOT, seed: int = SEED) -> dict:
     """Interval for C(a) - C(b) on the SAME people, resampling whole clusters.
 
     Paired, because the two scores are computed on identical rows: the
@@ -168,27 +206,68 @@ def cluster_bootstrap_delta(risk_a: pd.Series, risk_b: pd.Series,
     """
     rng = np.random.default_rng(seed)
     clusters = d["design_cluster"].to_numpy()
-    unique = np.unique(clusters)
-    index = {c: np.flatnonzero(clusters == c) for c in unique}
+    # design_cluster is "<stratum>_<psu>". The stratum is what the bootstrap has
+    # to respect: NHANES draws PSUs WITHIN strata, so resampling PSUs from one
+    # common pool ignores the stratification and produces an interval that is
+    # too wide -- a stratified design has less variance than an unstratified one
+    # with the same number of clusters, and a bootstrap that forgets the strata
+    # gives back exactly that difference.
+    strata = np.array([c.rsplit("_", 1)[0] for c in clusters])
+    index = {c: np.flatnonzero(clusters == c) for c in np.unique(clusters)}
+    by_stratum = {h: np.unique(clusters[strata == h]) for h in np.unique(strata)}
 
-    deltas = []
+    # A stratum contributing one PSU cannot be bootstrapped: every draw returns
+    # the same unit, so it contributes no between-PSU variance and the interval
+    # comes back too narrow -- silently, and in the direction that flatters the
+    # result. The ten-year test set has 31 strata with exactly two PSUs each, so
+    # this never fires today; it exists so that a future analysis set which does
+    # have a singleton stops here rather than publishing a confident interval.
+    lonely = [h for h, psus in by_stratum.items() if len(psus) < 2]
+    if lonely:
+        raise ValueError(
+            f"{len(lonely)} stratum/strata contribute a single PSU "
+            f"({lonely[:3]}...); a stratified bootstrap over them yields no "
+            f"variance. Collapse them before resampling.")
+
+    deltas: list[float] = []
+    dropped = 0
     for _ in range(n_boot):
-        picked = rng.choice(unique, size=len(unique), replace=True)
+        picked = np.concatenate([
+            rng.choice(psus, size=len(psus), replace=True)
+            for psus in by_stratum.values()])
         rows = np.concatenate([index[c] for c in picked])
         sub = d.iloc[rows]
-        if sub["cvd_death"].sum() < 10:
+        if sub["cvd_death"].sum() < MIN_EVENTS_PER_REPLICATE:
+            # Skipping selects on the OUTCOME: replicates with few events are
+            # the ones with unstable, extreme differences, so dropping them
+            # narrows the interval in the direction that flatters the result --
+            # exactly the failure the singleton-stratum guard above refuses to
+            # commit. Counted, reported, and floored below.
+            dropped += 1
             continue
-        ca = concordance(risk_a.iloc[rows], sub["followup_years"], sub["cvd_death"])
-        cb = concordance(risk_b.iloc[rows], sub["followup_years"], sub["cvd_death"])
+        ca = concordance(risk_a.iloc[rows], sub["followup_years"], sub["cvd_death"],
+                         weights=sub["wtmec2yr"], horizon=horizon)
+        cb = concordance(risk_b.iloc[rows], sub["followup_years"], sub["cvd_death"],
+                         weights=sub["wtmec2yr"], horizon=horizon)
         deltas.append(ca - cb)
 
     arr = np.asarray(deltas)
+    if len(arr) < MIN_REPLICATE_FRACTION * n_boot:
+        raise ValueError(
+            f"only {len(arr)} of {n_boot} bootstrap replicates carried at least "
+            f"{MIN_EVENTS_PER_REPLICATE} events. The discard selects on the "
+            f"outcome, so an interval built from what is left is narrower than "
+            f"the truth by an unknown amount rather than merely noisier.")
     lo, hi = np.percentile(arr, [2.5, 97.5])
-    point = float(concordance(risk_a, d["followup_years"], d["cvd_death"])
-                  - concordance(risk_b, d["followup_years"], d["cvd_death"]))
+    point = float(
+        concordance(risk_a, d["followup_years"], d["cvd_death"],
+                    weights=d["wtmec2yr"], horizon=horizon)
+        - concordance(risk_b, d["followup_years"], d["cvd_death"],
+                      weights=d["wtmec2yr"], horizon=horizon))
     return {"delta": round(point, 4), "lo": round(float(lo), 4),
             "hi": round(float(hi), 4), "half_width": round(float(hi - lo) / 2, 4),
-            "n_boot": int(len(arr)),
+            "n_boot": int(len(arr)), "n_boot_requested": int(n_boot),
+            "n_boot_dropped": int(dropped),
             "excludes_zero": bool(lo > 0 or hi < 0)}
 
 
@@ -204,7 +283,8 @@ def permutation_importance(model, d: pd.DataFrame, features: list[str],
     zero. The features that do not exist in the raw frame at all would raise.
     """
     base = concordance(model.predict_cif(d, horizon, prepared=True),
-                       d["followup_years"], d["cvd_death"])
+                       d["followup_years"], d["cvd_death"],
+                       weights=d["wtmec2yr"], horizon=horizon)
     rng = np.random.default_rng(seed)
     rows = []
     for f in features:
@@ -215,7 +295,8 @@ def permutation_importance(model, d: pd.DataFrame, features: list[str],
             rng.shuffle(col)
             shuffled[f] = col
             c = concordance(model.predict_cif(shuffled, horizon, prepared=True),
-                            shuffled["followup_years"], shuffled["cvd_death"])
+                            shuffled["followup_years"], shuffled["cvd_death"],
+                            weights=shuffled["wtmec2yr"], horizon=horizon)
             drops.append(base - c)
         rows.append({"variable": f, "delta_c": round(float(np.mean(drops)), 5),
                      "sd": round(float(np.std(drops)), 5)})
@@ -250,10 +331,10 @@ def run(cohort: pd.DataFrame, selected: list[str], horizon: float = 10.0) -> dic
         risks[name] = model.predict_cif(test, horizon, prepared=True)
         scores[name] = (evaluate(risks[name], test, horizon)
                         | {"n_features": len(feats)})
-        arms[name] = (model, feats)
 
     reference = "cox_p"
-    deltas = {name: cluster_bootstrap_delta(risks[name], risks[reference], test)
+    deltas = {name: cluster_bootstrap_delta(risks[name], risks[reference], test,
+                                            horizon)
               for name in arms if name != reference}
 
     imp = permutation_importance(arms["cox_wide"][0], test, wide, horizon)
@@ -262,4 +343,8 @@ def run(cohort: pd.DataFrame, selected: list[str], horizon: float = 10.0) -> dic
             "importance": imp, "wide": wide, "horizon": horizon,
             "n_train": int(len(train)), "n_test": int(len(test)),
             "events_test": int(test["cvd_death"].sum()),
-            "n_boot": N_BOOT}
+            "n_boot_requested": N_BOOT,
+            # The smallest number of replicates any interval was actually built
+            # from. The page used to print the requested count, which is right
+            # only when nothing was dropped -- true today, by luck.
+            "n_boot": min(d["n_boot"] for d in deltas.values()) if deltas else 0}

@@ -75,7 +75,7 @@ def figure_arms(arms: pd.DataFrame, res: dict) -> None:
     a = res["arms"]
     _heading(
         fig,
-        "The variable set was the binding constraint, not the model form",
+        "The gain is in the variable set, not the model form",
         f"Paired differences in Harrell C on the same {a['n_test']:,} held-out "
         f"participants and {a['events_test']} cardiovascular deaths, with 95% "
         f"intervals from {a['n_boot']} bootstrap replicates resampling whole "

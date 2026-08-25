@@ -9,11 +9,20 @@ than dropping the person.
 
 This script answers that empirically for the Part 3 cohort.
 
-It builds on src.cohort rather than assembling its own frame. An earlier version
-duplicated read_cols/build_cycle here, and the copies diverged exactly where it
-hurt: the blood-pressure fallback and the BPQ skip-pattern decode were both
-fixed in src/cohort.py and left stale here, so this table reported a cost the
-pipeline no longer paid. One builder, one set of decisions.
+It reads the PUBLISHED cohort rather than assembling its own frame. Two earlier
+versions each got this wrong in the same direction. The first duplicated
+read_cols/build_cycle here and the copies diverged exactly where it hurt: the
+blood-pressure fallback and the BPQ skip-pattern decode were both fixed in
+src/cohort.py and left stale here. The second called build_cycle and re-applied
+its own restriction ladder -- age, exam weight, prevalent CVD -- which is a
+STRICT SUBSET of the ladder build_cohort applies. It silently skipped linkage
+eligibility, MEC completion and cause-of-death coding, so it started from 20,771
+people where the analysis cohort has 20,736, and the feasibility of a filter was
+being reported against 35 people who are not in the study.
+
+Now the cohort section is strobe_part3.csv verbatim and the input section runs
+on cohort_part3.csv.gz. Neither can drift from what was published, because
+neither is recomputed here.
 
 Output: reports/tables/pce_cascade.csv
 """
@@ -26,14 +35,13 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from src.cohort import (  # noqa: E402
-    AGE_MAX, AGE_MIN, CYCLES, build_cycle, load_crosswalk,
-)
+
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger(__name__)
 
-OUT = Path(__file__).parent.parent / "reports" / "tables" / "pce_cascade.csv"
+ROOT = Path(__file__).parent.parent
+OUT = ROOT / "reports" / "tables" / "pce_cascade.csv"
 
 # The nine inputs the 2013 ACC/AHA Pooled Cohort Equations require, named as
 # src.cohort produces them.
@@ -51,29 +59,38 @@ PCE_INPUTS = [
 
 
 def main() -> None:
-    xw = load_crosswalk()
-    df = pd.concat([build_cycle(c, xw) for c in CYCLES], ignore_index=True)
-    log.info(f"Pooled 1999-2014: {len(df):,} participants (all ages)\n")
+    strobe_p = ROOT / "reports" / "tables" / "strobe_part3.csv"
+    cohort_p = ROOT / "data" / "processed" / "cohort_part3.csv.gz"
+    for f in (strobe_p, cohort_p):
+        if not f.exists():
+            raise SystemExit(
+                f"{f.relative_to(ROOT)} is missing. This table reports the cost "
+                f"of each PCE filter ON THE PUBLISHED COHORT and will not "
+                f"reconstruct one. Run `make cohort` first.")
 
-    n0 = len(df)
-    steps = [("start: all 1999-2014 respondents", df)]
-    df = df[df.age.between(AGE_MIN, AGE_MAX)]
-    steps.append((f"age {AGE_MIN}-{AGE_MAX}", df))
-    df = df[df.wtmec2yr.fillna(0) > 0]
-    steps.append(("MEC exam weight > 0", df))
-    df = df[df.prev_cvd == 0]
-    steps.append(("free of self-reported CVD at baseline", df))
+    strobe = pd.read_csv(strobe_p)
+    df = pd.read_csv(cohort_p)
+    n0 = int(strobe["n"].iloc[0])
 
-    rows, prev = [], n0
-    for label, d in steps:
-        rows.append({"section": "cohort", "step": label, "n": len(d),
-                     "lost": prev - len(d),
-                     "pct_of_section_start": round(100 * len(d) / n0, 1)})
-        prev = len(d)
+    # The cohort section is the STROBE ladder as published -- copied, not
+    # recomputed. If it were recomputed the two tables could disagree, and the
+    # last two times this script owned a ladder of its own, they did.
+    rows = [{"section": "cohort", "step": r.step, "n": int(r.n),
+             "lost": int(r.excluded),
+             "pct_of_section_start": round(100 * int(r.n) / n0, 1),
+             "cvd_deaths": ("" if pd.isna(r.cvd_deaths) else int(r.cvd_deaths))}
+            for r in strobe.itertuples()]
 
-    log.info(f"{'cohort restriction':40s}{'N':>9s}{'lost':>9s}{'%':>8s}")
+    log.info(f"{'cohort restriction (STROBE, as published)':44s}"
+             f"{'N':>9s}{'lost':>9s}{'%':>8s}")
     for r in rows:
-        log.info(f"{r['step']:40s}{r['n']:9,d}{r['lost']:9,d}{r['pct_of_section_start']:7.1f}%")
+        log.info(f"{r['step']:44s}{r['n']:9,d}{r['lost']:9,d}"
+                 f"{r['pct_of_section_start']:7.1f}%")
+
+    if len(df) != rows[-1]["n"]:
+        raise SystemExit(
+            f"the cohort file holds {len(df):,} rows but the STROBE ladder ends "
+            f"at {rows[-1]['n']:,}. One of the two is stale; rebuild both.")
 
     base = df
     missing = [c for c, _ in PCE_INPUTS if c not in base.columns]
@@ -102,13 +119,14 @@ def main() -> None:
         # blocks silently mixed two different 100% baselines.
         cascade.append({"section": "pce_inputs", "step": f"require {label} non-null",
                         "n": len(cur), "lost": before - len(cur),
-                        "pct_of_section_start": round(100 * len(cur) / start, 1)})
+                        "pct_of_section_start": round(100 * len(cur) / start, 1),
+                        "cvd_deaths": int((cur.cvd_death == 1).sum())})
         log.info(f"{'require ' + label + ' non-null':40s}{len(cur):9,d}"
                  f"{before - len(cur):9,d}{100 * len(cur) / start:7.1f}%")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["section", "step", "n", "lost",
+        w = csv.DictWriter(f, fieldnames=["section", "step", "n", "lost", "cvd_deaths",
                                           "pct_of_section_start"])
         w.writeheader()
         w.writerows(rows + cascade)

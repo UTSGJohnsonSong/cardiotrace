@@ -1,6 +1,6 @@
 arm,n_features,harrell_c,auc_horizon,delta_c,delta_lo,delta_hi,excludes_zero,is_reference
-cox_p,11,0.8034,0.8334,,,,,True
-cox_wide,12,0.8185,0.8509,0.0151,0.0069,0.0245,True,False
-gbm_p,11,0.7526,0.7763,-0.0508,-0.07,-0.0272,True,False
-gbm_wide,12,0.7684,0.8079,-0.035,-0.0539,-0.0146,True,False
-floor_age_sex,2,0.7706,0.7969,-0.0328,-0.0518,-0.012,True,False
+cox_p,11,0.8379,0.8334,,,,,True
+cox_wide,12,0.8555,0.8509,0.0176,0.0074,0.0275,True,False
+gbm_p,11,0.7837,0.7763,-0.0542,-0.079,-0.0284,True,False
+gbm_wide,12,0.8134,0.8079,-0.0245,-0.0499,0.0018,False,False
+floor_age_sex,2,0.7981,0.7969,-0.0398,-0.0545,-0.0233,True,False

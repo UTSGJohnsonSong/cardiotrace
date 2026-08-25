@@ -1,13 +1,13 @@
 rank,variable,delta_c,sd,e2_status,e2_why
-1,age,0.17701,0.01224,admissible,In E2_ADJUSTMENT.
-2,log_uacr,0.02772,0.00225,undetermined,"Same node as eGFR, same omission."
-3,smoke_current,0.02025,0.00171,admissible,In E2_ADJUSTMENT.
-4,male,0.01215,0.00239,admissible,In E2_ADJUSTMENT.
-5,bp_treated,0.00417,0.00321,forbidden,A collider: blood pressure and prevalent disease both cause treatment.
-6,systolic_bp,0.00314,0.00107,exposure,The exposure whose effect E2 estimates.
-7,diabetes_dx,0.00073,0.00077,undetermined,"A diagnosis at the glucose node, so it carries access to care as well."
-8,race_black,0.00057,0.00073,admissible,In E2_ADJUSTMENT.
-9,bmi,0.00022,0.00086,admissible,In E2_ADJUSTMENT.
-10,hdl_cholesterol,-4e-05,0.00109,undetermined,The lipid node; see triglycerides.
-11,smoke_former,-0.00022,0.00064,admissible,In E2_ADJUSTMENT.
-12,total_cholesterol,-0.00065,0.00027,undetermined,The lipid node; see triglycerides.
+1,age,0.18995,0.01583,admissible,In E2_ADJUSTMENT.
+2,smoke_current,0.02858,0.00502,admissible,In E2_ADJUSTMENT.
+3,log_uacr,0.02357,0.00465,undetermined,"Same node as eGFR, same omission."
+4,male,0.01843,0.00255,admissible,In E2_ADJUSTMENT.
+5,bp_treated,0.00609,0.0071,forbidden,A collider: blood pressure and prevalent disease both cause treatment.
+6,systolic_bp,0.00301,0.00149,exposure,The exposure whose effect E2 estimates.
+7,race_black,0.00234,0.00128,admissible,In E2_ADJUSTMENT.
+8,diabetes_dx,0.00023,0.00089,undetermined,"A diagnosis at the glucose node, so it carries access to care as well."
+9,smoke_former,-0.00014,0.00108,admissible,In E2_ADJUSTMENT.
+10,hdl_cholesterol,-0.00014,0.00191,undetermined,The lipid node; see triglycerides.
+11,total_cholesterol,-0.00071,0.00093,undetermined,The lipid node; see triglycerides.
+12,bmi,-0.00261,0.00142,admissible,In E2_ADJUSTMENT.

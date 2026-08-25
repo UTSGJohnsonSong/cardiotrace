@@ -66,6 +66,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from src.cohort import _read, _read_required
 
@@ -81,11 +82,58 @@ DESC_CYCLES = [
 # Cycles fielded entirely before the pandemic, used to fit the counterfactual.
 PRE_COVID_CYCLES = DESC_CYCLES[:-1]
 
+# Which weight this analysis is entitled to use.
+#
+# NHANES publishes one weight per component and the rule is the least common
+# denominator: the analysis takes the weight of the most restrictive component
+# any of its variables came from. Part 1's outcome is MCQ160B-F -- five
+# questions asked in the household INTERVIEW -- so the interview weight is the
+# one that matches. The examination weight was used originally and is wrong in a
+# way that is invisible in the output: it restricts the sample to people who
+# also attended the mobile examination centre, and MEC attendance is not
+# random. In the post-pandemic cycle it removed 22% of age-eligible respondents
+# against 3-9% elsewhere, which put a fourfold change in examination coverage
+# directly underneath the counterfactual in section 3.
+#
+# The exam weight is kept as a sensitivity analysis rather than deleted: it is
+# the comparison that shows how much the choice moved the answer.
+#
+# Ascertainment (src/ascertainment.py) correctly keeps the EXAM weight, because
+# its denominator needs measured blood pressure, which only MEC attendees have.
+WEIGHT_INTERVIEW = "wtint2yr"
+WEIGHT_EXAM = "wtmec2yr"
+
 AGE_MIN_DESC = 20
 
 # The five self-reported conditions. All five are required: MCQ160F is stroke,
 # and losing it silently redefines the outcome.
 CVD_ITEMS = ["MCQ160B", "MCQ160C", "MCQ160D", "MCQ160E", "MCQ160F"]
+
+# The five questions individually, not only their union. `prev_cvd` was the one
+# thing that survived build_descriptive_cycle for a long time, and the
+# condition-level rows in the Tableau extract were therefore still being read
+# out of `reports/tables/prevalence_has_*.csv` -- files whose only writer is
+# legacy-invalid/run_pipeline.py. Two consequences reached the published
+# extract: those rows carried the DEPRECATED pipeline's crude pooled-weight
+# prevalence beside this one's (8.0967% against 8.0208% for the same outcome and
+# cycle, in the same column), and they dated the redesigned cycle 2021.5 where
+# every other block dates it 2022.6, so a time series plotted them 1.1 years to
+# the left. Same item codes as dbt/models/staging/stg_cardiovascular.sql.
+CONDITION_ITEMS = {
+    "has_heart_failure": "MCQ160B",
+    "has_chd":           "MCQ160C",
+    "has_angina":        "MCQ160D",
+    "has_mi":            "MCQ160E",
+    "has_stroke":        "MCQ160F",
+}
+CONDITION_LABELS = {
+    "prev_cvd":          "Any cardiovascular disease",
+    "has_chd":           "Coronary heart disease",
+    "has_mi":            "Myocardial infarction",
+    "has_stroke":        "Stroke",
+    "has_heart_failure": "Heart failure",
+    "has_angina":        "Angina",
+}
 
 # 2000 projected U.S. standard population, proportion distribution, on the
 # all-ages base of 274,634 thousand. Each entry is the sum of the Master List
@@ -123,8 +171,59 @@ RACE_LABELS = {
 }
 
 
+# CDC names the final cycle "NHANES August 2021-August 2023", not 2021-2022:
+# https://wwwn.cdc.gov/nchs/nhanes/continuousnhanes/default.aspx?Cycle=2021-2023
+# The folder and the file suffix (_L) are what this project keys on and are left
+# alone, but the position on the time axis is not a naming question. Field
+# midpoint is August 2022, so 2022.6 rather than 2021.5 -- and the extrapolation
+# in section 3 therefore reaches 5.1 years past the last pre-pandemic cycle, not
+# the 4.0 it claimed.
+#
+# CDC also states that this cycle "is based on an updated sample design and
+# modified interview as well as examination procedures", and urges caution
+# before combining it with earlier cycles for trend analysis given the 15-month
+# unobserved period. That caution is reproduced in the report; it is not a
+# reason to drop the cycle, but it is a reason not to call the comparison
+# quasi-experimental.
+CYCLE_MIDPOINT_OVERRIDE = {"2021-2022": 2022.6}
+
+# Display label, where it differs from the key this project stores.
+# The machine key stays "2021-2022" everywhere -- it is the NHANES file suffix,
+# the folder name and the value in every CSV, and renaming it would break the
+# join to the raw files. What has to change is what a READER sees: that cycle
+# was fielded August 2021 to August 2023, on a redesigned sample, and a page
+# that calls it "2021-2022" beside ten genuine two-year cycles is telling the
+# reader it is the eleventh of the same kind.
+CYCLE_LABEL = {"2021-2022": "Aug 2021&ndash;Aug 2023"}
+
+
+def display_cycle(cycle: str, dash: str = "&ndash;") -> str:
+    """Reader-facing name for a cycle key.
+
+    Defined next to CYCLE_LABEL and exported, because for one release the map
+    existed and had no callers: every page still printed the raw key, and the
+    map read like a solved problem.
+    """
+    label = CYCLE_LABEL.get(cycle, cycle)
+    return label if dash == "&ndash;" else label.replace("&ndash;", dash)
+
+
 def cycle_midpoint(cycle: str) -> float:
-    """Midpoint year, so cycles sit on a real time axis rather than an index."""
+    """Midpoint year, so cycles sit on a real time axis rather than an index.
+
+    An unrecognised label raises rather than falling through to `start + 0.5`.
+    That fallback is right for every cycle except the last one, and for a
+    RELABELLED last one it silently returns 2021.5 instead of 2022.6 -- which
+    shortens the extrapolation in section 3 from 5.1 years to 4.0 and moves the
+    counterfactual gap and its interval, with no signal anywhere.
+    """
+    if cycle in CYCLE_MIDPOINT_OVERRIDE:
+        return CYCLE_MIDPOINT_OVERRIDE[cycle]
+    if cycle not in DESC_CYCLES:
+        raise KeyError(
+            f"unrecognised cycle {cycle!r}; the start+0.5 rule is only correct "
+            f"for the cycles in DESC_CYCLES, and CYCLE_MIDPOINT_OVERRIDE holds "
+            f"the ones it is wrong for")
     start = int(cycle.split("-")[0])
     return start + 0.5
 
@@ -133,7 +232,8 @@ def build_descriptive_cycle(cycle: str) -> pd.DataFrame:
     """Demographics plus the five CVD questions for one cycle."""
     demo = _read_required(
         cycle, "DEMO",
-        ["RIDAGEYR", "RIAGENDR", "RIDRETH1", "WTMEC2YR", "SDMVPSU", "SDMVSTRA"])
+        ["RIDAGEYR", "RIAGENDR", "RIDRETH1", "WTINT2YR", "WTMEC2YR",
+         "SDMVPSU", "SDMVSTRA"])
     extra = _read(cycle, "DEMO", ["RIDRETH3"])
     if extra is not None and "RIDRETH3" in extra.columns:
         demo = demo.merge(extra, on="SEQN", how="left", validate="1:1")
@@ -147,7 +247,7 @@ def build_descriptive_cycle(cycle: str) -> pd.DataFrame:
 
     df = demo.merge(mcq, on="SEQN", how="left", validate="1:1")
     df = df.rename(columns={
-        "RIDAGEYR": "age", "WTMEC2YR": "wtmec2yr",
+        "RIDAGEYR": "age", "WTINT2YR": "wtint2yr", "WTMEC2YR": "wtmec2yr",
         "SDMVPSU": "psu", "SDMVSTRA": "strata",
     })
     df["sex"] = df["RIAGENDR"].map({1: "Male", 2: "Female"})
@@ -166,38 +266,53 @@ def build_descriptive_cycle(cycle: str) -> pd.DataFrame:
         stacked.eq(1).any(axis=1), 1.0,
         np.where(stacked.notna().any(axis=1), 0.0, np.nan))
 
+    # Each condition on its own, recoded exactly as prev_cvd's components are:
+    # 7 and 9 stay missing rather than becoming "no".
+    for name, col in CONDITION_ITEMS.items():
+        df[name] = df[col].replace({7: np.nan, 9: np.nan}).map({1: 1.0, 2: 0.0})
+
     df["cycle"] = cycle
     df["year"] = cycle_midpoint(cycle)
     keep = ["SEQN", "cycle", "year", "age", "sex", "race_eth",
-            "wtmec2yr", "psu", "strata", "prev_cvd"]
+            "wtint2yr", "wtmec2yr", "psu", "strata", "prev_cvd",
+            *CONDITION_ITEMS]
     return df[keep]
 
 
-def build_descriptive(ladder: list | None = None) -> pd.DataFrame:
+def build_descriptive(ladder: list | None = None,
+                      weight: str = WEIGHT_INTERVIEW) -> pd.DataFrame:
     """Every cycle, adults 20+, with a usable weight and outcome.
 
+    `weight` selects the analysis weight and is written to a `weight` column
+    that every estimator downstream reads; both raw weights survive on the
+    frame, so the sensitivity analysis is a parameter and not a second pipeline.
+    See WEIGHT_INTERVIEW for why the default is the interview weight.
+
     Pass a list to `ladder` to receive the per-cycle exclusion counts. Part 3 has
-    a STROBE flow table and Part 1 had nothing, so 2021-2022 could lose 22% of
-    its age-eligible respondents to a zero examination weight -- against 3 to 9%
+    a STROBE flow table and Part 1 had nothing, so under the examination weight
+    2021-2022 lost 22% of its age-eligible respondents -- against 3 to 9%
     everywhere else -- without a reader being able to see it. That cycle is the
     single post-pandemic observation the whole counterfactual rests on, and a
-    fourfold change in examination coverage there is a competing explanation for
-    the gap.
+    fourfold change in examination coverage there was a competing explanation
+    for the gap. Under the interview weight that particular competing
+    explanation largely disappears, which is a second reason the choice matters.
     """
     frames = [build_descriptive_cycle(c) for c in DESC_CYCLES]
     df = pd.concat(frames, ignore_index=True)
     df = df[df["age"] >= AGE_MIN_DESC]
+    df["weight"] = df[weight]
     if ladder is not None:
         for cycle, g in df.groupby("cycle", observed=True):
-            no_weight = int((g["wtmec2yr"].isna() | (g["wtmec2yr"] <= 0)).sum())
-            no_outcome = int(g.loc[g["wtmec2yr"] > 0, "prev_cvd"].isna().sum())
+            no_weight = int((g["weight"].isna() | (g["weight"] <= 0)).sum())
+            no_outcome = int(g.loc[g["weight"] > 0, "prev_cvd"].isna().sum())
             ladder.append({
                 "cycle": cycle, "age_eligible": len(g),
-                "no_exam_weight": no_weight, "no_outcome": no_outcome,
+                "weight_used": weight,
+                "no_weight": no_weight, "no_outcome": no_outcome,
                 "analysed": len(g) - no_weight - no_outcome,
                 "lost_pct": 100 * (no_weight + no_outcome) / len(g),
             })
-    df = df[df["wtmec2yr"].notna() & (df["wtmec2yr"] > 0)]
+    df = df[df["weight"].notna() & (df["weight"] > 0)]
     df = df[df["prev_cvd"].notna()]
     df["age_group"] = pd.cut(df["age"], bins=AGE_BINS, labels=AGE_LABELS,
                              right=False, include_lowest=True)
@@ -214,15 +329,24 @@ def _linearised_variance(df: pd.DataFrame, z: pd.Series) -> float:
     within-stratum degrees of freedom, so dropping it removes its contribution
     entirely instead of borrowing one.
 
-    That is not a hypothetical. The overall series has no singleton strata, but
-    the race subgroups have 47 across 44 published subgroup-cycles, and in
-    2001-2002 Other Hispanic the dropped strata held 36% of the sample -- a
-    standard error of 0.92 pp where the collapsed-stratum estimate gives 1.26.
-    The symptom was visible in the output all along: an understated variance
-    drives the design effect below one and makes the effective sample size
-    exceed the nominal one. Some rows still do -- see `design_effect`, which
-    reports rather than suppresses them, because at 14-17 design degrees of
-    freedom a per-cycle DEFF below one is usually noise rather than evidence.
+    NO PUBLISHED ESTIMATE REACHES THIS BRANCH TODAY, and the paragraph that
+    used to stand here said the opposite -- "that is not a hypothetical" --
+    which is the reverse of the truth and would be the thing a future
+    maintainer trusted when deciding whether the collapse could be deleted.
+    `by_cycle` computes a subgroup's variance over the WHOLE cycle's design
+    (see its `design` argument), and a full cycle has about two PSUs in every
+    stratum and no singletons. Instrumented across a full rebuild of both
+    published prevalence tables: 110 variance calls, 0 of which see one.
+
+    It is a guard for a case that is one refactor away. Restrict a domain to its
+    own rows -- which is what an estimator without the `design` argument does --
+    and the four race groups produce 46 singleton strata across the 44
+    subgroup-cycles. The symptom of getting it wrong is visible in the output:
+    an understated variance drives the design effect below one and makes the
+    effective sample size exceed the nominal one. Twenty of the 44 subgroup rows
+    are below one anyway -- see `design_effect`, which reports rather than
+    suppresses them, because at 14-17 design degrees of freedom a per-cycle DEFF
+    below one is usually noise rather than evidence.
 
     Collapsing is the remedy NCHS documents for exactly this case in a domain
     analysis. It is mildly conservative -- the pooled pseudo-stratum treats
@@ -307,7 +431,11 @@ def age_standardised_prevalence(df: pd.DataFrame,
     zero for people outside the domain; restricting to the domain's own rows
     deletes the units that contain none of its members and recomputes stratum
     means over what is left, which understates the variance. That understatement
-    is what drove design effects below one in 19 of 44 published subgroup rows.
+    drove design effects below one in 19 of the 44 subgroup rows BEFORE this
+    argument existed. Twenty of the 44 are below one now, which is not the same
+    fault returning: at 14-17 design degrees of freedom a per-cycle DEFF below
+    one is ordinary noise. Written in the past tense on purpose -- a reader who
+    checks the current table finds 20 and needs to know which claim it answers.
     """
     present = [g for g in AGE_LABELS if (df["age_group"] == g).any()]
     total_w = sum(STD_2000[g] for g in present)
@@ -317,7 +445,7 @@ def age_standardised_prevalence(df: pd.DataFrame,
     p_std = 0.0
     z = np.zeros(len(df))
     ag = df["age_group"].to_numpy()
-    w_all = df["wtmec2yr"].to_numpy()
+    w_all = df["weight"].to_numpy()
     y_all = df[outcome].to_numpy()
 
     for g in present:
@@ -338,7 +466,7 @@ def crude_prevalence(df: pd.DataFrame,
                      outcome: str = "prev_cvd",
                      design: pd.DataFrame | None = None) -> tuple[float, float]:
     """Unstandardised weighted prevalence, for the standardisation contrast."""
-    w = df["wtmec2yr"].to_numpy()
+    w = df["weight"].to_numpy()
     y = df[outcome].to_numpy()
     s = w.sum()
     p = float((w * y).sum() / s)
@@ -393,7 +521,7 @@ def kish_weighting_factor(df: pd.DataFrame) -> float:
     together; attributing all of it to clustering overstates what the cluster
     structure costs, in this series by roughly a factor of 1.6.
     """
-    w = df["wtmec2yr"].to_numpy(float)
+    w = df["weight"].to_numpy(float)
     if len(w) == 0 or w.mean() == 0:
         return float("nan")
     return float(1.0 + (w.std(ddof=0) / w.mean()) ** 2)
@@ -449,11 +577,33 @@ def by_cycle(df: pd.DataFrame, group: str | None = None,
         row = dict(zip(keys, vals))
         deff_std, n_eff_std = design_effect(g, se=se_std, outcome=outcome)
         kish = kish_weighting_factor(g)
+        # Degrees of freedom come from the SAME frame the variance came from.
+        # For a subgroup row that is the whole cycle, not the subgroup: the
+        # variance three lines up is already computed over the cycle's sampling
+        # structure (see age_standardised_prevalence's `design` argument and the
+        # paragraph in its docstring), and taking df from the domain instead
+        # paired a design-based variance with a domain-based multiplier.
+        #
+        # It is the standard subpopulation rule -- Stata's `svy, subpop()` and
+        # svyby on a full design object both keep the design df -- and it was
+        # wrong in 24 of the 44 published race rows, by up to 7.0% on the width.
+        # One of them mattered: 2005-2006 Other Hispanic came out at df 9, and
+        # `max(0.0, ...)` then clipped its lower bound to exactly zero, so the
+        # published band said the prevalence could be nil. At the design df it
+        # does not reach zero. src/ascertainment.py had the pairing right; this
+        # is the file that drifted.
+        dof_frame = design if design is not None else g
+        n_psu = int(dof_frame.groupby(["strata", "psu"], observed=True).ngroups)
+        n_str = int(dof_frame["strata"].nunique())
+        dof = max(n_psu - n_str, 1)
+        crit = float(stats.t.ppf(0.975, dof))
         row.update(n=len(g), n_cases=int(g[outcome].sum()),
-                   n_psu=int(g.groupby(["strata", "psu"], observed=True).ngroups),
+                   n_psu=n_psu, n_strata=n_str, design_dof=dof, crit=crit,
                    p_std=p_std, se_std=se_std,
-                   lo_std=max(0.0, p_std - 1.96 * se_std),
-                   hi_std=p_std + 1.96 * se_std,
+                   lo_std=max(0.0, p_std - crit * se_std),
+                   hi_std=p_std + crit * se_std,
+                   lo_std_normal=max(0.0, p_std - 1.96 * se_std),
+                   hi_std_normal=p_std + 1.96 * se_std,
                    p_crude=p_crude, se_crude=se_crude,
                    deff_std=deff_std, n_effective_std=n_eff_std,
                    kish_weighting=kish,

@@ -107,9 +107,13 @@ def main() -> None:
     aet = fit_aetiologic(df, "systolic_bp", tobin=True)
     aet.to_csv(TAB / "cox_systolic_bp.csv")
     log.info(aet.to_string())
-    hr10 = float(aet.loc["systolic_bp", "hr"]) ** 10
-    lo10 = float(aet.loc["systolic_bp", "hr_lo95"]) ** 10
-    hi10 = float(aet.loc["systolic_bp", "hr_hi95"]) ** 10
+    # exp(coef * 10), not hr ** 10. The second raises an ALREADY-ROUNDED
+    # per-unit hazard ratio to the tenth power and compounds the rounding:
+    # 1.0115 ** 10 = 1.121137 against exp(coef * 10) = 1.121588, a difference
+    # that reaches the third decimal this report prints.
+    hr10 = float(np.exp(aet.loc["systolic_bp", "log_hr"] * 10))
+    lo10 = float(np.exp(aet.loc["systolic_bp", "log_lo95"] * 10))
+    hi10 = float(np.exp(aet.loc["systolic_bp", "log_hi95"] * 10))
     log.info(f"\nper 10 mmHg: HR {hr10:.3f} (95% CI {lo10:.3f}-{hi10:.3f})")
     results["aetiologic_sbp_per_10mmhg"] = {
         "hr": round(hr10, 4), "lo95": round(lo10, 4), "hi95": round(hi10, 4)}
@@ -119,7 +123,7 @@ def main() -> None:
     # that is worth knowing.
     raw = fit_aetiologic(df, "systolic_bp", tobin=False)
     results["aetiologic_sbp_per_10mmhg_no_tobin"] = {
-        "hr": round(float(raw.loc["systolic_bp", "hr"]) ** 10, 4)}
+        "hr": round(float(np.exp(raw.loc["systolic_bp", "log_hr"] * 10)), 4)}
     log.info(f"without Tobin adjustment:   HR {results['aetiologic_sbp_per_10mmhg_no_tobin']['hr']:.3f}")
 
     log.info("\n=== prediction: forward-in-time validation ===")
@@ -135,19 +139,46 @@ def main() -> None:
         test = df[df.cycle.isin(cycles)]
         risk = model.predict_cif(test, horizon)
         observed = ((test.cvd_death == 1) & (test.followup_years <= horizon)).astype(float)
-        c = concordance(risk, test.followup_years, test.cvd_death)
-        tab = calibration_table(risk, observed.reindex(risk.index),
-                                test.wtmec2yr.reindex(risk.index))
+        w = test.wtmec2yr.reindex(risk.index)
+        # Weighted, and censored at the horizon the label claims. The unweighted
+        # value is kept beside it: it is what was published, and a reader
+        # deserves to see how far the correction moved it rather than only the
+        # corrected number.
+        # BOTH take the horizon. The point of printing them side by side is to
+        # show what the weighting correction cost, and a pair that differs by
+        # weighting AND censoring measures neither: without `horizon` the
+        # unweighted call ranges over the whole of follow-up and takes the
+        # lifelines branch rather than this project's estimator, so the tie
+        # convention differs too. src/discrimination.py:186 states this rule;
+        # this call site did not follow it, and the report's caption asserted
+        # that it did. Measured cost of the omission: 5-year 0.797 -> 0.791
+        # (max follow-up there is 11.25 years against a 5-year horizon, so the
+        # published figure was not a five-year statistic), 10-year 0.804 ->
+        # 0.805. It also halved the apparent weighting gap at 5 years, from a
+        # true 0.0115 to a printed 0.0050 -- understating the very correction
+        # the column exists to disclose.
+        c = concordance(risk, test.followup_years, test.cvd_death,
+                        weights=w, horizon=horizon)
+        c_unw = concordance(risk, test.followup_years, test.cvd_death,
+                            horizon=horizon)
+        tab = calibration_table(risk, observed.reindex(risk.index), w)
         tab.to_csv(TAB / f"calibration_{horizon:g}y.csv")
         panels.append((label, tab))
 
-        pred_mean = 100 * float(np.average(risk.dropna()))
-        obs_mean = 100 * float(observed.reindex(risk.dropna().index).mean())
+        # These two were unweighted while the calibration table beside them was
+        # weighted, so a summary line and the table it summarised were different
+        # estimands. Both are weighted now.
+        keep = risk.dropna().index
+        ww = w.reindex(keep).to_numpy(float)
+        pred_mean = 100 * float(np.average(risk.reindex(keep).to_numpy(float), weights=ww))
+        obs_mean = 100 * float(np.average(observed.reindex(keep).to_numpy(float), weights=ww))
         summary[label] = {"n": len(test), "cvd_deaths": int(test.cvd_death.sum()),
                           "horizon_years": horizon, "harrell_c": round(c, 3),
+                          "harrell_c_unweighted": round(c_unw, 3),
+                          "n_evaluable": int(len(keep)),
                           "mean_predicted_pct": round(pred_mean, 2),
                           "mean_observed_pct": round(obs_mean, 2)}
-        log.info(f"\n{label}: n={len(test):,}  C={c:.3f}  "
+        log.info(f"\n{label}: n={len(test):,}  C={c:.3f} (unweighted {c_unw:.3f})  "
                  f"predicted {pred_mean:.2f}% vs observed {obs_mean:.2f}%")
         log.info(tab.to_string())
 

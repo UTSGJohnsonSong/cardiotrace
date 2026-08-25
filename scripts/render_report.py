@@ -21,14 +21,16 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from src.descriptive import AGE_LABELS, PRE_COVID_CYCLES, STD_2000  # noqa: E402
+from src.descriptive import (  # noqa: E402
+    AGE_LABELS, PRE_COVID_CYCLES, STD_2000, display_cycle,
+)
 
 ROOT = Path(__file__).parent.parent
 FIG = ROOT / "reports" / "figures"
 TABLES = ROOT / "reports" / "tables"
 OUT = ROOT / "reports" / "cardiotrace-report.html"
 
-BUILD_DATE = "2026-08-21"
+BUILD_DATE = "2026-08-23"
 DATA_CUTOFF = "2019-12-31"
 
 
@@ -115,7 +117,7 @@ body {
 /* ── masthead ─────────────────────────────────────────────────────── */
 .masthead { padding: 76px 0 34px; border-bottom: 2px solid var(--ink); }
 .eyebrow {
-  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  font-family: var(--sans); font-size: 12.5px; font-weight: 600;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
   margin: 0 0 20px;
 }
@@ -130,7 +132,7 @@ h1 {
 .standfirst { font-size: 18px; line-height: 1.55; color: var(--ink-2); margin: 0; }
 .masthead-meta {
   display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 30px;
-  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-3);
 }
 .masthead-meta b { color: var(--ink-2); font-weight: 600; }
 
@@ -138,7 +140,7 @@ h1 {
 section { padding-top: 62px; }
 .sec-head { display: flex; gap: 20px; align-items: baseline; margin-bottom: 8px; }
 .sec-num {
-  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
   letter-spacing: 0.1em; color: var(--ink-3); padding-top: 8px;
   min-width: 74px; flex-shrink: 0;
 }
@@ -147,7 +149,7 @@ h2 {
   font-weight: 700; letter-spacing: -0.012em; text-wrap: balance;
 }
 h3 {
-  font-family: var(--sans); font-size: 12.5px; font-weight: 700;
+  font-family: var(--sans); font-size: 13.5px; font-weight: 700;
   letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2);
   margin: 44px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-soft);
 }
@@ -158,7 +160,7 @@ p { margin: 0 0 18px; }
 /* ── method chips ─────────────────────────────────────────────────── */
 .chip {
   display: inline-flex; align-items: center; gap: 7px;
-  font-family: var(--sans); font-size: 10.5px; font-weight: 700;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 5px 11px; border: 1px solid var(--rule); border-radius: 2px;
   background: var(--chip-bg); color: var(--ink-2); white-space: nowrap;
@@ -183,12 +185,12 @@ p { margin: 0 0 18px; }
 .decision .d-choice { font-size: 16px; line-height: 1.45; }
 .decision .d-choice b { font-weight: 700; }
 .decision .col-label {
-  font-family: var(--sans); font-size: 10px; font-weight: 700;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
   letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-3);
   display: block; margin-bottom: 6px;
 }
 .decision .d-buys, .decision .d-costs {
-  font-family: var(--sans); font-size: 13.5px; line-height: 1.52; color: var(--ink-2);
+  font-family: var(--sans); font-size: 14.5px; line-height: 1.52; color: var(--ink-2);
 }
 .decision .d-costs { color: var(--ink-2); }
 .decision .d-costs .col-label { color: var(--flag-text); }
@@ -206,7 +208,7 @@ figure {
 }
 figure img { display: block; width: 100%; height: auto; }
 figcaption {
-  font-family: var(--sans); font-size: 12.5px; line-height: 1.55;
+  font-family: var(--sans); font-size: 13.5px; line-height: 1.55;
   color: #6b6a65; margin-top: 16px; padding-top: 14px;
   border-top: 1px solid #e1e0d9;
 }
@@ -220,7 +222,7 @@ figcaption b { color: #34332f; font-weight: 600; }
 }
 .stat { background: var(--plate); padding: 16px 18px; }
 .stat .k {
-  font-family: var(--sans); font-size: 10.5px; font-weight: 600;
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
   letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3);
   margin-bottom: 7px;
 }
@@ -229,29 +231,40 @@ figcaption b { color: #34332f; font-weight: 600; }
   font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--ink);
   line-height: 1.12;
 }
-.stat .n { font-family: var(--sans); font-size: 11.5px; color: var(--ink-3); margin-top: 5px; }
+.stat .n { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin-top: 5px; }
 
 /* ── tables ───────────────────────────────────────────────────────── */
 .twrap { overflow-x: auto; margin: 26px 0; }
 table {
   width: 100%; border-collapse: collapse;
-  font-family: var(--sans); font-size: 13.5px;
+  font-family: var(--sans); font-size: 14.5px;
   font-variant-numeric: tabular-nums;
 }
 caption {
-  text-align: left; font-family: var(--sans); font-size: 12px; font-weight: 600;
+  text-align: left; font-family: var(--sans); font-size: 13px; font-weight: 600;
   letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3);
   padding-bottom: 10px;
 }
 th, td { padding: 9px 14px 9px 0; text-align: right; border-bottom: 1px solid var(--rule-soft); }
 th:first-child, td:first-child { text-align: left; }
 thead th {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  font-size: 12.5px; font-weight: 600; letter-spacing: 0.06em;
   text-transform: uppercase; color: var(--ink-3);
   border-bottom: 1px solid var(--rule);
 }
 tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
 td.em { font-weight: 700; color: var(--ink); }
+/* Second line of a header cell: which variant of the statistic this column is.
+   Lower case against the uppercase header, because it is a qualifier and not a
+   second heading. */
+thead th .thsub {
+  display: block; margin-top: 2px;
+  font-weight: 400; letter-spacing: 0.02em; text-transform: none;
+  /* No opacity here. At 11px this is normal-size text under WCAG, so it needs
+     4.5:1, and opacity 0.85 over the page ground measured 3.71:1 -- a fail that
+     looked like a design choice. The token on its own clears it. */
+  color: var(--ink-3);
+}
 
 /* ── callouts & inline ────────────────────────────────────────────── */
 .note {
@@ -270,12 +283,171 @@ li { margin-bottom: 10px; }
 hr { border: 0; border-top: 1px solid var(--rule-soft); margin: 58px 0 0; }
 footer {
   margin-top: 58px; padding-top: 26px; border-top: 2px solid var(--ink);
-  font-family: var(--sans); font-size: 12.5px; color: var(--ink-3);
+  font-family: var(--sans); font-size: 13.5px; color: var(--ink-3);
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
 """
+
+
+def design_based_exposure(xc3: pd.DataFrame, term: str = "systolic_bp",
+                          per: float = 10.0) -> dict:
+    """Part 3's primary inference, read from the design-based R fit.
+
+    Every guard here exists because the same mistake is available in two
+    directions and neither one crashes: the columns are LOG hazard ratios, so
+    exponentiating twice gives a plausible-looking number, and forgetting to
+    exponentiate gives another one.
+
+    The decisive check is the Wald identity. A Wald interval is exactly
+    symmetric about the coefficient ON THE LOG SCALE -- lo = coef - z*se and
+    hi = coef + z*se -- and that identity is destroyed by an exp(). So if these
+    columns had already been exponentiated upstream, the reconstruction below
+    would not close, and the build stops instead of publishing a wrong interval.
+
+    The hazard ratio, its interval and the critical value all come from THIS
+    table, i.e. from one R inference. Pairing an R interval with a Python
+    p-value would be two inferences wearing one label; the report states no
+    p-value for this term, and `_forbidden` keeps it that way by refusing a
+    table that has quietly gained one.
+    """
+    import numpy as np
+
+    from src.models import aetiologic_covariates
+
+    # The same list the Python fit uses, not a set rebuilt from the constant.
+    # Rebuilding it here meant a covariate dropped inside fit_aetiologic alone
+    # would still satisfy this guard, which is the one place that is supposed to
+    # notice the R table and the Python model describing different adjustments.
+    expected = set(aetiologic_covariates(term))
+    got = list(xc3["term"])
+    if len(got) != len(set(got)):
+        raise SystemExit(f"crosscheck_part3.csv has duplicate terms: {got}")
+    if set(got) != expected:
+        raise SystemExit(
+            f"crosscheck_part3.csv does not match the Python model's terms. "
+            f"Only in R: {sorted(set(got) - expected)}; only in Python: "
+            f"{sorted(expected - set(got))}")
+
+    _forbidden = [c for c in xc3.columns if c.lower() in {"p", "pvalue", "p_value"}]
+    if _forbidden:
+        raise SystemExit(
+            f"crosscheck_part3.csv now carries {_forbidden}. If a p-value is to "
+            f"be reported it must come from the same fit as the interval; wire "
+            f"it in deliberately rather than letting a column appear.")
+
+    r = xc3[xc3["term"] == term].iloc[0]
+    coef, se = float(r["svycoxph_coef"]), float(r["svycoxph_se"])
+    lo, hi, crit = (float(r["svycoxph_lo95"]), float(r["svycoxph_hi95"]),
+                    float(r["svycoxph_crit"]))
+
+    if not (abs(coef) < 5.0 and 0.0 < se < 5.0):
+        raise SystemExit(
+            f"{term}: coef={coef:g}, se={se:g} are not on the log-hazard scale; "
+            f"they look like they have already been exponentiated")
+    if not (lo < coef < hi):
+        raise SystemExit(f"{term}: the interval does not bracket the coefficient")
+    if not (np.isclose(lo, coef - crit * se, rtol=1e-6, atol=1e-9)
+            and np.isclose(hi, coef + crit * se, rtol=1e-6, atol=1e-9)):
+        raise SystemExit(
+            f"{term}: the interval does not reconstruct as coef +/- {crit:g}*se "
+            f"on the log scale, which is what a Wald interval must do. Either "
+            f"the columns are already hazard ratios, or the interval came from "
+            f"somewhere other than this standard error.")
+
+    # Seventh guard: the multiplier has to BE the design-df t, not merely be
+    # self-consistent with the interval it produced. The Wald reconstruction
+    # above passes for any multiplier at all, so for one release Part 3's
+    # primary interval was built on z = 1.96 -- survey's confint default for a
+    # svycoxph -- while Part 1, the ascertainment series and the Tableau
+    # extract all used a t on the design degrees of freedom. Nothing in the
+    # artefact recorded which was which, because design_df was printed to the R
+    # console instead of written to the file.
+    from scipy import stats
+
+    if "svycoxph_design_df" not in xc3.columns:
+        raise SystemExit(
+            "crosscheck_part3.csv has no svycoxph_design_df column, so the "
+            "critical value cannot be checked against anything. Regenerate it "
+            "with scripts/crosscheck_survey.py.")
+    ddf = float(r["svycoxph_design_df"])
+    if not np.isfinite(ddf) or ddf < 1:
+        raise SystemExit(f"{term}: design df is {ddf!r}, which cannot be right")
+    expect = float(stats.t.ppf(0.975, ddf))
+    if not np.isclose(crit, expect, rtol=1e-6):
+        raise SystemExit(
+            f"{term}: the interval uses a multiplier of {crit:.6f}, but the "
+            f"design has {ddf:g} degrees of freedom and t(0.975) = "
+            f"{expect:.6f}. z = 1.959964 is what survey's confint returns by "
+            f"default; the rest of this project uses the design-df t, and two "
+            f"conventions under one \"95% CI\" legend is the thing this guard "
+            f"exists to stop.")
+
+    # Exactly one exponentiation, here and nowhere else.
+    return {"hr": float(np.exp(coef * per)),
+            "lo95": float(np.exp(lo * per)),
+            "hi95": float(np.exp(hi * per)),
+            "se": se, "crit": crit, "design_df": ddf, "per": per}
+
+
+def _num(x, dp: int) -> str:
+    """A number, or an em dash where there is none.
+
+    An f-string renders float('nan') as the literal text "nan", which is what a
+    reader of the published page then sees. Every numeric cell that can be
+    missing goes through here.
+    """
+    return "&mdash;" if pd.isna(x) else f"{x:.{dp}f}"
+
+
+def _pval(x) -> str:
+    """A p-value, or the bound it is below.
+
+    `fit_aetiologic` rounds to four decimals, so every p below 5e-5 arrives here
+    as exactly 0.0. Printing that asserts a probability of zero, which is not a
+    quantity any model returns -- and unlike a NaN it looks like a result. The
+    rounding is deliberate (the log columns beside it are the unrounded source),
+    so the fix belongs at the point of display.
+    """
+    if pd.isna(x):
+        return "&mdash;"
+    return "&lt;0.0001" if float(x) < 0.0001 else f"{float(x):.4f}"
+
+
+
+def _text(s) -> str:
+    """Text, or an em dash.
+
+    `s or fallback` is not enough: pandas reads an empty CSV field back as
+    float('nan'), and float('nan') is truthy, so the fallback never fires and
+    the NaN is interpolated straight into the cell. That is how nine rows of
+    the candidate table came to answer "Into the forward path?" with "nan".
+    """
+    return "&mdash;" if pd.isna(s) else str(s)
+
+
+def _head_cells(df: pd.DataFrame) -> str:
+    """Header row for a table rendered whole."""
+    return "".join(f"<th>{c}</th>" for c in df.columns)
+
+
+def _full_rows(df: pd.DataFrame, em_last: bool = False) -> str:
+    """Body rows for a table rendered whole, every cell through `_text`.
+
+    Three tables were assembled by three near-identical comprehensions and only
+    one of them guarded against NaN. Whether a missing cell reaches a reader as
+    an em dash or as the word "nan" should not depend on which comprehension a
+    table happens to be rendered by.
+    """
+    last = len(df.columns) - 1
+    em = ' class="em"'
+    return "".join(
+        "<tr>" + "".join(
+            f"<td{em if em_last and i == last else ''}>{_text(v)}</td>"
+            for i, v in enumerate(r)) + "</tr>"
+        for r in df.itertuples(index=False))
+
 
 
 def stat(k: str, v: str, n: str = "") -> str:
@@ -334,8 +506,81 @@ def build() -> str:
     p4_imp = pd.read_csv(TABLES / "part4_importance.csv")
     p4_creat = pd.read_csv(TABLES / "part4_creatinine.csv")
 
+    # The cohort's own counts. scripts/build_cohort_results.py has claimed since
+    # it was written that these were no longer typed by hand; they were. This
+    # file never opened cohort_results.json, so 20,736 / 925 / 2,711 / 235,553
+    # sat as literals in five places -- correct, but outside what
+    # verify_clean_rebuild can see, which is the only reason a number here is
+    # ever trustworthy.
+    cohort_path = ROOT / "reports" / "cohort_results.json"
+    if not cohort_path.exists():
+        raise SystemExit(
+            f"{cohort_path.name} is missing; run `make cohort`.")
+    coh = json.loads(cohort_path.read_text(encoding="utf-8"))
+    n_cohort = f"{int(coh['n_participants']):,}"
+    n_cvd = f"{int(coh['cvd_deaths']):,}"
+    n_competing = f"{int(coh['competing_deaths']):,}"
+    n_person_years = f"{round(float(coh['person_years'])):,}"
+
+    miss_path = ROOT / "reports" / "missingness_results.json"
+    if not miss_path.exists():
+        raise SystemExit(
+            f"{miss_path.name} is missing; run scripts/build_missingness_results.py")
+    miss = json.loads(miss_path.read_text(encoding="utf-8"))
+    # The limitations paragraph quotes the complete-case cost. It quoted the
+    # PCE NINE-input figures (18,744 / 824) under a sentence naming the ELEVEN
+    # model inputs, which understated the thing it was disclosing: the eleven
+    # cost 14.6% of the deaths, not 10.9%. Interpolated from the artefact now,
+    # so the label and the number cannot disagree again.
+    miss_pct_people = float(miss["pct_dropped"])
+    miss_n_kept = int(miss["n_analysed"])
+    miss_n_cohort = int(miss["n_cohort"])
+    miss_deaths_cohort = int(miss["cvd_deaths_cohort"])
+    miss_deaths_kept = int(miss["cvd_deaths_analysed"])
+    miss_pct_deaths = 100 * (1 - miss_deaths_kept / miss_deaths_cohort)
+    miss_drivers = pd.read_csv(TABLES / "part3_missing_drivers.csv")
+    miss_compare = pd.read_csv(TABLES / "part3_missing_compare.csv")
+    rows_miss = "".join(
+        f"<tr><td><code>{r.variable}</code></td><td>{r.n_missing:,}</td>"
+        f"<td>{r.pct_missing:.2f}%</td><td class='em'>{r.n_uniquely_lost:,}</td></tr>"
+        for r in miss_drivers.itertuples() if r.n_missing > 0)
+    rows_misscmp = "".join(
+        f"<tr><td><code>{r.variable}</code></td><td>{r.kept_mean:,.4f}</td>"
+        f"<td>{r.dropped_mean:,.4f}</td>"
+        f"<td class='em'>{r.difference:+,.4f}</td></tr>"
+        for r in miss_compare.itertuples())
+
+    # The R cross-validation. NOT optional any more, and the comment here used
+    # to say it was: "the section is omitted rather than the build failing on a
+    # machine without one". That stopped being true when Part 3's primary
+    # interval moved to svycoxph -- the build now raises without these tables,
+    # so `have_xc` was False on no reachable path and the "omit the section"
+    # branch below could never be selected. Fail here, where the flag is
+    # computed, and name whichever file is actually missing.
+    xc1_path = TABLES / "crosscheck_part1.csv"
+    xc3_path = TABLES / "crosscheck_part3.csv"
+    absent = [p.name for p in (xc1_path, xc3_path) if not p.exists()]
+    if absent:
+        raise SystemExit(
+            f"missing from reports/tables/: {', '.join(absent)}. Part 3's "
+            f"primary intervals come from crosscheck_part3.csv and section 7 "
+            f"reports both. Run scripts/crosscheck_survey.py (needs R with the "
+            f"survey package).")
+    xc1 = pd.read_csv(xc1_path)
+    xc3 = pd.read_csv(xc3_path)
+    xc_se_max = float(xc1["absdiff_se_std"].abs().max())
+    xc_rel_max = float(xc1["reldiff_se_std"].abs().max())
+    xc_coef_max = float(xc3["absdiff_coef_svycoxph"].abs().max())
+    xc_se_med = float(xc3["reldiff_se_svycoxph"].abs().median())
+    xc_se_worst = float(xc3["reldiff_se_svycoxph"].abs().max())
+    xc_cluster_med = float(xc3["reldiff_se_coxph_cluster"].abs().median())
+    _exp = xc3[xc3["term"] == "systolic_bp"].iloc[0]
+    xc_exp_rel = float(abs(_exp["reldiff_se_svycoxph"]))
+    xc_dof_lo = int(xc1["r_design_df"].min())
+    xc_dof_hi = int(xc1["r_design_df"].max())
+
     rows1 = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.n_cases:,}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.n:,}</td><td>{r.n_cases:,}</td>"
         f"<td>{100 * r.p_crude:.2f}</td><td class='em'>{100 * r.p_std:.2f}</td>"
         f"<td>{100 * r.lo_std:.2f} – {100 * r.hi_std:.2f}</td></tr>"
         for r in overall.itertuples())
@@ -349,22 +594,48 @@ def build() -> str:
         for r in cif.itertuples(index=False))
 
     pred = model["prediction"]
+    # The unweighted concordance sits beside the weighted one because the
+    # weighted value is the headline and the gap is large: 0.804 was published
+    # for as long as concordance() accepted a weights argument its body did not
+    # read. A reader who only sees the corrected number cannot tell how far the
+    # correction moved it, and the README says both -- the page should not
+    # disclose less than the file it is generated alongside.
     rows_pred = "".join(
         f"<tr><td>{k}</td><td>{v['n']:,}</td><td>{v['cvd_deaths']}</td>"
         f"<td class='em'>{v['harrell_c']:.3f}</td>"
+        f"<td>{v['harrell_c_unweighted']:.3f}</td>"
         f"<td>{v['mean_predicted_pct']:.2f}%</td>"
         f"<td>{v['mean_observed_pct']:.2f}%</td></tr>"
         for k, v in pred.items())
 
-    rows_cox = "".join(
-        "<tr>" + "".join(f"<td>{v}</td>" for v in r) + "</tr>"
-        for r in cox.itertuples(index=False))
-    cox_head = "".join(f"<th>{c}</th>" for c in cox.columns)
-
-    rows_strobe = "".join(
-        "<tr>" + "".join(f"<td>{v}</td>" for v in r) + "</tr>"
-        for r in strobe.itertuples(index=False))
-    strobe_head = "".join(f"<th>{c}</th>" for c in strobe.columns)
+    # `f"{v}"` on a missing cell prints the literal text "nan", which is what a
+    # reader then sees. `_text` is the default here for every whole-table
+    # render, not just the flow table: the flow table got it because its first
+    # row legitimately has no cvd_deaths, and the aetiologic table went without
+    # for no reason other than having no missing cell on the day it was written.
+    # An absent Cox estimate is an absence, so it renders as one.
+    # A DISPLAY projection, not the CSV dumped whole. Two things were reaching
+    # the page that no model produced. `fit_aetiologic` rounds `p` to 4dp, so
+    # anything below 5e-5 became exactly `0.0` and six of the nine rows
+    # published a p-value of zero. And the log columns are deliberately left
+    # unrounded -- that was the fix for the hazard-ratio scaling bug -- so the
+    # table printed `0.011474575653970712` at sixteen significant figures beside
+    # hazard ratios given to four. Both are presentation faults of correct
+    # numbers, which is why neither showed up as a wrong value anywhere.
+    # The CSV keeps every column at full precision; it is linked from the page.
+    cox_display = pd.DataFrame({
+        "covariate": cox["covariate"],
+        "n": cox["n"].map(lambda v: f"{int(v):,}"),
+        "HR": cox["hr"].map(lambda v: _num(v, 4)),
+        "95% CI": [f"{_num(lo, 4)}&ndash;{_num(hi, 4)}"
+                   for lo, hi in zip(cox["hr_lo95"], cox["hr_hi95"])],
+        "log HR": cox["log_hr"].map(lambda v: _num(v, 6)),
+        "p": cox["p"].map(_pval),
+    })
+    rows_cox = _full_rows(cox_display)
+    cox_head = _head_cells(cox_display)
+    rows_strobe = _full_rows(strobe)
+    strobe_head = _head_cells(strobe)
 
     asc = pd.read_csv(TABLES / "part1_ascertainment.csv")
     cp = json.loads((TABLES / "part2_changepoint.json").read_text())
@@ -383,12 +654,10 @@ def build() -> str:
     p_lo, p_hi = 100 * overall["p_std"].min(), 100 * overall["p_std"].max()
     strobe_n = int(strobe["n"].iloc[-1])
     rows_flow = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.age_eligible:,}</td>"
-        f"<td>{r.no_exam_weight:,}</td><td>{r.analysed:,}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.age_eligible:,}</td>"
+        f"<td>{r.no_weight:,}</td><td>{r.analysed:,}</td>"
         f"<td class='em'>{r.lost_pct:.1f}%</td></tr>"
         for r in flow.itertuples())
-    _post_lost = float(flow.loc[flow["cycle"] == "2021-2022", "lost_pct"].iloc[0])
-    _other_lost = flow.loc[flow["cycle"] != "2021-2022", "lost_pct"]
     # The power row matching the slope actually observed, so this sentence
     # cannot describe a different trend from the one reported a page earlier.
     _slope_pp = abs(100 * p1["std_slope_per_decade"])
@@ -406,13 +675,13 @@ def build() -> str:
         for band in AGE_LABELS)
 
     rows_deff = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.n_psu}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.n:,}</td><td>{r.n_psu}</td>"
         f"<td>{r.deff_std:.2f}</td><td>{r.kish_weighting:.2f}</td>"
         f"<td class='em'>{r.deff_clustering:.2f}</td></tr>"
         for r in overall.itertuples())
 
     rows_asc = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.instrument}</td><td>{r.n_hypertensive:,}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.instrument}</td><td>{r.n_hypertensive:,}</td>"
         f"<td class='em'>{100 * r.ascertained_std:.1f}%</td>"
         f"<td>{100 * r.lo_std:.1f} – {100 * r.hi_std:.1f}</td>"
         f"<td>{100 * r.measured_only_std:.1f}%</td></tr>"
@@ -444,13 +713,13 @@ def build() -> str:
 
     p4_rows_rank = "".join(
         f"<tr><td>{r.label}</td><td>{r.e2_status}</td><td>{r.n:,}</td>"
-        f"<td>{r.hr_per_sd:.3f}</td><td class='em'>{r.wald:.1f}</td>"
-        f"<td>{'yes' if r.in_pool else (r.note or 'below threshold')}</td></tr>"
+        f"<td>{_num(r.hr_per_sd, 3)}</td><td class='em'>{_num(r.wald, 1)}</td>"
+        f"<td>{'yes' if r.in_pool else _text(r.note)}</td></tr>"
         for r in p4_rank.itertuples())
 
     p4_rows_arms = "".join(
         f"<tr><td>{ARM_LABEL_HTML[r.arm]}</td><td>{r.n_features}</td>"
-        f"<td>{r.harrell_c:.4f}</td><td>{r.auc_horizon:.4f}</td>"
+        f"<td>{_num(r.harrell_c, 4)}</td><td>{_num(r.auc_horizon, 4)}</td>"
         f"<td class='em'>{'&mdash; reference' if r.is_reference else f'{r.delta_c:+.4f}'}</td>"
         f"<td>{'' if r.is_reference else f'{r.delta_lo:+.4f} to {r.delta_hi:+.4f}'}</td></tr>"
         for r in p4_arms.itertuples())
@@ -462,7 +731,7 @@ def build() -> str:
         for r in p4_imp.head(8).itertuples())
 
     p4_rows_creat = "".join(
-        f"<tr><td>{r.cycle}</td><td>{r.n:,}</td><td>{r.mean_as_loaded:.4f}</td>"
+        f"<tr><td>{display_cycle(r.cycle)}</td><td>{r.n:,}</td><td>{r.mean_as_loaded:.4f}</td>"
         f"<td class='em'>{r.mean_calibrated:.4f}</td>"
         f"<td>{'CDC correction applied' if r.corrected else '&mdash;'}</td></tr>"
         for r in p4_creat.itertuples())
@@ -482,6 +751,30 @@ def build() -> str:
 
     def _codes(names):
         return ", ".join(f"<code>{v}</code>" for v in names) or "none"
+
+    # `bool()` on a possibly-missing flag reads missing as TRUE: the column is
+    # object dtype because the reference row has no delta, and bool(nan) is
+    # True. Getting that wrong here would make the page assert that a difference
+    # is established on the strength of a blank cell.
+    def _flag(x) -> bool:
+        return bool(x) and not pd.isna(x)
+
+    _gain_excl = _flag(p4_gain.excludes_zero)
+    _form_excl = _flag(p4_form.excludes_zero)
+    if _gain_excl and _form_excl:
+        p4_both_excl = "excludes zero"
+    elif _gain_excl:
+        p4_both_excl = ("excludes zero for the variable set; the form comparison is wider "
+                        "and the boosted arm on the screened set is not distinguishable "
+                        "from the reference")
+    elif _form_excl:
+        p4_both_excl = ("excludes zero for the form; the variable set is not distinguishable "
+                        "from the reference")
+    else:
+        p4_both_excl = "contains zero, so neither comparison is resolved here"
+    p4_vs_floor = ("discriminates <em>worse than</em>"
+                   if p4_form.harrell_c < p4_floor.harrell_c
+                   else "still beats")
 
     p4_base_kept = p4_prev["base_selected"]
     p4_base_dropped = p4_prev["base_rejected"]
@@ -537,20 +830,34 @@ def build() -> str:
 
     sbp = model["aetiologic_sbp_per_10mmhg"]
 
+    # PRIMARY inference for the exposure comes from the DESIGN-BASED fit, not
+    # from lifelines. The two agree on the coefficient to 3e-12 and disagree on
+    # the standard error by a median of 1.2% across the nine terms, because
+    # lifelines computes an unstratified cluster sandwich while `svycoxph` uses
+    # the stratified ultimate-cluster form NHANES guidance describes. Only the
+    # second is design-based in the sense this report claims elsewhere, so it is
+    # the one reported; the Python fit is kept beside it as a sensitivity
+    # analysis rather than replaced.
+    #
+    # The artefacts are committed, so the site builds without R. Regenerating
+    # them needs `scripts/crosscheck_survey.py`, which shells out to Rscript.
+    # Their presence is checked where they are read, not here.
+    sbp_design = design_based_exposure(xc3)
+
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cardiovascular Disease in the United States, 1999–2022 — CardioTrace</title>
+<title>Cardiovascular Disease in the United States, 1999–2023 — CardioTrace</title>
 <style>{CSS}</style>
 </head>
 <body>
 <div class="wrap">
 
 <header class="masthead">
-  <p class="eyebrow">CardioTrace · NHANES 1999–2022 · NCHS Linked Mortality File</p>
-  <h1>Cardiovascular Disease in the United States, 1999–2022</h1>
+  <p class="eyebrow">CardioTrace · NHANES 1999–2023 · NCHS Linked Mortality File</p>
+  <h1>Cardiovascular Disease in the United States, 1999–2023</h1>
   <p class="subtitle">Three estimands, three designs &mdash; and a fourth section asking what limits the third: a standardised prevalence series,
   a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
   <p class="standfirst measure">One national survey can answer more than one question, but not
@@ -558,9 +865,9 @@ def build() -> str:
   design that identifies it, and prices the choices that design requires.</p>
   <div class="masthead-meta">
     <span><b>Prepared</b> {BUILD_DATE}</span>
-    <span><b>Survey cycles</b> {p1['n_cycles']}, {overall.iloc[0]['cycle']} to {p1['last_cycle']}</span>
+    <span><b>Survey cycles</b> {p1['n_cycles']}, {display_cycle(overall.iloc[0]['cycle'])} to {display_cycle(p1['last_cycle'])}</span>
     <span><b>Descriptive sample</b> {p1['n_adults']:,} adults 20+</span>
-    <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
+    <span><b>Cohort</b> {n_cohort} adults 40–79 · {n_cvd} CVD deaths</span>
     <span><b>Mortality follow-up through</b> {DATA_CUTOFF}</span>
   </div>
 </header>
@@ -611,11 +918,11 @@ def build() -> str:
           <tr><td>Question</td><td>How has prevalence moved?</td>
               <td>Did 2020 bend the trend?</td>
               <td>Who among the healthy dies of it?</td></tr>
-          <tr><td>Kind</td><td>Descriptive</td><td>Causal (quasi-experimental)</td>
+          <tr><td>Kind</td><td>Descriptive</td><td>Exploratory model contrast</td>
               <td>Predictive + causal</td></tr>
           <tr><td>Sample</td><td>{p1['n_adults']:,} adults 20+, {p1['n_cycles']} cycles</td>
               <td>Same series, one post-pandemic point</td>
-              <td>20,736 adults 40–79, CVD-free at baseline</td></tr>
+              <td>{n_cohort} adults 40–79, CVD-free at baseline</td></tr>
           <tr><td>Outcome</td><td>Self-reported diagnosis</td><td>Self-reported diagnosis</td>
               <td>Death from cardiovascular causes</td></tr>
           <tr><td>Estimator</td><td>Weighted, age-standardised prevalence</td>
@@ -644,27 +951,36 @@ def build() -> str:
     reverses its sign.</p>
 
     <div class="stats">
-      {stat("Adults 20+", f"{p1['n_adults']:,}", f"{p1['n_cycles']} cycles, {overall.iloc[0]['cycle']} to {p1['last_cycle']}")}
-      {stat("Crude", f"{pct(p1['crude_first'], 1)} → {pct(p1['crude_last'], 1)}", f"rising, to {p1['last_cycle']}")}
-      {stat("Standardised", f"{pct(p1['std_first'], 1)} → {pct(p1['std_last'], 1)}", f"falling, to {p1['last_cycle']}")}
+      {stat("Adults 20+", f"{p1['n_adults']:,}", f"{p1['n_cycles']} cycles, {display_cycle(overall.iloc[0]['cycle'])} to "
+         f"{display_cycle(p1['last_cycle'])}")}
+      {stat("Crude", f"{pct(p1['crude_first'], 1)} → {pct(p1['crude_last'], 1)}", f"rising, to {display_cycle(p1['last_cycle'])}")}
+      {stat("Standardised", f"{pct(p1['std_first'], 1)} → {pct(p1['std_last'], 1)}", f"falling, to {display_cycle(p1['last_cycle'])}")}
       {stat("Weighted mean age", f"{p1['mean_age_first']:.1f} → {p1['mean_age_last']:.1f}", "years — the driver")}
     </div>
 
     <figure>
       <img src="{data_uri('part1_standardisation.png')}"
-           alt="Crude and age-standardised prevalence of self-reported cardiovascular disease by
-                NHANES cycle, 1999 to 2022. The two series track together until roughly 2015, then
-                the crude series rises while the standardised series stays flat.">
-      <figcaption><b>Two series, opposite conclusions.</b> Both lines run all
-      {p1['n_cycles']} cycles, to {p1['last_cycle']}; the trend is fitted on the
-      {n_pre_cycles} pre-pandemic cycles only, because §3 exists to ask what the last one did
-      relative to it. Over that window the standardised series falls
+           alt="Crude and age-standardised prevalence of self-reported cardiovascular disease
+                across the ten pre-pandemic NHANES cycles, 1999 to 2018. The two series track
+                together until roughly 2015, then the crude series rises while the standardised
+                series stays flat. The August 2021 to August 2023 cycle is plotted separately in
+                grey, detached from both lines.">
+      <figcaption><b>Two series, opposite conclusions.</b> Both lines run the
+      {n_pre_cycles} pre-pandemic cycles. The last cycle is drawn <b>detached</b>, in grey, with
+      its own interval and no line joining it: NCHS names it August 2021&ndash;August 2023,
+      reports it on an updated sample design with modified interview and examination procedures,
+      and urges caution before combining it with earlier cycles for trend analysis. A continuous
+      line would assert a comparability the survey itself declines to assert. Over the fitted
+      window the standardised series falls
       {abs(100 * p1['std_slope_per_decade']):.2f} points per decade (95% CI
       {100 * p1['std_slope_ci'][0]:.2f} to {100 * p1['std_slope_ci'][1]:.2f}) while the crude
-      series rises {100 * p1['crude_slope_per_decade']:+.2f}. The interval excludes zero, so the
-      decline is not noise. Read the final point with the caveat §3 develops: that cycle lost
-      {_post_lost:.1f}% of age-eligible adults to a missing examination weight, against
-      {_other_lost.min():.1f}&ndash;{_other_lost.max():.1f}% everywhere else.</figcaption>
+      series rises {100 * p1['crude_slope_per_decade']:+.2f}. <b>The sign reversal is the
+      finding, and it does not depend on any critical value; the size of the decline does.</b>
+      Ten points with a dispersion estimated from the same ten give t({p1['slope_dof']}) =
+      {p1['slope_t_crit']:.3f} rather than 1.96, and on that interval the slope
+      {'excludes' if p1['std_slope_excludes_zero'] else 'does not exclude'} zero. The decline
+      is consistent in direction across the series and
+      {'established' if p1['std_slope_excludes_zero'] else 'not established'} at 95%.</figcaption>
     </figure>
 
     <h3>How standardisation works, and why it is not a correction factor</h3>
@@ -820,7 +1136,7 @@ def build() -> str:
                 narrower measured-only denominator, which is markedly lower and flatter.">
       <figcaption><b>Ascertainment improved by
       {100 * (asc_aus['ascertained_std'].iloc[-1] - asc_aus['ascertained_std'].iloc[0]):.1f} points
-      overall, peaking in {asc_peak['cycle']}.</b> The share climbs from
+      overall, peaking in {display_cycle(asc_peak['cycle'])}.</b> The share climbs from
       {100 * asc_aus['ascertained_std'].iloc[0]:.1f}% to
       {100 * asc_peak['ascertained_std']:.1f}%, then falls back to
       {100 * asc_aus['ascertained_std'].iloc[-1]:.1f}%. The peak cycle straddles the 2014 coverage
@@ -884,7 +1200,7 @@ def build() -> str:
       <img src="{data_uri('part2_counterfactual.png')}"
            alt="Age-standardised prevalence with a fitted pre-pandemic trend extrapolated across
                 the gap where NHANES fielded no cycle, compared against the single observed
-                2021-2022 point with its confidence interval.">
+                Aug 2021&ndash;Aug 2023 point with its confidence interval.">
       <figcaption><b>The gap in the horizontal axis is the analytical problem.</b> NHANES
       suspended field operations, so no 2019–2020 cycle exists and the counterfactual must be
       carried {p2['extrapolation_years']:.0f} years beyond the last observation. With one point
@@ -918,32 +1234,59 @@ def build() -> str:
     </div>
 
     <h3>Who is in the one post-pandemic cycle</h3>
-    <p class="measure">The whole counterfactual rests on a single observation, so
-    it matters who that observation is made of. Every cycle loses some
-    age-eligible respondents who were interviewed but never examined and
-    therefore carry no examination weight. In 2021&ndash;2022 that loss is
-    <b>{_post_lost:.1f}%</b>, against {_other_lost.min():.1f}&ndash;
-    {_other_lost.max():.1f}% in every other cycle &mdash; a fourfold change in
-    examination coverage, concentrated on exactly the point the analysis leans
-    on.</p>
+    <p class="measure">The whole counterfactual rests on a single observation, so it matters who
+    that observation is made of &mdash; and for a while this section reported a problem that was
+    not there. Every NHANES analysis takes the weight of its most restrictive component. The
+    outcome here is five questions asked in the household interview, so the interview weight is
+    the one that matches it; the examination weight was used originally, and it silently
+    restricts the sample to people who also attended the mobile examination centre.</p>
+
+    <p class="measure">That choice mattered most exactly where the analysis is weakest. Under the
+    examination weight the post-pandemic cycle lost
+    <b>{p1['exam_weight_loss_post_pct']:.1f}%</b> of its age-eligible respondents against
+    {p1['exam_weight_loss_other_min_pct']:.1f}&ndash;{p1['exam_weight_loss_other_max_pct']:.1f}%
+    elsewhere, and that fourfold change in examination coverage was reported here as a competing
+    explanation for the whole gap. Under the interview weight no cycle loses more than
+    <b>{p1['max_loss_pct']:.2f}%</b>, and nobody at all lacks a weight. The competing explanation
+    was an artefact of the wrong weight, and it is withdrawn rather than quietly dropped.</p>
 
     <div class="twrap">
       <table>
-        <caption>Part 1 and Part 2 &mdash; participant flow by cycle</caption>
+        <caption>Part 1 and Part 2 &mdash; participant flow by cycle, interview weight</caption>
         <thead><tr><th>Cycle</th><th>Age-eligible (20+)</th>
-          <th>No examination weight</th><th>Analysed</th><th>Lost</th></tr></thead>
+          <th>No weight</th><th>Analysed</th><th>Lost</th></tr></thead>
         <tbody>{rows_flow}</tbody>
       </table>
     </div>
 
     <div class="note flag">
-      <b>This is a competing explanation, not a footnote.</b> A cycle that
-      examined a different quarter of the people it recruited could differ from
-      its predecessors for reasons that have nothing to do with the pandemic&rsquo;s
-      effect on cardiovascular disease. The survey weights are designed to
-      correct for non-response, and NCHS reweighted this cycle accordingly, but
-      that correction is an adjustment rather than a guarantee. It belongs beside
-      the gap, not below it.
+      <b>What remains a competing explanation is the cycle itself, and it comes from CDC.</b>
+      NCHS names this cycle <em>August 2021 &ndash; August 2023</em>, states that it &ldquo;is
+      based on an updated sample design and modified interview as well as examination
+      procedures&rdquo;, and urges analysts to proceed with caution before combining it with
+      earlier cycles for trend analysis, given the fifteen months in which nothing was observed.
+      A changed sample design and a changed instrument are not things a weight corrects. It is
+      why this section reports a deviation from an extrapolated trend and not a pandemic effect.
+    </div>
+
+    <div class="note">
+      <b>A second post-pandemic point is not available to anyone, and will not be soon.</b>
+      The obvious repair for a one-observation contrast is another observation, so it is worth
+      saying why there is not one. <em>August 2021 &ndash; August 2023</em> is the most recent
+      NHANES cycle with released public-use files; NCHS announced its first wave in October
+      2024. The field period that would have supplied a point between them &mdash; 2019 to March
+      2020 &mdash; was cut short when operations were suspended, and the 18 of 30 primary
+      sampling units that were completed are not nationally representative on their own, which
+      is why NCHS distributes them merged into 2017-2018 as a single
+      <em>2017 &ndash; March 2020 pre-pandemic</em> file rather than as a cycle. That file
+      cannot extend this series: it overlaps 2017-2018 and reassigns its sampling units to the
+      2015-2018 design strata, so it is a substitute for a point already here, not an addition.
+      Collection for the next cycle began in 2025, and NCHS releases a cycle only after its
+      collection is complete.
+      <br><br>
+      The same boundary sets the cohort. The public-use Linked Mortality File covers NHANES
+      1999-2018 with follow-up through 31 December 2019, which is why Part 3 ends there and
+      why its follow-up is entirely pre-pandemic. Neither cutoff is a choice made here.
     </div>
 
     <h3>Letting the data choose the breakpoint &mdash; within the window it can reach</h3>
@@ -999,6 +1342,10 @@ def build() -> str:
         f"Sidesteps the instrument and assay changes accumulated across {p1['n_cycles']} cycles, which would otherwise be indistinguishable from a pandemic effect.",
         "Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock."),
       decision(
+        "Weight the series with the <b>interview</b> weight, not the examination weight.",
+        f"It is the weight the outcome is entitled to &mdash; five questions asked in the household interview &mdash; and it removes the {p1['exam_weight_loss_post_pct']:.0f}% post-pandemic loss that the examination weight introduced and that was reported here as a competing explanation.",
+        f"The series is no longer directly comparable with the examination-weighted analyses in &sect;5 and &sect;6, and n rises from {p1['n_adults_exam_weight']:,} to {p1['n_adults']:,}, so every published figure moved."),
+      decision(
         "Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.",
         f"Turns an assumption into a measured quantity: it came out at {p1['dispersion']:.2f}, so the straight line already explains the series as well as sampling error allows.",
         "Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after."),
@@ -1033,7 +1380,7 @@ def build() -> str:
 
 <section>
   <div class="sec-head"><div class="sec-num">4</div>
-  <h2>Who, among the currently healthy, goes on to die of it</h2></div>
+  <h2>Who, among adults CVD-free at baseline, goes on to die of it</h2></div>
   <div class="body-indent">
     <div class="chip-row">
       <span class="chip">Prospective cohort</span>
@@ -1047,10 +1394,10 @@ def build() -> str:
     precedes outcome, and therefore the only one where prediction is a defensible word.</p>
 
     <div class="stats">
-      {stat("Participants", "20,736", "40–79, CVD-free at baseline")}
-      {stat("CVD deaths", "925", "2,711 competing deaths")}
-      {stat("Person-years", "235,553", "origin at the examination")}
-      {stat("Systolic BP", f"HR {sbp['hr']:.3f}", f"per 10 mmHg · {sbp['lo95']:.3f}–{sbp['hi95']:.3f}")}
+      {stat("Participants", n_cohort, "40–79, CVD-free at baseline")}
+      {stat("CVD deaths", n_cvd, f"{n_competing} competing deaths")}
+      {stat("Person-years", n_person_years, "origin at the examination")}
+      {stat("Systolic BP", f"HR {sbp_design['hr']:.3f}", f"per 10 mmHg · {sbp_design['lo95']:.3f}–{sbp_design['hi95']:.3f} · survey-design-based 95% CI, stratified PSU design")}
     </div>
 
     <figure>
@@ -1104,9 +1451,98 @@ def build() -> str:
     <p class="measure">The exposure is instead reconstructed: treated participants have a constant
     added to their measured value to approximate the untreated level. The adjustment is an
     assumption, stated as one, and the model is refitted without it as a sensitivity check —
-    the effect attenuates from {sbp['hr']:.3f} to
+    the estimate attenuates from {sbp['hr']:.3f} to
     {model['aetiologic_sbp_per_10mmhg_no_tobin']['hr']:.3f} per 10 mmHg, which is the direction
     and roughly the magnitude the reasoning predicts.</p>
+
+    <div class="note flag">
+      <b>What this quantity is, stated narrowly on purpose.</b> It is the association of
+      treatment-adjusted baseline systolic pressure with subsequent cardiovascular mortality,
+      adjusted for the confounders the graph names. It is not the total causal effect of blood
+      pressure, and calling it one would claim more than this design carries: the pressure is
+      already the product of years of treatment nobody observed, the Tobin constant is a
+      convention rather than an identification strategy, there is no treatment history, kidney
+      function may precede hypertension as easily as follow it, and excluding prevalent disease
+      at baseline does not undo the selection that being alive and non-institutionalised in a
+      survey imposes. A target-trial specification with treatment histories would be needed to
+      say more, and none of that is available here.
+    </div>
+
+    <h3>Who the model is fitted on, which is not who the cohort is</h3>
+    <p class="measure">Every fit here drops participants with any covariate missing. That is an
+    analysis decision made by a method call, and it changes the population being described: from
+    US adults free of cardiovascular disease at baseline, to <b>US adults free of cardiovascular
+    disease at baseline who happened to have every variable measured</b>. It removes
+    {miss['n_dropped']:,} of {miss['n_cohort']:,} &mdash; {miss['pct_dropped']:.1f}% &mdash; and
+    it is not random.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>What causes the deletion. &ldquo;Uniquely lost&rdquo; is rows this variable alone
+        removes &mdash; missing here and complete on everything else.</caption>
+        <thead><tr><th>Variable</th><th>Missing</th><th>%</th><th>Uniquely lost</th></tr></thead>
+        <tbody>{rows_miss}</tbody>
+      </table>
+    </div>
+
+    <p class="measure">One variable does most of it: <code>{miss['top_driver']}</code> alone
+    removes {miss['top_driver_uniquely_lost']:,} rows. Total and HDL cholesterol are each missing
+    for more people, and cost almost nothing extra, because they go missing together and mostly
+    for people already lost to something else.</p>
+
+    <div class="twrap">
+      <table>
+        <caption>Kept against dropped, on everything observed for both</caption>
+        <thead><tr><th>Variable</th><th>Kept</th><th>Dropped</th><th>Difference</th></tr></thead>
+        <tbody>{rows_misscmp}</tbody>
+      </table>
+    </div>
+
+    <div class="note flag">
+      <b>The dropped are sicker and disproportionately Black, so this is a limitation and not a
+      footnote.</b> Cardiovascular mortality among those dropped is
+      {100 * miss['cvd_death_dropped']:.2f}% against {100 * miss['cvd_death_kept']:.2f}% among
+      those kept, and {100 * miss['race_black_dropped']:.1f}% of the dropped are Black against
+      {100 * miss['race_black_kept']:.1f}% of the kept. Missingness is associated with the
+      outcome, which is the case in which listwise deletion is not merely inefficient.
+    </div>
+
+    <div class="note">
+      <b>Two different problems, and only one of them has a correction here.</b> Censoring &mdash;
+      follow-up ending before the outcome &mdash; is handled by the survival model itself, which
+      is what censoring is for. What follows is about something else: SELECTION, caused by
+      dropping participants whose covariates were not all measured. The weights below correct for
+      the second and have nothing to say about the first, and neither of them is multiple
+      imputation, which would use the partially observed variables rather than only the fully
+      observed ones and is <b>not done</b>.
+    </div>
+
+    <p class="measure">So the fit is re-run with inverse-probability-of-completeness weights,
+    modelled on age, sex, race and cycle &mdash; the variables observed for everyone, which is
+    what makes the model able to see the dropped at all. The exposure barely moves: HR
+    {miss['sensitivity']['hr_survey']:.4f}
+    ({miss['sensitivity']['hr_survey_ci'][0]:.4f}&ndash;{miss['sensitivity']['hr_survey_ci'][1]:.4f})
+    under the survey weight against {miss['sensitivity']['hr_ipcw']:.4f}
+    ({miss['sensitivity']['hr_ipcw_ci'][0]:.4f}&ndash;{miss['sensitivity']['hr_ipcw_ci'][1]:.4f})
+    under IPCW, a shift of {miss['sensitivity']['abs_shift']:.4f}.</p>
+
+    <p class="measure">Two bounds inside that correction are worth naming, because both shrink it
+    <em>toward</em> the uncorrected estimate and so buy part of the agreement the paragraph above
+    rests on. The propensity is floored at 0.05 &mdash; not binding here, the smallest is
+    {miss['trimming']['min_propensity']:.3f} &mdash; and the weights are trimmed at the 99th
+    percentile, which binds on {miss['trimming']['n_capped']} participants and removes
+    {miss['trimming']['weight_removed_pct']:.2f}% of the re-weighted total. Untrimmed, one
+    participant can carry several per cent of the weight, and an estimate driven by three people
+    is worse than the one it replaced; trimmed, the correction is smaller than it would otherwise
+    have been. Both numbers are here so a reader can judge which trade they prefer.</p>
+
+    <p class="measure"><b>That is reassurance about fragility, not a repair.</b> IPCW restores
+    unbiasedness only if completeness is independent of the outcome given what the completeness
+    model sees, and the variables most likely to explain both &mdash; illness severity, access to
+    care &mdash; are exactly the ones a survey that lost them does not have. What the agreement
+    establishes is that this estimate is not sensitive to <em>this</em> correction. Multiple
+    imputation, which would use the partially observed variables rather than only the fully
+    observed ones, is recorded as not done.</p>
 
     <h3>Validation splits on survey cycle, not at random</h3>
     <p class="measure">Random cross-validation assumes observations are exchangeable. In a
@@ -1128,8 +1564,13 @@ def build() -> str:
 
     <div class="twrap">
       <table>
-        <caption>Discrimination and calibration, held-out cycles</caption>
-        <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th><th>Harrell&rsquo;s C</th>
+        <caption>Discrimination and calibration, held-out cycles. Both concordance
+        columns are censored at the horizon the row names; the weighted column is
+        the estimate for the US population the sample represents, the unweighted
+        one is the estimate for the sample itself.</caption>
+        <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th>
+          <th>Harrell&rsquo;s C<br><span class="thsub">survey-weighted</span></th>
+          <th>Harrell&rsquo;s C<br><span class="thsub">unweighted</span></th>
           <th>Mean predicted</th><th>Mean observed</th></tr></thead>
         <tbody>{rows_pred}</tbody>
       </table>
@@ -1196,7 +1637,19 @@ def build() -> str:
       null. Exposures are measured once, which supports baseline risk prediction — the same design
       as Framingham, the Pooled Cohort Equations, SCORE2 and QRISK3 — but not dynamic risk
       updating, and a single measurement attenuates associations through regression dilution.
-      Follow-up ends {DATA_CUTOFF}, entirely before the pandemic.
+      Follow-up ends {DATA_CUTOFF}, entirely before the pandemic. Two design choices are
+      simplifications rather than corrections: the cohort pools eight cycles on the two-year
+      examination weight, where NCHS's guidance for an analysis spanning 1999&ndash;2002 is to use
+      the four-year weights released for those cycles, and complete-case restriction to the eleven
+      model inputs drops {miss_pct_people:.1f}% of the cohort and {miss_pct_deaths:.1f}% of the
+      cardiovascular deaths ({miss_n_cohort:,} &rarr; {miss_n_kept:,} people,
+      {miss_deaths_cohort} &rarr; {miss_deaths_kept} deaths). The first was
+      measured before being accepted: the four-year weights disagree sharply per person
+      &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
+      the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
+      which is below the precision printed here. The second is not corrected at all: the
+      inverse-probability weights described above address censoring, not selection into the
+      complete-case subsample.
     </div>
   </div>
 </section>
@@ -1311,9 +1764,9 @@ def build() -> str:
 
     <p class="measure">One screened variable added {p4_gain.delta_c:+.4f} to C on the same form.
     Changing the form to gradient boosting on the same eleven cost {p4_form.delta_c:+.4f}, and the
-    interval excludes zero in both directions. The floor arm is what makes those numbers readable:
-    a Cox model on age and sex alone reaches C&nbsp;=&nbsp;{p4_floor.harrell_c:.4f}, so gradient
-    boosting on all eleven variables discriminates <em>worse than age and sex</em>.</p>
+    interval on each {p4_both_excl}. The floor arm is what makes those numbers readable: a Cox
+    model on age and sex alone reaches C&nbsp;=&nbsp;{p4_floor.harrell_c:.4f}, so gradient
+    boosting on all eleven variables {p4_vs_floor} age and sex.</p>
 
     <div class="note">
       <b>Two statistics, because one of them is not a fair contest.</b> Harrell's C rewards
@@ -1458,11 +1911,18 @@ def build() -> str:
     and one recalibrating it to this cohort, so that the definitional gap is isolated instead of
     silently absorbed.</p>
 
-    <p class="measure">Three decisions remain open and are recorded as open: how to handle race
-    categories the equations do not cover, whether to restrict the comparison to the subsample
-    with all nine inputs observed, and whether treated blood pressure enters through the
-    equations' own treated branch rather than this project's reconstruction of the untreated
-    level. Each changes the answer, so none is being made silently.</p>
+    <p class="measure">The comparison protocol was fixed in advance, before any of it was run,
+    and it commits to four things. The primary comparison covers non-Hispanic White and
+    non-Hispanic Black adults only, because those are the groups the equations were derived in;
+    other groups appear as a labelled sensitivity analysis rather than in the headline. It runs on
+    the subsample with all nine inputs observed — and this project's own model is refitted and
+    re-evaluated on that same subsample, because two numbers both called a concordance statistic
+    look comparable while measuring different populations. Blood pressure enters through the
+    equations' own treated and untreated branches, not through this project's reconstruction of an
+    untreated level, which was built for a different estimand. And because the outcomes differ, the
+    comparison is a prognostic benchmark on discrimination, not a claim about the same endpoint.
+    What remains is implementation, not judgement: the coefficient tables and baseline survival
+    have still to be written down and pinned by tests.</p>
   </div>
 </section>
 
@@ -1474,12 +1934,20 @@ def build() -> str:
   <div class="body-indent">
     <h3>Sources</h3>
     <ul class="measure">
-      <li><b>NHANES 1999–2022</b>, CDC public-use files. All 1,821 published files are enumerated
+      <li><b>NHANES 1999–2023</b>, CDC public-use files. All 1,821 published files are enumerated
       and recorded with the rule that retained or dropped each one, before anything is
       downloaded.</li>
-      <li><b>NCHS Public-Use Linked Mortality Files</b>, follow-up through {DATA_CUTOFF}. NCHS
-      substitutes synthetic follow-up time or cause of death for a small number of records to
-      prevent re-identification.</li>
+      <li><b>NCHS Public-Use Linked Mortality Files</b>, covering NHANES 1999-2018 with
+      follow-up through {DATA_CUTOFF}. NCHS substitutes synthetic follow-up time or cause of
+      death for a small number of records to prevent re-identification. The 1999-2018 coverage
+      is what sets this cohort's boundary: no public linkage extends past it.</li>
+      <li><b>Where the series stops.</b>
+      <a href="https://blogs.cdc.gov/nchs/2024/10/17/7686/">NCHS announced the first wave of
+      August 2021 &ndash; August 2023 files in October 2024</a>; it is the most recent released
+      cycle. The truncated 2019 &ndash; March 2020 field period is distributed
+      <a href="https://wwwn.cdc.gov/nchs/nhanes/continuousnhanes/overviewbrief.aspx?Cycle=2017-2020">merged
+      into 2017-2018 as a pre-pandemic file</a>, not as a cycle, because the 18 of 30 completed
+      sampling units are not nationally representative alone.</li>
       <li><b>2000 projected U.S. standard population</b>, NCHS <i>Health, United States 2019</i>,
       Appendix II Table 2.</li>
       <li><b>ASCVD Pooled Cohort Equations</b>, 2013 ACC/AHA Full Work Group Report, Table 4 —
@@ -1490,7 +1958,11 @@ def build() -> str:
 
     <h3>Estimation</h3>
     <ul class="measure">
-      <li>Every population quantity is weighted with the examination weight. Variances are
+      <li><b>Cross-validated against R.</b> Both hand-written estimators were checked
+      against an independent implementation &mdash; see the section below.</li>
+            <li>Each analysis is weighted with the weight of its most restrictive component: the
+      <b>interview</b> weight for the self-reported prevalence series, the <b>examination</b>
+      weight for anything that needs a measured blood pressure or a laboratory value. Variances are
       Taylor-linearised and clustered on the masked variance units NCHS releases in place of
       the true design variables (<code>SDMVSTRA</code> × <code>SDMVPSU</code>).</li>
       <li>Age standardisation is direct, to the published 2000 standard bands renormalised over
@@ -1510,6 +1982,51 @@ def build() -> str:
     read the same bytes. The test suite requires no downloaded data — fixtures write synthetic
     files that round-trip through the same reader the pipeline uses.</p>
   </div>
+
+    <h3>Checked against an independent implementation</h3>
+    {f'''
+    <p class="measure">Two of the estimators here are written by hand: the Taylor-linearised
+    variance for the standardised prevalence, and the cluster-robust Cox. Unit tests can show that
+    such an estimator does what its author meant; they cannot show that what the author meant is
+    what the method is. So both were re-fitted in R with <code>survey</code> and
+    <code>survival</code>, on exactly the rows the shipped code path uses, and compared term by
+    term.</p>
+
+    <p class="measure"><b>Part 1 agrees to machine precision.</b> Across all {p1['n_cycles']}
+    cycles the standardised prevalence and its standard error match
+    <code>svydesign</code>&nbsp;+&nbsp;<code>svyby</code>&nbsp;+&nbsp;<code>svycontrast</code> to
+    within {xc_se_max:.1e} absolute and {xc_rel_max:.1e} relative &mdash; floating-point noise. Two
+    different R routes to the same estimand agree with each other exactly as well, so this is not
+    agreement with one arbitrary choice. R also reports the design degrees of freedom directly:
+    {xc_dof_lo}&ndash;{xc_dof_hi} per cycle, which is the number the intervals above use.</p>
+
+    <p class="measure"><b>Part 3 agrees on the coefficients and disagrees on the standard
+    errors, for a reason worth stating.</b> Every coefficient matches <code>svycoxph</code> to
+    {xc_coef_max:.1e}. The robust standard errors differ by a median of
+    {100 * xc_se_med:.2f}% and at worst {100 * xc_se_worst:.1f}%. A third fit &mdash; R&rsquo;s
+    <code>coxph</code> with <code>cluster()</code>, which is the same estimator the Python code
+    computes &mdash; agrees with it to {100 * xc_cluster_med:.2f}%. The implementation is
+    therefore right and the gap is a difference of estimator: the Python fit is an
+    <em>unstratified</em> cluster sandwich, while <code>svycoxph</code> uses the stratified
+    ultimate-cluster form that NHANES guidance describes.</p>
+
+    <div class="note flag">
+      <b>So the Part 3 hazard-ratio intervals reported above are the DESIGN-BASED ones, taken
+      from <code>svycoxph</code>.</b> The Python cluster-robust fit is kept beside them as a
+      sensitivity analysis rather than replaced, because it is the same estimator every version of
+      this report until now used and a reader deserves to see how far the change moved anything.
+      It moved the exposure by {100 * xc_exp_rel:.1f}%: HR {sbp['hr']:.4f}
+      ({sbp['lo95']:.4f}&ndash;{sbp['hi95']:.4f}) cluster-robust against
+      {sbp_design['hr']:.4f} ({sbp_design['lo95']:.4f}&ndash;{sbp_design['hi95']:.4f})
+      design-based. Across the nine terms the standard errors differ by a median of
+      {100 * xc_se_med:.2f}% and at most {100 * xc_se_worst:.2f}% &mdash; and
+      <b>no term changes whether its interval covers the null</b>, so the sensitivity analysis
+      agrees with the primary one on every conclusion and differs only on precision. The
+      R script and its output are versioned in the repository, so the site builds without R; only
+      regenerating them needs it. Writing the stratified form in Python is recorded as open,
+      because doing it properly is a project of its own and shipping a second implementation
+      nobody has checked would be worse than depending on one that is checked.
+    </div>'''}
 </section>
 
 <footer>

@@ -20,6 +20,8 @@ only plain strings in this project that legitimately contain braces.
 
 import ast
 import re
+
+import pandas as pd
 from pathlib import Path
 
 import pytest
@@ -79,6 +81,31 @@ def test_no_python_expression_survives_into_the_published_pages(rel):
     assert leaked == [], f"{rel} carries unsubstituted expressions: {leaked}"
 
 
+# A cell whose entire content is the literal "nan". Anchored on the tags so it
+# cannot match the letters inside an ordinary word.
+NAN_CELL = re.compile(r">\s*nan\s*<", re.I)
+
+
+@pytest.mark.parametrize("rel", PUBLISHED, ids=str)
+def test_no_missing_value_is_published_as_the_word_nan(rel):
+    """The sibling of the brace check, and the leak it did not cover.
+
+    An f-string renders float('nan') as the literal text "nan". Nine cells of
+    the candidate table published it in the column headed "Into the forward
+    path?" -- including the row for eGFR, which is the variable the PREVENT
+    comparison turns on. The cause was two steps apart: an empty string written
+    to CSV comes back from pandas as float('nan'), and float('nan') is TRUTHY,
+    so the renderer's `value or fallback` never fired.
+
+    Both ends are fixed -- every state has a name in the data, and the renderer
+    tests for absence with pd.isna rather than falsiness -- but the failure was
+    invisible to every existing test, which is why this one exists.
+    """
+    found = NAN_CELL.findall(prose_only((ROOT / rel).read_text(encoding="utf-8")))
+    assert found == [], (
+        f"{rel} publishes {len(found)} missing value(s) as the word 'nan'")
+
+
 def stylesheet_constants(tree: ast.Module) -> set[int]:
     """Ids of the constants that legitimately carry braces.
 
@@ -111,3 +138,66 @@ def test_no_plain_string_in_the_generators_carries_a_format_field(name):
            if isinstance(n, ast.Constant) and isinstance(n.value, str)
            and id(n) not in skip and INTERPOLATION.search(n.value)]
     assert bad == [], f"{name}: plain strings carrying format fields at {bad}"
+
+
+# ── nothing on the page asserts a quantity the model did not produce ─────────
+
+def _published_pages():
+    root = Path(__file__).parent.parent
+    pages = sorted((root / "docs").glob("*.html"))
+    report = root / "reports" / "cardiotrace-report.html"
+    if report.exists():
+        pages.append(report)
+    return pages
+
+
+def _visible(path):
+    """Page text with CSS and embedded images removed.
+
+    Base64 image payloads are megabytes of arbitrary characters and will match
+    almost any pattern, so a scan that leaves them in reports noise.
+    """
+    h = path.read_text(encoding="utf-8")
+    h = re.sub(r"<style>.*?</style>", "", h, flags=re.S)
+    return re.sub(r'data:image/[^"]*', "", h)
+
+
+def test_no_published_p_value_is_exactly_zero():
+    """`fit_aetiologic` rounds p to four decimals, so anything below 5e-5
+    becomes 0.0 -- and the Cox table was rendered from the CSV verbatim, so six
+    of its nine rows published a p-value of zero.
+
+    A zero probability is not a value any model returns, and unlike a NaN it
+    reads as a result rather than as an absence. The rounding is deliberate, so
+    the fix is at the point of display.
+    """
+    offenders = {p.name: n for p in _published_pages()
+                 if (n := len(re.findall(r"<td>0\.0+</td>", _visible(p))))}
+    assert not offenders, f"p-value of exactly zero on: {offenders}"
+
+
+def test_no_published_cell_carries_more_precision_than_it_earned():
+    """The log columns are left unrounded on purpose -- that was the fix for
+    the hazard-ratio scaling bug -- so dumping the CSV printed
+    0.011474575653970712 beside hazard ratios given to four decimals."""
+    offenders = {p.name: n for p in _published_pages()
+                 if (n := len(re.findall(r">\s*-?\d\.\d{10,}", _visible(p))))}
+    assert not offenders, f"over-precise cells on: {offenders}"
+
+
+def test_the_p_value_formatter_states_a_bound_rather_than_a_zero():
+    import importlib.util
+
+    root = Path(__file__).parent.parent
+    src = (root / "scripts" / "render_report.py").read_text(encoding="utf-8")
+    ns = {"pd": pd}
+    start = src.index("def _pval")
+    exec(src[start:src.index("\n\n\n", start)], ns)
+    pval = ns["_pval"]
+
+    assert pval(0.0) == "&lt;0.0001"
+    assert pval(1e-9) == "&lt;0.0001"
+    assert pval(0.0005) == "0.0005"
+    assert pval(0.1058) == "0.1058"
+    assert pval(float("nan")) == "&mdash;"
+    assert importlib.util  # the import is the documentation of why exec is used
