@@ -253,7 +253,7 @@ def _lift_from_script(relpath: str, *names: str) -> dict:
 # -- the test badge has to be writable from every state it can reach ----------
 
 def test_the_badge_can_be_rewritten_from_any_state_it_can_reach():
-    """It used to be a one-way trapdoor.
+    r"""It used to be a one-way trapdoor.
 
     All three branches of render_readme.py matched
     `badge/tests-\d+%20passing-brightgreen` while writing three different
@@ -404,6 +404,17 @@ def test_a_full_receipt_matches_the_commit_it_claims_to_verify():
     book = _receipt()
     if book is None:
         pytest.skip("no receipt; run scripts/verify_clean_rebuild.py")
+
+    # actions/checkout clones at depth 1 by default, so most commits genuinely
+    # are absent and every receipt would look forged. The workflow asks for the
+    # full history precisely so this check can run there; anywhere else, a
+    # shallow clone means the question cannot be answered, and a check that
+    # cannot answer its question must say so rather than fail.
+    shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                             cwd=ROOT, capture_output=True, text=True)
+    if shallow.stdout.strip() == "true":
+        pytest.skip("shallow clone: the receipt's commit cannot be looked up here")
+
     for scope, r in book.items():
         sha = r["commit"]
         proc = subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"],

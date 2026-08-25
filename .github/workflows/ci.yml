@@ -53,7 +53,13 @@ jobs:
   rebuild:
     runs-on: ubuntu-latest
     steps:
+      # Full history, not the default depth-1. The receipt test looks up the
+      # commit a verification run recorded, and in a shallow clone every commit
+      # but the tip is absent -- so the check could not run at all, in the one
+      # place it is most worth running.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
