@@ -655,24 +655,16 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
     }
 
 
-def author_links(lead: bool = False) -> str:
-    """Explore / Methodology / GitHub / Resume / LinkedIn.
+def author_links() -> str:
+    """The page footer: source, and nothing else.
 
-    Resume and LinkedIn are dropped entirely while their constants are empty:
-    a link to nowhere is worse than no link.
+    It used to carry GitHub, Résumé and LinkedIn on every page, which put all
+    three on the index a second time -- the first screen already asks. Repeating
+    an ask does not strengthen it; it reads as a page that is worried the first
+    one was missed. The footer keeps the source link, which is the one thing a
+    reader might want from any page rather than from the front one.
     """
-    items = []
-    if lead:
-        items += [("#findings", "Explore findings", "lead"),
-                  ("methods.html", "View methodology", "lead")]
-    items.append((REPO_URL, "GitHub", ""))
-    if RESUME_URL:
-        items.append((RESUME_URL, "Resume", ""))
-    if LINKEDIN_URL:
-        items.append((LINKEDIN_URL, "LinkedIn", ""))
-    return "".join(
-        '<a href="{}"{}>{}</a>'.format(href, f' class="{cls}"' if cls else "", text)
-        for href, text, cls in items)
+    return f'<a href="{REPO_URL}">GitHub</a>'
 
 
 def nav(current: str) -> str:
@@ -821,7 +813,7 @@ def build_hero(f: dict) -> str:
     # it that does not require reading it.
     steps = [("#built", "What I built"), ("#findings", "Three findings"),
              ("methods.html", "Methods &amp; engineering"),
-             ("#limits", "What it cannot show"), ("#colophon-h", "Contact")]
+             ("#limits", "What it cannot show")]
     path = "".join(f'<a href="{h}">{s}</a>' for h, s in steps)
 
     return f"""<header class="masthead hero">
@@ -841,6 +833,13 @@ def build_hero(f: dict) -> str:
 def build_colophon() -> str:
     """The author line, in the register a journal uses: name, affiliation and a
     contribution statement, set in the same gutter grid as every section head.
+
+    NO LINK ROW. The five contact links are in the first screen, and repeating
+    them here put Résumé, GitHub and LinkedIn on the index three times over --
+    hero, colophon, page footer. Three asks read as one nervous ask. A reader
+    who has scrolled this far and wants to act scrolls back up, or uses the
+    footer, which carries the same links for every page and so has a reason to
+    exist that this row did not.
     """
     return f"""<section class="colophon" aria-labelledby="colophon-h">
   <div class="sec-head"><div class="sec-num">AUTHOR</div>
@@ -848,9 +847,6 @@ def build_colophon() -> str:
   <div class="body-indent">
     <p class="colophon-affil">{AUTHOR_PROGRAM}</p>
     <p class="colophon-stmt measure">{AUTHOR_STATEMENT}</p>
-    <nav class="colophon-links" aria-label="Author and project links">
-      {author_links(lead=True)}
-    </nav>
   </div>
 </section>"""
 
