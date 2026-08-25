@@ -47,6 +47,23 @@ SITE_URL = "https://utsgjohnsonsong.github.io/cardiotrace/"
 
 AUTHOR = "Zekun Song"
 AUTHOR_PROGRAM = "Computer Science &amp; Data Science, University of Toronto"
+
+# The hero's positioning line, and it is NOT the LinkedIn headline verbatim.
+# That one reads "Backend &amp; Data Engineer | Reliable Data Platforms &amp; Clinical
+# AI", which is the right pitch on a profile a backend recruiter lands on and
+# the wrong one on a site whose content is population health research: a
+# research reader sees a backend engineer, a backend reader sees an
+# epidemiology site, and neither finds what they came for. Same person, same
+# facts, aimed at the page it sits on.
+#
+# The hireable signals are kept because they are what a recruiter scans for and
+# cannot infer: the co-op window, work authorisation, and the stack.
+AUTHOR_HEADLINE = (
+    "Data &amp; Research Engineering &middot; Population Health, Clinical AI")
+AUTHOR_CREDENTIALS = (
+    "Python &middot; SQL &middot; PostgreSQL &middot; dbt &nbsp;|&nbsp; "
+    "U of T CS + Data Science &nbsp;|&nbsp; "
+    "Sep 2026 &ndash; Apr 2027 co-op &nbsp;|&nbsp; Canadian PR")
 AUTHOR_STATEMENT = (
     "I designed and built CardioTrace end to end &mdash; from reproducible CDC "
     "data acquisition to survey-weighted inference and prospective risk modelling.")
@@ -236,6 +253,14 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   border-bottom-width: 1px;
 }
 .cta a.lead:hover { background: var(--series-text); color: var(--paper); }
+/* The scannable facts a recruiter cannot infer from the work itself: stack,
+   programme, availability, work authorisation. Under the contact row because
+   that is where someone who has decided to act needs them. */
+.credentials {
+  margin: 16px 0 0; font-family: var(--sans); font-size: 13px;
+  color: var(--ink-3); line-height: 1.6;
+}
+
 .stats.hero-strip {
   grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
   margin: 30px 0 0;
@@ -817,13 +842,14 @@ def build_hero(f: dict) -> str:
     path = "".join(f'<a href="{h}">{s}</a>' for h, s in steps)
 
     return f"""<header class="masthead hero">
-  <p class="eyebrow">{AUTHOR} &middot; {AUTHOR_PROGRAM}</p>
+  <p class="eyebrow">{AUTHOR} &middot; {AUTHOR_HEADLINE}</p>
   <h1>CardioTrace</h1>
   <p class="standfirst measure">An end-to-end population health research
   pipeline over {f['n_cycles']} NHANES cycles and linked mortality records
   &mdash; complex-survey inference, competing-risk survival modelling,
   validation forward in time, and a report that regenerates from the data.</p>
   <nav class="cta" aria-label="Contact and source">{links}</nav>
+  <p class="credentials">{AUTHOR_CREDENTIALS}</p>
   <div class="stats hero-strip">{cells}</div>
   <nav class="quickpath" aria-label="Thirty-second path through this site">
     <span>30&nbsp;seconds:</span>{path}</nav>

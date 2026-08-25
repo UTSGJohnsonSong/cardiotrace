@@ -387,6 +387,14 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   border-bottom-width: 1px;
 }
 .cta a.lead:hover { background: var(--series-text); color: var(--paper); }
+/* The scannable facts a recruiter cannot infer from the work itself: stack,
+   programme, availability, work authorisation. Under the contact row because
+   that is where someone who has decided to act needs them. */
+.credentials {
+  margin: 16px 0 0; font-family: var(--sans); font-size: 13px;
+  color: var(--ink-3); line-height: 1.6;
+}
+
 .stats.hero-strip {
   grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
   margin: 30px 0 0;
@@ -533,13 +541,14 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 <nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
 <header class="masthead hero">
-  <p class="eyebrow">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</p>
+  <p class="eyebrow">Zekun Song &middot; Data &amp; Research Engineering &middot; Population Health, Clinical AI</p>
   <h1>CardioTrace</h1>
   <p class="standfirst measure">An end-to-end population health research
   pipeline over 11 NHANES cycles and linked mortality records
   &mdash; complex-survey inference, competing-risk survival modelling,
   validation forward in time, and a report that regenerates from the data.</p>
   <nav class="cta" aria-label="Contact and source"><a href="assets/Zekun_Song_Resume.pdf" class="lead">R&eacute;sum&eacute;</a><a href="mailto:zekun.song@mail.utoronto.ca" class="lead">Email</a><a href="https://www.linkedin.com/in/zekun-song/">LinkedIn</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="cardiotrace-report.html">Read the research</a></nav>
+  <p class="credentials">Python &middot; SQL &middot; PostgreSQL &middot; dbt &nbsp;|&nbsp; U of T CS + Data Science &nbsp;|&nbsp; Sep 2026 &ndash; Apr 2027 co-op &nbsp;|&nbsp; Canadian PR</p>
   <div class="stats hero-strip"><div class="stat"><div class="k">11 survey cycles</div><div class="v">1999&ndash;2023</div><div class="n">harmonised from the published files</div></div><div class="stat"><div class="k">62,877 adults</div><div class="v">survey-weighted</div><div class="n">design-based intervals throughout</div></div><div class="stat"><div class="k">20,736-person cohort</div><div class="v">925 CVD deaths</div><div class="n">linked to the National Death Index</div></div><div class="stat"><div class="k">Discrimination</div><div class="v">C&nbsp;=&nbsp;0.838</div><div class="n">at 10 years, on cycles held out in time</div></div></div>
   <nav class="quickpath" aria-label="Thirty-second path through this site">
     <span>30&nbsp;seconds:</span><a href="#built">What I built</a><a href="#findings">Three findings</a><a href="methods.html">Methods &amp; engineering</a><a href="#limits">What it cannot show</a></nav>
