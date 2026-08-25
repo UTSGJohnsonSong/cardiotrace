@@ -20,6 +20,7 @@ document -- no status column, no status emoji in a heading, no bare cycle key on
 a published page -- which is the thing that actually recurs.
 """
 
+import json
 import re
 from pathlib import Path
 
@@ -334,3 +335,62 @@ def test_the_extract_does_not_publish_two_values_for_one_estimate():
          .set_index("cycle")[cols])
     assert not a.empty and not b.empty
     pd.testing.assert_frame_equal(a.sort_index(), b.sort_index())
+
+
+# -- the merge gate cites a file, not a memory ---------------------------------
+
+def test_the_merge_gate_points_at_the_receipt_rather_than_at_a_recollection():
+    """It used to say "see the run log from merge day". There was none.
+
+    An assertion whose evidence does not exist is worse than no assertion, and
+    this document exists to stop exactly that.
+    """
+    gate = (DOCS / "impact-tracking.md").read_text(encoding="utf-8")
+    assert "verify_receipt.json" in gate, (
+        "the merge gate does not name the receipt it is supposed to cite")
+
+    # The old phrasing may appear, but only where it is being repudiated. A
+    # first version of this test banned the string outright and then failed on
+    # the paragraph explaining why the string was wrong -- which would have
+    # taught the next person to delete the explanation.
+    for line in gate.splitlines():
+        if "见合并当日的运行记录" in line:
+            assert "并不存在" in line or "上一版" in line, (
+                f"the merge gate cites a record that was never written: {line!r}")
+
+
+def test_the_verification_receipt_is_readable_and_says_what_it_covered():
+    receipt = ROOT / "reports" / "verify_receipt.json"
+    if not receipt.exists():
+        pytest.skip("no receipt; run scripts/verify_clean_rebuild.py")
+    r = json.loads(receipt.read_text(encoding="utf-8"))
+    assert r["result"] == "clean"
+    assert r["scope"] in {"render", "default", "full"}
+    assert r["covers"] and r["commit"] and r["ran_at"]
+    # A receipt that does not name its stages cannot be read as coverage.
+    assert r["stages"], "the receipt records no stages"
+    if r["scope"] == "full":
+        assert set(r["stages"]) >= {"cohort", "descriptive", "learning",
+                                    "benchmark", "models", "render"}
+
+
+def test_a_full_receipt_matches_the_commit_it_claims_to_verify():
+    """The rule the gate states, enforced rather than remembered.
+
+    The previous hand-written version of that table cited a --full run four
+    commits stale, one of which had changed a renderer. This does not fail on a
+    stale receipt -- a working tree moves ahead of its last verification all the
+    time -- but it does fail if the receipt names a commit this repository does
+    not contain, which is the case that means the file was edited by hand.
+    """
+    import subprocess
+
+    receipt = ROOT / "reports" / "verify_receipt.json"
+    if not receipt.exists():
+        pytest.skip("no receipt; run scripts/verify_clean_rebuild.py")
+    sha = json.loads(receipt.read_text(encoding="utf-8"))["commit"]
+    r = subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, (
+        f"the receipt names commit {sha[:12]}, which is not in this "
+        f"repository. A receipt is evidence only if it was written by a run.")

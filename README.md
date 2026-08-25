@@ -1,7 +1,7 @@
 # CardioTrace
 ### A prospective cohort study of cardiovascular mortality, built from linked NHANES cycles
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-194%20passing-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-197%20passing-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
 builds a prospective cohort of adults who were free of cardiovascular disease at
@@ -79,7 +79,7 @@ downstream turned the gaps into plausible numbers.
 
 The pipeline now enumerates all 1,821 published files before selecting any, records one
 rule per file, resolves column names through a verified per-cycle crosswalk, and fails
-the run on any cycle-wide gap that is not explicitly declared. The 194 tests are
+the run on any cycle-wide gap that is not explicitly declared. The 197 tests are
 regressions for defects that actually shipped.
 
 ---
@@ -130,7 +130,7 @@ python data/build_variable_crosswalk.py     # resolve per-cycle column names
 python -c "from src.cohort import build_cohort; build_cohort()"
 python scripts/make_survival_figures.py     # descriptive curves
 python scripts/fit_survival_models.py       # Cox + absolute risk + calibration
-pytest tests/ -q                            # 194 tests
+pytest tests/ -q                            # 197 tests
 ```
 
 Every download writes a SHA-256 manifest; `--verify` re-hashes against it. CDC revises
@@ -177,7 +177,7 @@ CardioTrace/
 │   ├── pce_variable_cascade.py     # what each PCE alignment filter costs
 │   ├── make_survival_figures.py    # descriptive curves
 │   └── fit_survival_models.py      # fit, validate forward in time, calibrate
-├── tests/                          # 194 regressions for defects that shipped
+├── tests/                          # 197 regressions for defects that shipped
 ├── docs/
 │   ├── research-design.md          # the protocol: estimands, node status, decision log
 │   ├── impact-tracking.md          # per defect: did it contaminate a published number?
