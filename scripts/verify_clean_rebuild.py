@@ -235,16 +235,32 @@ def main() -> None:
              "every tracked artefact except Part 4 (use --full for those)")
     log.info(f"\nClean rebuild reproduces {scope}.")
 
-    RECEIPT.write_text(json.dumps({
-        "scope": "render" if args.render else "full" if args.full else "default",
+    # Keyed BY SCOPE, so a one-minute --render in CI cannot erase the evidence
+    # of a fifteen-minute --full. The first version of this file wrote a single
+    # object and the very next --render overwrote the --full receipt the merge
+    # gate had just been pointed at -- turning the cheapest run into the one
+    # that decides what the repository claims to have verified.
+    name = "render" if args.render else "full" if args.full else "default"
+    book = {}
+    if RECEIPT.exists():
+        try:
+            book = json.loads(RECEIPT.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            book = {}
+        if not isinstance(book, dict) or "scope" in book:
+            book = {}          # the old single-object shape; start the book over
+    book[name] = {
         "commit": git("rev-parse", "HEAD").strip(),
         "branch": git("rev-parse", "--abbrev-ref", "HEAD").strip(),
         "ran_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "stages": [name for name, _ in stages],
+        "stages": [s for s, _ in stages],
         "result": "clean",
         "covers": scope,
-    }, indent=2) + "\n", encoding="utf-8")
-    log.info(f"receipt -> {RECEIPT.relative_to(ROOT)}")
+    }
+    RECEIPT.write_text(
+        json.dumps(dict(sorted(book.items())), indent=2) + "\n",
+        encoding="utf-8")
+    log.info(f"receipt -> {RECEIPT.relative_to(ROOT)} [{name}]")
 
 
 if __name__ == "__main__":
