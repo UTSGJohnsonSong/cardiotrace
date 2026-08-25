@@ -506,6 +506,22 @@ def build() -> str:
     p4_imp = pd.read_csv(TABLES / "part4_importance.csv")
     p4_creat = pd.read_csv(TABLES / "part4_creatinine.csv")
 
+    # The cohort's own counts. scripts/build_cohort_results.py has claimed since
+    # it was written that these were no longer typed by hand; they were. This
+    # file never opened cohort_results.json, so 20,736 / 925 / 2,711 / 235,553
+    # sat as literals in five places -- correct, but outside what
+    # verify_clean_rebuild can see, which is the only reason a number here is
+    # ever trustworthy.
+    cohort_path = ROOT / "reports" / "cohort_results.json"
+    if not cohort_path.exists():
+        raise SystemExit(
+            f"{cohort_path.name} is missing; run `make cohort`.")
+    coh = json.loads(cohort_path.read_text(encoding="utf-8"))
+    n_cohort = f"{int(coh['n_participants']):,}"
+    n_cvd = f"{int(coh['cvd_deaths']):,}"
+    n_competing = f"{int(coh['competing_deaths']):,}"
+    n_person_years = f"{round(float(coh['person_years'])):,}"
+
     miss_path = ROOT / "reports" / "missingness_results.json"
     if not miss_path.exists():
         raise SystemExit(
@@ -851,7 +867,7 @@ def build() -> str:
     <span><b>Prepared</b> {BUILD_DATE}</span>
     <span><b>Survey cycles</b> {p1['n_cycles']}, {display_cycle(overall.iloc[0]['cycle'])} to {display_cycle(p1['last_cycle'])}</span>
     <span><b>Descriptive sample</b> {p1['n_adults']:,} adults 20+</span>
-    <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
+    <span><b>Cohort</b> {n_cohort} adults 40–79 · {n_cvd} CVD deaths</span>
     <span><b>Mortality follow-up through</b> {DATA_CUTOFF}</span>
   </div>
 </header>
@@ -906,7 +922,7 @@ def build() -> str:
               <td>Predictive + causal</td></tr>
           <tr><td>Sample</td><td>{p1['n_adults']:,} adults 20+, {p1['n_cycles']} cycles</td>
               <td>Same series, one post-pandemic point</td>
-              <td>20,736 adults 40–79, CVD-free at baseline</td></tr>
+              <td>{n_cohort} adults 40–79, CVD-free at baseline</td></tr>
           <tr><td>Outcome</td><td>Self-reported diagnosis</td><td>Self-reported diagnosis</td>
               <td>Death from cardiovascular causes</td></tr>
           <tr><td>Estimator</td><td>Weighted, age-standardised prevalence</td>
@@ -1358,9 +1374,9 @@ def build() -> str:
     precedes outcome, and therefore the only one where prediction is a defensible word.</p>
 
     <div class="stats">
-      {stat("Participants", "20,736", "40–79, CVD-free at baseline")}
-      {stat("CVD deaths", "925", "2,711 competing deaths")}
-      {stat("Person-years", "235,553", "origin at the examination")}
+      {stat("Participants", n_cohort, "40–79, CVD-free at baseline")}
+      {stat("CVD deaths", n_cvd, f"{n_competing} competing deaths")}
+      {stat("Person-years", n_person_years, "origin at the examination")}
       {stat("Systolic BP", f"HR {sbp_design['hr']:.3f}", f"per 10 mmHg · {sbp_design['lo95']:.3f}–{sbp_design['hi95']:.3f} · survey-design-based 95% CI, stratified PSU design")}
     </div>
 
