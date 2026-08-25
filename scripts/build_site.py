@@ -955,7 +955,9 @@ def build_limits(f: dict) -> str:
         ("One post-pandemic observation",
          f"The trend comparison rests on a single cycle, {f['post_cycle']}, "
          f"reported on a redesigned sample. It is a contrast against an "
-         f"extrapolation, not a quasi-experiment, and the interval says so."),
+         f"extrapolation, not a quasi-experiment. No second point exists to fix "
+         f"it &mdash; the report documents why &mdash; and documenting a "
+         f"limitation does not lift it."),
         ("Mortality, not incidence",
          "The linkage adds a cause of death, not a non-fatal event. Someone who "
          "has a heart attack and survives is not an event here."),

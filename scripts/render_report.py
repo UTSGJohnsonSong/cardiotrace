@@ -1270,9 +1270,9 @@ def build() -> str:
     </div>
 
     <div class="note">
-      <b>A second post-pandemic point is not available to anyone, and will not be soon.</b>
-      The obvious repair for a one-observation contrast is another observation, so it is worth
-      saying why there is not one. <em>August 2021 &ndash; August 2023</em> is the most recent
+      <b>The single post-disruption observation remains an unavoidable limitation.</b> What
+      follows documents its origin, not a way around it: the repair for a one-observation
+      contrast is a second observation, and there is not one to be had &mdash; by anyone. <em>August 2021 &ndash; August 2023</em> is the most recent
       NHANES cycle with released public-use files; NCHS announced its first wave in October
       2024. The field period that would have supplied a point between them &mdash; 2019 to March
       2020 &mdash; was cut short when operations were suspended, and the 18 of 30 primary
@@ -1286,7 +1286,10 @@ def build() -> str:
       <br><br>
       The same boundary sets the cohort. The public-use Linked Mortality File covers NHANES
       1999-2018 with follow-up through 31 December 2019, which is why Part 3 ends there and
-      why its follow-up is entirely pre-pandemic. Neither cutoff is a choice made here.
+      why its follow-up is entirely pre-pandemic. Neither cutoff is a choice made here
+      &mdash; and knowing where a boundary comes from does not move it. Section 3's estimate
+      is still a deviation from an extrapolation resting on one observation, and it is still
+      the weakest inference in this report.
     </div>
 
     <h3>Letting the data choose the breakpoint &mdash; within the window it can reach</h3>

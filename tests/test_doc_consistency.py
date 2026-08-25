@@ -21,6 +21,7 @@ a published page -- which is the thing that actually recurs.
 """
 
 import json
+import os
 import re
 from pathlib import Path
 
@@ -407,12 +408,23 @@ def test_a_full_receipt_matches_the_commit_it_claims_to_verify():
 
     # actions/checkout clones at depth 1 by default, so most commits genuinely
     # are absent and every receipt would look forged. The workflow asks for the
-    # full history precisely so this check can run there; anywhere else, a
-    # shallow clone means the question cannot be answered, and a check that
-    # cannot answer its question must say so rather than fail.
+    # full history precisely so this check can run there.
+    #
+    # Shallow is a SKIP locally and a FAILURE in CI, and the asymmetry is the
+    # point. A contributor with a shallow clone cannot answer the question and
+    # should not be told they have broken something. But CI is the one place
+    # this check is load-bearing, and "skip" there would mean a future edit to
+    # fetch-depth silently retires it -- the check would still be green, still
+    # be listed, and no longer be doing anything. That is the exact shape of
+    # every defect this suite was written for.
     shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
                              cwd=ROOT, capture_output=True, text=True)
     if shallow.stdout.strip() == "true":
+        assert not os.environ.get("CI"), (
+            "the checkout is shallow, so the receipt's commit cannot be looked "
+            "up and this check cannot run. In CI that is a configuration fault, "
+            "not a reason to pass: .github/workflows/ci.yml must keep "
+            "fetch-depth: 0 on the rebuild job.")
         pytest.skip("shallow clone: the receipt's commit cannot be looked up here")
 
     for scope, r in book.items():
