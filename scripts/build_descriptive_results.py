@@ -16,11 +16,17 @@ The series also has a hole: NHANES suspended field operations, so there is no
 point instead of the usual 2. The prediction interval widens accordingly, but
 the gap is still an extrapolation and is labelled as one.
 
-Residual dispersion is estimated from the pre-pandemic fit rather than assumed
-to be 1. The design-based standard errors describe sampling error only; real
-cycle-to-cycle movement in a national prevalence is larger than that, and
-pretending otherwise produces a counterfactual interval that is too narrow and
-therefore a "significant" COVID effect that is an artefact of the model.
+Residual dispersion is estimated from the pre-pandemic fit AND FLOORED AT 1.
+The reasoning for estimating it is that design-based standard errors describe
+sampling error only, and real cycle-to-cycle movement in a national prevalence
+could be larger; pretending otherwise would give a counterfactual interval too
+narrow and a "significant" COVID effect that is an artefact of the model.
+
+On this series the estimate comes out at 0.86 -- the series moves LESS than
+sampling error alone explains -- so the floor binds and the published interval
+is the design-based one. Both are in the artefact (`gap_ci` against
+`gap_ci_unfloored`) because which one is on the page is not something a reader
+should have to infer.
 """
 
 from __future__ import annotations
@@ -63,6 +69,12 @@ def wls_trend(x: np.ndarray, y: np.ndarray, se: np.ndarray) -> dict:
     dof = len(x) - 2
     # Dispersion > 1 means the series moves more than sampling error explains.
     phi = float((w * resid ** 2).sum() / dof)
+    # Floored at 1: never let an estimated dispersion below one NARROW the
+    # interval past the design-based one. Ten points cannot establish that a
+    # national series is more stable than its own sampling error, and a phi of
+    # 0.86 -- which is what this series gives -- would shrink the band on the
+    # strength of that claim. The floor binds here; `gap_ci_unfloored` records
+    # what it would have been.
     cov = XtWX_inv * max(phi, 1.0)
     return {"beta": beta, "cov": cov, "cov_unfloored": XtWX_inv * phi,
             "phi": phi, "dof": dof,

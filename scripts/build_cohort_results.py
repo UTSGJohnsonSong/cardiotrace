@@ -29,9 +29,13 @@ def main() -> None:
     cohort.to_csv(PROCESSED / "cohort_part3.csv.gz", index=False)
     strobe.to_csv(TABLES / "strobe_part3.csv", index=False)
 
-    # The report and the site both state these. Until now three of them were
-    # typed into render_report.py by hand, which is the one thing this project
-    # does not allow anywhere else.
+    # The report and the site both state these. They were typed into
+    # render_report.py by hand, which is the one thing this project does not
+    # allow anywhere else -- and this comment claimed that had been fixed for a
+    # release in which render_report.py never opened this file. It does now:
+    # five sites there interpolate n_participants, cvd_deaths, competing_deaths
+    # and person_years, so verify_clean_rebuild can see them drift.
+    # build_site.py reads max_followup_years.
     (ROOT / "reports" / "cohort_results.json").write_text(
         json.dumps({
             "n_participants":     int(len(cohort)),

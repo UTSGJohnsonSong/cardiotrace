@@ -21,14 +21,20 @@ Conditioning on measured hypertension alone inverts the answer. Someone who was
 diagnosed, put on medication and successfully controlled measures normal, so a
 denominator of "currently measures high" drops exactly the people the diagnostic
 pipeline worked for -- and drops more of them as treatment improves. In this
-series the share of the already-diagnosed who no longer measure high rises from
-50% to 68%, so the omission grows monotonically over precisely the window the
-trend is read from.
+series the share of the already-diagnosed who no longer measure high goes from
+47.5% in 1999-2000 to a peak of 65.5% in 2013-2014 and back to 56.4% by
+2017-2018. It grows over most of the auscultatory window and then falls for the
+last two cycles -- NOT monotonically, which is what an earlier version of this
+paragraph claimed with endpoints of 50% and 68%. The argument does not need
+monotonicity: the omission is large throughout and moves, which is enough to
+make a denominator that excludes those people the wrong one.
 
 Measured on that denominator, ascertainment looks flat: 50.0% to 50.8% across
 the auscultatory window. On the conventional NHANES awareness denominator --
-measured high OR currently taking antihypertensive medication -- it rises from
-63.7% to 69.2%. The two readings support opposite conclusions, and only the
+measured high OR currently taking antihypertensive medication -- it goes from
+64.4% to 69.7%, having peaked at 80.9% in 2013-2014. (63.7% and 69.2% were the
+values before this branch switched the ascertainment series to the examination
+weight; the endpoints were not recomputed at the time.) The two readings support opposite conclusions, and only the
 second one answers the question being asked.
 
 THE INSTRUMENT CHANGE IS THE CATCH
