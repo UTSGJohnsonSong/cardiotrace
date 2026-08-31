@@ -1,6 +1,28 @@
 # CardioTrace
 ### A prospective cohort study of cardiovascular mortality, built from linked NHANES cycles
 
+<p align="center">
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/">
+    <img src="https://img.shields.io/badge/READ%20THE%20STUDY%20ONLINE-utsgjohnsonsong.github.io%2Fcardiotrace-FF3366?style=for-the-badge&labelColor=0B0B0B" alt="Read the study online" />
+  </a>
+</p>
+
+<h3 align="center">
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/">https://utsgjohnsonsong.github.io/cardiotrace/</a>
+</h3>
+
+<p align="center">
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/">Overview</a> &nbsp;·&nbsp;
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/burden.html">Burden</a> &nbsp;·&nbsp;
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/pandemic.html">Pandemic</a> &nbsp;·&nbsp;
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/cohort.html">Cohort</a> &nbsp;·&nbsp;
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">Predictive modeling</a> &nbsp;·&nbsp;
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/methods.html">Methods</a> &nbsp;·&nbsp;
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/cardiotrace-report.html"><b>Full report</b></a>
+</p>
+
+<p align="center"><sub>Every figure and number below is reproduced there, with the code that produced it.</sub></p>
+
 ![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-198%20passing-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
@@ -178,7 +200,8 @@ CardioTrace/
 │   ├── make_survival_figures.py    # descriptive curves
 │   └── fit_survival_models.py      # fit, validate forward in time, calibrate
 ├── tests/                          # 198 regressions for defects that shipped
-├── docs/
+├── docs/                           # also the published site (GitHub Pages, /docs)
+│   ├── index.html …                # the six-page site + cardiotrace-report.html
 │   ├── research-design.md          # the protocol: estimands, node status, decision log
 │   ├── impact-tracking.md          # per defect: did it contaminate a published number?
 │   ├── methodology-review.md       # the audit that started the rework
@@ -279,3 +302,11 @@ rule ladder and variable crosswalk are disease-agnostic and carry over directly.
 | **CardioTrace** | Cardiovascular disease | ✅ Prospective cohort built |
 | NephroTrace | Kidney disease (CKD) | 📋 Planned |
 | GutTrace | Digestive & nutrition | 📋 Planned |
+
+---
+
+<p align="center">
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/">
+    <img src="https://img.shields.io/badge/READ%20THE%20STUDY%20ONLINE-utsgjohnsonsong.github.io%2Fcardiotrace-FF3366?style=for-the-badge&labelColor=0B0B0B" alt="Read the study online" />
+  </a>
+</p>
