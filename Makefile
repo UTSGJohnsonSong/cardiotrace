@@ -81,6 +81,8 @@ learning: cohort
 site:
 	$(PY) scripts/build_site.py
 	$(PY) scripts/render_readme.py
+	$(PY) scripts/render_handover.py
+	$(PY) scripts/render_research_summary.py
 
 # Three artefacts nothing else depends on, so they are their own target rather
 # than a silent tail on `descriptive`: the PCE cascade, the four-year weight

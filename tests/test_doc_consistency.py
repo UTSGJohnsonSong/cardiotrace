@@ -159,12 +159,17 @@ def test_the_complete_case_filter_costs_more_events_than_people(cascade):
 
 def test_the_readme_badge_and_its_prose_report_the_same_suite():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    badge = re.search(r"badge/tests-(\d+)%20passing", readme)
-    assert badge, "the README has no passing-tests badge to check"
+    badge = re.search(r"badge/tests-([^\s)]+)", readme)
+    assert badge, "the README has no test badge to check"
+    value = badge.group(1)
+    if value == "not%20run-lightgrey" or re.fullmatch(r"\d+%20failing-red", value):
+        return  # A failing/unavailable run makes no claim about a passing count.
+    count = re.fullmatch(r"(\d+)%20collected-brightgreen", value)
+    assert count, f"Unexpected badge state: {value}"
     prose = set(re.findall(r"\b(\d+) (?:tests|regressions)\b", readme))
     assert prose, "no prose mention of the test count; the sync has nothing to keep honest"
-    assert prose == {badge.group(1)}, (
-        f"badge says {badge.group(1)}, prose says {sorted(prose)}")
+    assert prose == {count.group(1)}, (
+        f"badge says {count.group(1)}, prose says {sorted(prose)}")
 
 
 # -- the redesigned cycle is not the eleventh of the same kind ----------------
@@ -470,11 +475,16 @@ def test_the_verified_commit_and_head_differ_only_by_the_receipt():
 def test_handover_status_is_generated_from_current_artefacts():
     """The cold-start document must not preserve the previous run's headline."""
     handover = (DOCS / "handover.md").read_text(encoding="utf-8")
-    summary = json.loads((ROOT / "reports/test_summary.json").read_text(encoding="utf-8"))
-    assert f"{summary['collected']} collected" in handover
+    from scripts.render_handover import render
+    assert render(handover) == handover, "Run scripts/render_handover.py"
     pce = json.loads((ROOT / "reports/pce_results.json").read_text(encoding="utf-8"))
     primary = pce["primary"]
     paired = next(x for x in primary["cascade"] if x["step"] == "paired_complete_all_arms")
     assert f"{paired['n']:,} people / {paired['cvd_deaths']} deaths" in handover
     assert "head-to-head is not implemented" not in handover
     assert "TRIPOD checklist and reproducibility package not written" not in handover
+
+
+def test_research_summary_matches_current_results():
+    from scripts.render_research_summary import build
+    assert (DOCS / "research-summary.md").read_text(encoding="utf-8") == build()

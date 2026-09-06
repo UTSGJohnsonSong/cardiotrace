@@ -102,3 +102,42 @@ def test_selection_propensity_targets_the_covariates_actually_fitted(monkeypatch
     with pytest.raises(RuntimeError, match="captured"):
         missingness.sensitivity(pd.DataFrame())
     assert seen == [aetiologic_covariates()]
+
+
+@pytest.mark.parametrize("value", ["", "NA", "inf"])
+def test_active_coefficient_cannot_silently_become_zero(tmp_path, value):
+    from src.pce import REFERENCE
+    table = pd.read_csv(REFERENCE, keep_default_na=False)
+    table.loc[0, "value"] = value
+    path = tmp_path / "broken.csv"
+    table.to_csv(path, index=False)
+    with pytest.raises(ValueError):
+        coefficients(path)
+
+
+def test_aj_curve_accounts_for_censoring_before_an_event():
+    # Equal weights: one censor first, then one CVD death among the three at
+    # risk, then a competing death. CIF=1/3, not the binary 1/4.
+    d = pd.DataFrame({"followup_years": [1., 2., 3., 12.],
+        "cvd_death": [0, 1, 0, 0], "competing_death": [0, 0, 1, 0], "wtmec2yr": 1.})
+    tab = decision_curve({}, d, 10, [.5], censoring="aalen_johansen").set_index("arm")
+    assert tab.loc["treat_all", "net_benefit"] == pytest.approx(-1/3)
+    assert tab.loc["treat_none", "net_benefit"] == 0
+
+
+@pytest.mark.parametrize("field,value", [("cvd_death", 7), ("competing_death", 1),
+    ("followup_years", -1), ("wtmec2yr", 0), ("wtmec2yr", np.nan)])
+def test_invalid_outcome_design_inputs_are_rejected(field, value):
+    d = pd.DataFrame({"followup_years": [1.], "cvd_death": [1],
+                      "competing_death": [0], "wtmec2yr": [1.]})
+    d.loc[0, field] = value
+    with pytest.raises(ValueError):
+        decision_curve({}, d, 10)
+
+
+@pytest.mark.parametrize("horizon", [0, -1, np.inf, np.nan])
+def test_invalid_horizon_is_rejected(horizon):
+    d = pd.DataFrame({"followup_years": [1.], "cvd_death": [1],
+                      "competing_death": [0], "wtmec2yr": [1.]})
+    with pytest.raises(ValueError, match="Horizon"):
+        decision_curve({}, d, horizon)

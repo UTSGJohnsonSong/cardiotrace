@@ -5,6 +5,7 @@ import json
 import subprocess
 import zipfile
 from pathlib import Path
+from check_receipt import check
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,6 +23,10 @@ def main():
         raise SystemExit("Write the snapshot outside the repository")
     if git("status", "--porcelain").strip():
         raise SystemExit("Commit all changes and the verification receipt before packaging")
+    try:
+        check(ROOT)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     if dest.exists():
         raise SystemExit(f"Refusing to overwrite an existing snapshot: {dest}")
     sha = git("rev-parse", "HEAD").decode().strip()

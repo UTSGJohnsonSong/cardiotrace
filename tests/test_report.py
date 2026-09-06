@@ -162,6 +162,32 @@ def _visible(path):
     return re.sub(r'data:image/[^"]*', "", h)
 
 
+def _zero_p_cells(html):
+    """Inspect p-value columns only; zero net benefit is a legitimate result."""
+    from html import unescape
+    def visible(cell):
+        return unescape(re.sub(r"<[^>]+>", "", cell)).strip().lower()
+    zeros = 0
+    for table in re.findall(r"<table\b[^>]*>(.*?)</table>", html, flags=re.S | re.I):
+        columns = []
+        for row in re.findall(r"<tr\b[^>]*>(.*?)</tr>", table, flags=re.S | re.I):
+            headers = re.findall(r"<th\b[^>]*>(.*?)</th>", row, flags=re.S | re.I)
+            if headers:
+                columns = [i for i, cell in enumerate(headers)
+                           if visible(cell) in {"p", "p-value", "p value"}]
+            cells = re.findall(r"<td\b[^>]*>(.*?)</td>", row, flags=re.S | re.I)
+            zeros += sum(i < len(cells) and bool(re.fullmatch(r"0(?:\.0+)?", visible(cells[i])))
+                         for i in columns)
+    return zeros
+
+
+def test_zero_net_benefit_is_not_mistaken_for_a_p_value():
+    html = ("<table><tr><th>Arm</th><th>Net benefit</th><th>p</th></tr>"
+            "<tr><td>None</td><td>0.00</td><td>&lt;0.0001</td></tr></table>")
+    assert _zero_p_cells(html) == 0
+    assert _zero_p_cells(html.replace("&lt;0.0001", "0.0000")) == 1
+
+
 def test_no_published_p_value_is_exactly_zero():
     """`fit_aetiologic` rounds p to four decimals, so anything below 5e-5
     becomes 0.0 -- and the Cox table was rendered from the CSV verbatim, so six
@@ -172,7 +198,7 @@ def test_no_published_p_value_is_exactly_zero():
     the fix is at the point of display.
     """
     offenders = {p.name: n for p in _published_pages()
-                 if (n := len(re.findall(r"<td>0\.0+</td>", _visible(p))))}
+                 if (n := _zero_p_cells(_visible(p)))}
     assert not offenders, f"p-value of exactly zero on: {offenders}"
 
 

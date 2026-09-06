@@ -27,7 +27,9 @@ completeness is independent of the outcome GIVEN the variables the completeness
 model sees. Nothing here can establish that, and the variables most likely to
 explain both missingness and death -- illness severity, access to care -- are
 exactly the ones a survey that lost them does not have. What it can do is show
-whether the answer is sensitive to the assumption at all. If the two agree, the
+whether the answer is sensitive to this specified weighting model.
+Reported Cox intervals condition on the estimated weights and omit uncertainty
+in fitting the completeness propensity. If the two agree, the
 complete-case result is at least not fragile to this particular correction; if
 they disagree, that is worth knowing before anyone quotes either.
 """
@@ -136,9 +138,9 @@ def ipcw(cohort: pd.DataFrame, features: list[str] | None = None,
     cap = np.nanpercentile(w[ok], 99) if trim else np.inf
     capped = int((w[ok] > cap).sum())
     out = pd.Series(np.minimum(w, cap), index=d.index, name="ipcw")
-    # Both bounds bind silently, and trimming shrinks the correction TOWARD the
-    # uncorrected estimate -- so a paragraph that rests on the two agreeing has
-    # to be able to say how much of the agreement the trim bought.
+    # Report both interventions on the weights. Capping changes influence;
+    # it does not guarantee movement toward the complete-case coefficient.
+    # The sensitivity also fits uncapped weights to show its actual effect.
     out.attrs.update(
         n_floored=floored, n_capped=capped,
         min_propensity=float(np.nanmin(p)),

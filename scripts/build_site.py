@@ -896,7 +896,7 @@ def build_evidence(f: dict) -> str:
     ]
     if "n_tests" in f:
         tiles.append(("Automated tests", num(f["n_tests"]),
-                      "the whole suite, green, on synthetic fixtures"))
+                      "collected tests; suite successful, conditional skips included"))
     if "followup_years" in f:
         tiles.append(("Mortality follow-up", f"{f['followup_years']} yr",
                       "record linkage to the National Death Index"))

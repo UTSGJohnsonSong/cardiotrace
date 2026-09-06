@@ -13,22 +13,25 @@ requirements with those constraints:
 
 ```sh
 python -m venv .venv
-# POSIX: .venv/bin/python; Windows: .venv/Scripts/python.exe
-python -m pip install -r requirements.txt -c requirements-analysis-lock.txt
+# Windows:
+.venv/Scripts/python.exe -m pip install -r requirements.txt -c requirements-analysis-lock.txt
+# POSIX equivalent: .venv/bin/python -m pip install -r requirements.txt -c requirements-analysis-lock.txt
 ```
 
 Activate the environment first, or replace each `python` below with its full
 path. `make` defaults to the Windows path; on POSIX use
 `make PY=.venv/bin/python <target>`. The lock is an analysis constraint file,
 not a claim that every optional notebook/warehouse dependency is frozen.
-`reports/reproduction_environment.json` records the exact interpreter and key
-package versions used for the tested local build.
+The `environment` field of each scope in `reports/verify_receipt.json` records
+the interpreter, platform and key package versions for that successful build.
 
 ## Offline checkout: tests and render consistency
 
 ```sh
 git clone https://github.com/UTSGJohnsonSong/cardiotrace.git
 cd cardiotrace
+# Create and activate the environment as above.
+python scripts/check_receipt.py
 python -m pytest -q
 python scripts/verify_clean_rebuild.py --render
 ```
@@ -37,7 +40,8 @@ Use a full-history clone. CI runs this scope on Linux. Tests requiring the local
 cohort skip on a fresh checkout; the receipt history check fails on a shallow
 CI clone. The renderer consumes committed result JSON/CSV and figures. README
 prose outside the Key Findings markers is retained. The handover status block
-is generated alongside the report and checked for drift.
+and structured research summary are generated alongside the report and checked
+for drift.
 
 ## Raw-data analysis
 
@@ -64,6 +68,7 @@ python scripts/render_report.py
 python scripts/build_site.py
 python scripts/render_readme.py
 python scripts/render_handover.py
+python scripts/render_research_summary.py
 ```
 
 The catalog and selection ledger enumerate the actual published URLs; do not
@@ -76,10 +81,15 @@ The benchmark adds paired PCE comparisons, model parameters and decision curves.
 
 Inspect and commit regenerated artefacts, then run
 `python scripts/verify_clean_rebuild.py --full` from a clean tree. It rebuilds
-the cohort from raw files as well as all six named stages including Part 4.
+raw-file hashes and the cohort from those files, then all six named stages including Part 4.
 It does not redownload data, validate source truth, run R, or test Postgres/dbt.
 Its receipt is written only on success. Commit only the receipt after that run;
 the receipt must refer to the same tree apart from the receipt file itself.
+`python scripts/check_receipt.py` fails closed on stale evidence, missing
+history or uncommitted analysis edits. CI and packaging run this gate.
+Local unit tests may skip stale receipt freshness while development is underway;
+that skip is not release approval. Never hand-edit `test_summary.json` to make
+a renderer green: fix the tests, rerun the full suite, then regenerate pages.
 PNG bytes are excluded because font/rendering environments vary; numerical
 tables and generated HTML are checked. The check compares tracked text exactly,
 so any cross-platform floating-point drift needs inspection rather than a
@@ -113,7 +123,9 @@ python scripts/package_reproduction.py --output /absolute/path/cardiotrace.zip
 
 The archive contains tracked files and an additional SHA-256 manifest naming
 the source commit. It refuses uncommitted tracked changes or untracked source
-files so the snapshot has an unambiguous provenance. It contains no raw data,
+files, as well as a stale full receipt, so the snapshot has an unambiguous provenance. It contains no raw data,
 virtual environment or credentials. The script refuses to write inside the
-repository. Unresolved investigator disclosures and scientific limitations are
+repository. The ZIP has no Git history: use the manifest commit with a full
+Git clone for receipt ancestry checks; the extracted files can run analyses.
+Unresolved investigator disclosures and scientific limitations are
 listed in `docs/tripod-checklist.md`; a package is not evidence of clinical readiness.

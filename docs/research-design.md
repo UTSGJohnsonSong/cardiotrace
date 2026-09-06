@@ -35,19 +35,36 @@
 | 8 | 分层架构 | 🔒 | `dbt/models/staging/` → `dbt/models/mart/` · `src/etl.py` |
 | 9 | 仪器与口径桥接 | 🔒 | `src/biomarkers.py`（`CREATININE_CALIBRATION`，CDC 官方系数） |
 | 10 | 编码决策 | 🔒 | `data/build_variable_crosswalk.py` · `src/cohort.py`（每条 CASE WHEN 附依据） |
-| 11 | 缺失机制与插补 | 🔄 | `src/missingness.py` · `reports/tables/part3_missing_sensitivity.csv`。**未收口**：IPCW 处理的是截尾，完整病例的选择偏差仍未解决 |
+| 11 | 缺失机制与插补 | 🔒 | `src/missingness.py` · `reports/tables/part3_missing_sensitivity.csv`。E2 实际协变量的完整性加权敏感性已完成，含未截尾权重对照；MAR、positivity 和 MNAR 限制保留 |
 | 12 | 抽样设计的正确处理 | 🔒 | `src/descriptive.py`（Taylor 线性化 + 设计自由度 t 分位） · `scripts/crosscheck_survey.R`（`svycoxph` 独立复核）。**已知偏离**：1999–2002 未用 4 年权重，代价已量化，见 `scripts/check_fouryear_weights.py` |
 | 13 | 描述性分析 | 🔒 | `src/descriptive.py` · `src/changepoint.py` · `src/ascertainment.py` |
 | 14 | 模型与验证策略 | 🔒 | `src/models.py` · `scripts/fit_survival_models.py`（按周期前向验证） |
-| 15 | 校准、基准、敏感性 | 🔄 | 协议已锁定（`docs/pce-benchmark.md` §3.5，四条）。**未收口**：PCE 头对头尚未实现 |
-| 16 | 报告规范与可重复包 | 🔄 | `scripts/render_report.py` · `reports/tables/strobe_part3.csv`。**未收口**：TRIPOD 清单与可重复包尚未成文 |
+| 15 | 校准、基准、敏感性 | 🔒 | `docs/pce-benchmark.md` §3.5 · `src/pce.py` · `reports/pce_results.json`。配对历史基准、死亡风险适配、探索性 DCA 已实现；终点不一致，不是严格校准验证 |
+| 16 | 报告规范与可重复包 | 🔄 | `docs/tripod-checklist.md` · `docs/reproducibility.md` · `scripts/package_reproduction.py`。技术交付已完成；作者、伦理、资金、利益冲突、注册和患者参与声明需研究者补充 |
 
 ---
+
+## 2026-09-06 closeout decisions (recorded before the corrective code)
+
+The final audit found delivery defects rather than evidence of superiority:
+the PCE paired differences include zero at both horizons. Retain the locked
+comparator and estimands. Make the handover status a generated view of committed
+results; record interpreter/package versions in the full rebuild receipt itself.
+Enforce receipt ancestry and an unchanged tree (apart from the receipt) in CI
+and packaging. Development tests may still skip stale verification evidence.
+Display collected test counts as collected, including skipped tests, and permit
+the renderer to recover from a failing badge without editing test evidence.
+Restrict the zero-p-value regression to actual p-value columns: a decision-curve
+net benefit of zero is a valid result and must stay visible. Add fail-loud
+validation for omitted active PCE coefficients and invalid outcome/design inputs.
+Completeness-weight sensitivity intervals condition on estimated weights; they
+do not include propensity-estimation uncertainty, and capping need not move a
+coefficient toward its complete-case estimate. No new clinical claim is made.
 
 ## 2026-09-06 implementation decisions (recorded before fitting)
 
 The takeover audit found that `src/missingness.py::ipcw` already models
-**completeness**, not censoring. The node 11 wording above is historical error,
+**completeness**, not censoring. The former node 11 wording was a historical error,
 not evidence that this sensitivity did not exist. Its exposure sensitivity used
 the prediction-feature completeness mask for an E2 fit; correct the propensity
 target to the exact covariates passed to that fit. Retain the existing floor and

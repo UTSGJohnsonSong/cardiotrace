@@ -156,12 +156,27 @@ if learn:
     form = a["deltas"]["gbm_p"]
     sel = learn["screen"]["selected"]
     lines.append(
-        f"- **What limits that model is the variable set, not its form.** A screen of "
+        f"- **An additional predictor helped in the tested model comparisons.** A screen of "
         f"{learn['screen']['n_candidates']} laboratory candidates against the eleven "
         f"selected {len(sel)} ({', '.join('`' + v + '`' for v in sel) or 'none'}), worth "
         f"{gain['delta']:+.4f} in C (95% CI {gain['lo']:+.4f} to {gain['hi']:+.4f}). "
         f"Gradient boosting on the same eleven is worth {form['delta']:+.4f} — worse than "
         f"a Cox model on age and sex alone.")
+
+pce = json.loads((REPORTS / "pce_results.json").read_text(encoding="utf-8"))["primary"]
+pce_results = []
+for horizon, test in pce["tests"].items():
+    a, b = [test["metrics"][arm] for arm in ["1a_published_ascvd", "3_cardiotrace_refit"]]
+    delta = test["delta_c_vs_published_pce"]["3_cardiotrace_refit"]
+    pce_results.append(
+        f"{horizon}: C {b['c']:.4f} vs {a['c']:.4f}, paired ΔC "
+        f"{delta['delta']:+.4f} (95% interval {delta['lo']:+.4f} to {delta['hi']:+.4f})")
+lines.append(
+    "- **The historical PCE benchmark does not establish CardioTrace superiority.** "
+    + "; ".join(pce_results) + ". Each comparison uses the same participants for "
+    "both arms. PCE targets hard ASCVD; this study observes CVD mortality, so these "
+    "are prognostic ranking comparisons, not same-endpoint clinical validation. "
+    "See the [research summary](docs/research-summary.md).")
 
 lines += ["", "_Figures in [`reports/figures/`](reports/figures). Numbers in "
           "[`reports/descriptive_results.json`](reports/descriptive_results.json), "
@@ -183,7 +198,7 @@ summary = REPORTS / "test_summary.json"
 if summary.exists():
     t = json.loads(summary.read_text(encoding="utf-8"))
     if t["failed"] == 0 and t["exit_status"] == 0:
-        readme = _set_badge(readme, f"{t['collected']}%20passing-brightgreen")
+        readme = _set_badge(readme, f"{t['collected']}%20collected-brightgreen")
         # The badge was not the only place the count appeared. Three sentences
         # of prose carried a hand-typed 85 while the badge said 128, so fixing
         # only the badge would have left the front page disagreeing with itself
@@ -203,7 +218,7 @@ if summary.exists():
                 "TEST_COUNT_IN_PROSE no longer matches them. Fix one or the "
                 "other rather than shipping a badge that disagrees with the "
                 "body text.")
-        print(f"test badge: {t['collected']} passing "
+        print(f"test badge: {t['collected']} collected (suite successful) "
               f"({n_prose} prose mention(s) synced)")
     else:
         # Leaving the old badge in place asserts a green count over a red suite,

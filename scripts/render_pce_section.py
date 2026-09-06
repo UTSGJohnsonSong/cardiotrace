@@ -47,7 +47,7 @@ def build():
             vals = d.set_index("arm").net_benefit
             rows.append(f"<tr><td>{horizon}y</td><td>{100*threshold:.1f}%</td>"
                         + "".join(
-                            f"<td>{'&mdash;' if arm == 'treat_none' else f'{1000*vals[arm]:.2f}'}</td>"
+                            f"<td>{1000*vals[arm]:.2f}</td>"
                             for arm in ["1b_mortality_recalibration", "2_same_inputs_refit",
                                         "3_cardiotrace_refit", "treat_all", "treat_none"])
                         + "</tr>")

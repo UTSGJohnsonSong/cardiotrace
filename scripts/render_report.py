@@ -30,7 +30,7 @@ FIG = ROOT / "reports" / "figures"
 TABLES = ROOT / "reports" / "tables"
 OUT = ROOT / "reports" / "cardiotrace-report.html"
 
-BUILD_DATE = "2026-08-23"
+BUILD_DATE = "2026-09-06"
 DATA_CUTOFF = "2019-12-31"
 
 

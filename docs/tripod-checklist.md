@@ -10,7 +10,7 @@ to the repository root. Items requiring investigator declarations are left open.
 | Item | Evidence and disposition |
 |---|---|
 | 1 | `README.md` and the report identify prospective CVD-mortality modelling in NHANES adults; a journal manuscript title remains to be supplied. |
-| 2 | `docs/advisor-briefing.md` provides a narrative briefing; a structured submission abstract is not supplied. |
+| 2 | `docs/research-summary.md` supplies a generated structured research summary; journal-specific formatting and investigator declarations remain. |
 | 3a–c | `docs/research-design.md` defines the rationale, target and inequality context. This is research for methodological appraisal; no deployed treatment pathway or intended patient use is established. |
 | 4 | `docs/research-design.md` separates burden, pandemic deviation, prospective modelling and learning comparisons. |
 | 5a–b | `src/cohort.py`, `src/descriptive.py`, `data/catalog/`, and the mortality manifest specify sources, survey cycles and follow-up cutoff. Temporal splits are in `src/models.py`. |
