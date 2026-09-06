@@ -39,6 +39,7 @@ DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 
 from src.descriptive import DESC_CYCLES, display_cycle  # noqa: E402
+from scripts.tableau_atlas import PANELS, WORKBOOK, validate as validate_atlas  # noqa: E402
 
 N_CYCLES = len(DESC_CYCLES)
 
@@ -80,7 +81,7 @@ AUTHOR_STATEMENT = (
 # TABLEAU_VIZ is the workbook path out of a Tableau Public share URL, e.g.
 # "CardioTraceExplorer/Dashboard1". Publishing is a manual step -- it needs a
 # Tableau account -- and docs/tableau-dashboard.md is the recipe. Setting it
-# here adds the Explore page and its nav entry; leaving it empty adds neither.
+# here adds an interactive embed above the always-available reviewed previews.
 RESUME_URL = "assets/Zekun_Song_Resume.pdf"
 LINKEDIN_URL = "https://www.linkedin.com/in/zekun-song/"
 EMAIL = "zekun.song@mail.utoronto.ca"
@@ -123,15 +124,14 @@ PAGES = {
 METHODS = ("methods.html", "Methods",
            "The comparison against the prespecified risk-score benchmark, the data "
            "sources, and what was done to them.")
-EXPLORE = ("explore.html", "Explore",
-           "The estimates the report had no room for: six conditions across "
-           f"{N_CYCLES} cycles, by age band and by race and ethnicity.")
+EXPLORE = ("explore.html", "Visual atlas",
+           "Three Tableau dashboards connecting population burden, mortality risk "
+           "and model evidence to the research report.")
 
 NAV = [("index.html", "Overview"), ("burden.html", "Burden"),
        ("pandemic.html", "Pandemic"), ("cohort.html", "Cohort"),
        ("learning.html", "Predictive Modeling"), ("methods.html", "Methods")]
-if TABLEAU_VIZ:
-    NAV.append((EXPLORE[0], EXPLORE[1]))
+NAV.append((EXPLORE[0], EXPLORE[1]))
 
 EXTRA_CSS = """
 /* ── site chrome: the only styling the single-file report does not need ── */
@@ -389,7 +389,15 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   border: 1px solid var(--rule); border-radius: 3px; padding: 14px;
   overflow-x: auto;
 }
-.vizwrap > div { min-width: 1000px; }
+.vizwrap > div { min-width: 1380px; }
+.atlas-links { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 20px 0;
+  font-family: var(--sans); font-size: 15px; }
+.atlas-panel { padding-top: 42px; }
+.atlas-panel img { display: block; width: 100%; height: auto;
+  border: 1px solid var(--rule); background: #fff; }
+.atlas-panel figure { margin: 22px 0; }
+.atlas-note { border-left: 3px solid var(--series); padding: 12px 20px;
+  background: var(--plate); font-family: var(--sans); font-size: 15px; }
 
 /* --- footer -------------------------------------------------------------- */
 .pagefoot {
@@ -668,10 +676,9 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
              f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
              f"set or by the model form?")),
         "explore.html": (
-            f"Explore &mdash; CardioTrace | {AUTHOR}",
-            f"Every published estimate, pivotable: six conditions across "
-            f"{f['n_cycles']} NHANES cycles, by age band and by race and "
-            f"ethnicity, with design-based intervals."),
+            f"Tableau visual atlas &mdash; CardioTrace | {AUTHOR}",
+            "Three reviewed Tableau dashboards: population burden, mortality risk "
+            "and model evidence, with report links and an editable workbook."),
         "cardiotrace-report.html": (
             f"Full report &mdash; CardioTrace | {AUTHOR}",
             f"The complete CardioTrace write-up in one file: every section, table "
@@ -813,6 +820,7 @@ def build_hero(f: dict) -> str:
         (LINKEDIN_URL, "LinkedIn", ""),
         (REPO_URL, "GitHub", ""),
         ("cardiotrace-report.html", "Read the research", ""),
+        ("explore.html", "Visual atlas", ""),
     ]
     links = "".join(
         '<a href="{}"{}>{}</a>'.format(href, f' class="{cls}"' if cls else "", text)
@@ -1005,11 +1013,9 @@ def build_index(style: str, sections: dict[str, str],
     """Overview: who made it, what it took, and what each part found."""
     title, desc = meta["index.html"]
     seen: set[str] = set()
-    explore = ""
-    if TABLEAU_VIZ:
-        explore = ('<p class="measure" style="margin-top:14px">Every published '
-                   f'estimate is also <a href="{EXPLORE[0]}">pivotable</a> &mdash; '
-                   'the cells these three pages had no room for.</p>')
+    explore = ('<p class="measure" style="margin-top:14px">Follow the results through '
+               f'three <a href="{EXPLORE[0]}">Tableau dashboards</a>, with '
+               'high-resolution previews and an editable workbook.</p>')
     body = f"""{build_hero(f)}
 
 {build_evidence(f)}
@@ -1033,61 +1039,79 @@ def build_index(style: str, sections: dict[str, str],
     return page(title, desc, "", style, "index.html", body)
 
 
-def build_explore(style: str, f: dict, meta: dict) -> str:
-    """The Tableau workbook, on a page of its own.
+def atlas_report_link(filename: str) -> str:
+    for anchor, _, title, _, links in PANELS:
+        if filename in [link[0] for link in links]:
+            return (f'<p class="atlas-note"><a href="explore.html#{anchor}">'
+                    f'View {title.lower()} in the Tableau atlas &rarr;</a></p>')
+    return ""
 
-    Its own page for one reason. The embed loads a script from public.tableau.com,
-    so this becomes the single page on the site that makes an external request
-    and depends on a third party staying up. Every other page, including the
-    emailed single-file report, stays self-contained -- and stays intact if
-    Tableau Public changes its embed API or withdraws the workbook.
-    """
+
+def build_explore(style: str, f: dict, meta: dict) -> str:
+    """A report-linked gallery, with an optional published Tableau embed."""
+    audit = validate_atlas()
     title, desc = meta["explore.html"]
     fname, label, stand = EXPLORE
-    body = f"""<header class="masthead"><p class="eyebrow">CardioTrace</p>
-<h1>{label}</h1><p class="standfirst measure">{stand}</p></header>
-
-<section>
-  <div class="sec-head"><div class="sec-num">7</div>
-  <h2>The cells the report had no room for</h2></div>
-  <div class="body-indent">
-    <p class="lede measure">Each of the three analyses chooses one view, because
-    an argument needs a spine. The estimates underneath cover six conditions,
-    {f['n_cycles']} cycles, six age bands and five race-ethnicity groups. This
-    page exists so a reader can ask a question those views did not.</p>
-
-    <div class="vizwrap">
-      <div class="tableauPlaceholder" id="viz-cardiotrace">
-        <object class="tableauViz" style="display:none">
-          <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F">
-          <param name="embed_code_version" value="3">
-          <param name="site_root" value="">
-          <param name="name" value="{TABLEAU_VIZ}">
-          <param name="tabs" value="no">
-          <param name="toolbar" value="yes">
-          <param name="showAppBanner" value="false">
-        </object>
-      </div>
-    </div>
-    <script src="https://public.tableau.com/javascripts/api/viz_v1.js"></script>
-
-    <div class="note">
-      <b>Read the intervals with the design in mind.</b> Age-band rows carry a
-      crude rate and no interval: an age-specific rate has nothing left to
-      standardise, and no design-based interval was computed for those cells.
-      Where an interval does appear it is design-based, and the honest measure
-      of how much independent information a cell holds is its variance-unit
-      count, not its sample size.
-    </div>
-
-    <p class="measure">The workbook reads one file,
-    <code>data/tableau/cardiotrace_prevalence.csv</code>, written by
-    <code>scripts/build_tableau_extract.py</code>. That script copies values out
-    of <code>reports/tables/</code> and recomputes nothing, so this page cannot
-    disagree with the report; if it ever does, the cause is that one file rather
-    than two analyses that drifted apart.</p>
+    sections = []
+    for anchor, image, panel_title, description, links in PANELS:
+        report_links = "".join(f'<a href="{url}">{text} &rarr;</a>' for url, text in links)
+        sections.append(f"""<section class="atlas-panel" id="{anchor}" aria-labelledby="{anchor}-title">
+  <h2 id="{anchor}-title">{panel_title}</h2>
+  <p class="measure">{description}</p>
+  <nav class="atlas-links" aria-label="Report chapters for {panel_title.lower()}">{report_links}</nav>
+  <figure><a href="tableau/{image}" aria-label="Open full-resolution {panel_title.lower()} dashboard">
+    <img src="tableau/{image}" width="2760" height="1880" loading="lazy" alt="{attr(description)}"></a>
+    <figcaption>Reviewed Tableau preview. <a href="tableau/{image}" download>Download PNG</a>
+    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
+</section>""")
+    jump = "".join(f'<a href="#{anchor}">{panel_title}</a>' for anchor, _, panel_title, _, _ in PANELS)
+    embed = ""
+    if TABLEAU_VIZ:
+        embed = f"""<div class="vizwrap" aria-label="Interactive Tableau workbook">
+  <div class="tableauPlaceholder" id="viz-cardiotrace">
+    <object class="tableauViz" style="display:none">
+      <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F">
+      <param name="embed_code_version" value="3"><param name="site_root" value="">
+      <param name="name" value="{attr(TABLEAU_VIZ)}"><param name="tabs" value="yes">
+      <param name="toolbar" value="yes"><param name="showAppBanner" value="false">
+    </object>
   </div>
-</section>"""
+</div><script src="https://public.tableau.com/javascripts/api/viz_v1.js"></script>
+<p class="measure">The interactive view loads from Tableau Public. The previews and workbook below remain available independently.</p>"""
+    body = f"""<header class="masthead"><p class="eyebrow">CardioTrace &middot; Tableau research atlas</p>
+<h1>{label}</h1><p class="standfirst measure">{stand}</p>
+<nav class="atlas-links" aria-label="Atlas downloads">
+  <a href="tableau/{WORKBOOK}" download>Download Tableau workbook</a>
+  <a href="cardiotrace-report.html#tableau-atlas">Read the full report</a>
+  <a href="#using-the-workbook">Workbook guide</a>
+</nav></header>
+<p class="atlas-note">The images below are high-resolution previews. Open the downloaded workbook in
+Tableau Public or Tableau Desktop for hover details and editing. It contains the aggregate data;
+no connection to the research environment is needed.</p>
+<nav class="atlas-links" aria-label="Dashboards">{jump}</nav>
+{embed}
+{''.join(sections)}
+<section id="using-the-workbook" aria-labelledby="workbook-guide"><h2 id="workbook-guide">Use the editable workbook</h2>
+<p class="measure">Open the downloaded <code>.twbx</code> file in Tableau Public or Tableau Desktop.
+Choose a dashboard from the bottom tabs, press F7 for presentation mode, and hover a mark for exact values,
+intervals and source details. The workbook includes the aggregate data and twelve editable worksheets.
+Save edits to your computer from the File menu.</p>
+<p class="measure">For a slide or document, use each dashboard's full-resolution PNG link.
+For offline reading, save the <a href="cardiotrace-report.html#tableau-atlas">complete HTML report</a>;
+all three previews are embedded in that file.</p></section>
+<section aria-labelledby="atlas-evidence"><h2 id="atlas-evidence">How these views connect to the evidence</h2>
+<p class="measure">The atlas uses the report's committed result tables and JSON, from research version
+<a href="{REPO_URL}/tree/{audit['source_commit']}">{audit['source_commit'][:7]}</a>.
+The site build checks their hashes against the reviewed workbook manifest. A changed source stops publication
+until the visual companion is updated and reviewed.</p>
+<p class="measure">Analysis samples and survey weights differ across the study parts. Intervals show uncertainty;
+PCE remains a prespecified historical ranking benchmark with a different endpoint. Part 4 uses a separate common sample,
+and decision curves are exploratory. Follow each dashboard's report links for the full methods and limitations.</p>
+<nav class="atlas-links" aria-label="Source and verification records">
+<a href="tableau/data-audit.json">Data sources and transformations</a>
+<a href="tableau/verification.json">Workbook verification</a>
+<a href="{REPO_URL}/blob/main/docs/tableau-dashboard.md">Maintenance and reproduction</a>
+</nav></section>"""
     return page(title, desc, fname, style, fname, body)
 
 
@@ -1132,6 +1156,7 @@ def chrome_single_file(html: str, meta: dict) -> str:
 
 
 def main() -> None:
+    validate_atlas()
     html = read_report()
     style = extract_style(html)
     sections = split_sections(html)
@@ -1157,7 +1182,7 @@ def main() -> None:
         body = page(title, desc, fname, style, fname,
                     f'<header class="masthead"><p class="eyebrow">CardioTrace</p>'
                     f'<h1>{label}</h1><p class="standfirst measure">{stand}</p></header>'
-                    f'{contents(sec)}{sec}',
+                    f'{atlas_report_link(fname)}{contents(sec)}{sec}',
                     prev_next=f'<a href="{order[i + 1]}">Next &rarr;</a> &nbsp;&middot;&nbsp; ')
         (DOCS / fname).write_text(externalise_images(body), encoding="utf-8")
         written.append(fname)
@@ -1169,13 +1194,12 @@ def main() -> None:
     body = page(title, desc, fname, style, fname,
                 f'<header class="masthead"><p class="eyebrow">CardioTrace</p>'
                 f'<h1>{label}</h1><p class="standfirst measure">{stand}</p></header>'
-                f'{contents(sec)}{sec}')
+                f'{atlas_report_link(fname)}{contents(sec)}{sec}')
     (DOCS / fname).write_text(externalise_images(body), encoding="utf-8")
     written.append(fname)
 
-    if TABLEAU_VIZ:
-        (DOCS / EXPLORE[0]).write_text(build_explore(style, f, meta), encoding="utf-8")
-        written.append(EXPLORE[0])
+    (DOCS / EXPLORE[0]).write_text(build_explore(style, f, meta), encoding="utf-8")
+    written.append(EXPLORE[0])
 
     # Deliberately NOT externalise_images: this is the copy a reader saves or
     # forwards, and the index promises it "carries every section, table and
@@ -1193,8 +1217,8 @@ def main() -> None:
     if not RESUME_URL or not LINKEDIN_URL:
         print("  NOTE: RESUME_URL / LINKEDIN_URL are empty; those links were omitted.")
     if not TABLEAU_VIZ:
-        print("  NOTE: TABLEAU_VIZ is empty; the Explore page was not built. "
-              "See docs/tableau-dashboard.md.")
+        print("  Tableau: reviewed previews and workbook download published; "
+              "no Tableau Public embed configured.")
     for m in f["missing"]:
         print(f"  NOTE: evidence tile omitted -- {m}")
 

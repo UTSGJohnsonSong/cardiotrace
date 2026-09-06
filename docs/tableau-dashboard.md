@@ -1,4 +1,61 @@
-# Building the interactive explorer in Tableau Public
+# Tableau research atlas: publication and maintenance
+
+## Current delivered atlas
+
+The delivered atlas has **three dashboards and twelve native worksheets**, covering
+population burden, mortality risk and model evidence. [Open the atlas](explore.html)
+or [download the portable workbook](tableau/cardiotrace-atlas.twbx). The report
+chapters link to the corresponding dashboard, and the atlas links back to their
+methods and limitations. The complete HTML report also embeds all three preview
+images so that a saved copy remains self-contained.
+
+The workbook and reviewed PNGs live in `docs/tableau/`. They read published
+aggregate CSV/JSON results, not participant records. `data-audit.json` records
+the source research version and input hashes; `verification.json` records the
+native save/reopen check, exact extract comparison and artifact hashes.
+The original source digests are retained; `source_sha256_lf` normalises only
+CRLF to LF so that a Windows review and Linux CI check the same source text.
+`scripts/tableau_atlas.py` runs during report/site generation and rejects a changed
+source, an altered reviewed image/workbook or a non-portable data connection.
+This guard also runs in tests and the render rebuild in CI.
+
+The website publishes previews and a downloadable workbook even without a
+Tableau Public account. `TABLEAU_VIZ` in `scripts/build_site.py` remains optional:
+only set it after verifying a real, published view. Without it, no Tableau
+script loads and the page clearly identifies its images as previews.
+
+### Rebuilding a changed atlas
+
+1. Install the optional `requirements-tableau.txt` dependencies in a separate
+   environment. Normal analysis, site builds and CI do not need them.
+2. Run `python scripts/build_tableau_atlas.py --out build/tableau`. Its frozen
+   source check permits documentation commits, but rejects changed result bytes.
+   If the research changes, review the source version, KPI text, captions,
+   scientific limitations and fixed axes together before updating that check.
+3. Open the generated TWBX in Tableau, inspect all dashboards and tooltips,
+   save locally and reopen the packaged file. Check that every connection is
+   embedded and compare each Hyper table with the generated extract.
+4. Capture the three presentation canvases. Update the workbook, previews and
+   audit/verification records in `docs/tableau/` as one reviewed set. Do not
+   refresh a source hash solely to silence a stale-dashboard failure.
+5. Run the suite, regenerate the report/site/README/handover/summary, commit
+   the changes, and run `scripts/verify_clean_rebuild.py --full`. Commit only
+   the new receipt afterward. CI and the receipt gate must pass before merging.
+
+The generation script produces the initial native workbook; the committed
+version is then saved by Tableau. Native XML and thumbnails may differ, so
+exact numerical extract comparison and visual review are separate checks.
+
+## Historical explorer proposal — not the delivered atlas
+
+The original prevalence-only proposal below is retained as design history.
+Its four sheets, filters and 1000 × 720 sizing were not implemented as specified;
+the delivered 1380 × 940 atlas follows the broader report. The original
+187-cell prevalence extract remains a source, alongside the mortality and model
+results listed in the current manifest. Do not describe the proposal's filters
+as features of the delivered workbook.
+
+### Original proposal
 
 The report chooses six views because an argument needs a spine. The estimates
 underneath cover far more: six conditions, eleven cycles, six age bands and five

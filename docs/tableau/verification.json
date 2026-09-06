@@ -1,0 +1,122 @@
+{
+  "verified_at_utc": "2026-09-06T08:03:20.323441+00:00",
+  "source_commit": "9517c6fbcd8a8e4f42ac9356e27f539689d64322",
+  "research_worktree_clean": true,
+  "workbook_sha256": "8b8d79d807bee844152ae40e7f66250f076a9f38499e79bde940f698d75bf661",
+  "tableau_version": "Tableau Public 2026.2",
+  "native_saved": true,
+  "final_output_reopened_in_tableau": true,
+  "all_three_dashboards_rendered": true,
+  "tooltip_visually_verified": true,
+  "preview_method": "Screen capture of the actual Tableau presentation canvas",
+  "dashboards": [
+    "01  Population burden",
+    "02  Mortality risk",
+    "03  Model evidence"
+  ],
+  "worksheets": 12,
+  "embedded_extract": "Data/1871418266/CardioTrace.hyper",
+  "all_data_connections_embedded": true,
+  "rows": 334,
+  "tables": [
+    {
+      "table": "Extract.Chart1",
+      "sheet": "Population trend",
+      "rows": 22,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart2",
+      "sheet": "Latest race intervals",
+      "rows": 12,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart3",
+      "sheet": "Age profile",
+      "rows": 66,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart4",
+      "sheet": "Condition trends",
+      "rows": 66,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart5",
+      "sheet": "Blood pressure gradient",
+      "rows": 5,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart6",
+      "sheet": "Adjusted associations",
+      "rows": 21,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart7",
+      "sheet": "Calibration 10y",
+      "rows": 12,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart8",
+      "sheet": "Calibration 5y",
+      "rows": 12,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart9",
+      "sheet": "Paired discrimination",
+      "rows": 8,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart10",
+      "sheet": "Paired differences",
+      "rows": 18,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart11",
+      "sheet": "Part 4 learning",
+      "rows": 12,
+      "all_values_match": true
+    },
+    {
+      "table": "Extract.Chart12",
+      "sheet": "Decision curves 10y",
+      "rows": 80,
+      "all_values_match": true
+    }
+  ],
+  "source_hashes_match": true,
+  "previews": {
+    "01-population-burden.png": {
+      "size": [
+        2760,
+        1880
+      ],
+      "sha256": "579e71a132ac5f78e3eb4882b2456f888ee4fdaedc4a084759d5785b29ee01ba"
+    },
+    "02-mortality-risk.png": {
+      "size": [
+        2760,
+        1880
+      ],
+      "sha256": "7030810e0ee1f5d2d80be8586e30dab0e729a71e65a952e25b9d88d8f8f39ede"
+    },
+    "03-model-evidence.png": {
+      "size": [
+        2760,
+        1880
+      ],
+      "sha256": "475a98a3ab1d680ea6b7648b79db7df198f2fac5e27fa2696d91685bd377840c"
+    }
+  },
+  "no_participant_data": true,
+  "no_model_refitting": true,
+  "tableau_public_upload": false
+}

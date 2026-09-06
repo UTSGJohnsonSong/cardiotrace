@@ -1,0 +1,3 @@
+# Optional: generating the native workbook; site builds and CI do not need these.
+tableauhyperapi==0.0.26479
+lxml>=4.9.0
