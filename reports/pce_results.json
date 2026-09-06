@@ -1,0 +1,412 @@
+{
+  "protocol": "docs/pce-benchmark.md \u00a73.5; research-design.md 2026-09-06 implementation decisions",
+  "endpoint_warning": "Prespecified historical prognostic benchmark. Published PCE predicts hard ASCVD; outcomes here are CVD mortality. No same-endpoint validation or clinical utility claim.",
+  "bootstrap": "200 paired PSU replicates within strata; conditional on training fits",
+  "five_year_pce": "Original ten-year PCE score used only for ranking; no five-year hard-ASCVD risk is estimated.",
+  "primary": {
+    "cascade": [
+      {
+        "step": "published_cohort",
+        "n": 20736,
+        "cvd_deaths": 925
+      },
+      {
+        "step": "pce_complete_all_ethnicities",
+        "n": 18744,
+        "cvd_deaths": 824
+      },
+      {
+        "step": "ethnicity_eligible",
+        "n": 12573,
+        "cvd_deaths": 629
+      },
+      {
+        "step": "paired_complete_all_arms",
+        "n": 12413,
+        "cvd_deaths": 600
+      }
+    ],
+    "n_train": 4126,
+    "train_cvd_deaths": 336,
+    "train_competing_deaths": 922,
+    "train_cycles": [
+      "1999-2000",
+      "2001-2002",
+      "2003-2004"
+    ],
+    "tests": {
+      "10y": {
+        "cycles": [
+          "2005-2006",
+          "2007-2008"
+        ],
+        "metrics": {
+          "1a_published_ascvd": {
+            "c": 0.8516884719249971,
+            "c_unweighted": 0.8072107535740987,
+            "auc_horizon": 0.8493592882591647,
+            "n": 3302,
+            "n_evaluable": 3302,
+            "events": 160,
+            "events_at_horizon": 108,
+            "mean_score_pct": 7.849452253750881,
+            "observed_cvd_mortality_pct": 2.154207152290773
+          },
+          "1b_mortality_recalibration": {
+            "c": 0.8484988352990034,
+            "c_unweighted": 0.8035672327245541,
+            "auc_horizon": 0.8463761544185924,
+            "n": 3302,
+            "n_evaluable": 3302,
+            "events": 160,
+            "events_at_horizon": 108,
+            "mean_score_pct": 1.9645915332123614,
+            "observed_cvd_mortality_pct": 2.154207152290773
+          },
+          "2_same_inputs_refit": {
+            "c": 0.8463858062215429,
+            "c_unweighted": 0.7981050029752369,
+            "auc_horizon": 0.842988171780761,
+            "n": 3302,
+            "n_evaluable": 3302,
+            "events": 160,
+            "events_at_horizon": 108,
+            "mean_score_pct": 2.015323147099963,
+            "observed_cvd_mortality_pct": 2.154207152290773
+          },
+          "3_cardiotrace_refit": {
+            "c": 0.8405852244018405,
+            "c_unweighted": 0.7972292153003463,
+            "auc_horizon": 0.8372186772976558,
+            "n": 3302,
+            "n_evaluable": 3302,
+            "events": 160,
+            "events_at_horizon": 108,
+            "mean_score_pct": 2.050693758055034,
+            "observed_cvd_mortality_pct": 2.154207152290773
+          }
+        },
+        "delta_c_vs_published_pce": {
+          "1b_mortality_recalibration": {
+            "delta": -0.0032,
+            "lo": -0.0072,
+            "hi": 0.0011,
+            "half_width": 0.0041,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "2_same_inputs_refit": {
+            "delta": -0.0053,
+            "lo": -0.0178,
+            "hi": 0.0078,
+            "half_width": 0.0128,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "3_cardiotrace_refit": {
+            "delta": -0.0111,
+            "lo": -0.0213,
+            "hi": 0.0004,
+            "half_width": 0.0109,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          }
+        }
+      },
+      "5y": {
+        "cycles": [
+          "2009-2010",
+          "2011-2012",
+          "2013-2014"
+        ],
+        "metrics": {
+          "1a_published_ascvd": {
+            "c": 0.7788349875147508,
+            "c_unweighted": 0.7715142975806483,
+            "auc_horizon": 0.7574969891594456,
+            "n": 4985,
+            "n_evaluable": 4968,
+            "events": 104,
+            "events_at_horizon": 55,
+            "mean_score_pct": 8.067953246927011,
+            "observed_cvd_mortality_pct": 0.8248961141129336
+          },
+          "1b_mortality_recalibration": {
+            "c": 0.7904443120537042,
+            "c_unweighted": 0.783376224134518,
+            "auc_horizon": 0.7700550037442192,
+            "n": 4985,
+            "n_evaluable": 4968,
+            "events": 104,
+            "events_at_horizon": 55,
+            "mean_score_pct": 0.585601216448347,
+            "observed_cvd_mortality_pct": 0.8248961141129336
+          },
+          "2_same_inputs_refit": {
+            "c": 0.7762753695897702,
+            "c_unweighted": 0.7663441123156763,
+            "auc_horizon": 0.7513594870379496,
+            "n": 4985,
+            "n_evaluable": 4968,
+            "events": 104,
+            "events_at_horizon": 55,
+            "mean_score_pct": 0.6398044892893351,
+            "observed_cvd_mortality_pct": 0.8248961141129336
+          },
+          "3_cardiotrace_refit": {
+            "c": 0.7930915908865485,
+            "c_unweighted": 0.7740605750084423,
+            "auc_horizon": 0.7698515660034081,
+            "n": 4985,
+            "n_evaluable": 4968,
+            "events": 104,
+            "events_at_horizon": 55,
+            "mean_score_pct": 0.654608660817329,
+            "observed_cvd_mortality_pct": 0.8248961141129336
+          }
+        },
+        "delta_c_vs_published_pce": {
+          "1b_mortality_recalibration": {
+            "delta": 0.0116,
+            "lo": -0.0063,
+            "hi": 0.0332,
+            "half_width": 0.0197,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "2_same_inputs_refit": {
+            "delta": -0.0026,
+            "lo": -0.0256,
+            "hi": 0.021,
+            "half_width": 0.0233,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "3_cardiotrace_refit": {
+            "delta": 0.0143,
+            "lo": -0.0113,
+            "hi": 0.0396,
+            "half_width": 0.0255,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          }
+        }
+      }
+    }
+  },
+  "other_ethnicities_white_equation_sensitivity": {
+    "cascade": [
+      {
+        "step": "published_cohort",
+        "n": 20736,
+        "cvd_deaths": 925
+      },
+      {
+        "step": "pce_complete_all_ethnicities",
+        "n": 18744,
+        "cvd_deaths": 824
+      },
+      {
+        "step": "ethnicity_eligible",
+        "n": 18744,
+        "cvd_deaths": 824
+      },
+      {
+        "step": "paired_complete_all_arms",
+        "n": 18529,
+        "cvd_deaths": 790
+      }
+    ],
+    "n_train": 5959,
+    "train_cvd_deaths": 451,
+    "train_competing_deaths": 1275,
+    "train_cycles": [
+      "1999-2000",
+      "2001-2002",
+      "2003-2004"
+    ],
+    "tests": {
+      "10y": {
+        "cycles": [
+          "2005-2006",
+          "2007-2008"
+        ],
+        "metrics": {
+          "1a_published_ascvd": {
+            "c": 0.8472396481194181,
+            "c_unweighted": 0.81005106753061,
+            "auc_horizon": 0.8436587706813141,
+            "n": 4669,
+            "n_evaluable": 4669,
+            "events": 193,
+            "events_at_horizon": 129,
+            "mean_score_pct": 7.684266431719235,
+            "observed_cvd_mortality_pct": 2.0157457727432453
+          },
+          "1b_mortality_recalibration": {
+            "c": 0.8460161743557317,
+            "c_unweighted": 0.8097150496479898,
+            "auc_horizon": 0.8424264588837277,
+            "n": 4669,
+            "n_evaluable": 4669,
+            "events": 193,
+            "events_at_horizon": 129,
+            "mean_score_pct": 1.8867543894729433,
+            "observed_cvd_mortality_pct": 2.0157457727432453
+          },
+          "2_same_inputs_refit": {
+            "c": 0.8436425552488799,
+            "c_unweighted": 0.8053755673670933,
+            "auc_horizon": 0.8385401010199882,
+            "n": 4669,
+            "n_evaluable": 4669,
+            "events": 193,
+            "events_at_horizon": 129,
+            "mean_score_pct": 1.9304963586018762,
+            "observed_cvd_mortality_pct": 2.0157457727432453
+          },
+          "3_cardiotrace_refit": {
+            "c": 0.8379676945010189,
+            "c_unweighted": 0.8047736101976936,
+            "auc_horizon": 0.8328957660019153,
+            "n": 4669,
+            "n_evaluable": 4669,
+            "events": 193,
+            "events_at_horizon": 129,
+            "mean_score_pct": 1.9593899543423097,
+            "observed_cvd_mortality_pct": 2.0157457727432453
+          }
+        },
+        "delta_c_vs_published_pce": {
+          "1b_mortality_recalibration": {
+            "delta": -0.0012,
+            "lo": -0.0045,
+            "hi": 0.0019,
+            "half_width": 0.0032,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "2_same_inputs_refit": {
+            "delta": -0.0036,
+            "lo": -0.0154,
+            "hi": 0.0081,
+            "half_width": 0.0118,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "3_cardiotrace_refit": {
+            "delta": -0.0093,
+            "lo": -0.0196,
+            "hi": 0.0014,
+            "half_width": 0.0105,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          }
+        }
+      },
+      "5y": {
+        "cycles": [
+          "2009-2010",
+          "2011-2012",
+          "2013-2014"
+        ],
+        "metrics": {
+          "1a_published_ascvd": {
+            "c": 0.7885512952740902,
+            "c_unweighted": 0.7823546980012593,
+            "auc_horizon": 0.7695652734127862,
+            "n": 7901,
+            "n_evaluable": 7883,
+            "events": 146,
+            "events_at_horizon": 70,
+            "mean_score_pct": 7.856870809853669,
+            "observed_cvd_mortality_pct": 0.7387685792603799
+          },
+          "1b_mortality_recalibration": {
+            "c": 0.7984299430612884,
+            "c_unweighted": 0.7940538082981884,
+            "auc_horizon": 0.7798744393903447,
+            "n": 7901,
+            "n_evaluable": 7883,
+            "events": 146,
+            "events_at_horizon": 70,
+            "mean_score_pct": 0.6086926910221044,
+            "observed_cvd_mortality_pct": 0.7387685792603799
+          },
+          "2_same_inputs_refit": {
+            "c": 0.7874807637929043,
+            "c_unweighted": 0.7841828028785518,
+            "auc_horizon": 0.7653267551780742,
+            "n": 7901,
+            "n_evaluable": 7883,
+            "events": 146,
+            "events_at_horizon": 70,
+            "mean_score_pct": 0.6733984692786995,
+            "observed_cvd_mortality_pct": 0.7387685792603799
+          },
+          "3_cardiotrace_refit": {
+            "c": 0.8021896882494421,
+            "c_unweighted": 0.7906658220479721,
+            "auc_horizon": 0.7816104735390019,
+            "n": 7901,
+            "n_evaluable": 7883,
+            "events": 146,
+            "events_at_horizon": 70,
+            "mean_score_pct": 0.687200790881346,
+            "observed_cvd_mortality_pct": 0.7387685792603799
+          }
+        },
+        "delta_c_vs_published_pce": {
+          "1b_mortality_recalibration": {
+            "delta": 0.0099,
+            "lo": -0.0037,
+            "hi": 0.0241,
+            "half_width": 0.0139,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "2_same_inputs_refit": {
+            "delta": -0.0011,
+            "lo": -0.0233,
+            "hi": 0.023,
+            "half_width": 0.0231,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          },
+          "3_cardiotrace_refit": {
+            "delta": 0.0136,
+            "lo": -0.0113,
+            "hi": 0.0365,
+            "half_width": 0.0239,
+            "n_boot": 200,
+            "n_boot_requested": 200,
+            "n_boot_dropped": 0,
+            "excludes_zero": false
+          }
+        }
+      }
+    }
+  }
+}

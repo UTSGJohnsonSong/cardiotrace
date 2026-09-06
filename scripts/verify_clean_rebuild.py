@@ -1,45 +1,17 @@
 """
-Assert that regenerating the artefacts in scope changes nothing tracked.
+Verify that rebuilding the selected scope changes no tracked text artefacts.
 
-The point is not tidiness. Almost every published number on the site and in the
-README is read out of a committed file under reports/ or data/tableau/. If a
-committed artefact and the code that writes it disagree, the pages show a number
-no current script produces, and nothing anywhere says so. Not hypothetical:
-docs/consistency-audit.md lists 36 such inconsistencies and
-docs/impact-tracking.md records seven that reached a published number. The
-mechanism was the same every time -- an artefact that outlived its code.
+--render needs only committed inputs: report, site, README and handover.
+Default/full scopes verify raw NHANES and mortality SHA-256 manifests, then
+rebuild the cohort from raw files, descriptive results, benchmarks, models and
+renderers. --full additionally rebuilds Part 4 before the benchmark/renderers.
+They do not redownload data or run R/Postgres/dbt. Raw-data truth and scientific
+validity are not established by a reproducible build. Image/PDF bytes are
+excluded because font/rendering environments vary; numerical tables are checked.
 
-"Almost every" is exact. scripts/build_site.py:359 reads
-data/catalog/nhanes_file_catalog.csv and publishes its row count as "Public-use
-files catalogued". That file is tracked, so --render still runs anywhere, but it
-is the one published figure that does not come from reports/ or data/tableau/.
-
-    python scripts/verify_clean_rebuild.py --render   # ~1 min, needs no data
-    python scripts/verify_clean_rebuild.py            # + tables and models
-    python scripts/verify_clean_rebuild.py --full     # + Part 4, ~15 min
-
-THREE SCOPES, BECAUSE ONLY ONE OF THEM CAN RUN IN CI. data/processed/ and
-data/raw/ are gitignored -- the cohort is 5 MB of derived NHANES data and the
-raw files are 376 MB -- so a checkout has the ARTEFACTS but not the inputs that
-produced them.
-
-  --render   The report, the site and the README. These read only tracked
-             files, so this runs anywhere, and it catches the failure that
-             actually happened: a published page showing a number that no
-             current script produces. This is what CI runs.
-  (default)  Adds the tables, the figures and the survival models. Needs
-             data/processed/cohort_part3.csv.gz.
-  --full     Adds Part 4. Fifteen minutes, so it is opt-in.
-
-WHAT NONE OF THEM CHECK. Rebuilding the cohort itself needs data/raw -- about
-1 GB of NHANES .XPT files, which are gitignored. (No database: src/cohort.py
-reads the XPT files directly with pyreadstat. Postgres belongs to the separate
-`load` and `dbt` targets, which the cohort does not depend on.) Even --full
-therefore proves the artefacts are internally consistent, not that they agree
-with the raw data;
-the cohort builder is pinned separately by tests/ against synthetic fixtures.
-Saying this out loud matters: a check whose limits are unstated gets read as
-covering more than it does, and then relied on for the part it never covered.
+A successful run records scope, commit, environment and time in the receipt.
+Commit only that receipt afterward. check_receipt.py independently enforces
+freshness in CI and packaging; unit tests alone are not a release gate.
 """
 
 import argparse
@@ -48,6 +20,8 @@ import logging
 import os
 import subprocess
 import sys
+import platform
+from importlib.metadata import version, PackageNotFoundError
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -71,11 +45,11 @@ RUN = {"capture_output": True, "text": True,
 # Ordered, because several of these read what the previous one wrote.
 # render_report reads part4_learning_results.json; build_site reads the report;
 # render_readme reads crosscheck_part3.csv and test_summary.json.
-NEEDS_COHORT = ROOT / "data" / "processed" / "cohort_part3.csv.gz"
-
 RENDER_STAGE = [("render", ["scripts/render_report.py",
                             "scripts/build_site.py",
-                            "scripts/render_readme.py"])]
+                            "scripts/render_readme.py",
+                            "scripts/render_handover.py",
+                            "scripts/render_research_summary.py"])]
 STAGES = [
     ("cohort", ["scripts/build_cohort_results.py"]),
     ("descriptive", ["scripts/build_descriptive_results.py",
@@ -83,6 +57,7 @@ STAGES = [
                      "scripts/build_missingness_results.py",
                      "scripts/make_descriptive_figures.py"]),
     ("benchmark", ["scripts/pce_variable_cascade.py",
+                   "scripts/build_pce_results.py",
                    "scripts/check_fouryear_weights.py",
                    "scripts/build_tableau_extract.py"]),
     ("models", ["scripts/fit_survival_models.py",
@@ -151,13 +126,12 @@ def main() -> None:
     args = ap.parse_args()
     if args.render and args.full:
         raise SystemExit("--render and --full ask for different scopes; pick one.")
-    if not args.render and not NEEDS_COHORT.exists():
+    if not args.render and not (ROOT / "data/raw").exists():
         raise SystemExit(
-            f"{NEEDS_COHORT.relative_to(ROOT)} is not present, and every stage "
-            f"except the renderers reads it. It is gitignored, so a fresh "
-            f"checkout will never have it.\n\n"
+            f"data/raw is not present. The cohort stage rebuilds from raw inputs. "
+            f"Raw files are gitignored, so a fresh checkout will not have them.\n\n"
             f"Run `python scripts/verify_clean_rebuild.py --render` for the "
-            f"part that needs no data, or `make cohort` to build it.")
+            f"part that needs no data, or `make data` to download the inputs.")
 
     before, before_untracked = dirty()
     if before:
@@ -174,6 +148,13 @@ def main() -> None:
     # rebuild is running does not get reported as a stale artefact afterwards --
     # which is exactly what happened the first time this ran to completion.
     preexisting = set(before_untracked)
+
+    if not args.render:
+        for script in ["data/download_from_catalog.py", "data/download_mortality.py"]:
+            r = subprocess.run([PY, script, "--verify"], cwd=ROOT, **RUN)
+            if r.returncode:
+                raise SystemExit(f"Raw input verification failed: {script}\n{r.stdout}\n{r.stderr}")
+        log.info("Raw NHANES and mortality files match their SHA-256 manifests.")
 
     if args.render:
         stages = RENDER_STAGE
@@ -229,10 +210,12 @@ def main() -> None:
     # Naming the scope is the point. A pass that says more than it checked is
     # worse than no check: the render scope touches three files and would
     # happily report "every tracked artefact" while every table went unexamined.
-    scope = ("the report, the site and the README, and nothing else"
+    scope = ("the report, site, README, handover status and research summary, and nothing else"
              if args.render else
-             "every tracked artefact including Part 4" if args.full else
-             "every tracked artefact except Part 4 (use --full for those)")
+             "generated text from cohort, descriptive, learning, benchmark, models and render stages; "
+             "image bytes, independent R and optional warehouse excluded" if args.full else
+             "generated text from cohort, descriptive, benchmark, models and render stages; "
+             "Part 4, image bytes, independent R and optional warehouse excluded")
     log.info(f"\nClean rebuild reproduces {scope}.")
 
     # Keyed BY SCOPE, so a one-minute --render in CI cannot erase the evidence
@@ -256,11 +239,26 @@ def main() -> None:
         "stages": [s for s, _ in stages],
         "result": "clean",
         "covers": scope,
+        "environment": environment(),
+        "raw_manifest_checks": not args.render,
     }
     RECEIPT.write_text(
         json.dumps(dict(sorted(book.items())), indent=2) + "\n",
         encoding="utf-8")
     log.info(f"receipt -> {RECEIPT.relative_to(ROOT)} [{name}]")
+
+
+def environment():
+    packages = {}
+    for name in ["numpy", "pandas", "scipy", "scikit-learn", "lifelines",
+                 "statsmodels", "pyreadstat", "matplotlib", "seaborn",
+                 "pytest", "formulaic", "autograd"]:
+        try:
+            packages[name] = version(name)
+        except PackageNotFoundError:
+            packages[name] = "not installed"
+    return {"python": platform.python_version(), "platform": platform.platform(),
+            "packages": packages}
 
 
 if __name__ == "__main__":

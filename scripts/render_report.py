@@ -30,7 +30,7 @@ FIG = ROOT / "reports" / "figures"
 TABLES = ROOT / "reports" / "tables"
 OUT = ROOT / "reports" / "cardiotrace-report.html"
 
-BUILD_DATE = "2026-08-23"
+BUILD_DATE = "2026-09-06"
 DATA_CUTOFF = "2019-12-31"
 
 
@@ -482,6 +482,8 @@ ARM_LABEL_HTML = {
 
 
 def build() -> str:
+    from scripts.render_pce_section import build as build_pce_section
+    pce_section = build_pce_section()
     desc = json.loads((ROOT / "reports" / "descriptive_results.json").read_text())
     model = json.loads((ROOT / "reports" / "model_results.json").read_text())
     p1, p2 = desc["part1"], desc["part2"]
@@ -1527,7 +1529,11 @@ def build() -> str:
     ({miss['sensitivity']['hr_survey_ci'][0]:.4f}&ndash;{miss['sensitivity']['hr_survey_ci'][1]:.4f})
     under the survey weight against {miss['sensitivity']['hr_ipcw']:.4f}
     ({miss['sensitivity']['hr_ipcw_ci'][0]:.4f}&ndash;{miss['sensitivity']['hr_ipcw_ci'][1]:.4f})
-    under IPCW, a shift of {miss['sensitivity']['abs_shift']:.4f}.</p>
+    under IPCW, a shift of {miss['sensitivity']['abs_shift']:.4f}.
+    Completeness for this sensitivity is defined by the exact E2 covariates
+    ({miss['sensitivity']['n']:,} participants), separately from the prediction
+    sample described above. Without the weight cap, HR is
+    {miss['sensitivity']['hr_ipcw_untrimmed']:.4f}.</p>
 
     <p class="measure">Two bounds inside that correction are worth naming, because both shrink it
     <em>toward</em> the uncorrected estimate and so buy part of the agreement the paragraph above
@@ -1650,9 +1656,10 @@ def build() -> str:
       measured before being accepted: the four-year weights disagree sharply per person
       &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
       the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
-      which is below the precision printed here. The second is not corrected at all: the
-      inverse-probability weights described above address censoring, not selection into the
-      complete-case subsample.
+      which is a small change at the reported scale. The second is examined by the
+      inverse-probability-of-completeness sensitivity above. Those weights address selection
+      into the E2 complete-case subsample, not censoring, and cannot establish that
+      unmeasured causes of missingness have been removed.
     </div>
   </div>
 </section>
@@ -1867,15 +1874,15 @@ def build() -> str:
   <h2>Benchmarking against the Pooled Cohort Equations</h2></div>
   <div class="body-indent">
     <div class="chip-row">
-      <span class="chip open">Protocol locked &middot; analysis pending</span>
+      <span class="chip">Protocol locked &middot; paired temporal analysis completed</span>
       <span class="chip">Coefficients sourced and verified</span>
     </div>
     <p class="lede measure">A discrimination statistic is only interpretable against something.
     The prespecified comparator is the ASCVD Pooled Cohort Equations — the score this project was
     designed against, and no longer the one ACC/AHA recommend. Its coefficients are in hand —
     transcribed from the 2013 ACC/AHA Full Work Group Report and checked by reproducing the four
-    worked examples that document prints for its own equations. The comparison is nonetheless
-    held, because of a definitional problem worth stating carefully.</p>
+    worked examples that document prints for its own equations. The comparison below keeps
+    the outcome mismatch explicit.</p>
 
     <div class="note flag">
       <b>The Pooled Cohort Equations are no longer the current clinical standard.</b> The 2026
@@ -1906,13 +1913,11 @@ def build() -> str:
     would make the decomposition uninterpretable — the naive layer would show large over-prediction
     and an unwary reader would attribute it to population drift.</p>
 
-    <p class="measure">The resolution rests on a property worth naming: <b>discrimination is
-    invariant to any monotone transformation of predicted risk</b>. Ranking is unaffected by a
-    systematic inflation of the numbers, so a concordance statistic remains comparable across the
-    outcome mismatch, whereas calibration does not. Discrimination therefore becomes the primary
-    comparison, and the naive layer is split into one arm applying the published baseline survival
-    and one recalibrating it to this cohort, so that the definitional gap is isolated instead of
-    silently absorbed.</p>
+    <p class="measure">Discrimination is evaluated against the same mortality outcomes on
+    the same people. A shared strictly increasing score transformation preserves ranking;
+    different outcome definitions and group-specific recalibration need not. This comparison
+    evaluates prognostic ranking for mortality and does not validate the ASCVD endpoint or
+    isolate the causal contributions of population, variable set and model form.</p>
 
     <p class="measure">The comparison protocol was fixed in advance, before any of it was run,
     and it commits to four things. The primary comparison covers non-Hispanic White and
@@ -1924,8 +1929,9 @@ def build() -> str:
     equations' own treated and untreated branches, not through this project's reconstruction of an
     untreated level, which was built for a different estimand. And because the outcomes differ, the
     comparison is a prognostic benchmark on discrimination, not a claim about the same endpoint.
-    What remains is implementation, not judgement: the coefficient tables and baseline survival
-    have still to be written down and pinned by tests.</p>
+    The paired sample additionally requires the CardioTrace inputs, with every loss reported
+    below. The coefficient loader and production scorer are tested against the source.</p>
+    {pce_section}
   </div>
 </section>
 

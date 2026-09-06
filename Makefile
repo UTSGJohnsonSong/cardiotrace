@@ -3,7 +3,7 @@
 
 PY := .venv/Scripts/python.exe
 
-.PHONY: help setup up down data load dbt cohort descriptive learning site benchmark verify all clean
+.PHONY: help setup up down data load dbt cohort descriptive learning site benchmark verify all clean models analysis
 
 help:
 	@echo "setup      create venv + install requirements"
@@ -36,6 +36,7 @@ down:
 # success. It now lives in legacy-invalid/ and nothing here points at it.
 data:
 	$(PY) data/download_from_catalog.py
+	$(PY) data/download_mortality.py
 
 load:
 	$(PY) -m src.etl
@@ -80,12 +81,15 @@ learning: cohort
 site:
 	$(PY) scripts/build_site.py
 	$(PY) scripts/render_readme.py
+	$(PY) scripts/render_handover.py
+	$(PY) scripts/render_research_summary.py
 
 # Three artefacts nothing else depends on, so they are their own target rather
 # than a silent tail on `descriptive`: the PCE cascade, the four-year weight
 # check and the Tableau extract.
 benchmark: cohort
 	$(PY) scripts/pce_variable_cascade.py
+	$(PY) scripts/build_pce_results.py
 	$(PY) scripts/check_fouryear_weights.py
 	$(PY) scripts/build_tableau_extract.py
 
@@ -99,7 +103,25 @@ benchmark: cohort
 verify:
 	$(PY) scripts/verify_clean_rebuild.py
 
-all: up data load dbt cohort learning descriptive benchmark site
+# Keep the analysis chain ordered even under make -j; each recursive make waits.
+models: cohort
+	$(PY) scripts/fit_survival_models.py
+	$(PY) scripts/make_survival_figures.py
+
+analysis:
+	$(MAKE) cohort
+	$(MAKE) learning
+	$(MAKE) models
+	$(MAKE) benchmark
+	$(MAKE) descriptive
+	$(MAKE) site
+
+all:
+	$(MAKE) up
+	$(MAKE) data
+	$(MAKE) load
+	$(MAKE) dbt
+	$(MAKE) analysis
 	@echo "Pipeline complete. See reports/ and docs/."
 
 clean:

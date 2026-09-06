@@ -35,14 +35,93 @@
 | 8 | 分层架构 | 🔒 | `dbt/models/staging/` → `dbt/models/mart/` · `src/etl.py` |
 | 9 | 仪器与口径桥接 | 🔒 | `src/biomarkers.py`（`CREATININE_CALIBRATION`，CDC 官方系数） |
 | 10 | 编码决策 | 🔒 | `data/build_variable_crosswalk.py` · `src/cohort.py`（每条 CASE WHEN 附依据） |
-| 11 | 缺失机制与插补 | 🔄 | `src/missingness.py` · `reports/tables/part3_missing_sensitivity.csv`。**未收口**：IPCW 处理的是截尾，完整病例的选择偏差仍未解决 |
+| 11 | 缺失机制与插补 | 🔒 | `src/missingness.py` · `reports/tables/part3_missing_sensitivity.csv`。E2 实际协变量的完整性加权敏感性已完成，含未截尾权重对照；MAR、positivity 和 MNAR 限制保留 |
 | 12 | 抽样设计的正确处理 | 🔒 | `src/descriptive.py`（Taylor 线性化 + 设计自由度 t 分位） · `scripts/crosscheck_survey.R`（`svycoxph` 独立复核）。**已知偏离**：1999–2002 未用 4 年权重，代价已量化，见 `scripts/check_fouryear_weights.py` |
 | 13 | 描述性分析 | 🔒 | `src/descriptive.py` · `src/changepoint.py` · `src/ascertainment.py` |
 | 14 | 模型与验证策略 | 🔒 | `src/models.py` · `scripts/fit_survival_models.py`（按周期前向验证） |
-| 15 | 校准、基准、敏感性 | 🔄 | 协议已锁定（`docs/pce-benchmark.md` §3.5，四条）。**未收口**：PCE 头对头尚未实现 |
-| 16 | 报告规范与可重复包 | 🔄 | `scripts/render_report.py` · `reports/tables/strobe_part3.csv`。**未收口**：TRIPOD 清单与可重复包尚未成文 |
+| 15 | 校准、基准、敏感性 | 🔒 | `docs/pce-benchmark.md` §3.5 · `src/pce.py` · `reports/pce_results.json`。配对历史基准、死亡风险适配、探索性 DCA 已实现；终点不一致，不是严格校准验证 |
+| 16 | 报告规范与可重复包 | 🔄 | `docs/tripod-checklist.md` · `docs/reproducibility.md` · `scripts/package_reproduction.py`。技术交付已完成；作者、伦理、资金、利益冲突、注册和患者参与声明需研究者补充 |
 
 ---
+
+## 2026-09-06 closeout decisions (recorded before the corrective code)
+
+The final audit found delivery defects rather than evidence of superiority:
+the PCE paired differences include zero at both horizons. Retain the locked
+comparator and estimands. Make the handover status a generated view of committed
+results; record interpreter/package versions in the full rebuild receipt itself.
+Enforce receipt ancestry and an unchanged tree (apart from the receipt) in CI
+and packaging. Development tests may still skip stale verification evidence.
+Display collected test counts as collected, including skipped tests, and permit
+the renderer to recover from a failing badge without editing test evidence.
+Restrict the zero-p-value regression to actual p-value columns: a decision-curve
+net benefit of zero is a valid result and must stay visible. Add fail-loud
+validation for omitted active PCE coefficients and invalid outcome/design inputs.
+Completeness-weight sensitivity intervals condition on estimated weights; they
+do not include propensity-estimation uncertainty, and capping need not move a
+coefficient toward its complete-case estimate. No new clinical claim is made.
+
+## 2026-09-06 implementation decisions (recorded before fitting)
+
+The takeover audit found that `src/missingness.py::ipcw` already models
+**completeness**, not censoring. The former node 11 wording was a historical error,
+not evidence that this sensitivity did not exist. Its exposure sensitivity used
+the prediction-feature completeness mask for an E2 fit; correct the propensity
+target to the exact covariates passed to that fit. Retain the existing floor and
+99th-percentile cap, disclose their diagnostics, and compare with untrimmed
+weights. This is a sensitivity under conditional missing-at-random and positivity,
+not proof that selection bias has been eliminated. Archive the old results.
+
+For node 15, preserve the four constraints in `docs/pce-benchmark.md` §3.5.
+The 18,744 PCE-complete participants include all ethnicities: report this cascade
+before the NH White/NH Black restriction. For a paired comparison, additionally
+require the existing CardioTrace prediction features (BMI and former-smoking
+status); explicitly report this loss rather than silently allowing each model
+to drop different rows. Train every fitted arm only on 1999–2004, then evaluate
+the same participants in 2005–2008 at ten years and 2009–2014 at five years.
+Other ethnicities use the White equation only in a separately labelled
+all-ethnicity sensitivity. No PCE blood pressure receives Tobin adjustment.
+
+Arm 1a is the published ten-year hard-ASCVD probability (including when used
+only as a ranking score at five years); do not invent a five-year PCE baseline.
+Arm 1b retains the race/sex-specific PCE coefficients and estimates weighted
+Breslow CVD baseline hazards in the training data with that fixed offset, plus
+group-specific competing-death hazards. It is a mortality adaptation, not a
+validation of hard-ASCVD calibration. Arm 2 refits the nine PCE inputs as a pooled
+linear cause-specific Cox model, using measured SBP and treatment status; it
+is a same-input comparator, not a refit of every published interaction. Arm 3
+refits the existing CardioTrace feature set and preprocessing on the identical
+training subset. These layers cannot isolate population, endpoint and form
+effects causally. Pooled discrimination can also change after group-specific
+recalibration; monotone invariance applies within a fixed transformation only.
+Report weighted and unweighted horizon-censored C, horizon AUC, and paired
+stratified PSU-bootstrap differences (200 replicates, fixed seed), conditional
+on the fitted training models. Save model parameters and training baselines.
+
+Decision curves are exploratory CVD-mortality curves for arms 1b–3, with treat-all
+and treat-none, on a fixed 0.5–10% threshold grid. PCE 1a has a different endpoint
+and is excluded. Require that every evaluated person has an observed horizon
+outcome (a competing death is a known non-case); fail on earlier loss to follow-up
+instead of labelling it a non-event. Report weighted TP/N minus weighted FP/N
+times threshold odds. This is a hypothetical utility analysis: no intervention,
+clinically endorsed mortality threshold, or treatment effect is established.
+Method source: https://www.danieldsjoberg.com/dcurves/articles/dca.html .
+
+Execution check: the five-year test includes administrative censoring before
+five years (late 2014 entrants), so the complete-outcome guard stopped the run.
+Use weighted Aalen–Johansen CIF within each threshold-positive group for DCA:
+TP/N = weighted selected fraction × CIF(horizon); FP/N = selected fraction −
+TP/N. This explicitly assumes independent censoring within the selected group.
+Use the same weighted AJ estimator for the reported observed mortality. Retain
+the guard unless the caller explicitly requests AJ. Report early-censor counts;
+the existing horizon AUC is labelled evaluable-case AUC, not an IPCW AUC.
+
+Node 16 will map reporting evidence and gaps against current TRIPOD+AI guidance
+(https://www.tripod-statement.org/scope/), which replaces TRIPOD-2015 for both
+regression and machine learning. Missing administrative facts remain explicitly
+unreported. A reproducibility package must distinguish offline rendering,
+Python analysis from verified raw files, independent R checks, and optional
+Postgres/dbt work. A successful render receipt proves only its named scope.
 
 ## 路线图：5 个阶段 · 16 个决策节点
 

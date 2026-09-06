@@ -549,14 +549,14 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   with one method. This report states each question as a quantity to be estimated, sets out the
   design that identifies it, and prices the choices that design requires.</p>
   <div class="masthead-meta">
-    <span><b>Prepared</b> 2026-08-23</span>
+    <span><b>Prepared</b> 2026-09-06</span>
     <span><b>Survey cycles</b> 11, 1999-2000 to Aug 2021&ndash;Aug 2023</span>
     <span><b>Descriptive sample</b> 62,877 adults 20+</span>
     <span><b>Cohort</b> 20,736 adults 40–79 · 925 CVD deaths</span>
     <span><b>Mortality follow-up through</b> 2019-12-31</span>
   </div>
 </header>
-<nav class="toc" aria-label="Contents"><p class="toc-label">Contents</p><ol><li class="toc-h2"><a href="#why-one-dataset-needs-three-designs">Why one dataset needs three designs</a></li><li class="toc-h2"><a href="#the-burden-across-11-cycles-with-ageing-taken-out">The burden across 11 cycles, with ageing taken out</a></li><li class="toc-h3"><a href="#how-standardisation-works-and-why-it-is-not-a">How standardisation works, and why it is not a correction factor</a></li><li class="toc-h3"><a href="#the-standard-population-written-out">The standard population, written out</a></li><li class="toc-h3"><a href="#how-much-the-clustering-actually-costs">How much the clustering actually costs</a></li><li class="toc-h3"><a href="#testing-the-limitation-instead-of-only-declaring-it">Testing the limitation instead of only declaring it</a></li><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li><li class="toc-h2"><a href="#who-among-adults-cvd-free-at-baseline-goes-on-to-die-of">Who, among adults CVD-free at baseline, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#who-the-model-is-fitted-on-which-is-not-who-the-cohort">Who the model is fitted on, which is not who the cohort is</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li><li class="toc-h2"><a href="#what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</a></li><li class="toc-h3"><a href="#the-screen">The screen</a></li><li class="toc-h3"><a href="#against-the-current-guideline-which-the-screen-was">Against the current guideline, which the screen was never shown</a></li><li class="toc-h3"><a href="#form-against-variable-set">Form against variable set</a></li><li class="toc-h3"><a href="#the-two-orderings-which-do-not-agree">The two orderings, which do not agree</a></li><li class="toc-h3"><a href="#the-assay-change-underneath-all-of-this">The assay change underneath all of this</a></li><li class="toc-h2"><a href="#benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</a></li><li class="toc-h2"><a href="#data-and-methods">Data and methods</a></li><li class="toc-h3"><a href="#sources">Sources</a></li><li class="toc-h3"><a href="#estimation">Estimation</a></li><li class="toc-h3"><a href="#reproducibility">Reproducibility</a></li><li class="toc-h3"><a href="#checked-against-an-independent-implementation">Checked against an independent implementation</a></li></ol></nav>
+<nav class="toc" aria-label="Contents"><p class="toc-label">Contents</p><ol><li class="toc-h2"><a href="#why-one-dataset-needs-three-designs">Why one dataset needs three designs</a></li><li class="toc-h2"><a href="#the-burden-across-11-cycles-with-ageing-taken-out">The burden across 11 cycles, with ageing taken out</a></li><li class="toc-h3"><a href="#how-standardisation-works-and-why-it-is-not-a">How standardisation works, and why it is not a correction factor</a></li><li class="toc-h3"><a href="#the-standard-population-written-out">The standard population, written out</a></li><li class="toc-h3"><a href="#how-much-the-clustering-actually-costs">How much the clustering actually costs</a></li><li class="toc-h3"><a href="#testing-the-limitation-instead-of-only-declaring-it">Testing the limitation instead of only declaring it</a></li><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li><li class="toc-h2"><a href="#who-among-adults-cvd-free-at-baseline-goes-on-to-die-of">Who, among adults CVD-free at baseline, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#who-the-model-is-fitted-on-which-is-not-who-the-cohort">Who the model is fitted on, which is not who the cohort is</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li><li class="toc-h2"><a href="#what-the-model-is-missing-and-whether-a-different-model">What the model is missing, and whether a different model would find it</a></li><li class="toc-h3"><a href="#the-screen">The screen</a></li><li class="toc-h3"><a href="#against-the-current-guideline-which-the-screen-was">Against the current guideline, which the screen was never shown</a></li><li class="toc-h3"><a href="#form-against-variable-set">Form against variable set</a></li><li class="toc-h3"><a href="#the-two-orderings-which-do-not-agree">The two orderings, which do not agree</a></li><li class="toc-h3"><a href="#the-assay-change-underneath-all-of-this">The assay change underneath all of this</a></li><li class="toc-h2"><a href="#benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</a></li><li class="toc-h3"><a href="#primary-non-hispanic-white-and-black">Primary: non-Hispanic White and Black</a></li><li class="toc-h3"><a href="#sensitivity-other-ethnicities-mapped-to-white-equations">Sensitivity: other ethnicities mapped to White equations</a></li><li class="toc-h3"><a href="#exploratory-decision-curves-for-cvd-mortality">Exploratory decision curves for CVD mortality</a></li><li class="toc-h2"><a href="#data-and-methods">Data and methods</a></li><li class="toc-h3"><a href="#sources">Sources</a></li><li class="toc-h3"><a href="#estimation">Estimation</a></li><li class="toc-h3"><a href="#reproducibility">Reproducibility</a></li><li class="toc-h3"><a href="#checked-against-an-independent-implementation">Checked against an independent implementation</a></li></ol></nav>
 
 <section>
   <div class="sec-head"><div class="sec-num">1</div>
@@ -1164,16 +1164,20 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     what makes the model able to see the dropped at all. The exposure barely moves: HR
     1.1216
     (1.0788&ndash;1.1661)
-    under the survey weight against 1.1225
-    (1.0802&ndash;1.1665)
-    under IPCW, a shift of 0.0009.</p>
+    under the survey weight against 1.1219
+    (1.0796&ndash;1.1659)
+    under IPCW, a shift of 0.0003.
+    Completeness for this sensitivity is defined by the exact E2 covariates
+    (17,890 participants), separately from the prediction
+    sample described above. Without the weight cap, HR is
+    1.1217.</p>
 
     <p class="measure">Two bounds inside that correction are worth naming, because both shrink it
     <em>toward</em> the uncorrected estimate and so buy part of the agreement the paragraph above
     rests on. The propensity is floored at 0.05 &mdash; not binding here, the smallest is
-    0.774 &mdash; and the weights are trimmed at the 99th
-    percentile, which binds on 186 participants and removes
-    0.41% of the re-weighted total. Untrimmed, one
+    0.743 &mdash; and the weights are trimmed at the 99th
+    percentile, which binds on 179 participants and removes
+    0.42% of the re-weighted total. Untrimmed, one
     participant can carry several per cent of the weight, and an estimate driven by three people
     is worse than the one it replaced; trimmed, the correction is smaller than it would otherwise
     have been. Both numbers are here so a reader can judge which trade they prefer.</p>
@@ -1264,9 +1268,10 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       measured before being accepted: the four-year weights disagree sharply per person
       &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
       the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
-      which is below the precision printed here. The second is not corrected at all: the
-      inverse-probability weights described above address censoring, not selection into the
-      complete-case subsample.
+      which is a small change at the reported scale. The second is examined by the
+      inverse-probability-of-completeness sensitivity above. Those weights address selection
+      into the E2 complete-case subsample, not censoring, and cannot establish that
+      unmeasured causes of missingness have been removed.
     </div>
   </div>
 </section>
@@ -1464,15 +1469,15 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   <h2 id="benchmarking-against-the-pooled-cohort-equations">Benchmarking against the Pooled Cohort Equations</h2></div>
   <div class="body-indent">
     <div class="chip-row">
-      <span class="chip open">Protocol locked &middot; analysis pending</span>
+      <span class="chip">Protocol locked &middot; paired temporal analysis completed</span>
       <span class="chip">Coefficients sourced and verified</span>
     </div>
     <p class="lede measure">A discrimination statistic is only interpretable against something.
     The prespecified comparator is the ASCVD Pooled Cohort Equations — the score this project was
     designed against, and no longer the one ACC/AHA recommend. Its coefficients are in hand —
     transcribed from the 2013 ACC/AHA Full Work Group Report and checked by reproducing the four
-    worked examples that document prints for its own equations. The comparison is nonetheless
-    held, because of a definitional problem worth stating carefully.</p>
+    worked examples that document prints for its own equations. The comparison below keeps
+    the outcome mismatch explicit.</p>
 
     <div class="note flag">
       <b>The Pooled Cohort Equations are no longer the current clinical standard.</b> The 2026
@@ -1503,13 +1508,11 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     would make the decomposition uninterpretable — the naive layer would show large over-prediction
     and an unwary reader would attribute it to population drift.</p>
 
-    <p class="measure">The resolution rests on a property worth naming: <b>discrimination is
-    invariant to any monotone transformation of predicted risk</b>. Ranking is unaffected by a
-    systematic inflation of the numbers, so a concordance statistic remains comparable across the
-    outcome mismatch, whereas calibration does not. Discrimination therefore becomes the primary
-    comparison, and the naive layer is split into one arm applying the published baseline survival
-    and one recalibrating it to this cohort, so that the definitional gap is isolated instead of
-    silently absorbed.</p>
+    <p class="measure">Discrimination is evaluated against the same mortality outcomes on
+    the same people. A shared strictly increasing score transformation preserves ranking;
+    different outcome definitions and group-specific recalibration need not. This comparison
+    evaluates prognostic ranking for mortality and does not validate the ASCVD endpoint or
+    isolate the causal contributions of population, variable set and model form.</p>
 
     <p class="measure">The comparison protocol was fixed in advance, before any of it was run,
     and it commits to four things. The primary comparison covers non-Hispanic White and
@@ -1521,8 +1524,34 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     equations' own treated and untreated branches, not through this project's reconstruction of an
     untreated level, which was built for a different estimand. And because the outcomes differ, the
     comparison is a prognostic benchmark on discrimination, not a claim about the same endpoint.
-    What remains is implementation, not judgement: the coefficient tables and baseline survival
-    have still to be written down and pinned by tests.</p>
+    The paired sample additionally requires the CardioTrace inputs, with every loss reported
+    below. The coefficient loader and production scorer are tested against the source.</p>
+    <h3 id="primary-non-hispanic-white-and-black">Primary: non-Hispanic White and Black</h3><p class='measure'>published cohort: 20,736 (925 deaths) &rarr; pce complete all ethnicities: 18,744 (824 deaths) &rarr; ethnicity eligible: 12,573 (629 deaths) &rarr; paired complete all arms: 12,413 (600 deaths).</p><p class='measure'>Training: 4,126 participants, 336 CVD deaths, 922 competing deaths, 1999–2004. Every arm uses the same rows.</p><div class='twrap'><table><thead><tr><th>Horizon</th><th>Arm</th><th>n</th><th>CVD events by horizon</th><th>Weighted C</th><th>Unweighted C</th><th>Evaluable-case AUC</th><th>ΔC vs PCE (95% interval)</th><th>Mean score</th><th>Observed mortality (AJ)</th></tr></thead><tbody><tr><td>10y</td><td>1a · Published PCE (hard ASCVD)</td><td>3,302</td><td>108</td><td>0.8517</td><td>0.8072</td><td>0.8494</td><td>reference</td><td>7.85%</td><td>2.15%</td></tr><tr><td>10y</td><td>1b · PCE slopes, mortality baselines</td><td>3,302</td><td>108</td><td>0.8485</td><td>0.8036</td><td>0.8464</td><td>-0.0032 (-0.0072, +0.0011)</td><td>1.96%</td><td>2.15%</td></tr><tr><td>10y</td><td>2 · Same inputs, refitted Cox</td><td>3,302</td><td>108</td><td>0.8464</td><td>0.7981</td><td>0.8430</td><td>-0.0053 (-0.0178, +0.0078)</td><td>2.02%</td><td>2.15%</td></tr><tr><td>10y</td><td>3 · CardioTrace, refitted</td><td>3,302</td><td>108</td><td>0.8406</td><td>0.7972</td><td>0.8372</td><td>-0.0111 (-0.0213, +0.0004)</td><td>2.05%</td><td>2.15%</td></tr><tr><td>5y</td><td>1a · Published PCE (hard ASCVD)</td><td>4,985</td><td>55</td><td>0.7788</td><td>0.7715</td><td>0.7575</td><td>reference</td><td>8.07%</td><td>0.82%</td></tr><tr><td>5y</td><td>1b · PCE slopes, mortality baselines</td><td>4,985</td><td>55</td><td>0.7904</td><td>0.7834</td><td>0.7701</td><td>+0.0116 (-0.0063, +0.0332)</td><td>0.59%</td><td>0.82%</td></tr><tr><td>5y</td><td>2 · Same inputs, refitted Cox</td><td>4,985</td><td>55</td><td>0.7763</td><td>0.7663</td><td>0.7514</td><td>-0.0026 (-0.0256, +0.0210)</td><td>0.64%</td><td>0.82%</td></tr><tr><td>5y</td><td>3 · CardioTrace, refitted</td><td>4,985</td><td>55</td><td>0.7931</td><td>0.7741</td><td>0.7699</td><td>+0.0143 (-0.0113, +0.0396)</td><td>0.65%</td><td>0.82%</td></tr></tbody></table></div><h3 id="sensitivity-other-ethnicities-mapped-to-white-equations">Sensitivity: other ethnicities mapped to White equations</h3><p class='measure'>published cohort: 20,736 (925 deaths) &rarr; pce complete all ethnicities: 18,744 (824 deaths) &rarr; ethnicity eligible: 18,744 (824 deaths) &rarr; paired complete all arms: 18,529 (790 deaths).</p><p class='measure'>Training: 5,959 participants, 451 CVD deaths, 1275 competing deaths, 1999–2004. Every arm uses the same rows.</p><div class='twrap'><table><thead><tr><th>Horizon</th><th>Arm</th><th>n</th><th>CVD events by horizon</th><th>Weighted C</th><th>Unweighted C</th><th>Evaluable-case AUC</th><th>ΔC vs PCE (95% interval)</th><th>Mean score</th><th>Observed mortality (AJ)</th></tr></thead><tbody><tr><td>10y</td><td>1a · Published PCE (hard ASCVD)</td><td>4,669</td><td>129</td><td>0.8472</td><td>0.8101</td><td>0.8437</td><td>reference</td><td>7.68%</td><td>2.02%</td></tr><tr><td>10y</td><td>1b · PCE slopes, mortality baselines</td><td>4,669</td><td>129</td><td>0.8460</td><td>0.8097</td><td>0.8424</td><td>-0.0012 (-0.0045, +0.0019)</td><td>1.89%</td><td>2.02%</td></tr><tr><td>10y</td><td>2 · Same inputs, refitted Cox</td><td>4,669</td><td>129</td><td>0.8436</td><td>0.8054</td><td>0.8385</td><td>-0.0036 (-0.0154, +0.0081)</td><td>1.93%</td><td>2.02%</td></tr><tr><td>10y</td><td>3 · CardioTrace, refitted</td><td>4,669</td><td>129</td><td>0.8380</td><td>0.8048</td><td>0.8329</td><td>-0.0093 (-0.0196, +0.0014)</td><td>1.96%</td><td>2.02%</td></tr><tr><td>5y</td><td>1a · Published PCE (hard ASCVD)</td><td>7,901</td><td>70</td><td>0.7886</td><td>0.7824</td><td>0.7696</td><td>reference</td><td>7.86%</td><td>0.74%</td></tr><tr><td>5y</td><td>1b · PCE slopes, mortality baselines</td><td>7,901</td><td>70</td><td>0.7984</td><td>0.7941</td><td>0.7799</td><td>+0.0099 (-0.0037, +0.0241)</td><td>0.61%</td><td>0.74%</td></tr><tr><td>5y</td><td>2 · Same inputs, refitted Cox</td><td>7,901</td><td>70</td><td>0.7875</td><td>0.7842</td><td>0.7653</td><td>-0.0011 (-0.0233, +0.0230)</td><td>0.67%</td><td>0.74%</td></tr><tr><td>5y</td><td>3 · CardioTrace, refitted</td><td>7,901</td><td>70</td><td>0.8022</td><td>0.7907</td><td>0.7816</td><td>+0.0136 (-0.0113, +0.0365)</td><td>0.69%</td><td>0.74%</td></tr></tbody></table></div>
+    <p class="measure">The published PCE column always contains ten-year hard-ASCVD scores,
+    even when ranking five-year mortality. Its mean is not a mortality calibration estimate.
+    The other arms estimate mortality. Baseline adaptation uses only training cycles and retains
+    the published PCE slopes, with group-specific competing hazards. Arm 2 is a pooled linear
+    same-input Cox model, not a reproduction of every PCE interaction. Arm 3 retains the
+    existing CardioTrace preprocessing. Pooled ordering can change after group-specific
+    adaptation; monotone invariance does not make different endpoints equivalent.</p>
+    <p class="measure">Intervals use 200 paired PSU-bootstrap replicates within strata,
+    conditional on the training fits. AUC excludes people whose horizon outcome is unknown;
+    it is not censoring-weighted AUC. AJ mortality and the five-year decision curves account
+    for earlier administrative censoring under independent censoring assumptions.</p>
+    <h3 id="exploratory-decision-curves-for-cvd-mortality">Exploratory decision curves for CVD mortality</h3>
+    <p class="measure">Net benefit is expressed per 1,000 people at illustrative thresholds.
+    All twenty thresholds from 0.5% to 10% are retained in the committed decision-curve tables.
+    Competing deaths count as non-cases; early censoring is handled with weighted AJ within
+    threshold-positive groups. The published ASCVD score is excluded because it has a different
+    endpoint. These thresholds describe hypothetical tradeoffs, not treatment recommendations.
+    Point estimates have no uncertainty bands and establish no clinical benefit.</p>
+    <div class="twrap"><table><thead><tr><th>Horizon</th><th>Threshold</th>
+    <th>PCE mortality adaptation</th><th>Same inputs</th><th>CardioTrace</th>
+    <th>Treat all</th><th>Treat none</th></tr></thead><tbody><tr><td>10y</td><td>1.0%</td><td>15.63</td><td>15.96</td><td>16.00</td><td>11.66</td><td>0.00</td></tr><tr><td>10y</td><td>2.0%</td><td>11.97</td><td>10.83</td><td>11.13</td><td>1.57</td><td>0.00</td></tr><tr><td>10y</td><td>5.0%</td><td>5.52</td><td>6.31</td><td>5.65</td><td>-29.96</td><td>0.00</td></tr><tr><td>5y</td><td>1.0%</td><td>2.67</td><td>2.58</td><td>2.73</td><td>-1.77</td><td>0.00</td></tr><tr><td>5y</td><td>2.0%</td><td>0.99</td><td>1.28</td><td>1.69</td><td>-11.99</td><td>0.00</td></tr><tr><td>5y</td><td>5.0%</td><td>0.10</td><td>0.04</td><td>-0.00</td><td>-43.95</td><td>0.00</td></tr></tbody></table></div>
+    <p class="measure">Reporting evidence and remaining disclosures are mapped in
+    <a href="https://github.com/UTSGJohnsonSong/cardiotrace/blob/main/docs/tripod-checklist.md">the TRIPOD+AI checklist</a>.
+    The <a href="https://github.com/UTSGJohnsonSong/cardiotrace/blob/main/docs/reproducibility.md">reproducibility guide</a>
+    separates offline rendering, raw-data analysis, R cross-checks and the optional warehouse.</p>
   </div>
 </section>
 
@@ -1630,7 +1659,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 </section>
 
 <footer>
-  <p>CardioTrace · Module 1 of the HealthTrace platform · prepared 2026-08-23. Figures and
+  <p>CardioTrace · Module 1 of the HealthTrace platform · prepared 2026-09-06. Figures and
   tables are generated from <code>reports/descriptive_results.json</code>,
   <code>reports/model_results.json</code> and <code>reports/tables/</code>; this file inlines them
   and has no external dependencies.</p>

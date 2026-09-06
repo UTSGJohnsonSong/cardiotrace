@@ -150,20 +150,30 @@ PCE 预测**首次 ASCVD**：非致死性心梗 + 冠心病死亡 + 致死或非
 
 ---
 
-## 4. 待做的是实现，不是决策
+## 4. Implementation completed; protocol clarification
 
-> §3.5 的四条已于 2026-08-19 锁定。这一节从前重复列着其中三条并标为「未定」——
-> 同一份文档里一个决定同时是「已锁」和「待议」，读到哪一节就得出哪个结论。
-> 现在这里只留实现待办。
+The four decisions in §3.5 remain locked. The former implementation to-do
+list is preserved in Git history. Implementation now lives in `src/pce.py`,
+`scripts/build_pce_results.py` and `tests/test_pce_benchmark.py`; generated
+tables and parameters are indexed in `reports/pce_results.json`.
 
-**协议侧已锁定**（→ §3.5）：①族裔限 White/Black · ②完整病例且本项目模型在同一子样本
-重评 · ③喂 PCE 实测 SBP + 治疗状态而非 Tobin 校正值 · ④终点不一致，降级为
-prognostic benchmark，主比 discrimination。
+The 18,744 people / 824 deaths in §3.5 are the all-ethnicity PCE-input cascade,
+before the primary ethnicity restriction. Primary eligibility leaves 12,573 /
+629; requiring BMI and former-smoking status for the existing CardioTrace arm
+leaves 12,413 / 600. All four arms are trained and evaluated on that same final
+sample. The all-ethnicity sensitivity maps other ethnicities to the White
+equations explicitly. The generated report includes the entire attrition chain.
 
-**实现待办**：
+Discrimination is invariant under a shared monotone transformation of a score
+on the same outcome/sample. It does not make ASCVD and CVD mortality equivalent;
+group-specific recalibration may change pooled ranking. Arm 1b adapts training
+baselines to mortality. Arm 2 refits a pooled linear Cox using the nine inputs;
+it does not refit every original PCE interaction. At five years, arm 1a is the
+original ten-year score used only for ranking. No five-year ASCVD baseline is
+invented. See `docs/research-design.md` for the recorded execution decisions.
 
-- 落地 PCE 系数与基线生存（1a 原基线 / 1b 重校准两层），并写单测锁住系数表。
-- 在 18,744 人完整病例子样本上重新拟合并评估本项目模型——**重新拟合，不是把主队列的
-  C 搬过来**（这是 §3.5② 的要点，两个数字都叫 C-index，摆在一起看不出问题）。
-- 族裔映射的**执行细节**：主分析两组已定，其他族裔作标注的敏感性分析这一条也已定；
-  待定的只是敏感性分析里 Mexican American 与 Other 各自套哪条方程、怎么在图上标注。
+The paired PSU-bootstrap intervals for CardioTrace versus PCE include zero at
+both horizons. This is a completed historical prognostic comparison with no
+evidence of superiority and no same-endpoint clinical validation claim.
+Exploratory mortality DCA uses illustrative thresholds and a weighted AJ
+extension for early censoring; it does not establish an intervention benefit.

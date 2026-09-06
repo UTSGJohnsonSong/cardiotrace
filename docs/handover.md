@@ -1,7 +1,8 @@
 # CardioTrace — handover
 
-For an assistant picking this project up cold. Written 2026-09-05 against
-commit `585ee2f`. Everything below was read out of the repository, not recalled.
+For an assistant picking this project up cold. Current numerical status is
+generated from committed artefacts, not recalled. The verification receipt names
+the tested commit; after a successful full rebuild, commit only the receipt.
 
 Published site: <https://utsgjohnsonsong.github.io/cardiotrace/>
 Repository: <https://github.com/UTSGJohnsonSong/cardiotrace>
@@ -45,8 +46,8 @@ analytically wrong ("KIQ022 is absent from the 1999-2000 module" — it was
 renamed). Any entry must record *why no equivalent variable exists*.
 
 **3. `src/models.py::prepare()` is not idempotent and refuses to run twice.**
-It adds the Tobin constant to treated participants **in place**. A second call
-gives them +20/+5 instead of +10/+5, the fit converges, and the result is a
+It adds the Tobin constant to treated participants on a **copy**. An unguarded second call
+would give them +20/+10 instead of +10/+5, the fit converges, and the result is a
 plausible wrong number. The guard raises if the frame already carries
 `design_cluster`. Pass `prepared=True` to the caller instead of re-preparing.
 
@@ -75,7 +76,7 @@ the repository owner, and it is why `legacy-invalid/` and
 
 ## 1. What the project is
 
-Three separate studies on NHANES, deliberately **not** sharing a sample:
+Four analysis parts on NHANES, deliberately **not** sharing a sample:
 
 | | Part 1 — burden | Part 2 — pandemic | Part 3 — cohort | Part 4 — learning |
 |---|---|---|---|---|
@@ -100,35 +101,39 @@ National Death Index fixed the time order at the cost of a harder endpoint
 
 ## 2. Current state
 
-**Tests:** 198 collected, 197 passed, 1 skipped, 0 failed
-(`reports/test_summary.json`; re-verified 2026-09-05).
+<!-- HANDOVER_STATUS_START -->
+**Generated from tracked results; edit the producers, not this block.**
 
-**Cohort** (`reports/cohort_results.json`):
+**Tests:** 235 collected. This includes conditional skips.
+The count is not a passed-test count; consult the actual pytest run and CI.
 
-| | |
-|---|---|
+| Cohort | Value |
+|---|---:|
 | Participants | 20,736 |
 | CVD deaths | 925 |
 | Competing deaths | 2,711 |
 | Person-years | 235,553 |
-| Median / max follow-up | 10.92 / 20.75 years |
+| Median / maximum follow-up | 10.92 / 20.75 years |
 
-**Models** (`reports/model_results.json`):
+**PCE primary paired sample:** 12,413 people / 600 deaths.
 
-| | |
-|---|---|
-| Systolic BP, per 10 mmHg | HR **1.1216** (95% CI 1.0788–1.1661); 1.097 without the Tobin adjustment |
-| Prediction, 2005–2008 test @ 10y | Harrell C **0.838** weighted / 0.805 unweighted; n = 5,163, 217 deaths, 4,669 evaluable; predicted 1.96% vs observed 2.02% |
-| Prediction, 2009–2014 test @ 5y | Harrell C **0.802** / 0.791; n = 8,801, 170 deaths; predicted 0.69% vs observed 0.74% |
+| Temporal test | n | Published PCE weighted C | CardioTrace weighted C | Paired difference (95% interval) |
+|---|---:|---:|---:|---|
+| 10y | 3,302 | 0.8517 | 0.8406 | -0.0111 (-0.0213, +0.0004) |
+| 5y | 4,985 | 0.7788 | 0.7931 | +0.0143 (-0.0113, +0.0396) |
 
-**Design nodes** — 16 total, tracked in `docs/research-design.md`. Thirteen are
-locked. Three are open, and they are the work queue:
+The published PCE score targets ten-year hard ASCVD and is used only as
+a ranking score at five years. This study observes CVD mortality.
+The paired differences do not establish discrimination superiority.
+Decision curves for mortality are exploratory and use illustrative thresholds.
 
-| node | state |
-|---|---|
-| 11 missingness | IPCW handles censoring; **complete-case selection bias is unresolved** |
-| 15 calibration & benchmark | protocol locked in `docs/pce-benchmark.md` §3.5; **the PCE head-to-head is not implemented** |
-| 16 reporting | **TRIPOD checklist and reproducibility package not written** |
+Sources: `reports/cohort_results.json`, `reports/pce_results.json`,
+`reports/test_summary.json`. Model, missingness and Part 4 details remain in
+their result JSON/CSV and the generated report. Design-node status has one
+authority: the current-status table in `docs/research-design.md`.
+Verification scope and commit live in `reports/verify_receipt.json`;
+run `python scripts/check_receipt.py` to check release freshness.
+<!-- HANDOVER_STATUS_END -->
 
 ---
 
@@ -138,13 +143,15 @@ Python 3.11. `PY := .venv/Scripts/python.exe` (Windows; adjust on POSIX).
 
 ```bash
 make setup          # venv + requirements
-make data           # download NHANES via the catalog-driven downloader
+make data           # download NHANES and linked mortality files
                     # (NOT data/download.py -- that one is in legacy-invalid/)
 make cohort         # build the Part 3 cohort + STROBE ladder
 make learning       # Part 4 screen and arm comparison  (~15 min)
 make descriptive    # Part 1/2 tables, figures, and the report
-make benchmark      # PCE cascade, four-year weight check, Tableau extract
-make site           # split the report into docs/ and re-render the README
+make benchmark      # PCE cascade/paired benchmark, four-year weight check, Tableau extract
+make models         # fit survival models and draw figures
+make analysis       # ordered complete analysis, no database required
+make site           # split report, render README and handover status
 make verify         # assert a clean rebuild changes nothing tracked
 make all            # up -> data -> load -> dbt -> cohort -> learning
                     #    -> descriptive -> benchmark -> site
@@ -188,13 +195,14 @@ src/
   ascertainment.py  self-report vs measured, the diagnosis-access analysis
   missingness.py    IPCW sensitivity
   screening.py      Part 4 candidate screen
-  discrimination.py C-index machinery
+  discrimination.py C-index machinery and paired PSU bootstrap
+  pce.py            historical PCE scorer, mortality recalibration, decision curves
   etl.py            XPT -> Postgres (the warehouse layer)
 
 scripts/            build_*_results.py write the JSON; make_*_figures.py draw;
                     render_report.py + build_site.py + render_readme.py publish;
                     verify_clean_rebuild.py is the merge gate
-tests/              198 tests; every cohort test is a regression for a shipped defect
+tests/              synthetic fixtures, contracts and conditional real-data checks
 docs/               *.html is the published site (GitHub Pages, main /docs)
                     *.md is the design record -- see section 9
 reports/            figures, tables, and the results JSON the pages read from
@@ -212,15 +220,16 @@ it rebuilds and asserts no tracked file changed. Run it before proposing a merge
 
 **`reports/verify_receipt.json` records what was verified, when, at which
 commit, over which scope** — `full` (everything including Part 4) and `render`
-(report, site, README only). It exists because a merge gate whose evidence is a
+(report, site, README and handover status only). It exists because a merge gate whose evidence is a
 recollection is not a gate. When you change a renderer or a results producer,
 regenerate the receipt.
 
 **CI runs two jobs** (`.github/workflows/ci.yml`): `pytest -q`, and a clean
 rebuild via `verify_clean_rebuild.py --render` that prints the diff if there is
-one. Both need full git history.
+one. The rebuild job also runs `scripts/check_receipt.py`, which fails on a
+stale full receipt. Both jobs need full git history.
 
-**`tests/test_doc_consistency.py`** (467 lines) checks that the prose and the
+**`tests/test_doc_consistency.py`** checks that the prose and the
 numbers agree — that the README, the report and the design doc do not drift
 apart from the JSON. If you change a number, that file will tell you what else
 claims it.
@@ -253,13 +262,13 @@ claims it.
 
 ---
 
-## 7. Open work, in the order it should be done
+## 7. Publication disclosures and future research
 
-1. **PCE head-to-head** (node 15). The protocol is already written in
-   `docs/pce-benchmark.md` §3.5 — four specified comparisons, locked 2026-08-19.
-   The coefficients and their provenance are in the same file. **Do not write
-   PCE coefficients from memory**; that file exists precisely because that is
-   how they get wrong.
+1. **PCE benchmark follow-up** (node 15). The implementation is in
+   `src/pce.py` and `scripts/build_pce_results.py`; the coefficient source remains
+   `docs/pce-benchmark.md` §3.5 and all 60 rows are regression-tested. Review the
+   endpoint mismatch and group-specific calibration interpretation before using
+   any number in a manuscript. **Do not write PCE coefficients from memory**.
 
    **Do not swap the comparator.** PCE stopped being the clinical standard
    during this project (verified 2026-08-22): the 2026 ACC/AHA dyslipidaemia
@@ -274,12 +283,17 @@ claims it.
    standard and a future comparison — not this round's work, and not a drop-in
    substitution: it needs eGFR, drops the race input, extends down to age 30,
    and defines its outcome differently.
-2. **Complete-case selection bias** (node 11). IPCW currently addresses
-   censoring only. `src/missingness.py` and
-   `reports/tables/part3_missing_sensitivity.csv` are the starting point.
-3. **TRIPOD checklist and reproducibility package** (node 16).
-4. **Decision-curve analysis** — net benefit, closer to clinical use than the
-   C-index, and rarely done.
+2. **Complete-case selection bias** (node 11). The E2 exact-covariate IPCW
+   sensitivity is implemented, but MAR/positivity are assumptions and MNAR or
+   multiple-imputation analyses remain future work. See `src/missingness.py` and
+   `reports/tables/part3_missing_sensitivity.csv`.
+3. **TRIPOD+AI and reproducibility** (node 16). The evidence map is written in
+   `docs/tripod-checklist.md`, and `docs/reproducibility.md` documents offline,
+   raw-data, R and optional warehouse paths. Funding, ethics, registration and
+   conflicts still require investigator input.
+4. **Decision-curve follow-up (future research)** — exploratory mortality curves are generated in
+   `reports/tables/decision_curve_primary.csv`; thresholds are illustrative and
+   have no treatment or clinical utility claim.
 
 ---
 

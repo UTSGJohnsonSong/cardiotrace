@@ -1,0 +1,201 @@
+arm,horizon_years,threshold,net_benefit,weighted_true_positive_fraction,weighted_false_positive_fraction,early_censored,estimator
+1b_mortality_recalibration,10,0.005,0.01639467515,0.01977745767,0.6731737202,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.01,0.0142219586,0.01894215221,0.4672991679,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.015,0.01281195182,0.01804979834,0.3439519213,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.02,0.01085690158,0.01638158386,0.2707094317,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.025,0.009041179951,0.01451241516,0.2133781733,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.03,0.007802056619,0.01322313746,0.1752816139,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.035,0.00714082585,0.01244467262,0.1462346325,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.04,0.006063797281,0.01114644081,0.1219834448,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.045,0.005616608256,0.01028041453,0.09897633311,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.05,0.004783082209,0.009099660293,0.08201498359,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.055,0.004233914135,0.008308046506,0.07000100164,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.06,0.003313729127,0.007145264859,0.06002739313,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.065,0.002967639518,0.006428336297,0.04978079213,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.07,0.002413539043,0.005591737289,0.04222463384,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.075,0.002435432773,0.005324013589,0.03562583007,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.08,0.001470178438,0.004165302185,0.03099392309,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.085,0.001417517365,0.003751039991,0.02511968473,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.09,0.0002318687409,0.002360801401,0.02152587468,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.095,9.195535225e-05,0.001918815345,0.01740324519,0,fully observed weighted binary
+1b_mortality_recalibration,10,0.1,1.297655455e-05,0.001678789551,0.01499231697,0,fully observed weighted binary
+2_same_inputs_refit,10,0.005,0.01638475941,0.01964496855,0.6487816189,0,fully observed weighted binary
+2_same_inputs_refit,10,0.01,0.01437476335,0.01863459201,0.4217230371,0,fully observed weighted binary
+2_same_inputs_refit,10,0.015,0.01226928765,0.01703256311,0.3127884212,0,fully observed weighted binary
+2_same_inputs_refit,10,0.02,0.01022178074,0.01533153474,0.2503779458,0,fully observed weighted binary
+2_same_inputs_refit,10,0.025,0.009475342158,0.01482950679,0.2088124207,0,fully observed weighted binary
+2_same_inputs_refit,10,0.03,0.007569290312,0.01299919955,0.1755670655,0,fully observed weighted binary
+2_same_inputs_refit,10,0.035,0.006617350242,0.01187690812,0.1450135244,0,fully observed weighted binary
+2_same_inputs_refit,10,0.04,0.005558342256,0.01071527633,0.1237664179,0,fully observed weighted binary
+2_same_inputs_refit,10,0.045,0.005471151871,0.01040680088,0.1047454402,0,fully observed weighted binary
+2_same_inputs_refit,10,0.05,0.005130970557,0.009953520739,0.09162845345,0,fully observed weighted binary
+2_same_inputs_refit,10,0.055,0.004443266968,0.008977509911,0.07790653783,0,fully observed weighted binary
+2_same_inputs_refit,10,0.06,0.003710198406,0.008019796382,0.06751703495,0,fully observed weighted binary
+2_same_inputs_refit,10,0.065,0.002465725132,0.0066380496,0.06001728274,0,fully observed weighted binary
+2_same_inputs_refit,10,0.07,0.001901655063,0.005861203878,0.05260543425,0,fully observed weighted binary
+2_same_inputs_refit,10,0.075,0.001867705037,0.005472669961,0.04446123407,0,fully observed weighted binary
+2_same_inputs_refit,10,0.08,0.001744725259,0.005224686349,0.04001955254,0,fully observed weighted binary
+2_same_inputs_refit,10,0.085,0.001623586625,0.00491748258,0.03545782116,0,fully observed weighted binary
+2_same_inputs_refit,10,0.09,0.00107990286,0.004212297764,0.03167199293,0,fully observed weighted binary
+2_same_inputs_refit,10,0.095,0.001240406902,0.004163532935,0.02784662168,0,fully observed weighted binary
+2_same_inputs_refit,10,0.1,0.0009257661246,0.003617132307,0.02422229564,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.005,0.01644593298,0.01964496855,0.6366080775,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.01,0.0143503458,0.01863459201,0.4241403747,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.015,0.0112492949,0.01609816849,0.3184093654,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.02,0.01010080658,0.01527498765,0.2535348722,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.025,0.009506379265,0.01483363666,0.2077630385,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.03,0.006943456459,0.01250271655,0.1797494096,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.035,0.006355826751,0.01174861052,0.1486867526,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.04,0.006152676197,0.01148958233,0.1280857472,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.045,0.005591453362,0.01069620737,0.1083342239,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.05,0.005116754199,0.00998958029,0.09258369573,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.055,0.004780786762,0.009409876852,0.07953618428,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.06,0.004099830033,0.008515823158,0.0691838923,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.065,0.002269929776,0.006522669226,0.06117402132,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.07,0.002094228284,0.006193923098,0.05446737395,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.075,0.001469855372,0.00528078263,0.04700143618,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.08,0.0009148669926,0.004462113316,0.04079333271,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.085,0.0009392168983,0.004462113316,0.03792294379,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.09,0.001094646405,0.004308267826,0.03249328326,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.095,0.001010353068,0.004039279972,0.02885451419,0,fully observed weighted binary
+3_cardiotrace_refit,10,0.1,0.001040999549,0.003995664637,0.02659198579,0,fully observed weighted binary
+treat_all,10,0.005,0.01523362586,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.01,0.01026005831,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.015,0.005235997693,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.02,0.0001606711504,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.025,-0.004966710023,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.03,-0.0101469508,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.035,-0.01538087282,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.04,-0.02066931487,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.045,-0.02601313327,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.05,-0.03141320239,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.055,-0.0368704151,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.06,-0.04238568327,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.065,-0.04795993826,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.07,-0.05359413148,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.075,-0.05928923489,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.08,-0.0650462416,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.085,-0.07086616642,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.09,-0.07675004645,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.095,-0.08269894174,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_all,10,0.1,-0.08871393586,0.02015745773,0.9798425423,0,fully observed weighted binary
+treat_none,10,0.005,0,0,0,0,fully observed weighted binary
+treat_none,10,0.01,0,0,0,0,fully observed weighted binary
+treat_none,10,0.015,0,0,0,0,fully observed weighted binary
+treat_none,10,0.02,0,0,0,0,fully observed weighted binary
+treat_none,10,0.025,0,0,0,0,fully observed weighted binary
+treat_none,10,0.03,0,0,0,0,fully observed weighted binary
+treat_none,10,0.035,0,0,0,0,fully observed weighted binary
+treat_none,10,0.04,0,0,0,0,fully observed weighted binary
+treat_none,10,0.045,0,0,0,0,fully observed weighted binary
+treat_none,10,0.05,0,0,0,0,fully observed weighted binary
+treat_none,10,0.055,0,0,0,0,fully observed weighted binary
+treat_none,10,0.06,0,0,0,0,fully observed weighted binary
+treat_none,10,0.065,0,0,0,0,fully observed weighted binary
+treat_none,10,0.07,0,0,0,0,fully observed weighted binary
+treat_none,10,0.075,0,0,0,0,fully observed weighted binary
+treat_none,10,0.08,0,0,0,0,fully observed weighted binary
+treat_none,10,0.085,0,0,0,0,fully observed weighted binary
+treat_none,10,0.09,0,0,0,0,fully observed weighted binary
+treat_none,10,0.095,0,0,0,0,fully observed weighted binary
+treat_none,10,0.1,0,0,0,0,fully observed weighted binary
+1b_mortality_recalibration,5,0.005,0.003410951513,0.005183447434,0.3527266882,18,weighted AJ
+1b_mortality_recalibration,5,0.01,0.002081975097,0.003882367912,0.1782388887,18,weighted AJ
+1b_mortality_recalibration,5,0.015,0.001376254486,0.00286190841,0.09755794098,18,weighted AJ
+1b_mortality_recalibration,5,0.02,0.001224321514,0.002410642854,0.05812974564,18,weighted AJ
+1b_mortality_recalibration,5,0.025,0.0004155434492,0.001365015943,0.03702942724,18,weighted AJ
+1b_mortality_recalibration,5,0.03,0.0004393688246,0.001202367616,0.02467029426,18,weighted AJ
+1b_mortality_recalibration,5,0.035,0.0005227844168,0.001110669469,0.01620883071,18,weighted AJ
+1b_mortality_recalibration,5,0.04,0.0003811042651,0.0008801475683,0.01197703928,18,weighted AJ
+1b_mortality_recalibration,5,0.045,0.000243593173,0.0006406470304,0.008426365196,18,weighted AJ
+1b_mortality_recalibration,5,0.05,0.0002632996319,0.0005640972447,0.005715154644,18,weighted AJ
+1b_mortality_recalibration,5,0.055,0.0001240955119,0.0003384954869,0.003683781388,18,weighted AJ
+1b_mortality_recalibration,5,0.06,6.388950422e-05,0.0002321045672,0.002635369321,18,weighted AJ
+1b_mortality_recalibration,5,0.065,0.000100918059,0.0002321045672,0.001887067465,18,weighted AJ
+1b_mortality_recalibration,5,0.07,7.389248541e-05,0.000190831622,0.001553619958,18,weighted AJ
+1b_mortality_recalibration,5,0.075,0.0001048488554,0.000190831622,0.001060454121,18,weighted AJ
+1b_mortality_recalibration,5,0.08,0.0001146939024,0.000190831622,0.0008755837756,18,weighted AJ
+1b_mortality_recalibration,5,0.085,7.993724686e-05,0.0001410025381,0.0006573498997,18,weighted AJ
+1b_mortality_recalibration,5,0.09,5.703900048e-06,7.071652749e-05,0.0006573498997,18,weighted AJ
+1b_mortality_recalibration,5,0.095,1.885646475e-05,7.071652749e-05,0.0004940353345,18,weighted AJ
+1b_mortality_recalibration,5,0.1,3.757690354e-05,7.071652749e-05,0.0002982566155,18,weighted AJ
+2_same_inputs_refit,5,0.005,0.003071476017,0.004781241702,0.3402433712,18,weighted AJ
+2_same_inputs_refit,5,0.01,0.002169130176,0.004037164368,0.184935385,18,weighted AJ
+2_same_inputs_refit,5,0.015,0.001493609275,0.003183156357,0.1109469251,18,weighted AJ
+2_same_inputs_refit,5,0.02,0.001337393168,0.002888681523,0.07601312942,18,weighted AJ
+2_same_inputs_refit,5,0.025,0.000718255911,0.002040708872,0.05157566548,18,weighted AJ
+2_same_inputs_refit,5,0.03,0.0008283261244,0.001969264163,0.03689032993,18,weighted AJ
+2_same_inputs_refit,5,0.035,0.0006042573374,0.001543252691,0.02588944333,18,weighted AJ
+2_same_inputs_refit,5,0.04,0.0003860516023,0.001213821227,0.019866471,18,weighted AJ
+2_same_inputs_refit,5,0.045,0.0003496282481,0.001086284838,0.01563348985,18,weighted AJ
+2_same_inputs_refit,5,0.05,6.893569078e-05,0.0007071611146,0.01212628305,18,weighted AJ
+2_same_inputs_refit,5,0.055,3.685307935e-05,0.0005724291031,0.009202169863,18,weighted AJ
+2_same_inputs_refit,5,0.06,3.627611931e-05,0.0005263713797,0.007678159079,18,weighted AJ
+2_same_inputs_refit,5,0.065,-4.878184929e-05,0.0003548558814,0.00580617351,18,weighted AJ
+2_same_inputs_refit,5,0.07,-0.0001753685495,0.0001521608616,0.004351462177,18,weighted AJ
+2_same_inputs_refit,5,0.075,-0.0001494736739,0.0001521608616,0.003720159271,18,weighted AJ
+2_same_inputs_refit,5,0.08,-0.0001910779752,9.807460212e-05,0.003325254639,18,weighted AJ
+2_same_inputs_refit,5,0.085,-0.000168597887,7.502612556e-05,0.002622540841,18,weighted AJ
+2_same_inputs_refit,5,0.09,-0.0001405969339,7.502612556e-05,0.002180188712,18,weighted AJ
+2_same_inputs_refit,5,0.095,-0.0001158191966,7.502612556e-05,0.001818052806,18,weighted AJ
+2_same_inputs_refit,5,0.1,-8.742924549e-05,7.502612556e-05,0.001462098339,18,weighted AJ
+3_cardiotrace_refit,5,0.005,0.003069871842,0.004781240232,0.3405623096,18,weighted AJ
+3_cardiotrace_refit,5,0.01,0.002400332001,0.004297683487,0.1878377971,18,weighted AJ
+3_cardiotrace_refit,5,0.015,0.00139809695,0.003212468031,0.119143701,18,weighted AJ
+3_cardiotrace_refit,5,0.02,0.001352567612,0.002917428751,0.07667819579,18,weighted AJ
+3_cardiotrace_refit,5,0.025,0.001326532191,0.00269714826,0.0534540267,18,weighted AJ
+3_cardiotrace_refit,5,0.03,0.0004877424809,0.001718398641,0.03979121584,18,weighted AJ
+3_cardiotrace_refit,5,0.035,0.0005559615745,0.00161940383,0.02932062219,18,weighted AJ
+3_cardiotrace_refit,5,0.04,0.0002818624539,0.001191496363,0.02183121381,18,weighted AJ
+3_cardiotrace_refit,5,0.045,0.0002533001,0.001016394636,0.01619456182,18,weighted AJ
+3_cardiotrace_refit,5,0.05,0.0002009363132,0.0008766452553,0.0128384699,18,weighted AJ
+3_cardiotrace_refit,5,0.055,9.195067954e-05,0.0007056448607,0.01054438184,18,weighted AJ
+3_cardiotrace_refit,5,0.06,-0.0001042495042,0.0004496582621,0.008677888339,18,weighted AJ
+3_cardiotrace_refit,5,0.065,-0.0003280342263,0.0001521608616,0.006907421649,18,weighted AJ
+3_cardiotrace_refit,5,0.07,-0.0002784526389,0.0001291123851,0.005414792462,18,weighted AJ
+3_cardiotrace_refit,5,0.075,-0.0002152862017,0.0001291123851,0.00424758257,18,weighted AJ
+3_cardiotrace_refit,5,0.08,-0.0001633797625,0.0001291123851,0.003363659697,18,weighted AJ
+3_cardiotrace_refit,5,0.085,-0.0001578922027,7.502612556e-05,0.002507297298,18,weighted AJ
+3_cardiotrace_refit,5,0.09,-0.0001312510329,7.502612556e-05,0.002085691269,18,weighted AJ
+3_cardiotrace_refit,5,0.095,-6.61205601e-05,7.502612556e-05,0.0013446079,18,weighted AJ
+3_cardiotrace_refit,5,0.1,-5.585954982e-05,7.502612556e-05,0.001177971078,18,weighted AJ
+treat_all,5,0.005,0.002399684214,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.01,-0.00263870122,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.015,-0.007728237774,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.02,-0.01286970837,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.025,-0.01806391201,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.03,-0.02331166413,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.035,-0.02861379711,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.04,-0.03397116063,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.045,-0.03938462221,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.05,-0.04485506759,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.055,-0.05038340128,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.06,-0.05597054703,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.065,-0.06161744835,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.07,-0.06732506904,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.075,-0.07309439374,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.08,-0.07892642849,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.085,-0.08482220132,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.09,-0.09078276287,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.095,-0.09680918697,0.007387685793,0.9926123142,18,weighted AJ
+treat_all,5,0.1,-0.1029025713,0.007387685793,0.9926123142,18,weighted AJ
+treat_none,5,0.005,0,0,0,18,weighted AJ
+treat_none,5,0.01,0,0,0,18,weighted AJ
+treat_none,5,0.015,0,0,0,18,weighted AJ
+treat_none,5,0.02,0,0,0,18,weighted AJ
+treat_none,5,0.025,0,0,0,18,weighted AJ
+treat_none,5,0.03,0,0,0,18,weighted AJ
+treat_none,5,0.035,0,0,0,18,weighted AJ
+treat_none,5,0.04,0,0,0,18,weighted AJ
+treat_none,5,0.045,0,0,0,18,weighted AJ
+treat_none,5,0.05,0,0,0,18,weighted AJ
+treat_none,5,0.055,0,0,0,18,weighted AJ
+treat_none,5,0.06,0,0,0,18,weighted AJ
+treat_none,5,0.065,0,0,0,18,weighted AJ
+treat_none,5,0.07,0,0,0,18,weighted AJ
+treat_none,5,0.075,0,0,0,18,weighted AJ
+treat_none,5,0.08,0,0,0,18,weighted AJ
+treat_none,5,0.085,0,0,0,18,weighted AJ
+treat_none,5,0.09,0,0,0,18,weighted AJ
+treat_none,5,0.095,0,0,0,18,weighted AJ
+treat_none,5,0.1,0,0,0,18,weighted AJ
