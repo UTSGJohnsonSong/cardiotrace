@@ -1,8 +1,8 @@
 {
   "full": {
-    "commit": "67d534f63aaeaa12e745cf8baf654efd1eb89291",
-    "branch": "main",
-    "ran_at": "2026-08-25T23:03:47+00:00",
+    "commit": "fc4e831d36e0d2f8de708fca148f67563a90e864",
+    "branch": "finish-research-deliverables",
+    "ran_at": "2026-09-06T03:28:22+00:00",
     "stages": [
       "cohort",
       "descriptive",
@@ -15,9 +15,9 @@
     "covers": "every tracked artefact including Part 4"
   },
   "render": {
-    "commit": "7cb2aecd9dbfd3c25e47cc0f9944ee275ea5c508",
-    "branch": "main",
-    "ran_at": "2026-08-25T23:07:58+00:00",
+    "commit": "fc4e831d36e0d2f8de708fca148f67563a90e864",
+    "branch": "finish-research-deliverables",
+    "ran_at": "2026-09-06T03:22:18+00:00",
     "stages": [
       "render"
     ],

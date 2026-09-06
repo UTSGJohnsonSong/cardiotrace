@@ -1,9 +1,10 @@
 # CardioTrace — handover
 
 For an assistant picking this project up cold. Written 2026-09-06 against the
-current working tree after the PCE and reporting deliverables were implemented.
-The numbers below were read from repository artefacts, not recalled. Replace
-this sentence with the commit hash after committing the current tree.
+validated tree `fc4e831` after the PCE and reporting deliverables were
+implemented. The numbers below were read from repository artefacts, not
+recalled. The subsequent receipt commit should contain only the receipt and
+this status text.
 
 Published site: <https://utsgjohnsonsong.github.io/cardiotrace/>
 Repository: <https://github.com/UTSGJohnsonSong/cardiotrace>
