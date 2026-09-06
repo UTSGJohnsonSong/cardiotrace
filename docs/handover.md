@@ -7,6 +7,13 @@ the tested commit; after a successful full rebuild, commit only the receipt.
 Published site: <https://utsgjohnsonsong.github.io/cardiotrace/>
 Repository: <https://github.com/UTSGJohnsonSong/cardiotrace>
 
+Visual companion: <https://utsgjohnsonsong.github.io/cardiotrace/explore.html>.
+Three reviewed Tableau dashboards and the portable workbook are in `docs/tableau/`;
+the complete HTML report embeds their previews. `scripts/tableau_atlas.py` blocks
+a render when any source or reviewed artifact hash differs. Follow
+`docs/tableau-dashboard.md` when updating the atlas; its original explorer plan
+is explicitly retained as history, not as a list of implemented features.
+
 ---
 
 ## 0. Read this before you change anything
@@ -104,7 +111,7 @@ National Death Index fixed the time order at the cost of a harder endpoint
 <!-- HANDOVER_STATUS_START -->
 **Generated from tracked results; edit the producers, not this block.**
 
-**Tests:** 235 collected. This includes conditional skips.
+**Tests:** 241 collected. This includes conditional skips.
 The count is not a passed-test count; consult the actual pytest run and CI.
 
 | Cohort | Value |

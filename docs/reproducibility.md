@@ -108,6 +108,15 @@ Python estimates with R. `reports/tables/crosscheck_part1.csv` and
 `reports/tables/crosscheck_part3.csv` are committed so rendering does not need R.
 These checks cover the original survey estimators, not the new PCE adaptation.
 
+## Tableau visual companion
+
+The Tableau companion is a reviewed native-workbook snapshot in `docs/tableau/`.
+Report/site rendering checks its source and artifact hashes without installing
+Tableau. Regenerating the workbook uses separate optional dependencies and a
+native Tableau visual review; see [the atlas maintenance guide](tableau-dashboard.md).
+The full analysis receipt includes the source/hash gate and regenerated HTML,
+not a rerun of Tableau GUI capture. The single-file report embeds the previews.
+
 ## Optional warehouse
 
 `make up`, `make load` and `make dbt` require Docker/Postgres and the dbt profile.

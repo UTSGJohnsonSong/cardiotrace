@@ -523,7 +523,15 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
   border: 1px solid var(--rule); border-radius: 3px; padding: 14px;
   overflow-x: auto;
 }
-.vizwrap > div { min-width: 1000px; }
+.vizwrap > div { min-width: 1380px; }
+.atlas-links { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 20px 0;
+  font-family: var(--sans); font-size: 15px; }
+.atlas-panel { padding-top: 42px; }
+.atlas-panel img { display: block; width: 100%; height: auto;
+  border: 1px solid var(--rule); background: #fff; }
+.atlas-panel figure { margin: 22px 0; }
+.atlas-note { border-left: 3px solid var(--series); padding: 12px 20px;
+  background: var(--plate); font-family: var(--sans); font-size: 15px; }
 
 /* --- footer -------------------------------------------------------------- */
 .pagefoot {
@@ -538,9 +546,9 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html" aria-current="page">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html" aria-current="page">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a><a href="explore.html">Visual atlas</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Pandemic</h1><p class="standfirst measure">Whether the pandemic bent the trend, and what a single post-pandemic observation can and cannot establish.</p></header><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li></ol></nav><section>
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Pandemic</h1><p class="standfirst measure">Whether the pandemic bent the trend, and what a single post-pandemic observation can and cannot establish.</p></header><p class="atlas-note"><a href="explore.html#population">View population burden in the Tableau atlas &rarr;</a></p><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li></ol></nav><section>
   <div class="sec-head"><div class="sec-num">3</div>
   <h2 id="whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</h2></div>
   <div class="body-indent">

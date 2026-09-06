@@ -482,6 +482,8 @@ ARM_LABEL_HTML = {
 
 
 def build() -> str:
+    from scripts.tableau_atlas import report_appendix
+    atlas_appendix = report_appendix()
     from scripts.render_pce_section import build as build_pce_section
     pce_section = build_pce_section()
     desc = json.loads((ROOT / "reports" / "descriptive_results.json").read_text())
@@ -872,6 +874,7 @@ def build() -> str:
     <span><b>Cohort</b> {n_cohort} adults 40–79 · {n_cvd} CVD deaths</span>
     <span><b>Mortality follow-up through</b> {DATA_CUTOFF}</span>
   </div>
+  <p class="measure"><a href="#tableau-atlas">View the Tableau research atlas and download the editable workbook &rarr;</a></p>
 </header>
 
 <section>
@@ -2037,6 +2040,8 @@ def build() -> str:
       nobody has checked would be worse than depending on one that is checked.
     </div>'''}
 </section>
+
+{atlas_appendix}
 
 <footer>
   <p>CardioTrace · Module 1 of the HealthTrace platform · prepared {BUILD_DATE}. Figures and

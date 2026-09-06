@@ -1,0 +1,112 @@
+{
+  "source_commit": "9517c6fbcd8a8e4f42ac9356e27f539689d64322",
+  "source_sha256": {
+    "reports/descriptive_results.json": "d42b72f55e2c05a8a34f3a0df30845ded78ea5677ac679ac46c446b31012d445",
+    "reports/model_results.json": "a8d508a5304abd6e4224c19e950dd453464b75b5c2bef701b680e308139979c2",
+    "reports/pce_results.json": "73b3eb04f6918ccbecd01eeaf768a20b62e2be94064b7047f8d71921021e3867",
+    "reports/cohort_results.json": "858cdf4a0052ad8de622d697df88a5b9f3fe6ec5983e0030590846d7cbc4023c",
+    "reports/part4_learning_results.json": "2f404da019b65efcc08052983684642aef37a5d4f5c59462d03cdb4d391410dd",
+    "data/tableau/cardiotrace_prevalence.csv": "57d15b7a55ea750869fbec1ffc60bbd9303cbd6c288d42cd19debd9ec890ce0a",
+    "reports/tables/cif_by_sbp.csv": "42227d1212bf2956e0105895fa4dc7b502fb9d0835aaec7b98a0bd83c3cff795",
+    "reports/tables/crosscheck_part3.csv": "5a7bbc015325adb72bb8c056fefe09a3e6bac2e42d9929b9fe4da42b875ca151",
+    "reports/tables/calibration_10y.csv": "a108727014bede182ccb274868d6616ae0848da6cad69e204d07faab16301e6e",
+    "reports/tables/calibration_5y.csv": "519a691e3210706204de9c0db07f3102b3f9de73967c22e4394aa134ec9bd183",
+    "reports/tables/part4_arms.csv": "6293863f2e716a533516eca06106b1030027f59554b2b7f197c4a0325bd1dcc9",
+    "reports/tables/decision_curve_primary.csv": "64d13e36128548ee3a921e7148dcd9937a41f5a1fb1b37c5377375f115178b1d"
+  },
+  "charts": [
+    {
+      "sheet": "Population trend",
+      "rows": 22,
+      "kind": "line"
+    },
+    {
+      "sheet": "Latest race intervals",
+      "rows": 12,
+      "kind": "interval"
+    },
+    {
+      "sheet": "Age profile",
+      "rows": 66,
+      "kind": "heatmap"
+    },
+    {
+      "sheet": "Condition trends",
+      "rows": 66,
+      "kind": "line"
+    },
+    {
+      "sheet": "Blood pressure gradient",
+      "rows": 5,
+      "kind": "bar"
+    },
+    {
+      "sheet": "Adjusted associations",
+      "rows": 21,
+      "kind": "interval"
+    },
+    {
+      "sheet": "Calibration 10y",
+      "rows": 12,
+      "kind": "line"
+    },
+    {
+      "sheet": "Calibration 5y",
+      "rows": 12,
+      "kind": "line"
+    },
+    {
+      "sheet": "Paired discrimination",
+      "rows": 8,
+      "kind": "dot"
+    },
+    {
+      "sheet": "Paired differences",
+      "rows": 18,
+      "kind": "interval"
+    },
+    {
+      "sheet": "Part 4 learning",
+      "rows": 12,
+      "kind": "interval"
+    },
+    {
+      "sheet": "Decision curves 10y",
+      "rows": 80,
+      "kind": "line"
+    }
+  ],
+  "participants_in_extract": false,
+  "analysis_refitted": false,
+  "validation": {
+    "all_plotted_values_within_axes": true,
+    "every_interval_is_a_separate_series": true,
+    "prevalence_187_source_cells": true,
+    "age_heatmap_66_cells": true,
+    "bp_strata_total_n": 19831
+  },
+  "notes": [
+    "X/Y are chart coordinates; CI vertices are not separate observations.",
+    "Latest Aug 2021–Aug 2023 period is displayed at reference year 2022, replacing the internal CSV time coordinate for presentation only.",
+    "Prevalence values use percentage points; no fabricated age-specific CI.",
+    "Hazard ratios are exp of R coefficients and interval limits after stated unit scaling.",
+    "Four calibration identity-guide vertices are visual guides, not observations.",
+    "Heatmap colour interpolates between light blue shades over 0–40%; estimates are printed unchanged.",
+    "Native charts preserve hover details; underlying aggregate rows are editable.",
+    "Source freshness uses source_sha256_lf (CRLF to LF only), matching Git across Windows and Linux; original native-review byte digests are retained in source_sha256."
+  ],
+  "source_sha256_lf": {
+    "reports/descriptive_results.json": "e7a408511809e9198f163f83d2accb2205ec81eaaa235b58d0681fcd749b8bec",
+    "reports/model_results.json": "750d7cbdc3bdfac2b00c04ddcdd04544b6b289490ac5f805fbb41733e627cb80",
+    "reports/pce_results.json": "0cbcee3186b3111b936c1d04cc080c3a9c3cbf780548dcd58a55c9355648ecc1",
+    "reports/cohort_results.json": "c56b0b4ef7a1439ce2cbebabc0dc51d146cadb057e15691e66da496215612113",
+    "reports/part4_learning_results.json": "90b472adf03a49625def77432a65cd5096389db4555bd454fdf94af1e33e469a",
+    "data/tableau/cardiotrace_prevalence.csv": "736126ee69d153f396945bc7efc6501e7cd251eea60e16c3a22aa77fae11a308",
+    "reports/tables/cif_by_sbp.csv": "74a9cce79d742dbbf383f99596ce796663c2c7a89be1f5e334687407eafa6335",
+    "reports/tables/crosscheck_part3.csv": "5302ceb92a0bb3638efc7301b51c1a952616a60c6e52e650599ad4af81f3cfa2",
+    "reports/tables/calibration_10y.csv": "a6b48cd9eecb13fce0443f9fcc98fbcfc612f13d8114bbbf39ac17f51c513efe",
+    "reports/tables/calibration_5y.csv": "e9ccbf7243422e995c4941629c2ef20232ecacda07204ffa2c9e9470aa706b6d",
+    "reports/tables/part4_arms.csv": "40a7ac455681cb2c6c4c6bf9b929c3a76f9fdab12104eaf5f60708320695b371",
+    "reports/tables/decision_curve_primary.csv": "dafe2dc0007f6e538df6efbea44f6e9e91f0b4d9c089d28dae4f58994663ceba"
+  }
+}

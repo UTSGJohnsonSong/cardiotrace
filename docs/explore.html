@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Burden &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="Age-standardised cardiovascular prevalence across 11 NHANES cycles: the standardised series moves -0.59 pp per decade while the crude series rises with the ageing of the population.">
+<title>Tableau visual atlas &mdash; CardioTrace | Zekun Song</title>
+<meta name="description" content="Three reviewed Tableau dashboards: population burden, mortality risk and model evidence, with report links and an editable workbook.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
-<link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/burden.html">
+<link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/explore.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cstyle%3E.g%7Bfill%3A%23f7f6f2%7D%40media%28prefers-color-scheme%3Adark%29%7B.g%7Bfill%3A%2316161a%7D%7D%3C%2Fstyle%3E%3Crect%20class%3D%22g%22%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%2F%3E%3Cpath%20d%3D%22M2%2020h5.2l2.6-7.4%204.2%2014.2%204.1-19%202.9%2012.2H30%22%20fill%3D%22none%22%20stroke%3D%22%232a78d6%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
-<meta property="og:title" content="Burden &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="Age-standardised cardiovascular prevalence across 11 NHANES cycles: the standardised series moves -0.59 pp per decade while the crude series rises with the ageing of the population.">
-<meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/burden.html">
+<meta property="og:title" content="Tableau visual atlas &mdash; CardioTrace | Zekun Song">
+<meta property="og:description" content="Three reviewed Tableau dashboards: population burden, mortality risk and model evidence, with report links and an editable workbook.">
+<meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/explore.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta property="og:image:type" content="image/png">
@@ -22,8 +22,8 @@
 <meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Burden &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="Age-standardised cardiovascular prevalence across 11 NHANES cycles: the standardised series moves -0.59 pp per decade while the crude series rises with the ageing of the population.">
+<meta name="twitter:title" content="Tableau visual atlas &mdash; CardioTrace | Zekun Song">
+<meta name="twitter:description" content="Three reviewed Tableau dashboards: population burden, mortality risk and model evidence, with report links and an editable workbook.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <style>
@@ -546,230 +546,70 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html" aria-current="page">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a><a href="explore.html">Visual atlas</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a><a href="explore.html" aria-current="page">Visual atlas</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Burden</h1><p class="standfirst measure">How the burden of cardiovascular disease moved across 11 NHANES cycles, once the ageing of the population is taken out of it.</p></header><p class="atlas-note"><a href="explore.html#population">View population burden in the Tableau atlas &rarr;</a></p><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#the-burden-across-11-cycles-with-ageing-taken-out">The burden across 11 cycles, with ageing taken out</a></li><li class="toc-h3"><a href="#how-standardisation-works-and-why-it-is-not-a">How standardisation works, and why it is not a correction factor</a></li><li class="toc-h3"><a href="#the-standard-population-written-out">The standard population, written out</a></li><li class="toc-h3"><a href="#how-much-the-clustering-actually-costs">How much the clustering actually costs</a></li><li class="toc-h3"><a href="#testing-the-limitation-instead-of-only-declaring-it">Testing the limitation instead of only declaring it</a></li></ol></nav><section>
-  <div class="sec-head"><div class="sec-num">2</div>
-  <h2 id="the-burden-across-11-cycles-with-ageing-taken-out">The burden across 11 cycles, with ageing taken out</h2></div>
-  <div class="body-indent">
-    <div class="chip-row">
-      <span class="chip">Descriptive</span>
-      <span class="chip">Survey-weighted</span>
-      <span class="chip">Age-standardised</span>
-      <span class="chip">Design-based intervals</span>
-    </div>
-    <p class="lede measure">Crude prevalence of self-reported cardiovascular disease rose over the
-    series. Age-standardised prevalence fell. Standardisation does not shrink the trend here — it
-    reverses its sign.</p>
+<header class="masthead"><p class="eyebrow">CardioTrace &middot; Tableau research atlas</p>
+<h1>Visual atlas</h1><p class="standfirst measure">Three Tableau dashboards connecting population burden, mortality risk and model evidence to the research report.</p>
+<nav class="atlas-links" aria-label="Atlas downloads">
+  <a href="tableau/cardiotrace-atlas.twbx" download>Download Tableau workbook</a>
+  <a href="cardiotrace-report.html#tableau-atlas">Read the full report</a>
+  <a href="#using-the-workbook">Workbook guide</a>
+</nav></header>
+<p class="atlas-note">The images below are high-resolution previews. Open the downloaded workbook in
+Tableau Public or Tableau Desktop for hover details and editing. It contains the aggregate data;
+no connection to the research environment is needed.</p>
+<nav class="atlas-links" aria-label="Dashboards"><a href="#population">Population burden</a><a href="#mortality">Mortality risk</a><a href="#models">Model evidence</a></nav>
 
-    <div class="stats">
-      <div class="stat"><div class="k">Adults 20+</div><div class="v">62,877</div><div class="n">11 cycles, 1999-2000 to Aug 2021&ndash;Aug 2023</div></div>
-      <div class="stat"><div class="k">Crude</div><div class="v">8.0% → 9.4%</div><div class="n">rising, to Aug 2021&ndash;Aug 2023</div></div>
-      <div class="stat"><div class="k">Standardised</div><div class="v">8.7% → 8.0%</div><div class="n">falling, to Aug 2021&ndash;Aug 2023</div></div>
-      <div class="stat"><div class="k">Weighted mean age</div><div class="v">45.0 → 48.8</div><div class="n">years — the driver</div></div>
-    </div>
-
-    <figure>
-      <img src="assets/part1_standardisation.png"
-           alt="Crude and age-standardised prevalence of self-reported cardiovascular disease
-                across the ten pre-pandemic NHANES cycles, 1999 to 2018. The two series track
-                together until roughly 2015, then the crude series rises while the standardised
-                series stays flat. The August 2021 to August 2023 cycle is plotted separately in
-                grey, detached from both lines.">
-      <figcaption><b>Two series, opposite conclusions.</b> Both lines run the
-      10 pre-pandemic cycles. The last cycle is drawn <b>detached</b>, in grey, with
-      its own interval and no line joining it: NCHS names it August 2021&ndash;August 2023,
-      reports it on an updated sample design with modified interview and examination procedures,
-      and urges caution before combining it with earlier cycles for trend analysis. A continuous
-      line would assert a comparability the survey itself declines to assert. Over the fitted
-      window the standardised series falls
-      0.59 points per decade (95% CI
-      -1.22 to 0.04) while the crude
-      series rises +0.43. <b>The sign reversal is the
-      finding, and it does not depend on any critical value; the size of the decline does.</b>
-      Ten points with a dispersion estimated from the same ten give t(8) =
-      2.306 rather than 1.96, and on that interval the slope
-      does not exclude zero. The decline
-      is consistent in direction across the series and
-      not established at 95%.</figcaption>
-    </figure>
-
-    <h3 id="how-standardisation-works-and-why-it-is-not-a">How standardisation works, and why it is not a correction factor</h3>
-    <p class="measure">Direct standardisation computes prevalence separately within each age band,
-    then re-weights those bands to a fixed reference population — here the 2000 projected U.S.
-    standard population, on the bands NCHS pairs with NHANES: 20–34, 35–44, 45–54, 55–64, 65–74,
-    75 and over. The result answers a counterfactual question: <em>what would the national
-    rate be if the age structure had never changed?</em> Because the weights are held constant
-    across cycles, any movement left in the series cannot be demographic.</p>
-    <p class="measure">The intervals are equally deliberate. NHANES is a stratified, multi-stage
-    probability sample: people are drawn in clusters, and two people from the same cluster share a
-    neighbourhood, a provider mix and an interviewer. Treating them as independent produces
-    standard errors that are too small and intervals that look decisive when they are not. The
-    variance here is Taylor-linearised and clustered on the masked variance units NCHS releases in
-    place of the true stratum and primary sampling unit, and the
-    linearisation is applied to the standardised estimator as a whole rather than band by band. A
-    single sampling unit contributes people to every age band at once, so band-by-band variances
-    would discard the covariance between bands and understate the total.</p>
-
-    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Standardise directly to the <b>2000 U.S. standard population</b> rather than report crude rates.</div><div class="d-buys"><span class="col-label">What it buys</span>Separates disease change from demographic change. Comparable to any other US health statistic using the same standard.</div><div class="d-costs"><span class="col-label">What it costs</span>The output is no longer the actual number of people with disease — it is a hypothetical rate under a fixed age structure.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Define the population as <b>adults 20 and over</b>, on the age bands NCHS assigns to NHANES.</div><div class="d-buys"><span class="col-label">What it buys</span>The widest defensible adult range, on the bands the standard&rsquo;s own documentation pairs with this survey &mdash; so the base is inherited rather than chosen.</div><div class="d-costs"><span class="col-label">What it costs</span>The 20&ndash;34 band carries very few events, so it contributes width to the intervals and almost no signal.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Collapse the two oldest standard bands into an open <b>75+</b> group.</div><div class="d-buys"><span class="col-label">What it buys</span>NHANES top-codes age, and the top code itself changed over the series. An open upper band is stable across all cycles.</div><div class="d-costs"><span class="col-label">What it costs</span>No resolution above 75, where prevalence is highest and still rising with age.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Use <b>Taylor linearisation on the masked variance units</b> (<code>SDMVSTRA</code> × <code>SDMVPSU</code>) rather than model-based standard errors.</div><div class="d-buys"><span class="col-label">What it buys</span>Intervals that reflect how the sample was actually drawn, using the only design variables NCHS releases publicly.</div><div class="d-costs"><span class="col-label">What it costs</span>Wider intervals than a naive calculation, no closed form — the estimator has to be linearised by hand — and variances that approximate the true design rather than reproduce it, because the real strata and PSUs are withheld for disclosure control.</div></div></div>
-
-    <figure>
-      <img src="assets/part1_by_race.png"
-           alt="Small multiples of age-standardised cardiovascular disease prevalence for four
-                race and ethnicity groups, each panel repeating the national series as a grey
-                reference line.">
-      <figcaption><b>Differences between groups persist across the whole series.</b> Non-Hispanic
-      Black adults sit above the national rate in 10 of 11 cycles;
-      Mexican American adults sit below it in 10 of 11. The Other Hispanic panel is shaded before 2007 because its per-cycle sample
-      steps from 154 to 666 people between 2005–2006 and 2007–2008 — that segment measures a
-      different sample, and the apparent rise across it is a sampling artefact rather than a
-      health trend.</figcaption>
-    </figure>
-
-    <h3 id="the-standard-population-written-out">The standard population, written out</h3>
-    <p class="measure">An age-standardised rate cannot be checked without the distribution it was
-    standardised to, so here it is. The left column is each band&rsquo;s share of the full 2000
-    projected U.S. population; the right column renormalises over adults 20 and over, which is what
-    the estimator actually applies. The bands are the ones NCHS pairs with NHANES, and the weights
-    are sums of the Master List five-year weights they span.</p>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: 2000 projected U.S. standard population — age-adjustment weights. Scrollable.">
-      <table>
-        <caption>2000 projected U.S. standard population &mdash; age-adjustment weights</caption>
-        <thead><tr><th>Age band</th><th>Share of all ages</th>
-          <th>Renormalised, 20+ base</th></tr></thead>
-        <tbody><tr><td>20-34</td><td>0.202052</td><td class='em'>0.283330</td></tr><tr><td>35-44</td><td>0.162613</td><td class='em'>0.228026</td></tr><tr><td>45-54</td><td>0.134834</td><td class='em'>0.189073</td></tr><tr><td>55-64</td><td>0.087247</td><td class='em'>0.122343</td></tr><tr><td>65-74</td><td>0.066037</td><td class='em'>0.092601</td></tr><tr><td>75+</td><td>0.060350</td><td class='em'>0.084627</td></tr></tbody>
-      </table>
-    </div>
-
-    <h3 id="how-much-the-clustering-actually-costs">How much the clustering actually costs</h3>
-    <p class="measure">The argument for design-based variance is usually made by citation. It can
-    be measured instead. The design effect is the design-based variance divided by the variance a
-    simple random sample of the same size would have produced; the effective sample size,
-    <em>n</em> divided by that ratio, is the number of independent observations this sample is
-    worth. NCHS publishes no design effects for continuous NHANES, so the only way to know is to
-    compute them on the estimates at hand.</p>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Design effect, decomposed — age-standardised prevalence. The residual is the total divided by the Kish weighting factor: it carries clustering, stratification and their interaction, not clustering alone.. Scrollable.">
-      <table>
-        <caption>Design effect, decomposed &mdash; age-standardised prevalence. The residual is
-        the total divided by the Kish weighting factor: it carries clustering, stratification and
-        their interaction, not clustering alone.</caption>
-        <thead><tr><th>Cycle</th><th>n</th><th>Variance units</th>
-          <th>Total DEFF</th><th>Weighting alone</th>
-          <th>Residual (DEFF &divide; Kish)</th></tr></thead>
-        <tbody><tr><td>1999-2000</td><td>4,880</td><td>27</td><td>2.92</td><td>1.77</td><td class='em'>1.65</td></tr><tr><td>2001-2002</td><td>5,410</td><td>30</td><td>2.46</td><td>1.58</td><td class='em'>1.56</td></tr><tr><td>2003-2004</td><td>5,039</td><td>30</td><td>3.62</td><td>1.54</td><td class='em'>2.35</td></tr><tr><td>2005-2006</td><td>4,979</td><td>30</td><td>1.48</td><td>1.52</td><td class='em'>0.97</td></tr><tr><td>2007-2008</td><td>5,934</td><td>32</td><td>2.69</td><td>1.64</td><td class='em'>1.64</td></tr><tr><td>2009-2010</td><td>6,216</td><td>31</td><td>1.74</td><td>1.55</td><td class='em'>1.12</td></tr><tr><td>2011-2012</td><td>5,557</td><td>31</td><td>0.79</td><td>1.95</td><td class='em'>0.41</td></tr><tr><td>2013-2014</td><td>5,768</td><td>30</td><td>1.74</td><td>1.57</td><td class='em'>1.11</td></tr><tr><td>2015-2016</td><td>5,719</td><td>30</td><td>1.12</td><td>1.91</td><td class='em'>0.59</td></tr><tr><td>2017-2018</td><td>5,568</td><td>30</td><td>1.90</td><td>2.34</td><td class='em'>0.81</td></tr><tr><td>Aug 2021&ndash;Aug 2023</td><td>7,807</td><td>30</td><td>1.89</td><td>1.48</td><td class='em'>1.27</td></tr></tbody>
-      </table>
-    </div>
-
-    <p class="measure">For this report&rsquo;s age-standardised prevalence estimate, the median
-    <em>total</em> design effect is <b>1.89</b>, corresponding to a typical effective
-    sample size of about <b>3,313</b> against a nominal <b>5,568</b>. A design
-    effect belongs to an estimator rather than to the sample, so this figure describes this
-    estimate and does not transfer to another one computed on the same people.</p>
-
-    <p class="measure">It also carries more than one thing at once, and they should not be
-    conflated. Unequal selection probabilities inflate the variance on their own, by a factor of
-    1 + CV&sup2; of the weights &mdash; a median of <b>1.58</b> here. Dividing it out
-    leaves a residual of about <b>1.12</b>. That residual is what the design structure
-    costs beyond the weights: mostly clustering, but net of stratification, which pulls the other
-    way, and of whatever interaction the two have &mdash; so it is neither an upper nor a lower
-    bound on clustering alone. The total is worse still as a price for clustering: quoting it that
-    way would overstate it by roughly half again. The reason a residual above one exists at all is
-    visible in the third column &mdash; each cycle resolves into only 27&ndash;32
-    variance units, because participants must travel to a mobile examination centre and NCHS
-    fields the centres in a small number of locations. Two adults reached by the same location
-    share a food environment, an insurance market, a provider mix and often an interviewer, so the
-    second largely repeats what the first already said. Treating them as independent would not
-    bias the estimate; it would make the interval too narrow.</p>
-
-    <div class="note">
-      <b>These units are not counties, and cannot be turned back into any.</b> The public-use
-      files do not carry the true design variables. NCHS withholds them because releasing the real
-      primary sampling units every two years would carry a disclosure risk, and substitutes
-      <em>masked variance units</em> &mdash; a pseudo-stratum (<code>SDMVSTRA</code>) and a
-      pseudo-PSU (<code>SDMVPSU</code>) &mdash; which it describes as producing variance estimates
-      that &ldquo;closely approximate&rdquo; the ones the true design variables would give, and
-      directs analysts to use for all public-release work. The real first-stage units are mostly
-      single counties, but the 27&ndash;32 units counted above are the masked ones:
-      they stand in for that structure rather than identify it. Nothing here is a statement about
-      any particular county, and no geography can be recovered from the table.
-    </div>
-
-    <div class="note">
-      <b>Unequal selection and clustering are different problems.</b> Sampling some groups at
-      higher rates is handled by the weights, and affects the point estimate. Clustering is not
-      touched by the weights at all, and affects only the variance. NHANES does both, which is why
-      the analytic guidance names both: variance estimates that assume simple random sampling are
-      too low because they ignore &ldquo;the differential weighting <em>and</em> the correlation
-      among sample persons within a cluster&rdquo;.
-    </div>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Prevalence by cycle, adults 20+. Scrollable.">
-      <table>
-        <caption>Prevalence by cycle, adults 20+</caption>
-        <thead><tr><th>Cycle</th><th>n</th><th>Cases</th><th>Crude %</th>
-          <th>Standardised %</th><th>95% CI</th></tr></thead>
-        <tbody><tr><td>1999-2000</td><td>4,880</td><td>564</td><td>8.02</td><td class='em'>8.69</td><td>7.39 – 9.99</td></tr><tr><td>2001-2002</td><td>5,410</td><td>638</td><td>8.09</td><td class='em'>8.76</td><td>7.61 – 9.91</td></tr><tr><td>2003-2004</td><td>5,039</td><td>688</td><td>9.58</td><td class='em'>9.74</td><td>8.26 – 11.23</td></tr><tr><td>2005-2006</td><td>4,979</td><td>561</td><td>8.76</td><td class='em'>8.81</td><td>7.84 – 9.77</td></tr><tr><td>2007-2008</td><td>5,934</td><td>717</td><td>8.65</td><td class='em'>8.58</td><td>7.44 – 9.71</td></tr><tr><td>2009-2010</td><td>6,216</td><td>668</td><td>7.98</td><td class='em'>7.76</td><td>6.89 – 8.63</td></tr><tr><td>2011-2012</td><td>5,557</td><td>581</td><td>8.50</td><td class='em'>8.26</td><td>7.62 – 8.91</td></tr><tr><td>2013-2014</td><td>5,768</td><td>595</td><td>8.75</td><td class='em'>8.25</td><td>7.33 – 9.18</td></tr><tr><td>2015-2016</td><td>5,719</td><td>635</td><td>8.65</td><td class='em'>7.70</td><td>6.95 – 8.45</td></tr><tr><td>2017-2018</td><td>5,568</td><td>691</td><td>9.57</td><td class='em'>8.41</td><td>7.43 – 9.39</td></tr><tr><td>Aug 2021&ndash;Aug 2023</td><td>7,807</td><td>982</td><td>9.40</td><td class='em'>8.03</td><td>7.23 – 8.84</td></tr></tbody>
-      </table>
-    </div>
-
-    <h3 id="testing-the-limitation-instead-of-only-declaring-it">Testing the limitation instead of only declaring it</h3>
-    <p class="measure">A self-reported outcome moves with access to care as well as with disease.
-    That is the standard caveat, and stating it changes nothing. For one condition it can be
-    measured: blood pressure is both taken at the examination and asked about in the questionnaire,
-    so the share of the measurably hypertensive who report having been told is directly
-    observable. If expanding access were inflating self-reported prevalence, this share would have
-    to rise, and rise when access rose.</p>
-
-    <figure>
-      <img src="assets/part1_ascertainment.png"
-           alt="Share of hypertensive adults - measured high or on treatment - who report having
-                been told, by NHANES cycle. The series rises to a peak around 2013 and then
-                declines, with the ACA coverage expansion marked at 2014. A dashed line shows the
-                narrower measured-only denominator, which is markedly lower and flatter.">
-      <figcaption><b>Ascertainment improved by
-      5.2 points
-      overall, peaking in 2013-2014.</b> The share climbs from
-      64.4% to
-      80.9%, then falls back to
-      69.7%. The peak cycle straddles the 2014 coverage
-      expansion, so nothing is claimed about which came first. The dashed line conditions on
-      measured pressure alone; it looks flat because it drops everyone whose treatment worked, and
-      it drops a growing share of them &mdash; from half of the already-diagnosed to two thirds
-      across this window. 2021&ndash;2022 is shown separately: CDC changed both the measurement
-      instrument and the medication item that cycle.</figcaption>
-    </figure>
-
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Diagnostic ascertainment for hypertension, adults 20+. Scrollable.">
-      <table>
-        <caption>Diagnostic ascertainment for hypertension, adults 20+</caption>
-        <thead><tr><th>Cycle</th><th>Instrument</th><th>Hypertensive</th>
-          <th>Ascertained</th><th>95% CI</th>
-          <th>Measured-only denominator</th></tr></thead>
-        <tbody><tr><td>1999-2000</td><td>auscultatory</td><td>1,574</td><td class='em'>64.4%</td><td>58.0 – 70.8</td><td>50.0%</td></tr><tr><td>2001-2002</td><td>auscultatory</td><td>1,680</td><td class='em'>64.6%</td><td>59.6 – 69.7</td><td>47.0%</td></tr><tr><td>2003-2004</td><td>auscultatory</td><td>1,749</td><td class='em'>67.9%</td><td>62.2 – 73.6</td><td>49.6%</td></tr><tr><td>2005-2006</td><td>auscultatory</td><td>1,580</td><td class='em'>68.7%</td><td>64.1 – 73.4</td><td>51.0%</td></tr><tr><td>2007-2008</td><td>auscultatory</td><td>2,174</td><td class='em'>73.5%</td><td>65.9 – 81.1</td><td>52.7%</td></tr><tr><td>2009-2010</td><td>auscultatory</td><td>2,180</td><td class='em'>72.9%</td><td>67.1 – 78.7</td><td>53.1%</td></tr><tr><td>2011-2012</td><td>auscultatory</td><td>1,899</td><td class='em'>73.2%</td><td>68.4 – 78.0</td><td>52.9%</td></tr><tr><td>2013-2014</td><td>auscultatory</td><td>2,012</td><td class='em'>80.9%</td><td>78.2 – 83.7</td><td>61.4%</td></tr><tr><td>2015-2016</td><td>auscultatory</td><td>2,008</td><td class='em'>73.9%</td><td>69.5 – 78.4</td><td>57.8%</td></tr><tr><td>2017-2018</td><td>auscultatory</td><td>2,173</td><td class='em'>69.7%</td><td>64.3 – 75.1</td><td>50.8%</td></tr><tr><td>Aug 2021&ndash;Aug 2023</td><td>oscillometric</td><td>2,443</td><td class='em'>72.1%</td><td>68.1 – 76.0</td><td>53.0%</td></tr></tbody>
-      </table>
-    </div>
-
-    <p class="measure">This does not support a simple coverage-driven explanation. Ascertainment
-    improved over the first half of the series and then stopped, and the years in which coverage
-    rose fastest are not the years in which detection improved. That is not evidence against an
-    access effect of modest size, which eleven cycles cannot resolve either way; it is evidence
-    that the reported trend is not obviously an artefact of better detection.</p>
-
-    <div class="note">
-      <b>What this cannot say.</b> The outcome is self-reported physician diagnosis, so it tracks
-      diagnosis as much as disease and is sensitive to access to care — a group with worse access
-      can appear healthier. Nothing here is adjusted for anything other than age, deliberately:
-      these are descriptive quantities, and adjusting them would answer a causal question the
-      design does not support.
-    </div>
-  </div>
+<section class="atlas-panel" id="population" aria-labelledby="population-title">
+  <h2 id="population-title">Population burden</h2>
+  <p class="measure">Crude and age-standardised prevalence, latest race–ethnicity intervals, and age patterns across survey cycles.</p>
+  <nav class="atlas-links" aria-label="Report chapters for population burden"><a href="burden.html">Burden: trends and survey design &rarr;</a><a href="pandemic.html">Pandemic: the limits of one post-period &rarr;</a></nav>
+  <figure><a href="tableau/01-population-burden.png" aria-label="Open full-resolution population burden dashboard">
+    <img src="tableau/01-population-burden.png" width="2760" height="1880" loading="lazy" alt="Crude and age-standardised prevalence, latest race–ethnicity intervals, and age patterns across survey cycles."></a>
+    <figcaption>Reviewed Tableau preview. <a href="tableau/01-population-burden.png" download>Download PNG</a>
+    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
+</section><section class="atlas-panel" id="mortality" aria-labelledby="mortality-title">
+  <h2 id="mortality-title">Mortality risk</h2>
+  <p class="measure">Blood-pressure strata, adjusted associations checked in R, and five- and ten-year calibration.</p>
+  <nav class="atlas-links" aria-label="Report chapters for mortality risk"><a href="cohort.html">Cohort: eligibility, associations and calibration &rarr;</a></nav>
+  <figure><a href="tableau/02-mortality-risk.png" aria-label="Open full-resolution mortality risk dashboard">
+    <img src="tableau/02-mortality-risk.png" width="2760" height="1880" loading="lazy" alt="Blood-pressure strata, adjusted associations checked in R, and five- and ten-year calibration."></a>
+    <figcaption>Reviewed Tableau preview. <a href="tableau/02-mortality-risk.png" download>Download PNG</a>
+    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
+</section><section class="atlas-panel" id="models" aria-labelledby="models-title">
+  <h2 id="models-title">Model evidence</h2>
+  <p class="measure">Paired comparisons with historical PCE, the separate Part 4 learning experiment, and exploratory decision curves.</p>
+  <nav class="atlas-links" aria-label="Report chapters for model evidence"><a href="methods.html">Methods: the historical PCE benchmark &rarr;</a><a href="learning.html">Predictive modeling: the Part 4 experiment &rarr;</a></nav>
+  <figure><a href="tableau/03-model-evidence.png" aria-label="Open full-resolution model evidence dashboard">
+    <img src="tableau/03-model-evidence.png" width="2760" height="1880" loading="lazy" alt="Paired comparisons with historical PCE, the separate Part 4 learning experiment, and exploratory decision curves."></a>
+    <figcaption>Reviewed Tableau preview. <a href="tableau/03-model-evidence.png" download>Download PNG</a>
+    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
 </section>
+<section id="using-the-workbook" aria-labelledby="workbook-guide"><h2 id="workbook-guide">Use the editable workbook</h2>
+<p class="measure">Open the downloaded <code>.twbx</code> file in Tableau Public or Tableau Desktop.
+Choose a dashboard from the bottom tabs, press F7 for presentation mode, and hover a mark for exact values,
+intervals and source details. The workbook includes the aggregate data and twelve editable worksheets.
+Save edits to your computer from the File menu.</p>
+<p class="measure">For a slide or document, use each dashboard's full-resolution PNG link.
+For offline reading, save the <a href="cardiotrace-report.html#tableau-atlas">complete HTML report</a>;
+all three previews are embedded in that file.</p></section>
+<section aria-labelledby="atlas-evidence"><h2 id="atlas-evidence">How these views connect to the evidence</h2>
+<p class="measure">The atlas uses the report's committed result tables and JSON, from research version
+<a href="https://github.com/UTSGJohnsonSong/cardiotrace/tree/9517c6fbcd8a8e4f42ac9356e27f539689d64322">9517c6f</a>.
+The site build checks their hashes against the reviewed workbook manifest. A changed source stops publication
+until the visual companion is updated and reviewed.</p>
+<p class="measure">Analysis samples and survey weights differ across the study parts. Intervals show uncertainty;
+PCE remains a prespecified historical ranking benchmark with a different endpoint. Part 4 uses a separate common sample,
+and decision curves are exploratory. Follow each dashboard's report links for the full methods and limitations.</p>
+<nav class="atlas-links" aria-label="Source and verification records">
+<a href="tableau/data-audit.json">Data sources and transformations</a>
+<a href="tableau/verification.json">Workbook verification</a>
+<a href="https://github.com/UTSGJohnsonSong/cardiotrace/blob/main/docs/tableau-dashboard.md">Maintenance and reproduction</a>
+</nav></section>
 <div class="pagefoot">
   <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
   <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
-  <span class="footlinks"><a href="pandemic.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
+  <span class="footlinks"><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
 </div>
 </main>
 <a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>

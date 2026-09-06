@@ -18,12 +18,13 @@
   <a href="https://utsgjohnsonsong.github.io/cardiotrace/cohort.html">Cohort</a> &nbsp;·&nbsp;
   <a href="https://utsgjohnsonsong.github.io/cardiotrace/learning.html">Predictive modeling</a> &nbsp;·&nbsp;
   <a href="https://utsgjohnsonsong.github.io/cardiotrace/methods.html">Methods</a> &nbsp;·&nbsp;
+  <a href="https://utsgjohnsonsong.github.io/cardiotrace/explore.html">Visual atlas</a> &nbsp;·&nbsp;
   <a href="https://utsgjohnsonsong.github.io/cardiotrace/cardiotrace-report.html"><b>Full report</b></a>
 </p>
 
 <p align="center"><sub>Every figure and number below is reproduced there, with the code that produced it.</sub></p>
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-235%20collected-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-241%20collected-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
 builds a prospective cohort of adults who were free of cardiovascular disease at
@@ -46,6 +47,15 @@ of the 1,821 published NHANES files is recorded with the rule that kept or dropp
 
 _Figures in [`reports/figures/`](reports/figures). Numbers in [`reports/descriptive_results.json`](reports/descriptive_results.json), [`reports/model_results.json`](reports/model_results.json) and [`reports/tables/`](reports/tables). The superseded pipeline and everything it produced are in [`legacy-invalid/`](legacy-invalid), which no build target reaches._
 <!-- KEY_FINDINGS_END -->
+
+## Tableau research atlas
+
+[View the three dashboards online](https://utsgjohnsonsong.github.io/cardiotrace/explore.html)
+or [download the editable workbook](docs/tableau/cardiotrace-atlas.twbx).
+The atlas links burden, mortality risk and model comparisons to their report
+chapters. The complete HTML report also embeds all three previews for offline
+reading. [Source and maintenance notes](docs/tableau-dashboard.md) explain how
+the build rejects a snapshot whose source results have changed.
 
 ---
 
@@ -102,7 +112,7 @@ downstream turned the gaps into plausible numbers.
 
 The pipeline now enumerates all 1,821 published files before selecting any, records one
 rule per file, resolves column names through a verified per-cycle crosswalk, and fails
-the run on any cycle-wide gap that is not explicitly declared. The 235 tests are
+the run on any cycle-wide gap that is not explicitly declared. The 241 tests are
 regressions for defects that actually shipped.
 
 ---
@@ -153,7 +163,7 @@ python data/build_variable_crosswalk.py     # resolve per-cycle column names
 python -c "from src.cohort import build_cohort; build_cohort()"
 python scripts/make_survival_figures.py     # descriptive curves
 python scripts/fit_survival_models.py       # Cox + absolute risk + calibration
-pytest tests/ -q                            # 235 tests
+pytest tests/ -q                            # 241 tests
 ```
 
 Every download writes a SHA-256 manifest; `--verify` re-hashes against it. CDC revises
@@ -200,7 +210,7 @@ CardioTrace/
 │   ├── pce_variable_cascade.py     # what each PCE alignment filter costs
 │   ├── make_survival_figures.py    # descriptive curves
 │   └── fit_survival_models.py      # fit, validate forward in time, calibrate
-├── tests/                          # 235 regressions for defects that shipped
+├── tests/                          # 241 regressions for defects that shipped
 ├── docs/                           # also the published site (GitHub Pages, /docs)
 │   ├── index.html …                # the six-page site + cardiotrace-report.html
 │   ├── research-design.md          # the protocol: estimands, node status, decision log
