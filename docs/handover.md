@@ -1,7 +1,9 @@
 # CardioTrace — handover
 
-For an assistant picking this project up cold. Written 2026-09-05 against
-commit `585ee2f`. Everything below was read out of the repository, not recalled.
+For an assistant picking this project up cold. Written 2026-09-06 against the
+current working tree after the PCE and reporting deliverables were implemented.
+The numbers below were read from repository artefacts, not recalled. Replace
+this sentence with the commit hash after committing the current tree.
 
 Published site: <https://utsgjohnsonsong.github.io/cardiotrace/>
 Repository: <https://github.com/UTSGJohnsonSong/cardiotrace>
@@ -100,8 +102,9 @@ National Death Index fixed the time order at the cost of a harder endpoint
 
 ## 2. Current state
 
-**Tests:** 198 collected, 197 passed, 1 skipped, 0 failed
-(`reports/test_summary.json`; re-verified 2026-09-05).
+**Tests:** 213 collected, 212 passed, 1 skipped, 0 failed
+(`reports/test_summary.json`; re-verified 2026-09-06). The skipped test is the
+receipt history check on a shallow checkout.
 
 **Cohort** (`reports/cohort_results.json`):
 
@@ -121,14 +124,23 @@ National Death Index fixed the time order at the cost of a harder endpoint
 | Prediction, 2005–2008 test @ 10y | Harrell C **0.838** weighted / 0.805 unweighted; n = 5,163, 217 deaths, 4,669 evaluable; predicted 1.96% vs observed 2.02% |
 | Prediction, 2009–2014 test @ 5y | Harrell C **0.802** / 0.791; n = 8,801, 170 deaths; predicted 0.69% vs observed 0.74% |
 
+**PCE benchmark** (`reports/pce_results.json`): the all-ethnicity PCE-complete
+cascade is 18,744 people / 824 CVD deaths; the prespecified NH White/Black
+primary paired sample is 12,413 people / 600 deaths. Temporal test sets contain
+3,302 people (2005–2008, 10 years) and 4,985 people (2009–2014, 5 years).
+Published PCE scores predict hard ASCVD; arms 1b–3 predict CVD mortality, so
+this is a prognostic ranking comparison, not same-endpoint validation. Decision
+curves are exploratory mortality curves with illustrative 0.5–10% thresholds.
+
 **Design nodes** — 16 total, tracked in `docs/research-design.md`. Thirteen are
-locked. Three are open, and they are the work queue:
+locked. Nodes 11, 15 and 16 now have implementation/reporting deliverables;
+remaining work is scientific review and investigator disclosure:
 
 | node | state |
 |---|---|
-| 11 missingness | IPCW handles censoring; **complete-case selection bias is unresolved** |
-| 15 calibration & benchmark | protocol locked in `docs/pce-benchmark.md` §3.5; **the PCE head-to-head is not implemented** |
-| 16 reporting | **TRIPOD checklist and reproducibility package not written** |
+| 11 missingness | E2 exact-covariate completeness-weight sensitivity implemented; MAR/positivity and MNAR limitations remain |
+| 15 calibration & benchmark | paired prognostic PCE benchmark implemented; endpoint mismatch means no strict validation claim |
+| 16 reporting | TRIPOD+AI evidence map and reproducibility guide written; investigator declarations remain |
 
 ---
 
@@ -143,7 +155,7 @@ make data           # download NHANES via the catalog-driven downloader
 make cohort         # build the Part 3 cohort + STROBE ladder
 make learning       # Part 4 screen and arm comparison  (~15 min)
 make descriptive    # Part 1/2 tables, figures, and the report
-make benchmark      # PCE cascade, four-year weight check, Tableau extract
+make benchmark      # PCE cascade/paired benchmark, four-year weight check, Tableau extract
 make site           # split the report into docs/ and re-render the README
 make verify         # assert a clean rebuild changes nothing tracked
 make all            # up -> data -> load -> dbt -> cohort -> learning
@@ -188,13 +200,14 @@ src/
   ascertainment.py  self-report vs measured, the diagnosis-access analysis
   missingness.py    IPCW sensitivity
   screening.py      Part 4 candidate screen
-  discrimination.py C-index machinery
+  discrimination.py C-index machinery and paired PSU bootstrap
+  pce.py            historical PCE scorer, mortality recalibration, decision curves
   etl.py            XPT -> Postgres (the warehouse layer)
 
 scripts/            build_*_results.py write the JSON; make_*_figures.py draw;
                     render_report.py + build_site.py + render_readme.py publish;
                     verify_clean_rebuild.py is the merge gate
-tests/              198 tests; every cohort test is a regression for a shipped defect
+tests/              213 tests; every cohort test is a regression for a shipped defect
 docs/               *.html is the published site (GitHub Pages, main /docs)
                     *.md is the design record -- see section 9
 reports/            figures, tables, and the results JSON the pages read from
@@ -255,11 +268,11 @@ claims it.
 
 ## 7. Open work, in the order it should be done
 
-1. **PCE head-to-head** (node 15). The protocol is already written in
-   `docs/pce-benchmark.md` §3.5 — four specified comparisons, locked 2026-08-19.
-   The coefficients and their provenance are in the same file. **Do not write
-   PCE coefficients from memory**; that file exists precisely because that is
-   how they get wrong.
+1. **PCE benchmark follow-up** (node 15). The implementation is in
+   `src/pce.py` and `scripts/build_pce_results.py`; the coefficient source remains
+   `docs/pce-benchmark.md` §3.5 and all 60 rows are regression-tested. Review the
+   endpoint mismatch and group-specific calibration interpretation before using
+   any number in a manuscript. **Do not write PCE coefficients from memory**.
 
    **Do not swap the comparator.** PCE stopped being the clinical standard
    during this project (verified 2026-08-22): the 2026 ACC/AHA dyslipidaemia
@@ -274,12 +287,17 @@ claims it.
    standard and a future comparison — not this round's work, and not a drop-in
    substitution: it needs eGFR, drops the race input, extends down to age 30,
    and defines its outcome differently.
-2. **Complete-case selection bias** (node 11). IPCW currently addresses
-   censoring only. `src/missingness.py` and
-   `reports/tables/part3_missing_sensitivity.csv` are the starting point.
-3. **TRIPOD checklist and reproducibility package** (node 16).
-4. **Decision-curve analysis** — net benefit, closer to clinical use than the
-   C-index, and rarely done.
+2. **Complete-case selection bias** (node 11). The E2 exact-covariate IPCW
+   sensitivity is implemented, but MAR/positivity are assumptions and MNAR or
+   multiple-imputation analyses remain future work. See `src/missingness.py` and
+   `reports/tables/part3_missing_sensitivity.csv`.
+3. **TRIPOD+AI and reproducibility** (node 16). The evidence map is written in
+   `docs/tripod-checklist.md`, and `docs/reproducibility.md` documents offline,
+   raw-data, R and optional warehouse paths. Funding, ethics, registration and
+   conflicts still require investigator input.
+4. **Decision-curve follow-up** — exploratory mortality curves are generated in
+   `reports/tables/decision_curve_primary.csv`; thresholds are illustrative and
+   have no treatment or clinical utility claim.
 
 ---
 

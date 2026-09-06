@@ -465,3 +465,16 @@ def test_the_verified_commit_and_head_differ_only_by_the_receipt():
             f"HEAD has moved past the last full verification: "
             f"{sorted(moved - {'reports/verify_receipt.json'})[:5]}")
     assert moved <= {"reports/verify_receipt.json"}
+
+
+def test_handover_status_is_generated_from_current_artefacts():
+    """The cold-start document must not preserve the previous run's headline."""
+    handover = (DOCS / "handover.md").read_text(encoding="utf-8")
+    summary = json.loads((ROOT / "reports/test_summary.json").read_text(encoding="utf-8"))
+    assert f"{summary['collected']} collected" in handover
+    pce = json.loads((ROOT / "reports/pce_results.json").read_text(encoding="utf-8"))
+    primary = pce["primary"]
+    paired = next(x for x in primary["cascade"] if x["step"] == "paired_complete_all_arms")
+    assert f"{paired['n']:,} people / {paired['cvd_deaths']} deaths" in handover
+    assert "head-to-head is not implemented" not in handover
+    assert "TRIPOD checklist and reproducibility package not written" not in handover

@@ -44,6 +44,68 @@
 
 ---
 
+## 2026-09-06 implementation decisions (recorded before fitting)
+
+The takeover audit found that `src/missingness.py::ipcw` already models
+**completeness**, not censoring. The node 11 wording above is historical error,
+not evidence that this sensitivity did not exist. Its exposure sensitivity used
+the prediction-feature completeness mask for an E2 fit; correct the propensity
+target to the exact covariates passed to that fit. Retain the existing floor and
+99th-percentile cap, disclose their diagnostics, and compare with untrimmed
+weights. This is a sensitivity under conditional missing-at-random and positivity,
+not proof that selection bias has been eliminated. Archive the old results.
+
+For node 15, preserve the four constraints in `docs/pce-benchmark.md` §3.5.
+The 18,744 PCE-complete participants include all ethnicities: report this cascade
+before the NH White/NH Black restriction. For a paired comparison, additionally
+require the existing CardioTrace prediction features (BMI and former-smoking
+status); explicitly report this loss rather than silently allowing each model
+to drop different rows. Train every fitted arm only on 1999–2004, then evaluate
+the same participants in 2005–2008 at ten years and 2009–2014 at five years.
+Other ethnicities use the White equation only in a separately labelled
+all-ethnicity sensitivity. No PCE blood pressure receives Tobin adjustment.
+
+Arm 1a is the published ten-year hard-ASCVD probability (including when used
+only as a ranking score at five years); do not invent a five-year PCE baseline.
+Arm 1b retains the race/sex-specific PCE coefficients and estimates weighted
+Breslow CVD baseline hazards in the training data with that fixed offset, plus
+group-specific competing-death hazards. It is a mortality adaptation, not a
+validation of hard-ASCVD calibration. Arm 2 refits the nine PCE inputs as a pooled
+linear cause-specific Cox model, using measured SBP and treatment status; it
+is a same-input comparator, not a refit of every published interaction. Arm 3
+refits the existing CardioTrace feature set and preprocessing on the identical
+training subset. These layers cannot isolate population, endpoint and form
+effects causally. Pooled discrimination can also change after group-specific
+recalibration; monotone invariance applies within a fixed transformation only.
+Report weighted and unweighted horizon-censored C, horizon AUC, and paired
+stratified PSU-bootstrap differences (200 replicates, fixed seed), conditional
+on the fitted training models. Save model parameters and training baselines.
+
+Decision curves are exploratory CVD-mortality curves for arms 1b–3, with treat-all
+and treat-none, on a fixed 0.5–10% threshold grid. PCE 1a has a different endpoint
+and is excluded. Require that every evaluated person has an observed horizon
+outcome (a competing death is a known non-case); fail on earlier loss to follow-up
+instead of labelling it a non-event. Report weighted TP/N minus weighted FP/N
+times threshold odds. This is a hypothetical utility analysis: no intervention,
+clinically endorsed mortality threshold, or treatment effect is established.
+Method source: https://www.danieldsjoberg.com/dcurves/articles/dca.html .
+
+Execution check: the five-year test includes administrative censoring before
+five years (late 2014 entrants), so the complete-outcome guard stopped the run.
+Use weighted Aalen–Johansen CIF within each threshold-positive group for DCA:
+TP/N = weighted selected fraction × CIF(horizon); FP/N = selected fraction −
+TP/N. This explicitly assumes independent censoring within the selected group.
+Use the same weighted AJ estimator for the reported observed mortality. Retain
+the guard unless the caller explicitly requests AJ. Report early-censor counts;
+the existing horizon AUC is labelled evaluable-case AUC, not an IPCW AUC.
+
+Node 16 will map reporting evidence and gaps against current TRIPOD+AI guidance
+(https://www.tripod-statement.org/scope/), which replaces TRIPOD-2015 for both
+regression and machine learning. Missing administrative facts remain explicitly
+unreported. A reproducibility package must distinguish offline rendering,
+Python analysis from verified raw files, independent R checks, and optional
+Postgres/dbt work. A successful render receipt proves only its named scope.
+
 ## 路线图：5 个阶段 · 16 个决策节点
 
 > 这张表**不带状态**。状态只有一处，就是上面的「当前状态」表——

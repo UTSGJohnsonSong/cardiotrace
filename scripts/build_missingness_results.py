@@ -93,6 +93,8 @@ def main() -> None:
         "trimming": {k: (round(v, 4) if isinstance(v, float) else v)
                      for k, v in sens.attrs.items()},
         "sensitivity": {
+            "selection_target": "aetiologic_covariates: exact E2 complete cases",
+            "hr_ipcw_untrimmed": float(sens.iloc[2]["hr_per_10mmhg"]),
             "n": int(base["n"]),
             "hr_survey": float(base["hr_per_10mmhg"]),
             "hr_survey_ci": [float(base["lo95"]), float(base["hi95"])],

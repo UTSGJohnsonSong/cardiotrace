@@ -1,3 +1,4 @@
 weighting,n,hr_per_10mmhg,lo95,hi95
 "complete case, survey weight",17890,1.1216,1.0788,1.1661
-"complete case, IPCW",17890,1.1225,1.0802,1.1665
+"complete case, IPCW",17890,1.1219,1.0796,1.1659
+"complete case, IPCW without weight cap",17890,1.1217,1.0794,1.1657

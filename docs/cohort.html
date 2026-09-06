@@ -684,16 +684,20 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     what makes the model able to see the dropped at all. The exposure barely moves: HR
     1.1216
     (1.0788&ndash;1.1661)
-    under the survey weight against 1.1225
-    (1.0802&ndash;1.1665)
-    under IPCW, a shift of 0.0009.</p>
+    under the survey weight against 1.1219
+    (1.0796&ndash;1.1659)
+    under IPCW, a shift of 0.0003.
+    Completeness for this sensitivity is defined by the exact E2 covariates
+    (17,890 participants), separately from the prediction
+    sample described above. Without the weight cap, HR is
+    1.1217.</p>
 
     <p class="measure">Two bounds inside that correction are worth naming, because both shrink it
     <em>toward</em> the uncorrected estimate and so buy part of the agreement the paragraph above
     rests on. The propensity is floored at 0.05 &mdash; not binding here, the smallest is
-    0.774 &mdash; and the weights are trimmed at the 99th
-    percentile, which binds on 186 participants and removes
-    0.41% of the re-weighted total. Untrimmed, one
+    0.743 &mdash; and the weights are trimmed at the 99th
+    percentile, which binds on 179 participants and removes
+    0.42% of the re-weighted total. Untrimmed, one
     participant can carry several per cent of the weight, and an estimate driven by three people
     is worse than the one it replaced; trimmed, the correction is smaller than it would otherwise
     have been. Both numbers are here so a reader can judge which trade they prefer.</p>
@@ -784,9 +788,10 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       measured before being accepted: the four-year weights disagree sharply per person
       &mdash; 20.6% of participants by more than a fifth &mdash; but almost cancel in aggregate, moving
       the blood-pressure hazard ratio from 1.1216 to 1.1233 and no coefficient by more than 0.91%,
-      which is below the precision printed here. The second is not corrected at all: the
-      inverse-probability weights described above address censoring, not selection into the
-      complete-case subsample.
+      which is a small change at the reported scale. The second is examined by the
+      inverse-probability-of-completeness sensitivity above. Those weights address selection
+      into the E2 complete-case subsample, not censoring, and cannot establish that
+      unmeasured causes of missingness have been removed.
     </div>
   </div>
 </section>

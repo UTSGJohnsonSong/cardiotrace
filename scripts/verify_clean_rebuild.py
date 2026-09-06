@@ -83,6 +83,7 @@ STAGES = [
                      "scripts/build_missingness_results.py",
                      "scripts/make_descriptive_figures.py"]),
     ("benchmark", ["scripts/pce_variable_cascade.py",
+                   "scripts/build_pce_results.py",
                    "scripts/check_fouryear_weights.py",
                    "scripts/build_tableau_extract.py"]),
     ("models", ["scripts/fit_survival_models.py",

@@ -104,7 +104,8 @@ def pattern(cohort: pd.DataFrame,
     return drivers, compare
 
 
-def ipcw(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.Series:
+def ipcw(cohort: pd.DataFrame, features: list[str] | None = None,
+         *, trim: bool = True) -> pd.Series:
     """Survey weight x 1 / P(complete | age, sex, race, cycle).
 
     Fitted on the whole cohort, so the model sees the dropped participants --
@@ -122,12 +123,17 @@ def ipcw(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.Series:
 
     X = pd.get_dummies(d[ALWAYS_OBSERVED], columns=["cycle"], drop_first=True)
     X = X.astype(float).fillna(X.astype(float).median())
-    fit = LogisticRegression(max_iter=2000, C=1.0).fit(X, ok.astype(int))
-    p = fit.predict_proba(X)[:, 1]
+    if not ok.any():
+        raise ValueError("No complete cases for the requested model")
+    if ok.all():
+        p = np.ones(len(d))
+    else:
+        fit = LogisticRegression(max_iter=2000, C=1.0).fit(X, ok.astype(int))
+        p = fit.predict_proba(X)[:, 1]
 
     floored = int((p < 0.05).sum())
     w = d["wtmec2yr"].to_numpy(float) / np.clip(p, 0.05, 1.0)
-    cap = np.nanpercentile(w[ok], 99)
+    cap = np.nanpercentile(w[ok], 99) if trim else np.inf
     capped = int((w[ok] > cap).sum())
     out = pd.Series(np.minimum(w, cap), index=d.index, name="ipcw")
     # Both bounds bind silently, and trimming shrinks the correction TOWARD the
@@ -151,18 +157,21 @@ def sensitivity(cohort: pd.DataFrame, features: list[str] | None = None) -> pd.D
     """
     from src.models import _fit, aetiologic_covariates
 
-    features = list(features or P_FEATURES)
+    covs = list(features) if features is not None else aetiologic_covariates()
+    if "systolic_bp" not in covs:
+        raise ValueError("Exposure sensitivity requires systolic_bp")
     d = _model_frame(cohort)
     # Held by reference: assigning a Series into a DataFrame column discards its
     # `.attrs`, so `d["ipcw"].attrs` would come back empty and the trimming
     # diagnostics would be silently absent from the artefact.
-    w_ipcw = ipcw(cohort, features)
+    w_ipcw = ipcw(cohort, covs)
     d["ipcw"] = w_ipcw
-    covs = aetiologic_covariates()
+    d["ipcw_untrimmed"] = ipcw(cohort, covs, trim=False)
 
     rows = []
     for label, weight_col in (("complete case, survey weight", "wtmec2yr"),
-                              ("complete case, IPCW", "ipcw")):
+                              ("complete case, IPCW", "ipcw"),
+                              ("complete case, IPCW without weight cap", "ipcw_untrimmed")):
         frame = d.copy()
         frame["wtmec2yr"] = frame[weight_col]
         cph = _fit(frame, covs, "cvd_death")
