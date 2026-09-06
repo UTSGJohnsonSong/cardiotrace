@@ -1,8 +1,8 @@
 {
   "full": {
-    "commit": "fc4e831d36e0d2f8de708fca148f67563a90e864",
+    "commit": "e5a8f74b0cf56c6c7615c5217ac6eee2838f11f1",
     "branch": "finish-research-deliverables",
-    "ran_at": "2026-09-06T03:28:22+00:00",
+    "ran_at": "2026-09-06T03:55:16+00:00",
     "stages": [
       "cohort",
       "descriptive",
@@ -12,16 +12,54 @@
       "render"
     ],
     "result": "clean",
-    "covers": "every tracked artefact including Part 4"
+    "covers": "generated text from cohort, descriptive, learning, benchmark, models and render stages; image bytes, independent R and optional warehouse excluded",
+    "environment": {
+      "python": "3.11.9",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "packages": {
+        "numpy": "2.4.6",
+        "pandas": "2.3.3",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.9.0",
+        "lifelines": "0.30.3",
+        "statsmodels": "0.14.6",
+        "pyreadstat": "1.3.5",
+        "matplotlib": "3.11.0",
+        "seaborn": "0.13.2",
+        "pytest": "9.1.1",
+        "formulaic": "1.2.2",
+        "autograd": "1.9.1"
+      }
+    },
+    "raw_manifest_checks": true
   },
   "render": {
-    "commit": "fc4e831d36e0d2f8de708fca148f67563a90e864",
+    "commit": "e5a8f74b0cf56c6c7615c5217ac6eee2838f11f1",
     "branch": "finish-research-deliverables",
-    "ran_at": "2026-09-06T03:22:18+00:00",
+    "ran_at": "2026-09-06T03:56:45+00:00",
     "stages": [
       "render"
     ],
     "result": "clean",
-    "covers": "the report, the site and the README, and nothing else"
+    "covers": "the report, site, README, handover status and research summary, and nothing else",
+    "environment": {
+      "python": "3.11.9",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "packages": {
+        "numpy": "2.4.6",
+        "pandas": "2.3.3",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.9.0",
+        "lifelines": "0.30.3",
+        "statsmodels": "0.14.6",
+        "pyreadstat": "1.3.5",
+        "matplotlib": "3.11.0",
+        "seaborn": "0.13.2",
+        "pytest": "9.1.1",
+        "formulaic": "1.2.2",
+        "autograd": "1.9.1"
+      }
+    },
+    "raw_manifest_checks": false
   }
 }
