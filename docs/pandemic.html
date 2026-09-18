@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pandemic &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="Whether COVID-19 bent the cardiovascular prevalence trend: Aug 2021&ndash;Aug 2023 sits +0.45 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<meta name="description" content="A descriptive comparison with the earlier cardiovascular prevalence trend: Aug 2021&ndash;Aug 2023 sits +0.45 pp from the extrapolated trend, with a 95% interval that contains zero.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/pandemic.html">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
 <meta property="og:title" content="Pandemic &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: Aug 2021&ndash;Aug 2023 sits +0.45 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<meta property="og:description" content="A descriptive comparison with the earlier cardiovascular prevalence trend: Aug 2021&ndash;Aug 2023 sits +0.45 pp from the extrapolated trend, with a 95% interval that contains zero.">
 <meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/pandemic.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
@@ -23,7 +23,7 @@
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pandemic &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="Whether COVID-19 bent the cardiovascular prevalence trend: Aug 2021&ndash;Aug 2023 sits +0.45 pp from the extrapolated counterfactual, with a 95% interval that contains zero.">
+<meta name="twitter:description" content="A descriptive comparison with the earlier cardiovascular prevalence trend: Aug 2021&ndash;Aug 2023 sits +0.45 pp from the extrapolated trend, with a 95% interval that contains zero.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <style>
@@ -542,13 +542,93 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .pagefoot a { font-weight: 600; }
 .pagefoot .byline { color: var(--ink-2); font-weight: 600; }
 .pagefoot .footlinks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+/* Reading revision: clear hierarchy, generous space, progressive detail. */
+.sitenav-inner { align-items: center; gap: 26px; min-height: 64px; }
+.sitenav .brand { letter-spacing: .07em; }
+.hero { padding: 70px 0 32px; }
+.hero h1 { max-width: 850px; font-size: clamp(36px, 4.5vw, 56px); line-height: 1.09; margin-bottom: 24px; }
+.hero .standfirst { max-width: 64ch; font-size: 20px; }
+.hero-answer { margin-top: 20px; font-size: 17px; color: var(--ink-2); max-width: 68ch; }
+.hero-scope { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin: 24px 0 0; }
+.cta { margin-top: 28px; gap: 16px 26px; }
+.cta a.lead { background: var(--series-text); color: var(--paper); padding: 11px 18px; border-radius: 3px; }
+.quickpath { margin-top: 30px; }
+.findings { background: none; border: 0; gap: 0; margin-top: 16px; }
+.finding { background: none; display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 20px;
+  padding: 26px 0; border-bottom: 1px solid var(--rule-soft); }
+.finding > * { grid-column: 2; }
+.finding .finding-index { grid-column: 1; grid-row: 1 / span 4; font-family: var(--sans); font-size: 12px;
+  font-weight: 600; color: var(--series-text); padding-top: 5px; }
+.finding h3 { margin: 0; font-size: 22px; line-height: 1.3; }
+.finding .what { max-width: 65ch; font-size: 17px; margin: 10px 0; }
+.finding .fci { max-width: 72ch; font-size: 13px; line-height: 1.6; }
+.finding .go { margin-top: 12px; }
+.overview-figure figure { margin: 24px 0 0; }
+.overview-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule-soft); }
+.overview-figure figcaption { margin-top: 14px; font-family: var(--sans); font-size: 14px; color: var(--ink-2); max-width: 78ch; }
+.limits-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; margin-top: 26px; }
+.limit-item { border-top: 2px solid var(--rule); padding-top: 18px; }
+.limit-item h3 { font-family: var(--serif); font-size: 19px; text-transform: none; letter-spacing: 0; margin: 0 0 12px; padding: 0; border: 0; }
+.limit-item p { font-size: 16px; color: var(--ink-2); }
+.limit-item a { font-family: var(--sans); font-size: 13px; }
+details.technical-details, details.technical-note, .body-indent > details { border: 1px solid var(--rule-soft); padding: 17px 20px; margin: 24px 0; background: var(--plate); }
+summary { cursor: pointer; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--ink-2); }
+details[open] > summary { margin-bottom: 16px; }
+details p:last-child { margin-bottom: 0; }
+.reading-note { font-size: 15px; color: var(--ink-2); margin-top: 22px; }
+.colophon { border-top: 1px solid var(--rule); margin-top: 64px; padding-top: 36px; }
+.reading-layout { display: grid; grid-template-columns: 205px minmax(0,1fr); gap: 36px; align-items: start; }
+.reading-layout .toc { position: sticky; top: 84px; max-height: calc(100vh - 108px); overflow-y: auto;
+  padding: 18px 0; background: none; border: 0; border-top: 1px solid var(--rule); margin-top: 48px; }
+.reading-layout .toc summary { font-size: 13px; }
+.toc ol { columns: 1; }
+.toc li { font-size: 13px; margin-bottom: 13px; line-height: 1.5; }
+.reading-body { min-width: 0; }
+.reading-body .body-indent { margin-left: 0; }
+.reading-body .sec-num { min-width: 30px; }
+.reading-body .stats { grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); }
+.reading-body section:first-child { padding-top: 44px; }
+.reading-body h2 { font-size: clamp(24px,2.5vw,30px); }
+.reading-body .pagefoot { font-size: 12px; }
+.chart-guide figure { margin: 24px 0 34px; }
+.chart-guide img { display:block; width:100%; height:auto; background:#fff; border:1px solid var(--rule-soft); }
+.chart-guide figcaption { font-size:15px; color:var(--ink-2); margin-top:12px; max-width:78ch; }
+.archive-note { border-left: 3px solid var(--rule); padding: 14px 18px; color: var(--ink-2); font-size:15px; }
+.chart-guide h3 { font-family:var(--serif); font-size:22px; letter-spacing:0; text-transform:none; }
+.atlas-archive { margin-top:40px; padding:22px; border:1px solid var(--rule); }
+@media (max-width: 850px) {
+  .reading-layout { display: block; }
+  .reading-layout .toc { position: static; max-height: none; margin-top:24px; padding:16px 18px; background:var(--plate); border:1px solid var(--rule-soft); }
+  .toc ol { columns:2; }
+}
+@media (max-width: 640px) {
+  .sitenav-inner { gap:18px; min-height:54px; }
+  .sitenav .brand { font-size:11px; }
+  .sitenav a { font-size:12px; }
+  .sitenav a:last-child { display:none; }
+  .hero { padding-top:40px; }
+  .desktop-break { display:none; }
+  .hero .standfirst { font-size:18px; }
+  .hero-answer { font-size:16px; }
+  .finding { column-gap:10px; grid-template-columns:24px minmax(0,1fr); }
+  .finding h3 { font-size:21px; }
+  .limits-grid { grid-template-columns:1fr; gap:20px; }
+  .toc ol { columns:1; }
+  .pagefoot { font-size:12px; }
+  .atlas-archive { padding:16px; }
+}
+@media print {
+  .sitenav, .toplink, .toc, .quickpath, .cta { display:none !important; }
+  .reading-layout { display:block; }
+}
+
 </style>
 </head>
-<body>
+<body id="top">
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html" aria-current="page">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a><a href="explore.html">Visual atlas</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="cardiotrace-report.html">Read the report</a><a href="explore.html">Charts</a><a href="index.html#author">About the author</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Pandemic</h1><p class="standfirst measure">Whether the pandemic bent the trend, and what a single post-pandemic observation can and cannot establish.</p></header><p class="atlas-note"><a href="explore.html#population">View population burden in the Tableau atlas &rarr;</a></p><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li class="toc-h3"><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li class="toc-h3"><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li class="toc-h3"><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li></ol></nav><section>
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Pandemic</h1><p class="standfirst measure">How the latest survey compares with the earlier trend, and what one post-pandemic observation can and cannot establish.</p></header><p class="atlas-note"><a href="explore.html#population">See the population burden charts &rarr;</a></p><div class="reading-layout"><details class="toc" open><summary>On this page</summary><nav aria-label="On this page"><ol><li><a href="#whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</a></li><li><a href="#what-an-interrupted-time-series-normally-does-and-what">What an interrupted time series normally does, and what is missing here</a></li><li><a href="#who-is-in-the-one-post-pandemic-cycle">Who is in the one post-pandemic cycle</a></li><li><a href="#letting-the-data-choose-the-breakpoint-within-the">Letting the data choose the breakpoint — within the window it can reach</a></li></ol></nav></details><div class="reading-body"><section>
   <div class="sec-head"><div class="sec-num">3</div>
   <h2 id="whether-the-pandemic-bent-the-trend">Whether the pandemic bent the trend</h2></div>
   <div class="body-indent">
@@ -712,7 +792,7 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       settle whether the trend bent, not that it did not.
     </div>
 
-    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.</div><div class="d-buys"><span class="col-label">What it buys</span>Sidesteps the instrument and assay changes accumulated across 11 cycles, which would otherwise be indistinguishable from a pandemic effect.</div><div class="d-costs"><span class="col-label">What it costs</span>Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Weight the series with the <b>interview</b> weight, not the examination weight.</div><div class="d-buys"><span class="col-label">What it buys</span>It is the weight the outcome is entitled to &mdash; five questions asked in the household interview &mdash; and it removes the 22% post-pandemic loss that the examination weight introduced and that was reported here as a competing explanation.</div><div class="d-costs"><span class="col-label">What it costs</span>The series is no longer directly comparable with the examination-weighted analyses in &sect;5 and &sect;6, and n rises from 58,454 to 62,877, so every published figure moved.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns an assumption into a measured quantity: it came out at 0.86, so the straight line already explains the series as well as sampling error allows.</div><div class="d-costs"><span class="col-label">What it costs</span>Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Report a <b>level difference only</b>, and state that the slope change is unidentified.</div><div class="d-buys"><span class="col-label">What it buys</span>Nothing is claimed that one post-period observation cannot support.</div><div class="d-costs"><span class="col-label">What it costs</span>The most interesting question — whether the trajectory changed — is left open.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Let a <b>joinpoint model</b> nominate the breakpoint, rather than assuming it sits at the pandemic.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns the framing into a testable claim. It is not supported: no candidate knot clears the bootstrap threshold, and the profile set for its location spans the whole series.</div><div class="d-costs"><span class="col-label">What it costs</span>The same test has well under half the power needed to catch a break the size of the trend itself, so it cannot be reported as evidence that none exists.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Assess significance by <b>parametric bootstrap</b> instead of a chi-square test at the fitted knot.</div><div class="d-buys"><span class="col-label">What it buys</span>Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is 5.5, not the nominal 3.84.</div><div class="d-costs"><span class="col-label">What it costs</span>Roughly fifty per cent harder to reach significance than the test most software would report by default.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the pre-period on the <b>standardised</b> series, not the crude one.</div><div class="d-buys"><span class="col-label">What it buys</span>The counterfactual is about disease, not about the population continuing to age.</div><div class="d-costs"><span class="col-label">What it costs</span>Inherits every standardisation choice from §2, including the 20+ base.</div></div></div>
+    <details class="method-details"><summary>Analysis choices and their limits</summary><div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Use a <b>questionnaire-based outcome</b> rather than measured blood pressure or lipids.</div><div class="d-buys"><span class="col-label">What it buys</span>Sidesteps the instrument and assay changes accumulated across 11 cycles, which would otherwise be indistinguishable from a pandemic effect.</div><div class="d-costs"><span class="col-label">What it costs</span>Only captures diagnosed disease, which is slow-moving — precisely the outcome least likely to register a short shock.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Weight the series with the <b>interview</b> weight, not the examination weight.</div><div class="d-buys"><span class="col-label">What it buys</span>It is the weight the outcome is entitled to &mdash; five questions asked in the household interview &mdash; and it removes the 22% post-pandemic loss that the examination weight introduced and that was reported here as a competing explanation.</div><div class="d-costs"><span class="col-label">What it costs</span>The series is no longer directly comparable with the examination-weighted analyses in &sect;5 and &sect;6, and n rises from 58,454 to 62,877, so every published figure moved.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Estimate <b>dispersion from the residuals</b> rather than assume the design-based errors are the whole story.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns an assumption into a measured quantity: it came out at 0.86, so the straight line already explains the series as well as sampling error allows.</div><div class="d-costs"><span class="col-label">What it costs</span>Floored at 1 so the band is never narrower than nominal, which is a conservative choice made before the answer was known, not after.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Report a <b>level difference only</b>, and state that the slope change is unidentified.</div><div class="d-buys"><span class="col-label">What it buys</span>Nothing is claimed that one post-period observation cannot support.</div><div class="d-costs"><span class="col-label">What it costs</span>The most interesting question — whether the trajectory changed — is left open.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Let a <b>joinpoint model</b> nominate the breakpoint, rather than assuming it sits at the pandemic.</div><div class="d-buys"><span class="col-label">What it buys</span>Turns the framing into a testable claim. It is not supported: no candidate knot clears the bootstrap threshold, and the profile set for its location spans the whole series.</div><div class="d-costs"><span class="col-label">What it costs</span>The same test has well under half the power needed to catch a break the size of the trend itself, so it cannot be reported as evidence that none exists.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Assess significance by <b>parametric bootstrap</b> instead of a chi-square test at the fitted knot.</div><div class="d-buys"><span class="col-label">What it buys</span>Prices in the fact that the breakpoint was chosen by searching &mdash; the honest 95% threshold is 5.5, not the nominal 3.84.</div><div class="d-costs"><span class="col-label">What it costs</span>Roughly fifty per cent harder to reach significance than the test most software would report by default.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Fit the pre-period on the <b>standardised</b> series, not the crude one.</div><div class="d-buys"><span class="col-label">What it buys</span>The counterfactual is about disease, not about the population continuing to age.</div><div class="d-costs"><span class="col-label">What it costs</span>Inherits every standardisation choice from §2, including the 20+ base.</div></div></div></details>
 
     <div class="note">
       <b>What is still needed.</b> Extending this to measured risk factors — blood pressure,
@@ -721,11 +801,11 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       change of blood-pressure device would be attributed to the pandemic.
     </div>
   </div>
-</section>
+</section></div></div>
 <div class="pagefoot">
-  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
+  <span>CardioTrace &middot; NHANES 1999&ndash;August 2023 &middot; mortality follow-up through 2019<br>
   <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
-  <span class="footlinks"><a href="cohort.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
+  <span class="footlinks"><a rel="prev" href="burden.html">&larr; Burden</a><a rel="next" href="cohort.html">Cohort &rarr;</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
 </div>
 </main>
 <a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>

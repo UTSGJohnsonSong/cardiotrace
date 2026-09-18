@@ -194,6 +194,63 @@ def test_calibration_detects_a_systematically_inflated_model():
     assert tab.difference_pp.max() > 5.0
 
 
+def test_survival_calibration_handles_early_censoring_by_hand():
+    # Initial weight 6; weight 1 leaves before the CVD death. The death then
+    # contributes 2/5, not the binary proportion 2/6. The competing death is
+    # a known non-CVD outcome and must not enter the early-censoring count.
+    outcomes = pd.DataFrame({"followup_years": [1., 2., 3., 6.],
+                             "cvd_death": [0, 1, 0, 0],
+                             "competing_death": [0, 0, 1, 0]})
+    tab = calibration_table(pd.Series([.2] * 4), None, pd.Series([1., 2., 1., 2.]),
+                            n_bins=1, outcomes=outcomes, horizon=5.)
+    row = tab.iloc[0]
+    assert row.observed_pct == pytest.approx(40.)
+    assert row.predicted_pct == pytest.approx(20.)
+    assert row["n"] == 4
+    assert row.n_horizon_known == 3
+    assert row.n_early_censored == 1
+
+
+def test_survival_calibration_without_early_censoring_matches_binary_bins():
+    rng = np.random.default_rng(94)
+    n = 100
+    risk, weights = pd.Series(rng.uniform(.01, .5, n)), pd.Series(rng.uniform(1., 5., n))
+    event = rng.choice([0, 1, 2], n)
+    outcomes = pd.DataFrame({"followup_years": np.where(event == 0, 6., 2.),
+                             "cvd_death": (event == 1).astype(int),
+                             "competing_death": (event == 2).astype(int)})
+    binary = calibration_table(risk, outcomes.cvd_death, weights)
+    survival = calibration_table(risk, None, weights, outcomes=outcomes, horizon=5.)
+    pd.testing.assert_frame_equal(survival[binary.columns], binary)
+    assert survival.n_early_censored.sum() == 0
+    assert (survival.n_horizon_known == survival.n).all()
+
+
+def test_survival_calibration_distinguishes_competing_death_from_censoring():
+    # A weight-2 competing death removes half the population's survival mass.
+    # The later weight-1 CVD death contributes (1 - 2/4) * (1/2) = 1/4.
+    outcomes = pd.DataFrame({"followup_years": [1., 2., 6.],
+                             "cvd_death": [0, 1, 0],
+                             "competing_death": [1, 0, 0]})
+    args = (pd.Series([.2] * 3), None, pd.Series([2., 1., 1.]))
+    competing = calibration_table(*args, n_bins=1, outcomes=outcomes, horizon=5.)
+    censored = calibration_table(*args, n_bins=1,
+                                outcomes=outcomes.assign(competing_death=0), horizon=5.)
+    assert competing.observed_pct.iloc[0] == pytest.approx(25.)
+    assert censored.observed_pct.iloc[0] == pytest.approx(50.)
+    assert competing.n_horizon_known.iloc[0] == 3
+    assert censored.n_horizon_known.iloc[0] == 2
+
+
+def test_survival_calibration_refuses_missing_mortality_status():
+    outcomes = pd.DataFrame({"followup_years": [1., 6.],
+                             "cvd_death": [np.nan, 0.],
+                             "competing_death": [0., 0.]})
+    with pytest.raises(ValueError, match="Missing outcome/design"):
+        calibration_table(pd.Series([.1, .2]), None, pd.Series([1., 1.]),
+                          outcomes=outcomes, horizon=5.)
+
+
 def test_weighted_concordance_matches_a_brute_force_count():
     """The Fenwick-tree version is an optimisation of a definition, and an
     optimisation of a definition is exactly the kind of code that is confidently

@@ -1,6 +1,6 @@
 """Systematic screening of the variables the prediction model does not carry.
 
-The published model uses eleven variables. The advisor
+The published baseline model uses eleven input columns. The advisor
 asked whether anything outside that set carries independent information. This
 module answers that, and it answers it under the constraint the rest of the
 project runs on: a variable that helps a prediction is not thereby a variable a
@@ -8,30 +8,38 @@ causal model may adjust for.
 
 Every candidate therefore carries TWO declarations, and neither is derived:
 
-  `e2_status`  what the aetiologic model may do with it, read off the locked DAG
-               at docs/research-design.md node 4. Three states, because two
-               would force a guess:
+  `e2_status`  the historical adjustment-role declaration recorded at
+               docs/research-design.md node 4, not a validated causal permission.
+               Three states were declared rather than defaulting an unknown role:
                  admissible    a confounder, or already in E2_ADJUSTMENT
                  forbidden     a descendant of blood pressure, a collider on the
                                treatment path, or the exposure itself
-                 undetermined  the locked DAG does not settle it
-  `why`        the sentence that justifies the status, in the DAG's own terms
+                 undetermined  the historical graph does not settle it
+  `why`        the recorded rationale, preserved for traceability
 
-`undetermined` is not a hedge. The DAG draws no parents for the kidney node and
+The original graph contains treatment/measurement cycles and is not a valid
+DAG; node 4 now separates current implementation from that historical proposal.
+All causal-role declarations require review before use in a causal analysis.
+`undetermined` is not a hedge. The graph draws no parents for the kidney node and
 no edge between blood pressure and kidney function, so it cannot say whether
 eGFR is a confounder or a mediator; deciding that is a modelling decision, and
-this module has no standing to make it. Lipids sit at a collider between the
-unmeasured genetic node and adiposity, and are excluded from E2_ADJUSTMENT
+this module has no standing to make it. The historical graph places lipids at a
+collider between the unmeasured genetic node and adiposity; they are excluded from E2_ADJUSTMENT
 without a stated reason. Those cases are reported as open, not resolved.
 
 Screening happens on the TRAINING cycles only. A variable chosen with the test
 cycles in view is a variable chosen with the answer in view, and the C statistic
 that follows would be an in-sample number wearing an out-of-sample label.
 
-The survey design is deliberately absent from the selection step and present in
-the fit: selection asks which variables carry signal in this sample, which is a
-question about the sample, while the standard errors that follow are about the
-population and need the design.
+Selection fits weighted Cox models using `wtmec2yr` and a robust variance
+clustered on the prepared stratum-by-PSU identifier. The score is Wald z-squared
+from that cluster-robust standard error, not an unweighted fit or a likelihood
+ratio. This is not the full stratified survey-variance estimator used by the R
+cross-check. The 3.84 threshold and 80% coverage gate are exploratory selection
+rules, not multiplicity-adjusted hypothesis tests. Marginal candidates use their
+own complete rows; the forward path uses one common complete sample. Fasting
+subsample candidates retain exploratory rankings under the MEC weight; a formal
+population analysis of those candidates would need their subsample weights.
 """
 
 from __future__ import annotations

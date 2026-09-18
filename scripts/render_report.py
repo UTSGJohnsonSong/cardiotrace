@@ -14,6 +14,7 @@ choices with their prices is.
 from __future__ import annotations
 
 import base64
+from html import escape
 import json
 import sys
 from pathlib import Path
@@ -30,7 +31,7 @@ FIG = ROOT / "reports" / "figures"
 TABLES = ROOT / "reports" / "tables"
 OUT = ROOT / "reports" / "cardiotrace-report.html"
 
-BUILD_DATE = "2026-09-06"
+BUILD_DATE = "2026-09-18"
 DATA_CUTOFF = "2019-12-31"
 
 
@@ -465,7 +466,50 @@ def decision(choice: str, buys: str, costs: str) -> str:
 
 
 def ledger(*decisions: str) -> str:
-    return '<div class="ledger">' + "".join(decisions) + "</div>"
+    return ('<details class="method-details"><summary>Analysis choices and their limits</summary>'
+            '<div class="ledger">' + "".join(decisions) + "</div></details>")
+
+
+def _forward_path_rows(path: pd.DataFrame, labels: dict[str, str]) -> str:
+    """Show each recorded step, including a rejected candidate and its context.
+
+    A marginal table cannot explain why a candidate passed the first screen but
+    was not retained. The path uses a fixed sample; stop if its counts no longer
+    support that description rather than quietly printing a misleading table.
+    """
+    if path.empty or path["n"].nunique() != 1 or path["events"].nunique() != 1:
+        raise ValueError("forward path must record one fixed sample and event count")
+    if path.iloc[0]["step"] != 0:
+        raise ValueError("forward path must begin with its baseline model")
+    rows, chosen = [], []
+    for row in path.itertuples(index=False):
+        base = "11 existing inputs"
+        if chosen:
+            base += " + " + ", ".join(escape(labels.get(v, v)) for v in chosen)
+        candidate = "&mdash;" if row.step == 0 else escape(labels.get(row.entered, row.entered))
+        selected = not pd.isna(row.selected) and bool(row.selected)
+        decision_text = "Starting model" if row.step == 0 else (
+            "Added" if selected else "Not added; path stops")
+        rows.append(
+            f"<tr><td>{row.step}</td><td>{base}</td><td>{candidate}</td>"
+            f"<td>{int(row.n):,}</td><td>{int(row.events):,}</td>"
+            f"<td>{_num(row.wald, 2)}</td><td>{decision_text}</td></tr>")
+        if row.step > 0 and selected:
+            chosen.append(row.entered)
+    return "".join(rows)
+
+
+E2_LABELS = {
+    "admissible": "Permitted in current E2 specification",
+    "forbidden": "Excluded from current E2 specification",
+    "undetermined": "Unresolved assumption",
+    "exposure": "Target exposure",
+}
+E2_REASON_OVERRIDES = {
+    "systolic_bp": "Baseline pressure whose adjusted association is estimated.",
+    "bp_treated": "Treatment timing and its relation to prior blood pressure remain unresolved.",
+    "log_uacr": "The kidney–blood-pressure ordering remains unresolved.",
+}
 
 
 
@@ -507,6 +551,7 @@ def build() -> str:
     p4 = json.loads(p4_path.read_text(encoding="utf-8"))
     p4_arms = pd.read_csv(TABLES / "part4_arms.csv")
     p4_rank = pd.read_csv(TABLES / "part4_marginal_ranking.csv")
+    p4_forward = pd.read_csv(TABLES / "part4_forward_path.csv")
     p4_imp = pd.read_csv(TABLES / "part4_importance.csv")
     p4_creat = pd.read_csv(TABLES / "part4_creatinine.csv")
 
@@ -605,7 +650,8 @@ def build() -> str:
     # correction moved it, and the README says both -- the page should not
     # disclose less than the file it is generated alongside.
     rows_pred = "".join(
-        f"<tr><td>{k}</td><td>{v['n']:,}</td><td>{v['cvd_deaths']}</td>"
+        f"<tr><td>{k}</td><td>{v['n_complete']:,}</td><td>{v['cvd_deaths_by_horizon']}</td>"
+        f"<td>{v['n_early_censored']:,}</td>"
         f"<td class='em'>{v['harrell_c']:.3f}</td>"
         f"<td>{v['harrell_c_unweighted']:.3f}</td>"
         f"<td>{v['mean_predicted_pct']:.2f}%</td>"
@@ -716,10 +762,35 @@ def build() -> str:
     p4_top = p4_rank.iloc[0]
 
     p4_rows_rank = "".join(
-        f"<tr><td>{r.label}</td><td>{r.e2_status}</td><td>{r.n:,}</td>"
-        f"<td>{_num(r.hr_per_sd, 3)}</td><td class='em'>{_num(r.wald, 1)}</td>"
+        f"<tr><td>{r.label}</td><td>{r.n:,}</td><td>{r.events:,}</td>"
+        f"<td>{100 * r.coverage:.1f}%</td>"
+        f"<td>{_num(r.hr_per_sd, 3)}</td><td class='em'>{_num(r.wald, 2)}</td>"
         f"<td>{'yes' if r.in_pool else _text(r.note)}</td></tr>"
         for r in p4_rank.itertuples())
+    p4_labels = dict(zip(p4_rank["variable"], p4_rank["label"]))
+    p4_rows_forward = _forward_path_rows(p4_forward, p4_labels)
+    p4_forward_n = int(p4_forward.iloc[0]["n"])
+    p4_forward_events = int(p4_forward.iloc[0]["events"])
+    p4_undetermined = int((p4_rank["e2_status"] == "undetermined").sum())
+    p4_hba1c_note = ""
+    hba1c_initial = p4_rank[p4_rank["variable"] == "hba1c"]
+    hba1c_path = p4_forward[p4_forward["entered"] == "hba1c"]
+    if not hba1c_initial.empty and not hba1c_path.empty:
+        initial, later = hba1c_initial.iloc[0], hba1c_path.iloc[0]
+        if bool(initial["in_pool"]) and not bool(later["selected"]):
+            prior = p4_forward[(p4_forward["step"] > 0)
+                               & (p4_forward["step"] < later["step"])
+                               & p4_forward["selected"]]
+            prior_names = ", ".join(p4_labels.get(v, v) for v in prior["entered"])
+            condition = "the 11 existing inputs" + (f" plus {prior_names}" if prior_names else "")
+            p4_hba1c_note = (
+                '<p class="measure"><b>Why HbA1c was not added.</b> Its initial Wald '
+                f"statistic was {initial['wald']:.2f}, so it entered the candidate pool. "
+                f"After conditioning on {condition}, it was {later['wald']:.2f}, "
+                f"below the {p4_scr['wald_threshold']:.2f} threshold. The initial fits used "
+                "candidate-specific samples; the forward steps below use one fixed sample. "
+                "This result does not show that HbA1c has no predictive value in other "
+                "samples or models, and it says nothing about a causal effect.</p>")
 
     p4_rows_arms = "".join(
         f"<tr><td>{ARM_LABEL_HTML[r.arm]}</td><td>{r.n_features}</td>"
@@ -730,8 +801,8 @@ def build() -> str:
 
     p4_rows_imp = "".join(
         f"<tr><td>{r.rank}</td><td><code>{r.variable}</code></td>"
-        f"<td class='em'>{r.delta_c:+.5f}</td><td>{r.e2_status}</td>"
-        f"<td>{r.e2_why}</td></tr>"
+        f"<td class='em'>{r.delta_c:+.5f}</td><td>{E2_LABELS.get(r.e2_status, r.e2_status)}</td>"
+        f"<td>{E2_REASON_OVERRIDES.get(r.variable, r.e2_why)}</td></tr>"
         for r in p4_imp.head(8).itertuples())
 
     p4_rows_creat = "".join(
@@ -750,8 +821,8 @@ def build() -> str:
     else:
         p4_screen_says = (
             f"The screen admitted <b>none</b> of its {p4_scr['n_candidates']} "
-            "candidates. On this cohort the eleven already carry what the "
-            "laboratory adds.")
+            "candidates. None met this screening rule; that does not establish "
+            "that the candidates contain no additional information.")
 
     def _codes(names):
         return ", ".join(f"<code>{v}</code>" for v in names) or "none"
@@ -811,12 +882,11 @@ def build() -> str:
     # is the asymmetric one, and it is the one that does NOT flatter the screen.
     if p4_base_dropped and p4_opt_kept:
         p4_prevent_says = (
-            f"The screen rejected {_names(p4_base_dropped, p4_all)}, which "
-            f"PREVENT makes mandatory, and kept "
+            f"The screen did not select {_names(p4_base_dropped, p4_all)}, which "
+            f"PREVENT includes in its base model, and selected "
             f"{_names(p4_opt_kept, p4_all)}, which PREVENT treats as "
-            "optional. It disagrees with the guideline in both directions at "
-            "once, and that is the informative result rather than an "
-            "embarrassment.")
+            "optional. These different variable sets come from different "
+            "populations, outcomes and model-development procedures.")
     elif p4_base_kept and p4_opt_kept:
         p4_prevent_says = (
             f"The screen kept {_codes(p4_base_kept + p4_opt_kept)} &mdash; the "
@@ -824,9 +894,8 @@ def build() -> str:
             "told which they were.")
     elif not (p4_base_kept or p4_opt_kept):
         p4_prevent_says = (
-            "The screen kept none of them. That is a disagreement with the "
-            "current guideline, and it is worth explaining rather than "
-            "smoothing over.")
+            "The screen kept none of these additional predictors. That is a "
+            "result of this screening rule on this cohort, not a test of the guideline.")
     else:
         p4_prevent_says = (
             f"The screen kept {_codes(p4_base_kept + p4_opt_kept)} and rejected "
@@ -862,11 +931,14 @@ def build() -> str:
 <header class="masthead">
   <p class="eyebrow">CardioTrace · NHANES 1999–2023 · NCHS Linked Mortality File</p>
   <h1>Cardiovascular Disease in the United States, 1999–2023</h1>
-  <p class="subtitle">Three estimands, three designs &mdash; and a fourth section asking what limits the third: a standardised prevalence series,
-  a counterfactual test of the pandemic, and a prospective cohort of cardiovascular death</p>
-  <p class="standfirst measure">One national survey can answer more than one question, but not
-  with one method. This report states each question as a quantity to be estimated, sets out the
-  design that identifies it, and prices the choices that design requires.</p>
+  <p class="subtitle">How has cardiovascular disease burden changed, and which baseline measures
+  help rank the risk of cardiovascular death?</p>
+  <p class="standfirst measure">The age-standardised prevalence trend and the single post-pandemic
+  comparison remain uncertain. In the mortality cohort, higher baseline blood pressure is
+  associated with higher subsequent cardiovascular mortality; adding urine albumin-to-creatinine
+  ratio improves risk ranking on later survey cycles in this analysis. These findings concern
+  self-reported disease and recorded deaths, not all new heart attacks or strokes, and they do
+  not establish treatment effects or clinical readiness.</p>
   <div class="masthead-meta">
     <span><b>Prepared</b> {BUILD_DATE}</span>
     <span><b>Survey cycles</b> {p1['n_cycles']}, {display_cycle(overall.iloc[0]['cycle'])} to {display_cycle(p1['last_cycle'])}</span>
@@ -874,30 +946,32 @@ def build() -> str:
     <span><b>Cohort</b> {n_cohort} adults 40–79 · {n_cvd} CVD deaths</span>
     <span><b>Mortality follow-up through</b> {DATA_CUTOFF}</span>
   </div>
-  <p class="measure"><a href="#tableau-atlas">View the Tableau research atlas and download the editable workbook &rarr;</a></p>
+  <p class="measure"><a href="#tableau-atlas">Historical Tableau snapshot and editable workbook &rarr;</a></p>
 </header>
 
 <section>
   <div class="sec-head"><div class="sec-num">1</div>
-  <h2>Why one dataset needs three designs</h2></div>
+  <h2>The questions, the samples, and what they can tell us</h2></div>
   <div class="body-indent">
-    <p class="lede measure">Statistical questions come in three kinds, and the same variable can
-    be required in one, forbidden in another, and irrelevant in the third. Fixing which kind of
-    question is being asked is what makes every downstream choice decidable.</p>
+    <p class="lede measure">The population series describes how many adults report cardiovascular
+    disease. The follow-up study asks which baseline measures are associated with later deaths
+    and how well models rank that risk. These are different questions with different samples;
+    none of them, on its own, tells us what would happen if we changed a person's treatment.</p>
 
+    <details class="method-details"><summary>How description, association and prediction differ</summary>
     <div class="twrap">
       <table>
         <caption>The three kinds of question</caption>
-        <thead><tr><th>&nbsp;</th><th>Descriptive</th><th>Causal</th><th>Predictive</th></tr></thead>
+        <thead><tr><th>&nbsp;</th><th>Description</th><th>Adjusted association</th><th>Prediction</th></tr></thead>
         <tbody>
           <tr><td>Asks</td><td>How many, and how has it moved?</td>
-              <td>If we changed X, what happens to Y?</td>
+              <td>How do outcomes differ with X, after specified adjustment?</td>
               <td>Given what we know now, who is at risk?</td></tr>
           <tr><td>Needs</td><td>Survey weights, standardisation, intervals</td>
-              <td>A causal graph, confounder control, stated assumptions</td>
+              <td>A defined comparison, adjustment set and stated assumptions</td>
               <td>Out-of-sample validation, calibration</td></tr>
-          <tr><td>Does not need</td><td>Confounder control</td><td>A high AUC</td>
-              <td>A causal story</td></tr>
+          <tr><td>Does not establish</td><td>Why the trend changed</td>
+              <td>The effect of intervening on X</td><td>That a predictor causes disease</td></tr>
           <tr><td>Fails by</td><td>Reporting raw rates from an ageing population</td>
               <td>Interpreting every coefficient in one table as an effect</td>
               <td>Validating on data that leaks into training</td></tr>
@@ -906,11 +980,11 @@ def build() -> str:
     </div>
 
     <p class="measure">The clearest illustration is age. To describe how disease burden moved
-    across {p1['n_cycles']} survey cycles, age must be <em>removed</em> — otherwise an ageing population looks like a
-    spreading disease. To predict who will die, age must be <em>kept</em> — it is the single
-    strongest predictor available, and a model without it is worthless. The same variable,
-    opposite treatment, and the only thing that decides which is correct is which question is
-    being asked.</p>
+    across {p1['n_cycles']} survey cycles, the standardised series holds the age distribution
+    constant, while the crude series describes the population as it was. To predict mortality,
+    the model includes age because it carries information about risk. The research question
+    determines how the same measure is used.</p>
+    </details>
 
     <p class="measure">The first three analyses below therefore use three different samples. They are
     not three views of one table.</p>
@@ -921,17 +995,17 @@ def build() -> str:
         <thead><tr><th>&nbsp;</th><th>§2 Burden</th><th>§3 Pandemic</th><th>§4 Cohort</th></tr></thead>
         <tbody>
           <tr><td>Question</td><td>How has prevalence moved?</td>
-              <td>Did 2020 bend the trend?</td>
-              <td>Who among the healthy dies of it?</td></tr>
+              <td>How far is the post-pandemic point from the earlier trend?</td>
+              <td>Who without self-reported CVD at baseline later dies of it?</td></tr>
           <tr><td>Kind</td><td>Descriptive</td><td>Exploratory model contrast</td>
-              <td>Predictive + causal</td></tr>
+              <td>Prediction + adjusted association</td></tr>
           <tr><td>Sample</td><td>{p1['n_adults']:,} adults 20+, {p1['n_cycles']} cycles</td>
               <td>Same series, one post-pandemic point</td>
               <td>{n_cohort} adults 40–79, CVD-free at baseline</td></tr>
           <tr><td>Outcome</td><td>Self-reported diagnosis</td><td>Self-reported diagnosis</td>
               <td>Death from cardiovascular causes</td></tr>
           <tr><td>Estimator</td><td>Weighted, age-standardised prevalence</td>
-              <td>Counterfactual extrapolation</td>
+              <td>Extrapolation of the pre-pandemic trend</td>
               <td>Cause-specific Cox, competing risks</td></tr>
         </tbody>
       </table>
@@ -1428,12 +1502,12 @@ def build() -> str:
     of the outcome midway through the series. The cohort therefore stops at 2014, and stopping
     there yields <em>more</em> events than the wider alternative, not fewer.</p>
 
-    <h3>Why deaths from other causes cannot be treated as censoring</h3>
-    <p class="measure">Standard survival methods handle incomplete follow-up by censoring: a
-    participant still alive at the end of the study is recorded as “outcome not yet observed, and
-    still possible”. Applying the same treatment to someone who died of cancer asserts something
-    false — that they might still die of cardiovascular disease. The estimate that results answers
-    a hypothetical question in which no one can die of anything else.</p>
+    <h3>Why other causes of death matter for absolute risk</h3>
+    <p class="measure">A person who dies of another cause can no longer die of cardiovascular
+    disease. Cause-specific Cox models remove competing deaths from each event-specific risk set,
+    but estimating absolute risk requires both causes of death together. Treating competing
+    deaths like ordinary loss to follow-up in a one-minus-Kaplan–Meier calculation overstates
+    the observed probability of cardiovascular death.</p>
     <p class="measure">In this cohort the distortion is not academic: competing deaths outnumber
     cardiovascular deaths 2.9 to 1. Absolute risk is therefore built from two cause-specific
     models — one for cardiovascular death, one for everything else — combined into a cumulative
@@ -1449,24 +1523,22 @@ def build() -> str:
       because the competing hazard accumulates.</figcaption>
     </figure>
 
-    <h3>Blood pressure measured under treatment is not the exposure</h3>
-    <p class="measure">A participant on antihypertensive medication has a measured blood pressure
-    that reflects the treatment, not their underlying level. The intuitive fix — add “currently
-    treated” to the model as a covariate — is wrong for a specific reason: treatment is a
-    <span class="term">collider</span>. It is caused both by high blood pressure and by access to
-    care, so conditioning on it opens a path between blood pressure and healthcare access that was
-    not there before, and contaminates the estimate with confounding it did not previously have.</p>
-    <p class="measure">The exposure is instead reconstructed: treated participants have a constant
-    added to their measured value to approximate the untreated level. The adjustment is an
-    assumption, stated as one, and the model is refitted without it as a sensitivity check —
-    the estimate attenuates from {sbp['hr']:.3f} to
-    {model['aetiologic_sbp_per_10mmhg_no_tobin']['hr']:.3f} per 10 mmHg, which is the direction
-    and roughly the magnitude the reasoning predicts.</p>
+    <h3>How treatment complicates the blood-pressure comparison</h3>
+    <p class="measure">Blood pressure measured during treatment reflects both earlier pressure and
+    medication use. The adjusted-association analysis, called E2 in the code, adds a fixed
+    10 mmHg to systolic and 5 mmHg to diastolic pressure for treated participants. This is a
+    sensitivity convention, not a measurement of their untreated pressure. Whether treatment
+    should be adjusted for in a causal analysis depends on its timing and the question;
+    the available baseline data do not settle that.</p>
+    <p class="measure">Refitting without this adjustment changes the systolic-pressure hazard
+    ratio from {sbp['hr']:.3f} to {model['aetiologic_sbp_per_10mmhg_no_tobin']['hr']:.3f}
+    per 10 mmHg. Both are adjusted associations. The prediction model separately retains measured
+    pressure and treatment status as inputs.</p>
 
     <div class="note flag">
       <b>What this quantity is, stated narrowly on purpose.</b> It is the association of
       treatment-adjusted baseline systolic pressure with subsequent cardiovascular mortality,
-      adjusted for the confounders the graph names. It is not the total causal effect of blood
+      adjusted for the covariates in the current E2 specification. It is not the total causal effect of blood
       pressure, and calling it one would claim more than this design carries: the pressure is
       already the product of years of treatment nobody observed, the Tobin constant is a
       convention rather than an identification strategy, there is no treatment history, kidney
@@ -1579,8 +1651,10 @@ def build() -> str:
         <caption>Discrimination and calibration, held-out cycles. Both concordance
         columns are censored at the horizon the row names; the weighted column is
         the estimate for the US population the sample represents, the unweighted
-        one is the estimate for the sample itself.</caption>
-        <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th>
+        one is the estimate for the sample itself. Observed risk uses the survey-weighted
+        Aalen–Johansen estimate, accounting for competing deaths and incomplete follow-up.</caption>
+        <thead><tr><th>Test set</th><th>Complete inputs</th><th>CVD deaths by horizon</th>
+          <th>Censored before horizon</th>
           <th>Harrell&rsquo;s C<br><span class="thsub">survey-weighted</span></th>
           <th>Harrell&rsquo;s C<br><span class="thsub">unweighted</span></th>
           <th>Mean predicted</th><th>Mean observed</th></tr></thead>
@@ -1591,7 +1665,7 @@ def build() -> str:
     {ledger(
       decision(
         "Exclude participants with <b>cardiovascular disease at baseline</b> rather than adjust for it.",
-        "Three things at once: it removes a mediator that would otherwise absorb most of the blood-pressure effect; it gives a cohort with a real clinical counterpart (primary prevention); and it matches the population the clinical risk scores are built for.",
+        "Defines a baseline disease-free group relevant to primary-prevention risk assessment. This restriction does not itself establish causal comparability.",
         "Fewer events, since the excluded group has the highest mortality — 19.1 versus 3.9 deaths per 1,000 person-years."),
       decision(
         "Set the time origin at the <b>examination</b>, not the interview.",
@@ -1603,12 +1677,12 @@ def build() -> str:
         "Nothing can be said about the period after 2014, and stroke and cardiac deaths are not separable."),
       decision(
         "Model <b>two cause-specific hazards</b> and combine them, rather than fitting a subdistribution model.",
-        "The competing hazard stays visible and inspectable; one fitting path serves both the causal and the predictive question.",
+        "Accounts for other causes of death when assembling cardiovascular mortality risk, while retaining separate cause-specific association models.",
         "Absolute risk must be assembled explicitly rather than read off a single fitted model."),
       decision(
         "Adjust treated blood pressure by a <b>fixed constant</b> instead of conditioning on treatment.",
-        "Avoids opening a collider path through healthcare access, and targets the untreated exposure the causal question is about.",
-        "The constant is borrowed from the literature, not estimated here — an assumption that a sensitivity analysis can bound but not remove."),
+        "Makes one explicit assumption about medication's effect on the baseline measurement, which can be compared with the unadjusted measurement.",
+        "The constant is borrowed from the literature, not estimated here; it cannot recover treatment history or identify an intervention effect."),
       decision(
         "Validate by <b>survey cycle</b> rather than random folds.",
         "No leakage between correlated clusters, and it tests transportability forward in time.",
@@ -1625,7 +1699,7 @@ def build() -> str:
 
     <div class="twrap">
       <table>
-        <caption>Aetiologic model — cause-specific Cox, survey-weighted</caption>
+        <caption>E2 adjusted-association model — cause-specific Cox, survey-weighted</caption>
         <thead><tr>{cox_head}</tr></thead>
         <tbody>{rows_cox}</tbody>
       </table>
@@ -1645,8 +1719,9 @@ def build() -> str:
       samples the living, non-institutionalised population, so people who died young of
       cardiovascular disease were never eligible — a selection that cannot be corrected, only
       declared. Baseline disease is self-reported, with roughly 60–80% sensitivity, so some true
-      patients remain in a cohort described as primary prevention, biasing effects toward the
-      null. Exposures are measured once, which supports baseline risk prediction — the same design
+      patients remain in a cohort described as primary prevention. This can misclassify baseline
+      eligibility and affect estimated associations; the direction is not established here.
+      Exposures are measured once, which supports baseline risk prediction — the same design
       as Framingham, the Pooled Cohort Equations, SCORE2 and QRISK3 — but not dynamic risk
       updating, and a single measurement attenuates associations through regression dilution.
       Follow-up ends {DATA_CUTOFF}, entirely before the pandemic. Two design choices are
@@ -1676,10 +1751,10 @@ def build() -> str:
     <div class="chip-row">
       <span class="chip">Prospective</span>
       <span class="chip">Screened on training cycles only</span>
-      <span class="chip">Design-based Wald</span>
+      <span class="chip">Weighted cluster-robust screen</span>
       <span class="chip">Paired cluster bootstrap</span>
     </div>
-    <p class="lede measure">The model in &sect;4 carries eleven variables and reaches
+    <p class="lede measure">The model in &sect;4 uses eleven input columns and reaches
     C&nbsp;=&nbsp;{p4_ref.harrell_c:.3f}. Two quite different things could be holding it there: the
     eleven may not carry more, or the linear additive proportional-hazards form may not fit what
     they carry. Those are separable, so they are separated &mdash; the variable set and the model
@@ -1688,44 +1763,67 @@ def build() -> str:
 
     <div class="stats">
       {stat("Candidates screened", f"{p4_scr['n_candidates']}", f"on {p4_scr['n_train']:,} training rows")}
-      {stat("Selected", f"{len(p4_sel)}", f"design-based Wald &ge; {p4_scr['wald_threshold']:.2f}")}
+      {stat("Selected", f"{len(p4_sel)}", f"conditional Wald &ge; {p4_scr['wald_threshold']:.2f}")}
       {stat("Best single addition", f"&times;{p4_top.hr_per_sd:.2f}", f"per SD of {p4_top.label}, z = {p4_top.z:.1f}")}
       {stat("Gain in C", f"{p4_gain.delta_c:+.4f}", f"95% CI {p4_gain.delta_lo:+.4f} to {p4_gain.delta_hi:+.4f}")}
     </div>
 
-    <h3>The screen</h3>
-    <p class="measure">Fifteen candidates, each scored against the eleven the model already has
-    rather than on its own &mdash; a univariate hazard ratio for kidney function mostly reports
-    that older people have worse kidneys. Scoring is by the design-based Wald statistic, the
-    coefficient over its cluster-robust standard error, which is what the rest of this report
-    uses for inference and is the only thing that has a null distribution here. Screening runs on
-    the <b>training cycles only</b>; a variable chosen with the test cycles in view would make the
-    concordance that follows an in-sample number wearing an out-of-sample label.</p>
+    <h3>Which variables were considered, and why only one was added</h3>
+    <p class="measure">The first screen adds each of {p4_scr['n_candidates']} candidates separately
+    to the existing 11 model inputs, using only the 1999–2004 training cycles. Each candidate
+    uses its own complete cases, so these initial fits do not all describe the same people.
+    A candidate reaches the next stage only if its coverage is at least
+    {100 * p4_scr['min_coverage']:.0f}% of the training rows with complete existing inputs and its
+    Wald statistic reaches {p4_scr['wald_threshold']:.2f}.</p>
+    <p class="measure"><b>Wald is z squared:</b> the squared coefficient divided by its squared
+    cluster-robust standard error in a weighted Cox fit. This exploratory screening rule is not
+    a multiple-testing correction, a fully stratified survey test, or evidence of causation.
+    HR per SD below is a relative hazard ratio per one standard-deviation increase in the
+    candidate, not a change in absolute risk.</p>
 
     <p class="measure">{p4_screen_says}</p>
 
     <div class="twrap">
       <table>
-        <caption>Every candidate, adjusted for the eleven &mdash; training cycles</caption>
-        <thead><tr><th>Candidate</th><th>In the causal model?</th><th>n</th>
-          <th>HR per SD</th><th>Wald</th><th>Into the forward path?</th></tr></thead>
+        <caption>Stage 1: each candidate added separately to the 11 inputs</caption>
+        <thead><tr><th>Candidate</th><th>n</th><th>CVD deaths</th><th>Coverage</th>
+          <th>HR per SD</th><th>Wald (z²)</th><th>Eligible for stage 2?</th></tr></thead>
         <tbody>{p4_rows_rank}</tbody>
       </table>
     </div>
 
-    <div class="note">
-      <b>Half the candidates are measured on half the cohort, and that decides more than it
-      looks.</b> Fasting glucose, triglycerides and LDL come from the morning fasting subsample,
-      which is roughly half the participants by design, and alcohol intake is missing for a third.
-      Requiring complete data on all of them collapsed the common analysis set from
-      {p4_scr['n_train']:,} rows and {p4_scr['events_train']} events to 1,644 and 104 &mdash;
-      selecting six variables on 104 events is fitting noise. A candidate therefore joins the
-      forward path only if it is observed for at least {100 * p4_scr['min_coverage']:.0f}% of the
-      training rows. The others keep their rankings, each computed on its own rows, and are marked
-      out of the path with the reason rather than quietly dropped.
+    <p class="measure"><b>Stage 2 uses one fixed sample:</b> {p4_forward_n:,} people and
+    {p4_forward_events:,} cardiovascular deaths with complete existing inputs and all candidates
+    in the pool. At each step, the best remaining candidate is assessed after the previously
+    selected additions. A candidate can pass stage 1 and then fail this conditional threshold.</p>
+    <div class="twrap">
+      <table id="forward-selection">
+        <caption>Stage 2: recorded forward-selection path, fixed training sample</caption>
+        <thead><tr><th>Step</th><th>Already in the model</th><th>Candidate</th><th>n</th>
+          <th>CVD deaths</th><th>Conditional Wald (z²)</th><th>Decision</th></tr></thead>
+        <tbody>{p4_rows_forward}</tbody>
+      </table>
     </div>
+    {p4_hba1c_note}
+    <div class="note">
+      <b>Data availability and causal assumptions are different checks.</b> Fasting glucose,
+      triglycerides and LDL are measured in a fasting subsample; alcohol intake also has lower
+      coverage. Falling below the coverage gate does not mean these measures are biologically
+      unimportant. The exploratory initial fits use examination weights throughout; formal
+      inference for the fasting measures would need the appropriate subsample weights.
+      The separate E2 adjustment labels shown later do not determine eligibility for prediction.
+    </div>
+    <details class="method-details"><summary>What the 11 existing model inputs represent</summary>
+      <p class="measure">They are model columns: age, sex, a Black-race indicator, systolic blood
+      pressure, blood-pressure treatment, total and HDL cholesterol, diagnosed diabetes, current
+      and former smoking, and body mass index. Smoking occupies two columns. They represent
+      demographic information and conventional cardiovascular risk measures available in these
+      cycles; this analysis does not establish that they are the uniquely best starting set.
+      The race indicator is a coding choice in this historical specification, not a biological
+      explanation of differences in risk.</p>
+    </details>
 
-    <h3>Against the current guideline, which the screen was never shown</h3>
+    <h3>How the selected variables relate to PREVENT</h3>
     <p class="measure">PREVENT takes two different kinds of variable that the Pooled Cohort
     Equations do not, and the distinction matters here. Its <b>base model</b> requires
     {p4_base_new_list} &mdash; eGFR was newly included as a primary predictor, computed from
@@ -1742,14 +1840,11 @@ def build() -> str:
     <p class="measure">{p4_prevent_says}</p>
 
     <div class="note flag">
-      <b>The disagreement points away from the flattering reading, which is why it is worth
-      keeping.</b> This cohort is aged 40&ndash;79 and largely has normal filtration &mdash; the
-      median eGFR sits near 92, so glomerular filtration has little variance in the range where
-      it would separate people, while albuminuria varies across four orders of magnitude and
-      marks kidney damage before filtration falls. PREVENT was derived on 6.6&nbsp;million adults
-      from age 30 and predicts a composite that includes heart failure; a screen on that
-      population, for that outcome, would very likely have kept eGFR. Nothing here is evidence
-      against the guideline. It is evidence about what this cohort can see.
+      <b>This is a comparison of variable sets, not a validation of PREVENT.</b> This cohort
+      covers adults aged 40&ndash;79 and observes cardiovascular death. The broader PREVENT
+      equations were developed for different populations and outcomes; running the same screen
+      there would be a different analysis. This small exploratory screen cannot
+      establish whether PREVENT should include eGFR or validate PREVENT's predictions.
     </div>
 
     <h3>Form against variable set</h3>
@@ -1759,11 +1854,13 @@ def build() -> str:
                 intervals. Adding one screened variable to the Cox model improves it; both
                 gradient-boosting arms are worse, and boosting on the eleven is worse than a Cox
                 model on age and sex alone.">
-      <figcaption><b>The variable set was binding; the model form was not.</b> Every arm is fitted
+      <figcaption><b>Adding UACR helped in this comparison; the tested boosting settings did not.</b> Every arm is fitted
       on the same training cycles and scored on the same {p4_arm['n_test']:,} held-out
       participants and {p4_arm['events_test']} cardiovascular deaths, so no difference here is a
       difference in who was scored. Intervals are {p4_arm['n_boot']} bootstrap replicates
-      resampling whole variance units rather than rows, for the same reason &sect;2 does.</figcaption>
+      resampling whole variance units rather than rows. They condition on the fitted training
+      models and do not include repeating variable selection or model training. Boosting used
+      fixed settings, so this is not a conclusion about all possible boosting models.</figcaption>
     </figure>
 
     <div class="twrap">
@@ -1779,7 +1876,7 @@ def build() -> str:
     Changing the form to gradient boosting on the same eleven cost {p4_form.delta_c:+.4f}, and the
     interval on each {p4_both_excl}. The floor arm is what makes those numbers readable: a Cox
     model on age and sex alone reaches C&nbsp;=&nbsp;{p4_floor.harrell_c:.4f}, so gradient
-    boosting on all eleven variables {p4_vs_floor} age and sex.</p>
+    boosting on all eleven input columns {p4_vs_floor} age and sex.</p>
 
     <div class="note">
       <b>Two statistics, because one of them is not a fair contest.</b> Harrell's C rewards
@@ -1796,7 +1893,7 @@ def build() -> str:
       <img src="{data_uri('part4_two_orderings.png')}"
            alt="Permutation importance for each variable in the wide prediction model, coloured by
                 whether the aetiologic model may adjust for it. Age dominates, followed by urine
-                albumin-to-creatinine ratio, which the locked causal graph does not classify.">
+                albumin-to-creatinine ratio, whose causal adjustment role remains unresolved.">
       <figcaption><b>Earning a place in one model does not earn it a place in the other.</b>
       Permutation importance measured in the model frame rather than the raw one &mdash; three of
       the eleven features are constructed during model preparation, so shuffling them upstream
@@ -1806,27 +1903,25 @@ def build() -> str:
 
     <div class="twrap">
       <table>
-        <caption>What the prediction needs most, and what the causal model may do with it</caption>
+        <caption>Predictive importance alongside the recorded E2 adjustment assumptions</caption>
         <thead><tr><th>#</th><th>Variable</th><th>Fall in C when shuffled</th>
-          <th>In the causal model?</th><th>Why</th></tr></thead>
+          <th>Current E2 specification</th><th>Recorded rationale or unresolved issue</th></tr></thead>
         <tbody>{p4_rows_imp}</tbody>
       </table>
     </div>
 
     <p class="measure">Of the five variables the prediction depends on most,
-    <b>{p4["importance"]["n_top5_not_admissible"]}</b> are variables the aetiologic model may not
-    simply adjust for. That is the argument of &sect;1 made concrete instead of asserted: the same
-    dataset, the same people, two questions, and a variable that is indispensable to one and
-    inadmissible in the other.</p>
+    <b>{p4["importance"]["n_top5_not_admissible"]}</b> are excluded or unresolved in the current
+    E2 adjustment specification. These labels record analytical assumptions; they are not
+    empirically established causal roles and do not bar a variable from prediction.</p>
 
     <div class="note flag">
-      <b>Three of the fifteen candidates are marked "the locked DAG does not say", and that is a
-      finding about the DAG.</b> The causal graph in the design document draws the kidney node
-      with no parents and no edge to or from blood pressure, so it cannot decide whether eGFR and
-      albuminuria are confounders or mediators &mdash; and albuminuria is the one variable the
-      screen selected. Lipids sit at a collider between the unmeasured genetic node and adiposity.
-      Resolving either is a modelling decision, not a data question, and it is recorded as open
-      rather than settled here.
+      <b>{p4_undetermined} of the {p4_scr['n_candidates']} candidates have unresolved E2 roles.</b>
+      The historical graph does not establish the time ordering of blood pressure, treatment,
+      kidney function and glucose measures, and it contains feedback loops when time is not
+      separated. Its edges have not all been checked against cited literature. The current
+      model is reported as an adjusted association while these assumptions remain open;
+      <a href="#analysis-assumptions">the methods explain what still needs resolving</a>.
     </div>
 
     <h3>The assay change underneath all of this</h3>
@@ -1847,14 +1942,14 @@ def build() -> str:
       </table>
     </div>
 
-    <p class="measure">The equations were applied before the data was looked at, and both move
-    their cycle <em>toward</em> the untouched ones rather than away. That agreement is the check
-    that they were read the right way round.</p>
+    <p class="measure">The pipeline applies the published corrections before deriving kidney
+    measures and screening candidates. Their effect is visible above. Similarity between cycle
+    means is a useful check, but does not by itself validate an assay correction.</p>
 
     {ledger(
       decision(
-        "Screen on the <b>training cycles only</b>, and score by the design-based Wald statistic.",
-        "The concordance that follows is genuinely out of sample, and the statistic has a null distribution under the survey design rather than borrowing one it does not have.",
+        "Screen on the <b>training cycles only</b>, using weighted, cluster-robust Wald statistics.",
+        "Keeps the later test cycles out of variable selection and uses cluster-robust uncertainty in the screening rule.",
         f"A candidate observed for less than {100 * p4_scr['min_coverage']:.0f}% of the training rows cannot enter the forward path at all, so anything measured only in the fasting subsample is out by construction."),
       decision(
         "Compare the arms by a <b>paired</b> difference in C, bootstrapped over whole variance units.",
@@ -1865,9 +1960,9 @@ def build() -> str:
         "It is what a general-purpose classifier can represent, and it makes the comparison one of form rather than of library.",
         "Competing deaths become negative labels rather than a competing risk, and the output ranks people instead of being an absolute risk &mdash; so this section compares discrimination and never calibration."),
       decision(
-        "Declare every candidate's causal status by hand, with three states rather than two.",
-        "A variable the graph does not classify is reported as unclassified instead of being defaulted to admissible, which would print &lsquo;allowed&rsquo; for variables nobody decided about.",
-        "The table carries three &lsquo;undetermined&rsquo; rows that a reader may find unsatisfying, and one of them is the variable the screen chose."),
+        "Keep the recorded <b>E2 adjustment assumptions</b> separate from prediction screening.",
+        "Unresolved roles remain visible and are not converted into automatic adjustment recommendations.",
+        f"{p4_undetermined} candidate roles remain unresolved, including the selected addition; the historical graph requires review."),
     )}
   </div>
 </section>
@@ -1904,9 +1999,9 @@ def build() -> str:
     <div class="note flag">
       <b>The outcomes are not the same quantity.</b> The Pooled Cohort Equations predict
       <em>hard ASCVD</em> — non-fatal myocardial infarction, coronary death, and fatal or non-fatal
-      stroke. This cohort observes cardiovascular <em>death</em> alone. Applying the published
-      coefficients directly will over-predict, and that over-prediction is definitional, not a
-      failure of the equations in this population.
+      stroke. This cohort observes cardiovascular <em>death</em> alone. Its observed death rate
+      cannot be used as the calibration target for a probability that also includes non-fatal
+      events; a mismatch would not, by itself, show a failure of the equations.
     </div>
 
     <p class="measure">This matters because of what the comparison was designed to establish. The
@@ -1944,6 +2039,75 @@ def build() -> str:
   <div class="sec-head"><div class="sec-num">7</div>
   <h2>Data and methods</h2></div>
   <div class="body-indent">
+    <p class="lede measure">The results above use public survey data and linked mortality records.
+    The explanations below separate what the code estimates from the assumptions needed to give
+    those estimates a broader interpretation.</p>
+    <details class="method-details" id="glossary">
+      <summary>Terms used in this report</summary>
+      <dl class="measure">
+        <dt><b>NHANES</b></dt><dd>The National Health and Nutrition Examination Survey:
+        interviews, examinations and laboratory measures from a sample of the US
+        non-institutionalised population. Survey weights help that sample represent the population.</dd>
+        <dt><b>CVD</b></dt><dd>Cardiovascular disease. The population series uses self-reported
+        diagnoses; the cohort outcome is death from heart or cerebrovascular causes.</dd>
+        <dt><b>UACR</b></dt><dd>Urine albumin-to-creatinine ratio, a measure of albumin in urine
+        relative to creatinine. It can indicate kidney damage; the model uses its logarithm.</dd>
+        <dt><b>HbA1c</b></dt><dd>Glycated haemoglobin, a blood measure reflecting average glucose
+        over roughly the preceding two to three months.</dd>
+        <dt><b>HR and 95% CI</b></dt><dd>A hazard ratio compares the rate of the event at a given
+        time among people still at risk. It is not an absolute probability or an intervention
+        effect. A confidence interval describes uncertainty under the stated method; an interval
+        covering 1 for an HR or 0 for a difference leaves the direction unresolved.</dd>
+        <dt><b>C-index</b></dt><dd>A measure of risk ranking: among comparable pairs, how often
+        the higher score belongs to the person with the earlier event. It is not the percentage
+        of people whose death was correctly predicted.</dd>
+        <dt><b>Calibration</b></dt><dd>Whether predicted probabilities agree with observed risk.
+        For example, a group assigned about 3% risk should have about 3% observed risk over the
+        same period. Good ranking alone does not establish this.</dd>
+        <dt><b>Censoring</b></dt><dd>Follow-up ends before the outcome is fully known. Someone
+        last observed alive before five years cannot simply be labelled free of the event at
+        five years. The observed-risk estimates account for that incomplete follow-up.</dd>
+        <dt><b>Competing risk</b></dt><dd>An event that prevents the outcome of interest. Here,
+        death from another cause prevents a later cardiovascular death.</dd>
+        <dt><b>E2 and DAG</b></dt><dd>E2 is the code label for the adjusted blood-pressure
+        association model. A directed acyclic graph (DAG) is a diagram of assumed causal ordering;
+        a diagram states assumptions rather than proving them.</dd>
+      </dl>
+    </details>
+
+    <details class="method-details" id="analysis-assumptions">
+      <summary>Analysis assumptions: what is specified and what remains unresolved</summary>
+      <p class="measure"><b>The historical graph is not a verified DAG.</b> It combines
+      pre-treatment states, medication and measured pressure in the same time layer, creating
+      feedback loops. It has not received a complete, edge-by-edge literature review. A revised
+      graph must distinguish earlier pressure, treatment history and baseline measurement before
+      it can justify causal adjustment; simply removing an inconvenient arrow would not do so.</p>
+      <div class="twrap"><table>
+        <caption>Current interpretation of the main analysis assumptions</caption>
+        <thead><tr><th>Issue</th><th>What this analysis does</th><th>Remaining limit</th></tr></thead>
+        <tbody>
+          <tr><td>Blood-pressure adjustment</td><td>E2 includes age, sex, a Black-race indicator,
+          education, income-to-poverty ratio, current and former smoking, and BMI.</td>
+          <td>This specified adjustment set does not establish that all confounding is removed.</td></tr>
+          <tr><td>Treatment timing</td><td>Adds a fixed pressure increment for treated participants;
+          compares a fit without it.</td><td>Prior treatment and pressure trajectories are not
+          observed. An untreated pressure or treatment effect is not identified.</td></tr>
+          <tr><td>Kidney and glucose measures</td><td>Explores prediction gains independently of
+          their recorded E2 status.</td><td>Their temporal relation to blood pressure and role in
+          a causal adjustment set remain unresolved.</td></tr>
+          <tr><td>Incomplete follow-up</td><td>Observed mortality risk uses a survey-weighted
+          Aalen–Johansen estimate with competing events.</td><td>Interpretation still relies on
+          the censoring assumptions; calibration intervals are not reported.</td></tr>
+          <tr><td>Selection and missingness</td><td>Restricts to baseline disease-free complete
+          cases and reports a completeness-weighting sensitivity.</td><td>Neither step removes
+          all survivor selection or unmeasured causes of missingness.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="measure">These are declared assumptions and open issues, not literature-verified
+      causal arrows. The present results support description, adjusted association and temporal
+      prediction assessment; they do not establish the effect of intervening on blood pressure.</p>
+    </details>
+
     <h3>Sources</h3>
     <ul class="measure">
       <li><b>NHANES 1999–2023</b>, CDC public-use files. All 1,821 published files are enumerated
@@ -1970,13 +2134,16 @@ def build() -> str:
 
     <h3>Estimation</h3>
     <ul class="measure">
-      <li><b>Cross-validated against R.</b> Both hand-written estimators were checked
+      <li><b>Independently checked in R.</b> Both hand-written estimators were checked
       against an independent implementation &mdash; see the section below.</li>
             <li>Each analysis is weighted with the weight of its most restrictive component: the
       <b>interview</b> weight for the self-reported prevalence series, the <b>examination</b>
-      weight for anything that needs a measured blood pressure or a laboratory value. Variances are
-      Taylor-linearised and clustered on the masked variance units NCHS releases in place of
-      the true design variables (<code>SDMVSTRA</code> × <code>SDMVPSU</code>).</li>
+      weight for the main measured-pressure and laboratory analyses. The candidate screen's
+      fasting measures are an exploratory exception described in &sect;5. Descriptive variances
+      use Taylor linearisation; primary E2 intervals use R's stratified survey Cox estimator.
+      The Python Cox fits and exploratory screen use a cluster-robust sandwich, which is a
+      different variance estimator. Both use NCHS's released design identifiers
+      (<code>SDMVSTRA</code> × <code>SDMVPSU</code>).</li>
       <li>Age standardisation is direct, to the published 2000 standard bands renormalised over
       adults 20+, with 75–84 and 85+ collapsed to an open 75+ band.</li>
       <li>Absolute risk is assembled from two cause-specific Cox fits rather than a subdistribution
@@ -1995,7 +2162,7 @@ def build() -> str:
     files that round-trip through the same reader the pipeline uses.</p>
   </div>
 
-    <h3>Checked against an independent implementation</h3>
+    <details class="method-details"><summary>Independent checks in R: numerical agreement and remaining differences</summary>
     {f'''
     <p class="measure">Two of the estimators here are written by hand: the Taylor-linearised
     variance for the standardised prevalence, and the cluster-robust Cox. Unit tests can show that
@@ -2039,6 +2206,7 @@ def build() -> str:
       because doing it properly is a project of its own and shipping a second implementation
       nobody has checked would be worse than depending on one that is checked.
     </div>'''}
+    </details>
 </section>
 
 {atlas_appendix}

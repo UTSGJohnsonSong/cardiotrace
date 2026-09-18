@@ -1,4 +1,5 @@
-"""Publish the reviewed Tableau snapshot only while its sources still match."""
+"""Verify a reviewed Tableau atlas against current or explicitly frozen sources."""
+import argparse
 import base64
 import hashlib
 import html
@@ -32,11 +33,30 @@ def validate(root=ROOT):
     """Check current source bytes, reviewed previews and the portable workbook.
 
     Tableau images are reviewed snapshots, not Python-rendered artefacts. A
-    source change must fail the site build rather than silently publish stale
-    dashboard titles, intervals or sample counts beside a regenerated report.
+    source change must fail any attempt to present the atlas as current rather
+    than silently publish stale titles, intervals or counts as current evidence.
+    An explicitly labelled archive must use validate_snapshot instead.
     No Tableau installation or optional Hyper dependency is required in CI.
     """
     root = Path(root)
+    return _validate(root, source_root=root, snapshot=False)
+
+
+def validate_snapshot(root=ROOT):
+    """Verify the historical atlas against its preserved, reviewed source bytes.
+
+    This does not certify that the workbook represents current research.
+    Callers must label it as the 6 September 2026 historical snapshot; the
+    current-source validation above intentionally continues to reject drift.
+    Workbook, preview and portable-connection checks are identical in both modes.
+    """
+    root = Path(root)
+    return _validate(root, source_root=root / 'docs' / DIRECTORY / 'source-snapshot',
+                     snapshot=True)
+
+
+def _validate(root, *, source_root, snapshot):
+    """Share artifact checks without allowing current-source validation to fall back."""
     directory = root / 'docs' / DIRECTORY
     audit = json.loads((directory / 'data-audit.json').read_text(encoding='utf-8'))
     verification = json.loads((directory / 'verification.json').read_text(encoding='utf-8'))
@@ -50,9 +70,15 @@ def validate(root=ROOT):
     # review digests, but compare source text with the same LF normalisation
     # used by the repository index. Binary workbook/preview hashes stay exact.
     for rel, expected in audit['source_sha256_lf'].items():
-        actual = hashlib.sha256((root / rel).read_bytes().replace(b'\r\n', b'\n')).hexdigest()
+        path = PurePosixPath(rel)
+        if ':' in rel or path.is_absolute() or '..' in path.parts:
+            raise ValueError(f'Tableau source path is not relative: {rel}')
+        actual = hashlib.sha256((source_root / rel).read_bytes().replace(b'\r\n', b'\n')).hexdigest()
         if actual != expected:
-            raise ValueError(f'Tableau source changed: {rel}; rebuild and review the atlas')
+            kind = 'snapshot source' if snapshot else 'source'
+            action = ('restore the preserved reviewed bytes' if snapshot
+                      else 'rebuild and review the atlas')
+            raise ValueError(f'Tableau {kind} changed: {rel}; {action}')
     workbook = directory / WORKBOOK
     if digest(workbook) != verification['workbook_sha256']:
         raise ValueError('Tableau workbook differs from its reviewed version')
@@ -82,32 +108,41 @@ def validate(root=ROOT):
 
 
 def report_appendix(root=ROOT):
-    """Keep the complete report portable; interactive detail is an explicit link."""
-    audit = validate(root)
+    """Embed the verified historical snapshot, separately from current evidence."""
+    audit = validate_snapshot(root)
     figures = []
     for anchor, filename, title, description, links in PANELS:
         image = base64.b64encode((Path(root) / 'docs' / DIRECTORY / filename).read_bytes()).decode('ascii')
         figures.append(f'<figure><a href="{SITE}explore.html#{anchor}">'
                        f'<img src="data:image/png;base64,{image}" '
-                       f'alt="Tableau dashboard: {html.escape(description)}" loading="lazy" width="2760" height="1880" '
+                       f'alt="Historical Tableau dashboard: {html.escape(description)}" loading="lazy" width="2760" height="1880" '
                        f'style="width:100%;height:auto"></a>'
                        f'<figcaption><b>{title}.</b> {description}</figcaption></figure>')
     return f'''<section id="tableau-atlas">
-  <div class="sec-head"><div class="sec-num">A</div><h2>Tableau research atlas</h2></div>
+  <div class="sec-head"><div class="sec-num">A</div><h2>Historical Tableau snapshot (6 Sep 2026)</h2></div>
   <div class="body-indent">
-    <p class="lede measure">Three Tableau dashboards connect the burden, mortality and model-comparison results in this report.
-    The previews below are embedded in this file for offline reading.
-    <a href="{SITE}explore.html">Open the visual atlas</a> or
-    <a href="{SITE}{DIRECTORY}/{WORKBOOK}">download the editable Tableau workbook</a> for hover details and provenance.</p>
-    <p class="measure">These reviewed views use the same committed aggregates as the report, from research version
+    <p class="lede measure">These three native Tableau dashboards preserve the review completed on 6 September 2026.
+    They predate the Aalen–Johansen calibration correction and do not represent the current results.
+    <a href="{SITE}explore.html">View the current charts</a> for the updated evidence.</p>
+    <details><summary>Open the historical Tableau previews and workbook</summary>
+    <p class="measure">The previews are embedded for offline reading. The
+    <a href="{SITE}{DIRECTORY}/{WORKBOOK}">historical editable workbook</a> retains its reviewed extract and hover details.
+    Frozen source files, workbook and image hashes are checked separately from current results.
+    The snapshot describes research version
     <a href="https://github.com/UTSGJohnsonSong/cardiotrace/tree/{audit['source_commit']}">{audit['source_commit'][:7]}</a>.
-    Source hashes are checked whenever the report is rebuilt. PCE remains a historical ranking benchmark;
+    PCE remains a historical ranking benchmark;
     the endpoint mismatch and distinct analysis samples remain part of the interpretation.</p>
     {''.join(figures)}
+    </details>
   </div>
 </section>'''
 
 
 if __name__ == '__main__':
-    audit = validate()
-    print(f"Tableau atlas matches {len(audit['source_sha256'])} current source files")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--snapshot', action='store_true',
+                        help='check the labelled historical snapshot against frozen sources')
+    args = parser.parse_args()
+    audit = validate_snapshot() if args.snapshot else validate()
+    source_kind = 'frozen historical' if args.snapshot else 'current'
+    print(f"Tableau atlas matches {len(audit['source_sha256'])} {source_kind} source files")

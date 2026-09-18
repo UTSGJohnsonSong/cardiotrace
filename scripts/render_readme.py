@@ -109,8 +109,8 @@ lines.append(
     f"{100 * p1['std_first']:.1f}% to {100 * p1['std_last']:.1f}% once age is standardised "
     f"to the 2000 US population — across {p1['n_cycles']} NHANES cycles, "
     f"N = {p1['n_adults']:,}, interview weights, design-based intervals. "
-    f"**The reversal is the finding**: crude growth is largely the ageing of the "
-    f"population, and the age-standardised series declines modestly.")
+    f"The two series show why age composition matters to the comparison. "
+    f"The pre-pandemic standardised trend remains uncertain; its interval includes zero.")
 
 excl = p1["std_slope_excludes_zero"]
 lines.append(
@@ -145,7 +145,7 @@ if sbp_row:
 lines.append(
     f"- **Prediction, validated forward in time:** Harrell C {tenyr['harrell_c']:.3f} at "
     f"{int(tenyr['horizon_years'])} years on held-out later cycles "
-    f"(n = {tenyr['n']:,}), survey-weighted and censored at the horizon; "
+    f"(n = {tenyr['n_complete']:,} with complete inputs), survey-weighted and censored at the horizon; "
     f"{tenyr['harrell_c_unweighted']:.3f} unweighted. Competing risks modelled, never "
     f"censored away.")
 
@@ -157,7 +157,7 @@ if learn:
     sel = learn["screen"]["selected"]
     lines.append(
         f"- **An additional predictor helped in the tested model comparisons.** A screen of "
-        f"{learn['screen']['n_candidates']} laboratory candidates against the eleven "
+        f"{learn['screen']['n_candidates']} additional candidates against the eleven "
         f"selected {len(sel)} ({', '.join('`' + v + '`' for v in sel) or 'none'}), worth "
         f"{gain['delta']:+.4f} in C (95% CI {gain['lo']:+.4f} to {gain['hi']:+.4f}). "
         f"Gradient boosting on the same eleven is worth {form['delta']:+.4f} — worse than "

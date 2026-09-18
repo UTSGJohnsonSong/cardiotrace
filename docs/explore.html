@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tableau visual atlas &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="Three reviewed Tableau dashboards: population burden, mortality risk and model evidence, with report links and an editable workbook.">
+<title>Charts &mdash; CardioTrace | Zekun Song</title>
+<meta name="description" content="Current research figures explained in the browser, with links to methods and a historical Tableau workbook.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/explore.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cstyle%3E.g%7Bfill%3A%23f7f6f2%7D%40media%28prefers-color-scheme%3Adark%29%7B.g%7Bfill%3A%2316161a%7D%7D%3C%2Fstyle%3E%3Crect%20class%3D%22g%22%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%2F%3E%3Cpath%20d%3D%22M2%2020h5.2l2.6-7.4%204.2%2014.2%204.1-19%202.9%2012.2H30%22%20fill%3D%22none%22%20stroke%3D%22%232a78d6%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
-<meta property="og:title" content="Tableau visual atlas &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="Three reviewed Tableau dashboards: population burden, mortality risk and model evidence, with report links and an editable workbook.">
+<meta property="og:title" content="Charts &mdash; CardioTrace | Zekun Song">
+<meta property="og:description" content="Current research figures explained in the browser, with links to methods and a historical Tableau workbook.">
 <meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/explore.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
@@ -22,8 +22,8 @@
 <meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Tableau visual atlas &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="Three reviewed Tableau dashboards: population burden, mortality risk and model evidence, with report links and an editable workbook.">
+<meta name="twitter:title" content="Charts &mdash; CardioTrace | Zekun Song">
+<meta name="twitter:description" content="Current research figures explained in the browser, with links to methods and a historical Tableau workbook.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <style>
@@ -542,74 +542,132 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .pagefoot a { font-weight: 600; }
 .pagefoot .byline { color: var(--ink-2); font-weight: 600; }
 .pagefoot .footlinks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+/* Reading revision: clear hierarchy, generous space, progressive detail. */
+.sitenav-inner { align-items: center; gap: 26px; min-height: 64px; }
+.sitenav .brand { letter-spacing: .07em; }
+.hero { padding: 70px 0 32px; }
+.hero h1 { max-width: 850px; font-size: clamp(36px, 4.5vw, 56px); line-height: 1.09; margin-bottom: 24px; }
+.hero .standfirst { max-width: 64ch; font-size: 20px; }
+.hero-answer { margin-top: 20px; font-size: 17px; color: var(--ink-2); max-width: 68ch; }
+.hero-scope { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin: 24px 0 0; }
+.cta { margin-top: 28px; gap: 16px 26px; }
+.cta a.lead { background: var(--series-text); color: var(--paper); padding: 11px 18px; border-radius: 3px; }
+.quickpath { margin-top: 30px; }
+.findings { background: none; border: 0; gap: 0; margin-top: 16px; }
+.finding { background: none; display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 20px;
+  padding: 26px 0; border-bottom: 1px solid var(--rule-soft); }
+.finding > * { grid-column: 2; }
+.finding .finding-index { grid-column: 1; grid-row: 1 / span 4; font-family: var(--sans); font-size: 12px;
+  font-weight: 600; color: var(--series-text); padding-top: 5px; }
+.finding h3 { margin: 0; font-size: 22px; line-height: 1.3; }
+.finding .what { max-width: 65ch; font-size: 17px; margin: 10px 0; }
+.finding .fci { max-width: 72ch; font-size: 13px; line-height: 1.6; }
+.finding .go { margin-top: 12px; }
+.overview-figure figure { margin: 24px 0 0; }
+.overview-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule-soft); }
+.overview-figure figcaption { margin-top: 14px; font-family: var(--sans); font-size: 14px; color: var(--ink-2); max-width: 78ch; }
+.limits-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; margin-top: 26px; }
+.limit-item { border-top: 2px solid var(--rule); padding-top: 18px; }
+.limit-item h3 { font-family: var(--serif); font-size: 19px; text-transform: none; letter-spacing: 0; margin: 0 0 12px; padding: 0; border: 0; }
+.limit-item p { font-size: 16px; color: var(--ink-2); }
+.limit-item a { font-family: var(--sans); font-size: 13px; }
+details.technical-details, details.technical-note, .body-indent > details { border: 1px solid var(--rule-soft); padding: 17px 20px; margin: 24px 0; background: var(--plate); }
+summary { cursor: pointer; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--ink-2); }
+details[open] > summary { margin-bottom: 16px; }
+details p:last-child { margin-bottom: 0; }
+.reading-note { font-size: 15px; color: var(--ink-2); margin-top: 22px; }
+.colophon { border-top: 1px solid var(--rule); margin-top: 64px; padding-top: 36px; }
+.reading-layout { display: grid; grid-template-columns: 205px minmax(0,1fr); gap: 36px; align-items: start; }
+.reading-layout .toc { position: sticky; top: 84px; max-height: calc(100vh - 108px); overflow-y: auto;
+  padding: 18px 0; background: none; border: 0; border-top: 1px solid var(--rule); margin-top: 48px; }
+.reading-layout .toc summary { font-size: 13px; }
+.toc ol { columns: 1; }
+.toc li { font-size: 13px; margin-bottom: 13px; line-height: 1.5; }
+.reading-body { min-width: 0; }
+.reading-body .body-indent { margin-left: 0; }
+.reading-body .sec-num { min-width: 30px; }
+.reading-body .stats { grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); }
+.reading-body section:first-child { padding-top: 44px; }
+.reading-body h2 { font-size: clamp(24px,2.5vw,30px); }
+.reading-body .pagefoot { font-size: 12px; }
+.chart-guide figure { margin: 24px 0 34px; }
+.chart-guide img { display:block; width:100%; height:auto; background:#fff; border:1px solid var(--rule-soft); }
+.chart-guide figcaption { font-size:15px; color:var(--ink-2); margin-top:12px; max-width:78ch; }
+.archive-note { border-left: 3px solid var(--rule); padding: 14px 18px; color: var(--ink-2); font-size:15px; }
+.chart-guide h3 { font-family:var(--serif); font-size:22px; letter-spacing:0; text-transform:none; }
+.atlas-archive { margin-top:40px; padding:22px; border:1px solid var(--rule); }
+@media (max-width: 850px) {
+  .reading-layout { display: block; }
+  .reading-layout .toc { position: static; max-height: none; margin-top:24px; padding:16px 18px; background:var(--plate); border:1px solid var(--rule-soft); }
+  .toc ol { columns:2; }
+}
+@media (max-width: 640px) {
+  .sitenav-inner { gap:18px; min-height:54px; }
+  .sitenav .brand { font-size:11px; }
+  .sitenav a { font-size:12px; }
+  .sitenav a:last-child { display:none; }
+  .hero { padding-top:40px; }
+  .desktop-break { display:none; }
+  .hero .standfirst { font-size:18px; }
+  .hero-answer { font-size:16px; }
+  .finding { column-gap:10px; grid-template-columns:24px minmax(0,1fr); }
+  .finding h3 { font-size:21px; }
+  .limits-grid { grid-template-columns:1fr; gap:20px; }
+  .toc ol { columns:1; }
+  .pagefoot { font-size:12px; }
+  .atlas-archive { padding:16px; }
+}
+@media print {
+  .sitenav, .toplink, .toc, .quickpath, .cta { display:none !important; }
+  .reading-layout { display:block; }
+}
+
 </style>
 </head>
-<body>
+<body id="top">
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a><a href="explore.html" aria-current="page">Visual atlas</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="cardiotrace-report.html">Read the report</a><a href="explore.html" aria-current="page">Charts</a><a href="index.html#author">About the author</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace &middot; Tableau research atlas</p>
-<h1>Visual atlas</h1><p class="standfirst measure">Three Tableau dashboards connecting population burden, mortality risk and model evidence to the research report.</p>
-<nav class="atlas-links" aria-label="Atlas downloads">
-  <a href="tableau/cardiotrace-atlas.twbx" download>Download Tableau workbook</a>
-  <a href="cardiotrace-report.html#tableau-atlas">Read the full report</a>
-  <a href="#using-the-workbook">Workbook guide</a>
-</nav></header>
-<p class="atlas-note">The images below are high-resolution previews. Open the downloaded workbook in
-Tableau Public or Tableau Desktop for hover details and editing. It contains the aggregate data;
-no connection to the research environment is needed.</p>
-<nav class="atlas-links" aria-label="Dashboards"><a href="#population">Population burden</a><a href="#mortality">Mortality risk</a><a href="#models">Model evidence</a></nav>
-
-<section class="atlas-panel" id="population" aria-labelledby="population-title">
-  <h2 id="population-title">Population burden</h2>
-  <p class="measure">Crude and age-standardised prevalence, latest race–ethnicity intervals, and age patterns across survey cycles.</p>
-  <nav class="atlas-links" aria-label="Report chapters for population burden"><a href="burden.html">Burden: trends and survey design &rarr;</a><a href="pandemic.html">Pandemic: the limits of one post-period &rarr;</a></nav>
-  <figure><a href="tableau/01-population-burden.png" aria-label="Open full-resolution population burden dashboard">
-    <img src="tableau/01-population-burden.png" width="2760" height="1880" loading="lazy" alt="Crude and age-standardised prevalence, latest race–ethnicity intervals, and age patterns across survey cycles."></a>
-    <figcaption>Reviewed Tableau preview. <a href="tableau/01-population-burden.png" download>Download PNG</a>
-    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
-</section><section class="atlas-panel" id="mortality" aria-labelledby="mortality-title">
-  <h2 id="mortality-title">Mortality risk</h2>
-  <p class="measure">Blood-pressure strata, adjusted associations checked in R, and five- and ten-year calibration.</p>
-  <nav class="atlas-links" aria-label="Report chapters for mortality risk"><a href="cohort.html">Cohort: eligibility, associations and calibration &rarr;</a></nav>
-  <figure><a href="tableau/02-mortality-risk.png" aria-label="Open full-resolution mortality risk dashboard">
-    <img src="tableau/02-mortality-risk.png" width="2760" height="1880" loading="lazy" alt="Blood-pressure strata, adjusted associations checked in R, and five- and ten-year calibration."></a>
-    <figcaption>Reviewed Tableau preview. <a href="tableau/02-mortality-risk.png" download>Download PNG</a>
-    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
-</section><section class="atlas-panel" id="models" aria-labelledby="models-title">
-  <h2 id="models-title">Model evidence</h2>
-  <p class="measure">Paired comparisons with historical PCE, the separate Part 4 learning experiment, and exploratory decision curves.</p>
-  <nav class="atlas-links" aria-label="Report chapters for model evidence"><a href="methods.html">Methods: the historical PCE benchmark &rarr;</a><a href="learning.html">Predictive modeling: the Part 4 experiment &rarr;</a></nav>
-  <figure><a href="tableau/03-model-evidence.png" aria-label="Open full-resolution model evidence dashboard">
-    <img src="tableau/03-model-evidence.png" width="2760" height="1880" loading="lazy" alt="Paired comparisons with historical PCE, the separate Part 4 learning experiment, and exploratory decision curves."></a>
-    <figcaption>Reviewed Tableau preview. <a href="tableau/03-model-evidence.png" download>Download PNG</a>
-    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
+<header class="masthead">
+  <p class="eyebrow">CardioTrace &middot; visual guide</p><h1>The results, in view.</h1>
+  <p class="standfirst measure">Start with a chart, then follow the evidence. These figures use the current
+  analysis outputs and can be read here without installing software.</p>
+  <nav class="atlas-links" aria-label="Chart groups"><a href="#population">Population burden</a>
+  <a href="#mortality">Mortality risk</a><a href="#models">Model evidence</a></nav>
+</header>
+<section id="population" class="chart-guide" aria-labelledby="population-title">
+  <h2 id="population-title">Population burden</h2><p class="lede measure">The overall prevalence and the age-standardised estimate describe different aspects of the same population.</p>
+  <figure><a href="assets/part1_standardisation.png" aria-label="Open full-size chart: Crude and age-standardised cardiovascular prevalence over survey cycles"><img src="assets/part1_standardisation.png" loading="lazy" alt="Crude and age-standardised cardiovascular prevalence over survey cycles"></a><figcaption>Pre-pandemic age-standardised trend: &minus;0.59 percentage points per decade (95% CI &minus;1.22 to +0.04). The interval includes zero. Standardisation changes the comparison; it does not establish what caused the change.</figcaption></figure><figure><a href="assets/part1_by_race.png" aria-label="Open full-size chart: Cardiovascular prevalence estimates by race and ethnicity"><img src="assets/part1_by_race.png" loading="lazy" alt="Cardiovascular prevalence estimates by race and ethnicity"></a><figcaption>Intervals describe uncertainty around group estimates. Lines guide reading across surveys; they do not fit a trend across the post-pandemic survey redesign. These are descriptive comparisons, not effects of group membership.</figcaption></figure><nav class="atlas-links" aria-label="Population methods"><a href="burden.html">Burden: trends and survey design &rarr;</a>
+  <a href="pandemic.html">Pandemic: the limits of one later survey &rarr;</a></nav>
 </section>
-<section id="using-the-workbook" aria-labelledby="workbook-guide"><h2 id="workbook-guide">Use the editable workbook</h2>
-<p class="measure">Open the downloaded <code>.twbx</code> file in Tableau Public or Tableau Desktop.
-Choose a dashboard from the bottom tabs, press F7 for presentation mode, and hover a mark for exact values,
-intervals and source details. The workbook includes the aggregate data and twelve editable worksheets.
-Save edits to your computer from the File menu.</p>
-<p class="measure">For a slide or document, use each dashboard's full-resolution PNG link.
-For offline reading, save the <a href="cardiotrace-report.html#tableau-atlas">complete HTML report</a>;
-all three previews are embedded in that file.</p></section>
-<section aria-labelledby="atlas-evidence"><h2 id="atlas-evidence">How these views connect to the evidence</h2>
-<p class="measure">The atlas uses the report's committed result tables and JSON, from research version
-<a href="https://github.com/UTSGJohnsonSong/cardiotrace/tree/9517c6fbcd8a8e4f42ac9356e27f539689d64322">9517c6f</a>.
-The site build checks their hashes against the reviewed workbook manifest. A changed source stops publication
-until the visual companion is updated and reviewed.</p>
-<p class="measure">Analysis samples and survey weights differ across the study parts. Intervals show uncertainty;
-PCE remains a prespecified historical ranking benchmark with a different endpoint. Part 4 uses a separate common sample,
-and decision curves are exploratory. Follow each dashboard's report links for the full methods and limitations.</p>
-<nav class="atlas-links" aria-label="Source and verification records">
-<a href="tableau/data-audit.json">Data sources and transformations</a>
-<a href="tableau/verification.json">Workbook verification</a>
-<a href="https://github.com/UTSGJohnsonSong/cardiotrace/blob/main/docs/tableau-dashboard.md">Maintenance and reproduction</a>
-</nav></section>
+<section id="mortality" class="chart-guide" aria-labelledby="mortality-title">
+  <h2 id="mortality-title">Mortality risk</h2><p class="lede measure">Risk ranking and risk calibration answer different questions.</p>
+  <p class="measure">Weighted C = 0.838 at 10 years on 4,669 participants with complete inputs in later cycles.
+  C measures ordering among comparable pairs; it is not the percentage of people whose outcome was predicted correctly.</p>
+  <figure><a href="assets/cif_by_sbp.png" aria-label="Open full-size chart: Cardiovascular death incidence across baseline blood-pressure groups"><img src="assets/cif_by_sbp.png" loading="lazy" alt="Cardiovascular death incidence across baseline blood-pressure groups"></a><figcaption>These curves describe observed cardiovascular deaths while accounting for competing deaths. Groups can differ in age and other characteristics; the plot does not estimate the effect of a blood-pressure intervention.</figcaption></figure><figure><a href="assets/calibration.png" aria-label="Open full-size chart: Predicted and observed cardiovascular mortality by risk group at five and ten years"><img src="assets/calibration.png" loading="lazy" alt="Predicted and observed cardiovascular mortality by risk group at five and ten years"></a><figcaption>Calibration asks whether predicted risk agrees with observed risk. Observed risk uses weighted Aalen–Johansen estimates, accounting for early censoring and competing deaths. Intervals are not shown; group-level agreement alone is incomplete validation.</figcaption></figure><nav class="atlas-links" aria-label="Mortality methods"><a href="cohort.html">Cohort: eligibility, associations and calibration &rarr;</a></nav>
+</section>
+<section id="models" class="chart-guide" aria-labelledby="models-title">
+  <h2 id="models-title">Model evidence</h2><p class="lede measure">A useful comparison changes one thing at a time and uses the same evaluation sample.</p>
+  <figure><a href="assets/part4_arms.png" aria-label="Open full-size chart: Paired changes in risk ranking for candidate inputs and model forms"><img src="assets/part4_arms.png" loading="lazy" alt="Paired changes in risk ranking for candidate inputs and model forms"></a><figcaption>The Part 4 comparison holds the evaluation sample constant. Adding UACR improved the tested Cox model; the tested gradient boosting model did not. Intervals are conditional on the fitted training models.</figcaption></figure><p class="measure">The separate paired PCE comparison does not establish CardioTrace superiority.
+  PCE targets hard ASCVD, including non-fatal events; the observed endpoint here is cardiovascular mortality.</p>
+  <nav class="atlas-links" aria-label="Model methods"><a href="learning.html">Predictive modeling: the Part 4 experiment &rarr;</a>
+  <a href="methods.html">Methods: the historical PCE benchmark &rarr;</a></nav>
+</section>
+<details class="atlas-archive" id="tableau-history"><summary>Historical Tableau workbook &middot; 6 September 2026</summary>
+  <p class="archive-note">This reviewed workbook is preserved as a historical snapshot. Its calibration views predate the early-censoring correction
+  used in the current charts above. Use the current report for current results.</p>
+  <p><a href="tableau/cardiotrace-atlas.twbx" download>Download the historical Tableau workbook (.twbx)</a> &middot;
+  <a href="tableau/README.md">Snapshot notes</a></p>
+  <p class="measure">The workbook includes aggregate data and editable worksheets; open it in Tableau for editing and hover details.
+  Its original source files, workbook and previews remain hash-verified against research version
+  <a href="https://github.com/UTSGJohnsonSong/cardiotrace/tree/9517c6fbcd8a8e4f42ac9356e27f539689d64322">9517c6f</a>.</p>
+  <figure id="historical-population"><img src="tableau/01-population-burden.png" loading="lazy" width="2760" height="1880" alt="Historical Tableau snapshot: Crude and age-standardised prevalence, latest race–ethnicity intervals, and age patterns across survey cycles."><figcaption>Population burden, reviewed 6 September 2026. <a href="tableau/01-population-burden.png">Full-size historical PNG</a></figcaption></figure><figure id="historical-mortality"><img src="tableau/02-mortality-risk.png" loading="lazy" width="2760" height="1880" alt="Historical Tableau snapshot: Blood-pressure strata, adjusted associations checked in R, and five- and ten-year calibration."><figcaption>Mortality risk, reviewed 6 September 2026. <a href="tableau/02-mortality-risk.png">Full-size historical PNG</a></figcaption></figure><figure id="historical-models"><img src="tableau/03-model-evidence.png" loading="lazy" width="2760" height="1880" alt="Historical Tableau snapshot: Paired comparisons with historical PCE, the separate Part 4 learning experiment, and exploratory decision curves."><figcaption>Model evidence, reviewed 6 September 2026. <a href="tableau/03-model-evidence.png">Full-size historical PNG</a></figcaption></figure>
+</details>
+<p class="reading-note"><a href="cardiotrace-report.html">Read the complete report &rarr;</a></p>
 <div class="pagefoot">
-  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
+  <span>CardioTrace &middot; NHANES 1999&ndash;August 2023 &middot; mortality follow-up through 2019<br>
   <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
-  <span class="footlinks"><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
+  <span class="footlinks"><a href="index.html">&larr; Overview</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
 </div>
 </main>
 <a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>

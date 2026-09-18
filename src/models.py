@@ -66,7 +66,7 @@ from lifelines import CoxPHFitter
 log = logging.getLogger(__name__)
 
 # Tobin et al. (2005): add a constant to the measured pressure of treated
-# participants to recover the untreated level. +10/+5 mmHg is the widely used
+# participants as a sensitivity approximation to the untreated level. +10/+5 is the
 # pair; the choice is a sensitivity analysis, not a fact.
 TOBIN_SBP, TOBIN_DBP = 10.0, 5.0
 
@@ -154,8 +154,9 @@ def fit_aetiologic(df: pd.DataFrame, exposure: str = "systolic_bp",
     """Cause-specific Cox for the association of `exposure` with CVD death.
 
     Non-CVD death is treated as censoring. That is the correct handling for the
-    aetiologic question — "does blood pressure raise the rate of CVD death among
-    those still alive" — and the wrong handling for absolute risk, which is what
+    cause-specific association — how blood pressure relates to the rate of CVD
+    death among those still alive — but does not identify a causal effect or
+    directly estimate absolute risk, which is what
     `predict_cif` is for.
     """
     d = prepare(df, tobin=tobin)
@@ -374,16 +375,45 @@ def _bit_sum(tree: np.ndarray, i: int) -> float:
     return s
 
 
-def calibration_table(risk: pd.Series, observed: pd.Series, weights: pd.Series,
-                      n_bins: int = 10) -> pd.DataFrame:
+def calibration_table(risk: pd.Series, observed: pd.Series | None, weights: pd.Series,
+                      n_bins: int = 10, *, outcomes: pd.DataFrame | None = None,
+                      horizon: float | None = None) -> pd.DataFrame:
     """Predicted vs observed risk by decile of predicted risk.
 
     Discrimination says whether the ranking is right; calibration says whether
     the numbers are. A model can rank perfectly and still be unusable — which is
     the documented failure mode of the Pooled Cohort Equations in contemporary
     cohorts, and the reason this table exists at all.
+
+    For survival outcomes, pass observed=None, the cohort's follow-up/death
+    columns as outcomes, and a horizon. Observed risk is survey-weighted
+    Aalen–Johansen within each bin, under independent censoring within the bin.
+    Early censoring is not an observed non-event; competing death is a known
+    non-CVD outcome. The original binary interface remains available only for
+    outcomes whose horizon status is known. Neither path supplies intervals.
     """
-    d = pd.DataFrame({"risk": risk, "obs": observed, "w": weights}).dropna()
+    from src.pce import observed_cif
+
+    survival = outcomes is not None or horizon is not None
+    if survival:
+        if outcomes is None or horizon is None or observed is not None:
+            raise ValueError("Supply outcomes and horizon with observed=None")
+        d = pd.DataFrame({"risk": risk, "w": weights}).dropna()
+        d = d.join(outcomes[["followup_years", "cvd_death", "competing_death"]])
+        d["wtmec2yr"] = d.w
+        # Validate mortality inputs before grouping. Missing outcome/design
+        # values must fail rather than silently become censored observations.
+        observed_cif(d, horizon)
+        d["early_censored"] = ((d.followup_years < horizon)
+                               & (d.cvd_death == 0) & (d.competing_death == 0))
+    else:
+        if observed is None:
+            raise ValueError("Supply observed binary outcomes or survival outcomes")
+        d = pd.DataFrame({"risk": risk, "obs": observed, "w": weights}).dropna()
+    if d.empty or not np.isfinite(d[["risk", "w"]]).all().all() or (d.w <= 0).any():
+        raise ValueError("Calibration requires finite risks and positive weights in a nonempty sample")
+    if not isinstance(n_bins, int) or n_bins < 1:
+        raise ValueError("n_bins must be a positive integer")
     # WEIGHTED quantile cut-points. `pd.qcut` splits the SAMPLE into equal-sized
     # groups; with survey weights the sample is not the population, so its
     # deciles are not population deciles. The means inside each bin were already
@@ -401,8 +431,13 @@ def calibration_table(risk: pd.Series, observed: pd.Series, weights: pd.Series,
         "n": g.size(),
         "predicted_pct": 100 * g.apply(lambda x: np.average(x.risk, weights=x.w),
                                        include_groups=False),
-        "observed_pct": 100 * g.apply(lambda x: np.average(x.obs, weights=x.w),
+        "observed_pct": 100 * g.apply(
+            (lambda x: observed_cif(x, horizon)) if survival
+            else (lambda x: np.average(x.obs, weights=x.w)),
                                       include_groups=False),
     })
+    if survival:
+        out["n_early_censored"] = g.early_censored.sum().astype(int)
+        out["n_horizon_known"] = out.n - out.n_early_censored
     out["difference_pp"] = (out.predicted_pct - out.observed_pct).round(2)
     return out.round(2)

@@ -1,0 +1,8 @@
+{
+  "n_participants": 20736,
+  "cvd_deaths": 925,
+  "competing_deaths": 2711,
+  "person_years": 235552.8,
+  "max_followup_years": 20.75,
+  "median_followup_years": 10.92
+}

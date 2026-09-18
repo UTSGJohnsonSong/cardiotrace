@@ -110,12 +110,16 @@ These checks cover the original survey estimators, not the new PCE adaptation.
 
 ## Tableau visual companion
 
-The Tableau companion is a reviewed native-workbook snapshot in `docs/tableau/`.
-Report/site rendering checks its source and artifact hashes without installing
-Tableau. Regenerating the workbook uses separate optional dependencies and a
+The Tableau companion is a historical native-workbook snapshot from 6 September
+2026 in `docs/tableau/`, before the early-censoring calibration correction.
+Current web charts use current generated figures. Report/site rendering checks
+the frozen inputs in `docs/tableau/source-snapshot/` and artifact hashes through
+`validate_snapshot`; the separate `validate` function still rejects differences
+against current analysis sources. Regenerating the workbook uses optional dependencies and a
 native Tableau visual review; see [the atlas maintenance guide](tableau-dashboard.md).
 The full analysis receipt includes the source/hash gate and regenerated HTML,
-not a rerun of Tableau GUI capture. The single-file report embeds the previews.
+not a rerun of Tableau GUI capture. The single-file report embeds the dated
+previews in a historical disclosure, alongside a link to the current charts.
 
 ## Optional warehouse
 

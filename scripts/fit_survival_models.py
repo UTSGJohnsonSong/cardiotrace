@@ -1,7 +1,7 @@
 """
 Fit and validate the Part 3 survival models.
 
-    aetiologic  cause-specific Cox for the total effect of systolic BP
+    aetiologic  cause-specific Cox for the adjusted association of systolic BP
     prediction  two cause-specific Cox fits -> absolute risk, validated forward
                 in time
 
@@ -36,6 +36,7 @@ from src.models import (  # noqa: E402
     CauseSpecificRisk, P_FEATURES, TRAIN_CYCLES, TEST_10Y_CYCLES, TEST_5Y_CYCLES,
     calibration_table, concordance, fit_aetiologic,
 )
+from src.pce import observed_cif  # noqa: E402
 from src.survival import (  # noqa: E402
     AXIS, CATEGORICAL, GRIDLINE, INK_MUTED, INK_PRIMARY, INK_SECONDARY, SURFACE,
 )
@@ -89,10 +90,12 @@ def figure_calibration(panels: list[tuple[str, pd.DataFrame]]) -> None:
     # place the two on top of each other once the axes are tightened.
     fig.suptitle("Absolute-risk calibration by decile of predicted risk",
                  fontweight="bold", fontsize=13, color=INK_PRIMARY,
-                 x=0.015, ha="left", y=1.10)
+                 x=0.015, ha="left", y=1.14)
     fig.text(0.015, 1.035, "Model trained on NHANES 1999–2004 and applied forward "
              "to later cycles · survey-weighted · each point is a decile of "
-             "predicted risk", color=INK_MUTED, fontsize=8.5, ha="left", va="bottom")
+             "predicted risk\nObserved risk: Aalen–Johansen with competing deaths "
+             "and censoring · point estimates only", color=INK_MUTED, fontsize=8.5,
+             ha="left", va="bottom")
     fig.savefig(FIG / "calibration.png", bbox_inches="tight", facecolor=SURFACE)
     plt.close(fig)
 
@@ -103,7 +106,7 @@ def main() -> None:
     df = pd.read_csv(COHORT)
     results: dict = {}
 
-    log.info("=== aetiologic: total effect of systolic BP on CVD death ===")
+    log.info("=== adjusted association of systolic BP with CVD death ===")
     aet = fit_aetiologic(df, "systolic_bp", tobin=True)
     aet.to_csv(TAB / "cox_systolic_bp.csv")
     log.info(aet.to_string())
@@ -119,7 +122,7 @@ def main() -> None:
         "hr": round(hr10, 4), "lo95": round(lo10, 4), "hi95": round(hi10, 4)}
 
     # Sensitivity: the Tobin constant is a convention, so report the model
-    # without it too. If the exposure effect only exists with the adjustment,
+    # without it too. If the exposure association only exists with the adjustment,
     # that is worth knowing.
     raw = fit_aetiologic(df, "systolic_bp", tobin=False)
     results["aetiologic_sbp_per_10mmhg_no_tobin"] = {
@@ -138,7 +141,6 @@ def main() -> None:
     ]:
         test = df[df.cycle.isin(cycles)]
         risk = model.predict_cif(test, horizon)
-        observed = ((test.cvd_death == 1) & (test.followup_years <= horizon)).astype(float)
         w = test.wtmec2yr.reindex(risk.index)
         # Weighted, and censored at the horizon the label claims. The unweighted
         # value is kept beside it: it is what was published, and a reader
@@ -161,21 +163,31 @@ def main() -> None:
                         weights=w, horizon=horizon)
         c_unw = concordance(risk, test.followup_years, test.cvd_death,
                             horizon=horizon)
-        tab = calibration_table(risk, observed.reindex(risk.index), w)
+        tab = calibration_table(risk, None, w, outcomes=test, horizon=horizon)
         tab.to_csv(TAB / f"calibration_{horizon:g}y.csv")
         panels.append((label, tab))
 
         # These two were unweighted while the calibration table beside them was
         # weighted, so a summary line and the table it summarised were different
         # estimands. Both are weighted now.
-        keep = risk.dropna().index
+        keep = risk.index[risk.notna() & w.notna()]
         ww = w.reindex(keep).to_numpy(float)
         pred_mean = 100 * float(np.average(risk.reindex(keep).to_numpy(float), weights=ww))
-        obs_mean = 100 * float(np.average(observed.reindex(keep).to_numpy(float), weights=ww))
+        complete = test.loc[keep]
+        obs_mean = 100 * observed_cif(complete, horizon)
+        early = ((complete.followup_years < horizon) & (complete.cvd_death == 0)
+                 & (complete.competing_death == 0))
         summary[label] = {"n": len(test), "cvd_deaths": int(test.cvd_death.sum()),
                           "horizon_years": horizon, "harrell_c": round(c, 3),
                           "harrell_c_unweighted": round(c_unw, 3),
                           "n_evaluable": int(len(keep)),
+                          "n_complete": int(len(keep)),
+                          "cvd_deaths_complete": int(complete.cvd_death.sum()),
+                          "cvd_deaths_by_horizon": int(((complete.cvd_death == 1)
+                                                       & (complete.followup_years <= horizon)).sum()),
+                          "n_horizon_known": int((~early).sum()),
+                          "n_early_censored": int(early.sum()),
+                          "observed_method": "survey_weighted_aalen_johansen",
                           "mean_predicted_pct": round(pred_mean, 2),
                           "mean_observed_pct": round(obs_mean, 2)}
         log.info(f"\n{label}: n={len(test):,}  C={c:.3f} (unweighted {c_unw:.3f})  "

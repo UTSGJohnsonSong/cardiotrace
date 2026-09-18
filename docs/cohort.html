@@ -542,13 +542,93 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .pagefoot a { font-weight: 600; }
 .pagefoot .byline { color: var(--ink-2); font-weight: 600; }
 .pagefoot .footlinks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+/* Reading revision: clear hierarchy, generous space, progressive detail. */
+.sitenav-inner { align-items: center; gap: 26px; min-height: 64px; }
+.sitenav .brand { letter-spacing: .07em; }
+.hero { padding: 70px 0 32px; }
+.hero h1 { max-width: 850px; font-size: clamp(36px, 4.5vw, 56px); line-height: 1.09; margin-bottom: 24px; }
+.hero .standfirst { max-width: 64ch; font-size: 20px; }
+.hero-answer { margin-top: 20px; font-size: 17px; color: var(--ink-2); max-width: 68ch; }
+.hero-scope { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin: 24px 0 0; }
+.cta { margin-top: 28px; gap: 16px 26px; }
+.cta a.lead { background: var(--series-text); color: var(--paper); padding: 11px 18px; border-radius: 3px; }
+.quickpath { margin-top: 30px; }
+.findings { background: none; border: 0; gap: 0; margin-top: 16px; }
+.finding { background: none; display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 20px;
+  padding: 26px 0; border-bottom: 1px solid var(--rule-soft); }
+.finding > * { grid-column: 2; }
+.finding .finding-index { grid-column: 1; grid-row: 1 / span 4; font-family: var(--sans); font-size: 12px;
+  font-weight: 600; color: var(--series-text); padding-top: 5px; }
+.finding h3 { margin: 0; font-size: 22px; line-height: 1.3; }
+.finding .what { max-width: 65ch; font-size: 17px; margin: 10px 0; }
+.finding .fci { max-width: 72ch; font-size: 13px; line-height: 1.6; }
+.finding .go { margin-top: 12px; }
+.overview-figure figure { margin: 24px 0 0; }
+.overview-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule-soft); }
+.overview-figure figcaption { margin-top: 14px; font-family: var(--sans); font-size: 14px; color: var(--ink-2); max-width: 78ch; }
+.limits-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; margin-top: 26px; }
+.limit-item { border-top: 2px solid var(--rule); padding-top: 18px; }
+.limit-item h3 { font-family: var(--serif); font-size: 19px; text-transform: none; letter-spacing: 0; margin: 0 0 12px; padding: 0; border: 0; }
+.limit-item p { font-size: 16px; color: var(--ink-2); }
+.limit-item a { font-family: var(--sans); font-size: 13px; }
+details.technical-details, details.technical-note, .body-indent > details { border: 1px solid var(--rule-soft); padding: 17px 20px; margin: 24px 0; background: var(--plate); }
+summary { cursor: pointer; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--ink-2); }
+details[open] > summary { margin-bottom: 16px; }
+details p:last-child { margin-bottom: 0; }
+.reading-note { font-size: 15px; color: var(--ink-2); margin-top: 22px; }
+.colophon { border-top: 1px solid var(--rule); margin-top: 64px; padding-top: 36px; }
+.reading-layout { display: grid; grid-template-columns: 205px minmax(0,1fr); gap: 36px; align-items: start; }
+.reading-layout .toc { position: sticky; top: 84px; max-height: calc(100vh - 108px); overflow-y: auto;
+  padding: 18px 0; background: none; border: 0; border-top: 1px solid var(--rule); margin-top: 48px; }
+.reading-layout .toc summary { font-size: 13px; }
+.toc ol { columns: 1; }
+.toc li { font-size: 13px; margin-bottom: 13px; line-height: 1.5; }
+.reading-body { min-width: 0; }
+.reading-body .body-indent { margin-left: 0; }
+.reading-body .sec-num { min-width: 30px; }
+.reading-body .stats { grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); }
+.reading-body section:first-child { padding-top: 44px; }
+.reading-body h2 { font-size: clamp(24px,2.5vw,30px); }
+.reading-body .pagefoot { font-size: 12px; }
+.chart-guide figure { margin: 24px 0 34px; }
+.chart-guide img { display:block; width:100%; height:auto; background:#fff; border:1px solid var(--rule-soft); }
+.chart-guide figcaption { font-size:15px; color:var(--ink-2); margin-top:12px; max-width:78ch; }
+.archive-note { border-left: 3px solid var(--rule); padding: 14px 18px; color: var(--ink-2); font-size:15px; }
+.chart-guide h3 { font-family:var(--serif); font-size:22px; letter-spacing:0; text-transform:none; }
+.atlas-archive { margin-top:40px; padding:22px; border:1px solid var(--rule); }
+@media (max-width: 850px) {
+  .reading-layout { display: block; }
+  .reading-layout .toc { position: static; max-height: none; margin-top:24px; padding:16px 18px; background:var(--plate); border:1px solid var(--rule-soft); }
+  .toc ol { columns:2; }
+}
+@media (max-width: 640px) {
+  .sitenav-inner { gap:18px; min-height:54px; }
+  .sitenav .brand { font-size:11px; }
+  .sitenav a { font-size:12px; }
+  .sitenav a:last-child { display:none; }
+  .hero { padding-top:40px; }
+  .desktop-break { display:none; }
+  .hero .standfirst { font-size:18px; }
+  .hero-answer { font-size:16px; }
+  .finding { column-gap:10px; grid-template-columns:24px minmax(0,1fr); }
+  .finding h3 { font-size:21px; }
+  .limits-grid { grid-template-columns:1fr; gap:20px; }
+  .toc ol { columns:1; }
+  .pagefoot { font-size:12px; }
+  .atlas-archive { padding:16px; }
+}
+@media print {
+  .sitenav, .toplink, .toc, .quickpath, .cta { display:none !important; }
+  .reading-layout { display:block; }
+}
+
 </style>
 </head>
-<body>
+<body id="top">
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="burden.html">Burden</a><a href="pandemic.html">Pandemic</a><a href="cohort.html" aria-current="page">Cohort</a><a href="learning.html">Predictive Modeling</a><a href="methods.html">Methods</a><a href="explore.html">Visual atlas</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="cardiotrace-report.html">Read the report</a><a href="explore.html">Charts</a><a href="index.html#author">About the author</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
-<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Cohort</h1><p class="standfirst measure">A prospective cohort of adults free of cardiovascular disease at baseline, followed for up to twenty years.</p></header><p class="atlas-note"><a href="explore.html#mortality">View mortality risk in the Tableau atlas &rarr;</a></p><nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ol><li class="toc-h2"><a href="#who-among-adults-cvd-free-at-baseline-goes-on-to-die-of">Who, among adults CVD-free at baseline, goes on to die of it</a></li><li class="toc-h3"><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li class="toc-h3"><a href="#why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</a></li><li class="toc-h3"><a href="#blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</a></li><li class="toc-h3"><a href="#who-the-model-is-fitted-on-which-is-not-who-the-cohort">Who the model is fitted on, which is not who the cohort is</a></li><li class="toc-h3"><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li></ol></nav><section>
+<header class="masthead"><p class="eyebrow">CardioTrace</p><h1>Cohort</h1><p class="standfirst measure">A prospective cohort of adults free of cardiovascular disease at baseline, followed for up to twenty years.</p></header><p class="atlas-note"><a href="explore.html#mortality">See the mortality risk charts &rarr;</a></p><div class="reading-layout"><details class="toc" open><summary>On this page</summary><nav aria-label="On this page"><ol><li><a href="#who-among-adults-cvd-free-at-baseline-goes-on-to-die-of">Who, among adults CVD-free at baseline, goes on to die of it</a></li><li><a href="#time-is-the-unit-of-information-not-people">Time is the unit of information, not people</a></li><li><a href="#why-other-causes-of-death-matter-for-absolute-risk">Why other causes of death matter for absolute risk</a></li><li><a href="#how-treatment-complicates-the-blood-pressure-comparison">How treatment complicates the blood-pressure comparison</a></li><li><a href="#who-the-model-is-fitted-on-which-is-not-who-the-cohort">Who the model is fitted on, which is not who the cohort is</a></li><li><a href="#validation-splits-on-survey-cycle-not-at-random">Validation splits on survey cycle, not at random</a></li></ol></nav></details><div class="reading-body"><section>
   <div class="sec-head"><div class="sec-num">4</div>
   <h2 id="who-among-adults-cvd-free-at-baseline-goes-on-to-die-of">Who, among adults CVD-free at baseline, goes on to die of it</h2></div>
   <div class="body-indent">
@@ -590,12 +670,12 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
     of the outcome midway through the series. The cohort therefore stops at 2014, and stopping
     there yields <em>more</em> events than the wider alternative, not fewer.</p>
 
-    <h3 id="why-deaths-from-other-causes-cannot-be-treated-as">Why deaths from other causes cannot be treated as censoring</h3>
-    <p class="measure">Standard survival methods handle incomplete follow-up by censoring: a
-    participant still alive at the end of the study is recorded as “outcome not yet observed, and
-    still possible”. Applying the same treatment to someone who died of cancer asserts something
-    false — that they might still die of cardiovascular disease. The estimate that results answers
-    a hypothetical question in which no one can die of anything else.</p>
+    <h3 id="why-other-causes-of-death-matter-for-absolute-risk">Why other causes of death matter for absolute risk</h3>
+    <p class="measure">A person who dies of another cause can no longer die of cardiovascular
+    disease. Cause-specific Cox models remove competing deaths from each event-specific risk set,
+    but estimating absolute risk requires both causes of death together. Treating competing
+    deaths like ordinary loss to follow-up in a one-minus-Kaplan–Meier calculation overstates
+    the observed probability of cardiovascular death.</p>
     <p class="measure">In this cohort the distortion is not academic: competing deaths outnumber
     cardiovascular deaths 2.9 to 1. Absolute risk is therefore built from two cause-specific
     models — one for cardiovascular death, one for everything else — combined into a cumulative
@@ -611,24 +691,22 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       because the competing hazard accumulates.</figcaption>
     </figure>
 
-    <h3 id="blood-pressure-measured-under-treatment-is-not-the">Blood pressure measured under treatment is not the exposure</h3>
-    <p class="measure">A participant on antihypertensive medication has a measured blood pressure
-    that reflects the treatment, not their underlying level. The intuitive fix — add “currently
-    treated” to the model as a covariate — is wrong for a specific reason: treatment is a
-    <span class="term">collider</span>. It is caused both by high blood pressure and by access to
-    care, so conditioning on it opens a path between blood pressure and healthcare access that was
-    not there before, and contaminates the estimate with confounding it did not previously have.</p>
-    <p class="measure">The exposure is instead reconstructed: treated participants have a constant
-    added to their measured value to approximate the untreated level. The adjustment is an
-    assumption, stated as one, and the model is refitted without it as a sensitivity check —
-    the estimate attenuates from 1.122 to
-    1.097 per 10 mmHg, which is the direction
-    and roughly the magnitude the reasoning predicts.</p>
+    <h3 id="how-treatment-complicates-the-blood-pressure-comparison">How treatment complicates the blood-pressure comparison</h3>
+    <p class="measure">Blood pressure measured during treatment reflects both earlier pressure and
+    medication use. The adjusted-association analysis, called E2 in the code, adds a fixed
+    10 mmHg to systolic and 5 mmHg to diastolic pressure for treated participants. This is a
+    sensitivity convention, not a measurement of their untreated pressure. Whether treatment
+    should be adjusted for in a causal analysis depends on its timing and the question;
+    the available baseline data do not settle that.</p>
+    <p class="measure">Refitting without this adjustment changes the systolic-pressure hazard
+    ratio from 1.122 to 1.097
+    per 10 mmHg. Both are adjusted associations. The prediction model separately retains measured
+    pressure and treatment status as inputs.</p>
 
     <div class="note flag">
       <b>What this quantity is, stated narrowly on purpose.</b> It is the association of
       treatment-adjusted baseline systolic pressure with subsequent cardiovascular mortality,
-      adjusted for the confounders the graph names. It is not the total causal effect of blood
+      adjusted for the covariates in the current E2 specification. It is not the total causal effect of blood
       pressure, and calling it one would claim more than this design carries: the pressure is
       already the product of years of treatment nobody observed, the Tobin constant is a
       convention rather than an identification strategy, there is no treatment history, kidney
@@ -736,21 +814,23 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       about magnitude, which is what makes it unusable for a clinical threshold.</figcaption>
     </figure>
 
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Discrimination and calibration, held-out cycles. Both concordance columns are censored at the horizon the row names; the weighted column is the estimate for the US population the sample represents, the unweighted one is the estimate for the sample itself.. Scrollable.">
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: Discrimination and calibration, held-out cycles. Both concordance columns are censored at the horizon the row names; the weighted column is the estimate for the US population the sample represents, the unweighted one is the estimate for the sample itself. Observed risk uses the survey-weighted Aalen–Johansen estimate, accounting for competing deaths and incomplete follow-up.. Scrollable.">
       <table>
         <caption>Discrimination and calibration, held-out cycles. Both concordance
         columns are censored at the horizon the row names; the weighted column is
         the estimate for the US population the sample represents, the unweighted
-        one is the estimate for the sample itself.</caption>
-        <thead><tr><th>Test set</th><th>n</th><th>CVD deaths</th>
+        one is the estimate for the sample itself. Observed risk uses the survey-weighted
+        Aalen–Johansen estimate, accounting for competing deaths and incomplete follow-up.</caption>
+        <thead><tr><th>Test set</th><th>Complete inputs</th><th>CVD deaths by horizon</th>
+          <th>Censored before horizon</th>
           <th>Harrell&rsquo;s C<br><span class="thsub">survey-weighted</span></th>
           <th>Harrell&rsquo;s C<br><span class="thsub">unweighted</span></th>
           <th>Mean predicted</th><th>Mean observed</th></tr></thead>
-        <tbody><tr><td>Test 2005–2008, 10-year risk</td><td>5,163</td><td>217</td><td class='em'>0.838</td><td>0.805</td><td>1.96%</td><td>2.02%</td></tr><tr><td>Test 2009–2014, 5-year risk</td><td>8,801</td><td>170</td><td class='em'>0.802</td><td>0.791</td><td>0.69%</td><td>0.74%</td></tr></tbody>
+        <tbody><tr><td>Test 2005–2008, 10-year risk</td><td>4,669</td><td>129</td><td>0</td><td class='em'>0.838</td><td>0.805</td><td>1.96%</td><td>2.02%</td></tr><tr><td>Test 2009–2014, 5-year risk</td><td>7,901</td><td>70</td><td>18</td><td class='em'>0.802</td><td>0.791</td><td>0.69%</td><td>0.74%</td></tr></tbody>
       </table>
     </div>
 
-    <div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Exclude participants with <b>cardiovascular disease at baseline</b> rather than adjust for it.</div><div class="d-buys"><span class="col-label">What it buys</span>Three things at once: it removes a mediator that would otherwise absorb most of the blood-pressure effect; it gives a cohort with a real clinical counterpart (primary prevention); and it matches the population the clinical risk scores are built for.</div><div class="d-costs"><span class="col-label">What it costs</span>Fewer events, since the excluded group has the highest mortality — 19.1 versus 3.9 deaths per 1,000 person-years.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Set the time origin at the <b>examination</b>, not the interview.</div><div class="d-buys"><span class="col-label">What it buys</span>Follow-up starts when the exposures were actually measured, which is what a survival model assumes.</div><div class="d-costs"><span class="col-label">What it costs</span>Requires the examination weight and drops participants who were interviewed but not examined.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Define the outcome as <b>heart plus cerebrovascular death</b>, over 1999–2014 only.</div><div class="d-buys"><span class="col-label">What it buys</span>More events than the narrower definition over more cycles, and one consistent outcome definition throughout.</div><div class="d-costs"><span class="col-label">What it costs</span>Nothing can be said about the period after 2014, and stroke and cardiac deaths are not separable.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Model <b>two cause-specific hazards</b> and combine them, rather than fitting a subdistribution model.</div><div class="d-buys"><span class="col-label">What it buys</span>The competing hazard stays visible and inspectable; one fitting path serves both the causal and the predictive question.</div><div class="d-costs"><span class="col-label">What it costs</span>Absolute risk must be assembled explicitly rather than read off a single fitted model.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Adjust treated blood pressure by a <b>fixed constant</b> instead of conditioning on treatment.</div><div class="d-buys"><span class="col-label">What it buys</span>Avoids opening a collider path through healthcare access, and targets the untreated exposure the causal question is about.</div><div class="d-costs"><span class="col-label">What it costs</span>The constant is borrowed from the literature, not estimated here — an assumption that a sensitivity analysis can bound but not remove.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Validate by <b>survey cycle</b> rather than random folds.</div><div class="d-buys"><span class="col-label">What it buys</span>No leakage between correlated clusters, and it tests transportability forward in time.</div><div class="d-costs"><span class="col-label">What it costs</span>A smaller training set, and performance that will degrade if the population drifts — though that degradation is itself the finding.</div></div></div>
+    <details class="method-details"><summary>Analysis choices and their limits</summary><div class="ledger"><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Exclude participants with <b>cardiovascular disease at baseline</b> rather than adjust for it.</div><div class="d-buys"><span class="col-label">What it buys</span>Defines a baseline disease-free group relevant to primary-prevention risk assessment. This restriction does not itself establish causal comparability.</div><div class="d-costs"><span class="col-label">What it costs</span>Fewer events, since the excluded group has the highest mortality — 19.1 versus 3.9 deaths per 1,000 person-years.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Set the time origin at the <b>examination</b>, not the interview.</div><div class="d-buys"><span class="col-label">What it buys</span>Follow-up starts when the exposures were actually measured, which is what a survival model assumes.</div><div class="d-costs"><span class="col-label">What it costs</span>Requires the examination weight and drops participants who were interviewed but not examined.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Define the outcome as <b>heart plus cerebrovascular death</b>, over 1999–2014 only.</div><div class="d-buys"><span class="col-label">What it buys</span>More events than the narrower definition over more cycles, and one consistent outcome definition throughout.</div><div class="d-costs"><span class="col-label">What it costs</span>Nothing can be said about the period after 2014, and stroke and cardiac deaths are not separable.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Model <b>two cause-specific hazards</b> and combine them, rather than fitting a subdistribution model.</div><div class="d-buys"><span class="col-label">What it buys</span>Accounts for other causes of death when assembling cardiovascular mortality risk, while retaining separate cause-specific association models.</div><div class="d-costs"><span class="col-label">What it costs</span>Absolute risk must be assembled explicitly rather than read off a single fitted model.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Adjust treated blood pressure by a <b>fixed constant</b> instead of conditioning on treatment.</div><div class="d-buys"><span class="col-label">What it buys</span>Makes one explicit assumption about medication's effect on the baseline measurement, which can be compared with the unadjusted measurement.</div><div class="d-costs"><span class="col-label">What it costs</span>The constant is borrowed from the literature, not estimated here; it cannot recover treatment history or identify an intervention effect.</div></div><div class="decision"><div class="d-choice"><span class="col-label">The choice</span>Validate by <b>survey cycle</b> rather than random folds.</div><div class="d-buys"><span class="col-label">What it buys</span>No leakage between correlated clusters, and it tests transportability forward in time.</div><div class="d-costs"><span class="col-label">What it costs</span>A smaller training set, and performance that will degrade if the population drifts — though that degradation is itself the finding.</div></div></div></details>
 
     <div class="twrap" role="region" tabindex="0" aria-label="Table: 15-year cumulative incidence by baseline systolic blood pressure. Scrollable.">
       <table>
@@ -760,9 +840,9 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       </table>
     </div>
 
-    <div class="twrap" role="region" tabindex="0" aria-label="Table: Aetiologic model — cause-specific Cox, survey-weighted. Scrollable.">
+    <div class="twrap" role="region" tabindex="0" aria-label="Table: E2 adjusted-association model — cause-specific Cox, survey-weighted. Scrollable.">
       <table>
-        <caption>Aetiologic model — cause-specific Cox, survey-weighted</caption>
+        <caption>E2 adjusted-association model — cause-specific Cox, survey-weighted</caption>
         <thead><tr><th>covariate</th><th>n</th><th>HR</th><th>95% CI</th><th>log HR</th><th>p</th></tr></thead>
         <tbody><tr><td>systolic_bp</td><td>17,890</td><td>1.0115</td><td>1.0076&ndash;1.0155</td><td>0.011475</td><td>&lt;0.0001</td></tr><tr><td>age</td><td>17,890</td><td>1.1038</td><td>1.0917&ndash;1.1160</td><td>0.098778</td><td>&lt;0.0001</td></tr><tr><td>male</td><td>17,890</td><td>2.0065</td><td>1.6468&ndash;2.4448</td><td>0.696395</td><td>&lt;0.0001</td></tr><tr><td>race_black</td><td>17,890</td><td>1.3789</td><td>1.1514&ndash;1.6514</td><td>0.321316</td><td>0.0005</td></tr><tr><td>education</td><td>17,890</td><td>0.9403</td><td>0.8728&ndash;1.0131</td><td>-0.061522</td><td>0.1058</td></tr><tr><td>pir</td><td>17,890</td><td>0.8361</td><td>0.7818&ndash;0.8943</td><td>-0.178967</td><td>&lt;0.0001</td></tr><tr><td>smoke_current</td><td>17,890</td><td>2.4491</td><td>1.9698&ndash;3.0451</td><td>0.895741</td><td>&lt;0.0001</td></tr><tr><td>smoke_former</td><td>17,890</td><td>1.1856</td><td>0.9548&ndash;1.4722</td><td>0.170236</td><td>0.1233</td></tr><tr><td>bmi</td><td>17,890</td><td>1.0401</td><td>1.0255&ndash;1.0548</td><td>0.039287</td><td>&lt;0.0001</td></tr></tbody>
       </table>
@@ -782,8 +862,9 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       samples the living, non-institutionalised population, so people who died young of
       cardiovascular disease were never eligible — a selection that cannot be corrected, only
       declared. Baseline disease is self-reported, with roughly 60–80% sensitivity, so some true
-      patients remain in a cohort described as primary prevention, biasing effects toward the
-      null. Exposures are measured once, which supports baseline risk prediction — the same design
+      patients remain in a cohort described as primary prevention. This can misclassify baseline
+      eligibility and affect estimated associations; the direction is not established here.
+      Exposures are measured once, which supports baseline risk prediction — the same design
       as Framingham, the Pooled Cohort Equations, SCORE2 and QRISK3 — but not dynamic risk
       updating, and a single measurement attenuates associations through regression dilution.
       Follow-up ends 2019-12-31, entirely before the pandemic. Two design choices are
@@ -802,11 +883,11 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
       unmeasured causes of missingness have been removed.
     </div>
   </div>
-</section>
+</section></div></div>
 <div class="pagefoot">
-  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
+  <span>CardioTrace &middot; NHANES 1999&ndash;August 2023 &middot; mortality follow-up through 2019<br>
   <span class="byline">Zekun Song &middot; Computer Science &amp; Data Science, University of Toronto</span></span>
-  <span class="footlinks"><a href="learning.html">Next &rarr;</a> &nbsp;&middot;&nbsp; <a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
+  <span class="footlinks"><a rel="prev" href="pandemic.html">&larr; Pandemic</a><a rel="next" href="learning.html">Predictive Modeling &rarr;</a><a href="https://github.com/UTSGJohnsonSong/cardiotrace">GitHub</a><a href="#top">Back to top &uarr;</a></span>
 </div>
 </main>
 <a class="toplink" href="#top" aria-label="Back to top of page">Top <span aria-hidden="true">&uarr;</span></a>
