@@ -1,8 +1,8 @@
 {
   "full": {
-    "commit": "c08d9ad1274aa6746891792fe4baf883876ad837",
-    "branch": "publish-tableau-atlas",
-    "ran_at": "2026-09-06T09:59:41+00:00",
+    "commit": "73e22ccfc62bb584d75eeef9fbed79c74c63b34f",
+    "branch": "improve-research-reading",
+    "ran_at": "2026-09-18T21:34:59+00:00",
     "stages": [
       "cohort",
       "descriptive",
@@ -34,9 +34,9 @@
     "raw_manifest_checks": true
   },
   "render": {
-    "commit": "c08d9ad1274aa6746891792fe4baf883876ad837",
-    "branch": "publish-tableau-atlas",
-    "ran_at": "2026-09-06T10:00:13+00:00",
+    "commit": "73e22ccfc62bb584d75eeef9fbed79c74c63b34f",
+    "branch": "improve-research-reading",
+    "ran_at": "2026-09-18T21:35:29+00:00",
     "stages": [
       "render"
     ],
