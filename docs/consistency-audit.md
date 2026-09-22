@@ -1,4 +1,46 @@
-# 文档一致性对账 —— 提案，未执行任何修改
+# 文档一致性对账 —— 历史审查快照与抽核处置
+
+> **Historical snapshot, not today's implementation status.** The original
+> 36-item review below describes `98d96cd` plus the working-tree changes it names.
+> Its line numbers, quoted values and "not implemented" labels belong to that
+> snapshot. Several fixes subsequently landed; neither "none executed" nor
+> "all 36 closed" describes the evidence available now.
+
+## 2026-09-18 disposition check
+
+This is a scoped source/artifact review against the `85b9ba9` takeover baseline,
+plus the documentation clarifications in this change. It is **not a full
+36-item acceptance review, a raw-data rerun or proof of current-site deployment**.
+"Implemented" below applies only to the cited part of an item. Generated output
+and runtime checks remain separate release evidence.
+
+| Original items | Disposition within this check | Evidence and remaining action |
+|---|---|---|
+| 1, 2, 5 | Implemented: active build and README sources replaced | `Makefile` uses the catalog downloader and `analysis`; `scripts/render_readme.py` reads the current descriptive/model/learning results. `legacy-invalid/` is outside the active build. This verifies the old regeneration mechanism was removed, not every sentence in the README. |
+| 4 | Implemented: interval interpretation corrected | `reports/descriptive_results.json` reports an interval including zero; `scripts/render_report.py` branches on `std_slope_excludes_zero`. |
+| 6, 36 | Implemented in the model and results; historical quotations retained | `src/models.py::concordance` uses weights and the horizon; `reports/model_results.json` separates weighted and unweighted C. Recheck any newly written prose against the relevant sample rather than copying a historic C value. |
+| 7, 8, 26 | PCE implementation completed; document labels clarified in this change | `src/pce.py`, `scripts/build_pce_results.py` and `reports/pce_results.json` implement the benchmark. `docs/pce-benchmark.md` now labels 18,744 as the intermediate cascade and 12,413 as the primary paired sample. The original audit's pending-analysis language is historical. |
+| 9 | Implemented: weights differ by analytic component | `src/descriptive.py` uses interview weights for prevalence; `src/cohort.py` and `src/models.py` use exam weights for the cohort models. This does not resolve the separate four-year-weight deviation in item 20. |
+| 12–16 | Implemented: a single current node-status table exists | `docs/research-design.md` separates that table from the roadmap and decision history; `tests/test_doc_consistency.py` checks its structure and landing paths. This does not mean every node is complete; node 4 is reopened for causal assumptions and node 16 retains investigator disclosures. |
+| 18 | Implemented model verified | `src/models.py::predict_risk` combines two cause-specific hazards; the current model is not a subdistribution-hazard fit. Historical alternatives remain labelled in the design record. |
+| 20 | Still present, quantified and disclosed | The main cohort uses two-year weights for 1999–2002. `scripts/check_fouryear_weights.py` and `docs/research-design.md` node 12 document the sensitivity; do not mark the guidance deviation as eliminated. |
+| 21, 25, 27 | Implemented in the cited current cohort/cascade sources | `reports/cohort_results.json`, `reports/tables/strobe_part3.csv`, `reports/tables/pce_cascade.csv` and `src/survival.py` agree on 20,736 participants and 2,711 competing deaths. Other historical quotations require their own context checks. |
+| 31, 32 | Implemented in source | `src/models.py::predict_risk` shifts survival to the left limit; `src/ascertainment.py` uses the design degrees of freedom for its interval. This pass inspected those implementations, rather than independently rerunning the R comparison. |
+| 34 | Implemented: historic audit labelled | `docs/methodology-review.md` identifies its `c523561` snapshot at the top. Its original diagnoses are retained. |
+| 3, 10, 11, 17, 19, 22–24, 28–30, 33, 35 | Not individually re-verified in this scoped disposition pass | This is not evidence that each remains broken. Before closing an item, check its complete scope against current sources, generated artifacts and the relevant runtime evidence; consult `docs/reproducibility.md` for reproduction boundaries. |
+
+Newly identified questions also remain outside the old 36-item closure count:
+the historical causal graph has directed cycles; E1 is not run; the actual E2
+covariates differ from the old proposal; and screening-role labels are not
+validated causal permissions. The current distinction and required follow-up
+are recorded in `docs/research-design.md` §4.0. `src/screening.py` now describes
+its weighted, cluster-robust Wald screen accurately; this text correction does
+not change the algorithm or settle the causal roles.
+
+## Original proposal — preserved historical wording
+
+The following "status", workspace observations, recommendations and verification
+instructions describe the original review only.
 
 > **状态**：提案。本文件是本次唯一新增，**没有改动任何其它文件**。
 > **不做的事**：不宣布任何文件为权威版本，不重排目录结构（按全局约定，这由你定）。

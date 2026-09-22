@@ -28,7 +28,7 @@
 | 1 | 研究问题与 estimand | 🔒 | 本文档 §节点 1；三个 Part 的 estimand 分列 |
 | 2 | 目标人群与分析样本 | 🔒 | `src/cohort.py` · `reports/tables/strobe_part3.csv` |
 | 3 | 结局定义与效度 | 🔒 | `src/cohort.py`（UCOD ∈ {1,5}，1999–2014，止于 2019-12-31） |
-| 4 | 识别假设（DAG） | 🔒 | 本文档 §节点 4 · `src/models.py`（E1/E2/P 三套变量集） |
+| 4 | 识别假设（DAG） | 🔄 | 本文档 §4.0 · `src/models.py`（实际运行 E2/P；E1 未运行）。历史图含回路，变量因果角色与识别依据尚未核验 |
 | 5 | 数据源与周期选择 | 🔒 | `src/cohort.py`（`CYCLES`） · `src/descriptive.py`（`CYCLE_LABEL`） |
 | 6 | 变量普查与筛选规则 | 🔒 | `data/build_catalog.py` · `data/apply_selection_rules.py` |
 | 7 | 可重复性契约 | 🔒 | `data/download_from_catalog.py` · `data/download_mortality.py`（SHA-256 manifest）· `Makefile`（`make verify` 断言干净重建无 diff）。被取代的下载器已移入 `legacy-invalid/`，无任何构建目标指向它 |
@@ -43,6 +43,43 @@
 | 16 | 报告规范与可重复包 | 🔄 | `docs/tripod-checklist.md` · `docs/reproducibility.md` · `scripts/package_reproduction.py`。技术交付已完成；作者、伦理、资金、利益冲突、注册和患者参与声明需研究者补充 |
 
 ---
+
+## 2026-09-22 presentation and Tableau update
+
+Lead the website with the research questions and three main findings. Keep the
+PCE comparison, its intervals and endpoint difference in the detailed methods;
+do not make a claim of superior performance. Describe the pandemic question as
+insufficient data to assess its impact on cardiovascular disease. These are
+presentation changes, not changes to the estimands or model-selection rules.
+
+Restore three visible Tableau dashboards from current aggregate results under
+`docs/tableau/current/`, with individual charts available on expansion. Review
+the native workbook, embedded data and exported previews together before using
+`validate_current()`. Preserve the original September 6 snapshot independently.
+Replace the site Resume PDF with the exact file selected by the author.
+
+## 2026-09-18 website and calibration decisions
+
+Keep the implemented estimands, candidate pool, selection rules and temporal
+split. Present the questions and bounded findings before technical details;
+show both candidate-screening steps with their actual sample sizes. The E2
+model estimates adjusted associations; historical DAG proposals do not establish
+causal identification. Node 4 remains open.
+
+The website audit found that binary observed proportions in the main model's
+calibration treated early censoring as event-free follow-up. Use the existing
+weighted Aalen–Johansen estimator from the benchmark implementation for both
+overall and grouped observed risk. Retain participants' recorded competing
+deaths and censoring times; do not change the fitted prediction model. Report
+input-complete counts, known horizon outcomes, early censoring and deaths by
+the horizon separately. The five-year set includes 18 early censored records;
+the ten-year set includes none. The change does not alter the displayed
+two-decimal overall observed percentages.
+
+Current browser charts come from the regenerated Python results. Preserve the
+reviewed 6 September Tableau workbook as a dated historical snapshot with its
+original source files and hashes. Its earlier review does not verify the new
+calibration; publishing updated Tableau output requires a separate review.
 
 ## 2026-09-06 closeout decisions (recorded before the corrective code)
 
@@ -503,7 +540,55 @@ NHANES 1999–2014 受访者                         82,091
 
 ## 节点 4 · 因果图（DAG）
 
-### 4.1 图
+### 4.0 Current implementation and unresolved assumptions (2026-09-18)
+
+**Read this before the historical proposal below.** The original graph is not
+a valid DAG: `BP → MEDS → BP` and `LIP → MEDS → LIP` are directed cycles. It
+uses the same nodes for prior exposure and a measurement after treatment.
+Neither its arrows nor the variable roles inferred from it have been validated
+against an edge-by-edge literature record. Preserve it as the design history;
+do not use it to claim an identified causal effect or a verified adjustment set.
+
+| Model | What is actually run | Interpretation and boundary |
+|---|---|---|
+| E2 | `src/models.py::aetiologic_covariates`: systolic BP plus age, sex (`male`), Black race indicator, education, income-to-poverty ratio, current smoking, former smoking and BMI | Adjusted association with subsequent CVD mortality. Treated BP receives the +10 mmHg Tobin convention; it does not identify untreated BP or a treatment effect. The R cross-check uses the same covariates. |
+| P | `src/models.py::P_FEATURES`: age, sex (`male`), Black race indicator, systolic BP, BP treatment, total cholesterol, HDL cholesterol, diabetes diagnosis, current smoking, former smoking and BMI | Eleven encoded input columns, with smoking represented by two columns. Two cause-specific Cox fits supply absolute mortality risk. A useful predictor is not automatically a suitable causal adjustment variable. |
+| E1 | Historical socioeconomic-effect proposal in §4.3 | No E1 fit or E1 result is produced by the current analysis chain; do not describe it as an implemented third model. |
+
+The implemented E2 list includes BMI and omits `FAMHX`, unlike the old table.
+The historical record does not supply a complete causal justification for this
+change. Record the difference rather than inventing a retrospective rationale.
+Likewise, omission of kidney or glucose measures from E2 does not establish that
+they are downstream of BP. Their role depends on prior disease, treatment and
+measurement time; that question remains open. `src/screening.py` preserves its
+declared `e2_status` labels for provenance, not as validated causal permissions.
+
+A time-indexed sketch makes the measurement problem visible without claiming
+to complete the causal graph:
+
+```mermaid
+flowchart LR
+  BPprior["Prior BP history — not observed longitudinally"] --> Tprior["Treatment before examination"]
+  BPprior --> BPbase["Measured BP at baseline"]
+  Tprior --> BPbase
+  BPprior --> Yfuture["Later CVD death"]
+  Tprior --> Yfuture
+  Accessprior["Prior access to care"] --> Tprior
+  Accessprior --> Yfuture
+```
+
+These are **illustrative assumptions awaiting literature review**, not a full
+adjustment graph. This sketch separates times and has no directed cycle, but
+omits common causes, selection and other pathways. It cannot identify a minimal
+adjustment set. Closing node 4 requires a time-indexed full graph, a source and
+assumption record for each edge, an acyclicity check, and a stated estimand before
+any causal interpretation. NHANES baseline measurements alone do not settle the
+direction between BP, kidney disease and glycaemic status.
+
+### 4.1 Historical graph — retained, not a valid DAG
+
+> The original graph below contains the cycles described in §4.0. Its labels
+> and arrows are preserved for traceability, not endorsed as current evidence.
 
 ```mermaid
 flowchart LR
@@ -568,7 +653,12 @@ flowchart LR
   SEL -.->|analysis conditions on this| DEATH
 ```
 
-### 4.2 图里最重要的四条结构
+### 4.2 Historical interpretation of the graph
+
+> The following claims were made from the historical graph. Its collider and
+> mediator labels are hypotheses, not established causal roles. In particular,
+> Tobin adjustment does not recover an identified untreated exposure, and the
+> historical CRP coverage statement below is superseded by the catalog in §6.1.
 
 | # | 结构 | 后果 | 处理 |
 |---|---|---|---|
@@ -583,7 +673,12 @@ flowchart LR
   你会得出"肥胖不重要"的错误结论。这是 Table 2 fallacy 最经典的案例。
 - **`CRP` 是中介不是混杂**，且覆盖有缺口（1999–2004 无数据）。**主分析不放**。
 
-### 4.3 一张 DAG，三个模型，三套变量集
+### 4.3 Historical three-model proposal — see §4.0 for implemented models
+
+> This table records an earlier proposal. E1 was not run; the E2 adjustment
+> list differs from the implementation, and its total-effect language is not a
+> supported interpretation of the fitted association. The P column is also a
+> proposal, not evidence that every listed metric has been produced.
 
 **这是 DAG 的全部意义所在。**"该放哪些变量"没有唯一答案——取决于你在估计什么。
 

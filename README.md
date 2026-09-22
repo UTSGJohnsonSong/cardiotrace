@@ -24,7 +24,7 @@
 
 <p align="center"><sub>Every figure and number below is reproduced there, with the code that produced it.</sub></p>
 
-![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-241%20collected-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.11-blue) ![lifelines](https://img.shields.io/badge/lifelines-survival-6f42c1) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue) ![dbt](https://img.shields.io/badge/dbt-1.11-orange) ![pytest](https://img.shields.io/badge/tests-260%20collected-brightgreen)
 
 CardioTrace ingests **CDC NHANES 1999–2023** and the **NCHS Linked Mortality File**, and
 builds a prospective cohort of adults who were free of cardiovascular disease at
@@ -37,25 +37,33 @@ of the 1,821 published NHANES files is recorded with the rule that kept or dropp
 <!-- KEY_FINDINGS_START -->
 ## Key Findings
 
-- **Crude prevalence rose and age-standardised prevalence fell.** Self-reported cardiovascular disease among US adults 20+ went from 8.0% to 9.4% crude, and from 8.7% to 8.0% once age is standardised to the 2000 US population — across 11 NHANES cycles, N = 62,877, interview weights, design-based intervals. **The reversal is the finding**: crude growth is largely the ageing of the population, and the age-standardised series declines modestly.
+- **Crude prevalence rose and age-standardised prevalence fell.** Self-reported cardiovascular disease among US adults 20+ went from 8.0% to 9.4% crude, and from 8.7% to 8.0% once age is standardised to the 2000 US population — across 11 NHANES cycles, N = 62,877, interview weights, design-based intervals. The two series show why age composition matters to the comparison. The pre-pandemic standardised trend remains uncertain; its interval includes zero.
 - **The standardised trend is -0.59 pp per decade** (95% CI -1.22 to +0.04, t(8)). It contains zero: with ten pre-pandemic points and a dispersion estimated from the same ten, the decline is consistent in direction and not established at 95%. The normal-quantile interval, which the earlier version reported, is -1.12 to -0.06.
 - **No detectable pandemic deviation.** 2021-2022 sits +0.45 pp from the pre-pandemic trend extrapolated 5.1 years past 2017-2018 (95% CI -0.76 to +1.66). This is an exploratory deviation from an extrapolation, not a quasi-experimental estimate: there is one post-pandemic observation, and NCHS reports that cycle on an updated sample design.
 - **Baseline systolic blood pressure predicts later cardiovascular death.** HR 1.122 per 10 mmHg (95% CI 1.078–1.166), survey-design-based on the stratified PSU design via R `survey::svycoxph`, Tobin-adjusted for treatment. Reported as an association with treatment-adjusted baseline pressure, not as a total causal effect.
-- **Prediction, validated forward in time:** Harrell C 0.838 at 10 years on held-out later cycles (n = 5,163), survey-weighted and censored at the horizon; 0.805 unweighted. Competing risks modelled, never censored away.
-- **An additional predictor helped in the tested model comparisons.** A screen of 15 laboratory candidates against the eleven selected 1 (`log_uacr`), worth +0.0176 in C (95% CI +0.0074 to +0.0275). Gradient boosting on the same eleven is worth -0.0542 — worse than a Cox model on age and sex alone.
-- **The historical PCE benchmark does not establish CardioTrace superiority.** 10y: C 0.8406 vs 0.8517, paired ΔC -0.0111 (95% interval -0.0213 to +0.0004); 5y: C 0.7931 vs 0.7788, paired ΔC +0.0143 (95% interval -0.0113 to +0.0396). Each comparison uses the same participants for both arms. PCE targets hard ASCVD; this study observes CVD mortality, so these are prognostic ranking comparisons, not same-endpoint clinical validation. See the [research summary](docs/research-summary.md).
+- **Prediction, validated forward in time:** Harrell C 0.838 at 10 years on held-out later cycles (n = 4,669 with complete inputs), survey-weighted and censored at the horizon; 0.805 unweighted. Competing risks modelled, never censored away.
+- **An additional predictor helped in the tested model comparisons.** A screen of 15 additional candidates against the eleven selected 1 (`log_uacr`), worth +0.0176 in C (95% CI +0.0074 to +0.0275). Gradient boosting on the same eleven is worth -0.0542 — worse than a Cox model on age and sex alone.
+- **Historical risk-score comparison.** 10y: C 0.8406 vs 0.8517, paired ΔC -0.0111 (95% interval -0.0213 to +0.0004); 5y: C 0.7931 vs 0.7788, paired ΔC +0.0143 (95% interval -0.0113 to +0.0396). Each comparison uses the same participants for both arms. PCE targets hard ASCVD; this study observes CVD mortality, so these are prognostic ranking comparisons, not same-endpoint clinical validation. See the [research summary](docs/research-summary.md).
 
 _Figures in [`reports/figures/`](reports/figures). Numbers in [`reports/descriptive_results.json`](reports/descriptive_results.json), [`reports/model_results.json`](reports/model_results.json) and [`reports/tables/`](reports/tables). The superseded pipeline and everything it produced are in [`legacy-invalid/`](legacy-invalid), which no build target reaches._
 <!-- KEY_FINDINGS_END -->
 
-## Tableau research atlas
+## Tableau dashboards and supporting charts
 
-[View the three dashboards online](https://utsgjohnsonsong.github.io/cardiotrace/explore.html)
-or [download the editable workbook](docs/tableau/cardiotrace-atlas.twbx).
-The atlas links burden, mortality risk and model comparisons to their report
-chapters. The complete HTML report also embeds all three previews for offline
-reading. [Source and maintenance notes](docs/tableau-dashboard.md) explain how
-the build rejects a snapshot whose source results have changed.
+[Read the dashboard guide](https://utsgjohnsonsong.github.io/cardiotrace/explore.html).
+Three native Tableau dashboard exports lead the page: population burden,
+mortality risk and model comparisons. Individual Python figures can be expanded
+for a closer look, and each group links to its report chapters. The current
+exports and [editable workbook](docs/tableau/current/cardiotrace-atlas.twbx) live
+in `docs/tableau/current/`; `validate_current()` checks their current analysis
+sources and native Tableau review record before rendering. The browser shows
+dashboard images; no Tableau Public interactive view is configured.
+
+The original 6 September 2026 workbook and previews remain in `docs/tableau/`,
+with frozen inputs in `docs/tableau/source-snapshot/`. They predate the
+early-censoring calibration correction and are clearly labelled as history.
+`validate_snapshot()` preserves their independent source and artifact checks.
+See the [source and maintenance notes](docs/tableau-dashboard.md).
 
 ---
 
@@ -112,7 +120,7 @@ downstream turned the gaps into plausible numbers.
 
 The pipeline now enumerates all 1,821 published files before selecting any, records one
 rule per file, resolves column names through a verified per-cycle crosswalk, and fails
-the run on any cycle-wide gap that is not explicitly declared. The 241 tests are
+the run on any cycle-wide gap that is not explicitly declared. The 260 tests are
 regressions for defects that actually shipped.
 
 ---
@@ -163,7 +171,7 @@ python data/build_variable_crosswalk.py     # resolve per-cycle column names
 python -c "from src.cohort import build_cohort; build_cohort()"
 python scripts/make_survival_figures.py     # descriptive curves
 python scripts/fit_survival_models.py       # Cox + absolute risk + calibration
-pytest tests/ -q                            # 241 tests
+pytest tests/ -q                            # 260 tests
 ```
 
 Every download writes a SHA-256 manifest; `--verify` re-hashes against it. CDC revises
@@ -210,7 +218,7 @@ CardioTrace/
 │   ├── pce_variable_cascade.py     # what each PCE alignment filter costs
 │   ├── make_survival_figures.py    # descriptive curves
 │   └── fit_survival_models.py      # fit, validate forward in time, calibrate
-├── tests/                          # 241 regressions for defects that shipped
+├── tests/                          # 260 regressions for defects that shipped
 ├── docs/                           # also the published site (GitHub Pages, /docs)
 │   ├── index.html …                # the six-page site + cardiotrace-report.html
 │   ├── research-design.md          # the protocol: estimands, node status, decision log

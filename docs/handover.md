@@ -8,11 +8,21 @@ Published site: <https://utsgjohnsonsong.github.io/cardiotrace/>
 Repository: <https://github.com/UTSGJohnsonSong/cardiotrace>
 
 Visual companion: <https://utsgjohnsonsong.github.io/cardiotrace/explore.html>.
-Three reviewed Tableau dashboards and the portable workbook are in `docs/tableau/`;
-the complete HTML report embeds their previews. `scripts/tableau_atlas.py` blocks
-a render when any source or reviewed artifact hash differs. Follow
-`docs/tableau-dashboard.md` when updating the atlas; its original explorer plan
-is explicitly retained as history, not as a list of implemented features.
+The guide leads with three native Tableau dashboard exports for burden,
+mortality risk and model comparisons; supporting Python figures are available
+on expansion. Current exports and the portable workbook belong in
+`docs/tableau/current/`. `scripts/tableau_atlas.py::validate_current()` checks
+current analysis sources and the native Tableau review record before rendering.
+The exports are readable images in the browser, not a configured Tableau Public
+interactive view.
+
+The original 6 September 2026 workbook and previews remain in `docs/tableau/`,
+with their source files frozen in `docs/tableau/source-snapshot/`. They predate
+the early-censoring calibration correction and remain labelled as history.
+`validate_snapshot()` checks those original sources and artifacts independently;
+their earlier review does not certify the current workbook. Follow
+`docs/tableau-dashboard.md` when rebuilding or reviewing either version. A full
+analysis rebuild does not repeat native Tableau capture or publish to Tableau Public.
 
 ---
 
@@ -111,7 +121,7 @@ National Death Index fixed the time order at the cost of a harder endpoint
 <!-- HANDOVER_STATUS_START -->
 **Generated from tracked results; edit the producers, not this block.**
 
-**Tests:** 241 collected. This includes conditional skips.
+**Tests:** 260 collected. This includes conditional skips.
 The count is not a passed-test count; consult the actual pytest run and CI.
 
 | Cohort | Value |
@@ -245,6 +255,13 @@ claims it.
 
 ## 6. Known deviations, stated because they bound the claims
 
+- **The original causal graph is not a valid DAG.** It merges prior exposure
+  and post-treatment measurements into nodes with directed cycles. Node 4 in
+  `docs/research-design.md` is reopened: its time-indexed sketch illustrates the
+  problem but does not identify an adjustment set. E2 reports an adjusted BP
+  association using the actual covariates in `src/models.py`; E1 remains an
+  unrun historical proposal. The original graph, three-model table and screening
+  role labels are historical declarations, not validated causal permissions.
 - **1999–2002 does not use the four-year weight.** NCHS guidance says it should.
   The cost is quantified in `scripts/check_fouryear_weights.py`; the deviation
   is recorded at node 12 in `docs/research-design.md`.
@@ -322,7 +339,7 @@ claims it.
 
 | question | file |
 |---|---|
-| Why is anything the way it is? | `docs/research-design.md` — the protocol, 16 nodes, decision log, reversed decisions struck through rather than deleted |
+| Why is anything the way it is? | `docs/research-design.md` — current status table and §4.0 distinguish implementation from historical proposals; the decision history is retained |
 | What was wrong with the first version? | `docs/methodology-review.md` |
 | Did a defect contaminate a published number? | `docs/impact-tracking.md` — per defect, the merge gate |
 | Do Python and R agree? | `docs/crosscheck-survey.md` |
@@ -330,8 +347,11 @@ claims it.
 | The narrative version, for a supervisor | `docs/advisor-briefing.md` |
 | What the pages say | `docs/*.html`, generated — edit the renderer, not the HTML |
 
-`docs/consistency-audit.md` is a **proposal that has not been executed**; do not
-treat its recommendations as applied.
+`docs/consistency-audit.md` is a **historical review snapshot**, not a current
+36-item backlog or a closed audit. Its 2026-09-18 disposition table records
+spot-checked fixes, known remaining deviations and items not re-verified in that
+pass. Read that table before treating an original recommendation as still open
+or already resolved; the original audit text is retained unchanged below it.
 
 The repository is the authority for design decisions. The owner also keeps
 progress notes in an Obsidian vault at

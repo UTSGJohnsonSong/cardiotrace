@@ -1,9 +1,27 @@
-# ASCVD PCE 基准对比 —— 系数来源与设计修正
+# ASCVD PCE 基准对比 —— 当前实现与历史设计记录
 
-> 状态：系数已取得并核验；**三层拆解的设计需要修正**（见 §2）。
+> **Current implementation (2026-09-18): completed historical prognostic benchmark.**
+> Read §4 for implemented comparisons and their limits. The primary paired sample
+> is **12,413 people / 600 CVD deaths**, not the 18,744-person intermediate cascade.
+> §2 retains the earlier design reasoning, including claims corrected in §4.
 > ⚠️ **PCE 已不是当前临床标准**（2026-08-22 核实，见 §0）——本项目仍按预先设定的历史基准保留 PCE，
 > PREVENT-ASCVD 记为当前标准与未来比较对象。
 > 决策记录以 `research-design.md` 的决策表为准，这份只做本议题的展开。
+
+Current sample stages, from `reports/pce_results.json` → `primary.cascade`:
+
+| Stage | People | CVD deaths |
+|---|---:|---:|
+| Published cohort | 20,736 | 925 |
+| PCE inputs complete, all ethnicities | 18,744 | 824 |
+| Primary ethnicity restriction | 12,573 | 629 |
+| All compared arms complete, primary paired sample | 12,413 | 600 |
+
+All four arms use the same final training and test subsets. The paired intervals
+include zero at both horizons; this comparison does not establish superiority.
+PCE predicts hard ASCVD while this study observes CVD mortality. The clinical
+guideline discussion in §0 records the dated check shown there; it is not a new
+guideline review performed for this documentation update.
 
 ---
 
@@ -50,7 +68,14 @@
 
 ---
 
-## 2. 🔴 结局口径不匹配 —— 这会污染三层拆解的归因
+## 2. Historical design reasoning: outcome mismatch
+
+> **Historical proposal, superseded where noted in §4.** The original wording
+> below overstates what can be isolated: a different endpoint does not guarantee
+> a particular observed calibration error, and monotone-score invariance on the
+> same outcome/sample does not make discrimination across endpoints equivalent.
+> Group-specific recalibration can also change pooled ranking. The four arms
+> describe comparisons; they do not causally separate sources of performance.
 
 Table 4 脚注对结局的定义是逐字的：
 
@@ -103,7 +128,7 @@ Table 4 脚注对结局的定义是逐字的：
 
 ## 3.5 🔒 对比协议 —— 2026-08-19 用户锁定
 
-导师审阅后给出四条约束。**在这四条落实之前不开工。**
+导师审阅后给出四条约束。原记录为「在这四条落实之前不开工」；当前实现已完成，见 §4。
 
 ### ① 族裔：主分析只做两组
 
@@ -120,16 +145,21 @@ Grade E / COR IIb —— 证据等级最低的一档。把它当主分析等于�
 用 PCE 九项输入齐全的完整病例：**18,744 人 / 824 事件**
 （`reports/tables/pce_cascade.csv`，起点是 20,736 人的分析样本）。
 
+**Current clarification:** this is an intermediate all-ethnicity count. Apply the
+primary ethnicity restriction and require every compared arm's inputs before
+splitting the final **12,413 people / 600 deaths** into training and test cycles.
+
 **关键约束**：不能拿主队列上得到的 C（加权 0.838，未加权 0.804）直接和 PCE 在这个子样本上的表现比。
-**必须在同一个 18,744 人子样本上重新拟合并评估本项目的模型**，否则比的是两个不同人群，
-差异里混进了「谁被排除了」这个来源。
+原记录为「必须在同一个 18,744 人子样本上重新拟合并评估本项目的模型」。
+**同一样本比较的约束保留；18,744 不是最终主比较样本。** 实际四组比较采用上表最后一行，
+否则比的是两个不同人群，差异里混进了「谁被排除了」这个来源。
 
 > 这一条容易被忽略，因为两个数字都叫「C-index」，摆在一起看不出问题。
 
 ### ③ 血压：喂 PCE 原始观测值，不喂 Tobin 校正值
 
 PCE 的正式变量定义是**实测 SBP + 治疗状态**，方程自带 treated / untreated 两条分支。
-本项目的 Tobin 校正（给服药者 +10 mmHg）是为**病因估计**设计的，目的是还原未治疗暴露；
+本项目的 Tobin 校正（给服药者 +10 mmHg）是调整后关联分析使用的约定，并不识别未治疗暴露；
 把它喂给 PCE 等于同一件事做了两遍，且与该方程的定义不符。
 
 📍 [ACC ASCVD Risk Estimator Plus](https://tools.acc.org/cvd-risk-estimator-plus/)
@@ -142,7 +172,7 @@ PCE 预测**首次 ASCVD**：非致死性心梗 + 冠心病死亡 + 致死或非
 **因此不能做严格的校准头对头。** 定位必须降级为：
 
 - 称作 **prognostic benchmark**，不称 head-to-head validation
-- **主要比较 discrimination**（对预测风险的单调变换不变，可跨口径）
+- **主要比较 discrimination**（在同一样本、同一死亡结局上评价风险排序；不据此宣称 ASCVD 与死亡终点可互换）
 - **不得宣称比较了同一个风险终点**
 
 §2 提出的 1a / 1b 分层仍然有用，但它解决的是「基线生存该不该重校准」，

@@ -30,6 +30,7 @@ import shutil
 import sys
 import urllib.parse
 from pathlib import Path
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -39,7 +40,7 @@ DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 
 from src.descriptive import DESC_CYCLES, display_cycle  # noqa: E402
-from scripts.tableau_atlas import PANELS, WORKBOOK, validate as validate_atlas  # noqa: E402
+from scripts.tableau_atlas import PANELS, WORKBOOK, validate_current as validate_atlas, validate_snapshot  # noqa: E402
 
 N_CYCLES = len(DESC_CYCLES)
 
@@ -109,29 +110,27 @@ FAVICON = "data:image/svg+xml," + urllib.parse.quote(FAVICON_SVG, safe="")
 PAGES = {
     "2": ("burden.html", "Burden",
           f"How the burden of cardiovascular disease moved across {N_CYCLES} NHANES "
-          "cycles, once the ageing of the population is taken out of it."),
+          "cycles, with and without a common age distribution."),
     "3": ("pandemic.html", "Pandemic",
-          "Whether the pandemic bent the trend, and what a single post-pandemic "
+          "How the latest survey compares with the earlier trend, and what one post-pandemic "
           "observation can and cannot establish."),
     "4": ("cohort.html", "Cohort",
           "A prospective cohort of adults free of cardiovascular disease at "
           "baseline, followed for up to twenty years."),
     "5": ("learning.html", "Predictive Modeling",
           "Whether the prediction model is limited by the eleven variables it "
-          "carries or by the form it takes, and what a systematic screen of the "
-          "laboratory finds."),
+          "carries or by the form it takes, and what a systematic screen of "
+          "additional candidate variables contribute."),
 }
 METHODS = ("methods.html", "Methods",
            "The comparison against the prespecified risk-score benchmark, the data "
            "sources, and what was done to them.")
-EXPLORE = ("explore.html", "Visual atlas",
-           "Three Tableau dashboards connecting population burden, mortality risk "
-           "and model evidence to the research report.")
+EXPLORE = ("explore.html", "Tableau dashboards",
+           "Three Tableau dashboards covering population trends, mortality risk and model comparisons.")
 
-NAV = [("index.html", "Overview"), ("burden.html", "Burden"),
-       ("pandemic.html", "Pandemic"), ("cohort.html", "Cohort"),
-       ("learning.html", "Predictive Modeling"), ("methods.html", "Methods")]
-NAV.append((EXPLORE[0], EXPLORE[1]))
+NAV = [("index.html", "Overview"), ("cardiotrace-report.html", "Read the report"),
+       ("explore.html", "Tableau"), ("index.html#author", "About the author")]
+
 
 EXTRA_CSS = """
 /* ── site chrome: the only styling the single-file report does not need ── */
@@ -408,6 +407,86 @@ h1, h2, h3, [id] { scroll-margin-top: 78px; }
 .pagefoot a { font-weight: 600; }
 .pagefoot .byline { color: var(--ink-2); font-weight: 600; }
 .pagefoot .footlinks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+/* Reading revision: clear hierarchy, generous space, progressive detail. */
+.sitenav-inner { align-items: center; gap: 26px; min-height: 64px; }
+.sitenav .brand { letter-spacing: .07em; }
+.hero { padding: 70px 0 32px; }
+.hero h1 { max-width: 850px; font-size: clamp(36px, 4.5vw, 56px); line-height: 1.09; margin-bottom: 24px; }
+.hero .standfirst { max-width: 64ch; font-size: 20px; }
+.hero-answer { margin-top: 20px; font-size: 17px; color: var(--ink-2); max-width: 68ch; }
+.hero-scope { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin: 24px 0 0; }
+.cta { margin-top: 28px; gap: 16px 26px; }
+.cta a.lead { background: var(--series-text); color: var(--paper); padding: 11px 18px; border-radius: 3px; }
+.quickpath { margin-top: 30px; }
+.findings { background: none; border: 0; gap: 0; margin-top: 16px; }
+.finding { background: none; display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: 20px;
+  padding: 26px 0; border-bottom: 1px solid var(--rule-soft); }
+.finding > * { grid-column: 2; }
+.finding .finding-index { grid-column: 1; grid-row: 1 / span 4; font-family: var(--sans); font-size: 12px;
+  font-weight: 600; color: var(--series-text); padding-top: 5px; }
+.finding h3 { margin: 0; font-size: 22px; line-height: 1.3; }
+.finding .what { max-width: 65ch; font-size: 17px; margin: 10px 0; }
+.finding .fci { max-width: 72ch; font-size: 13px; line-height: 1.6; }
+.finding .go { margin-top: 12px; }
+.overview-figure figure { margin: 24px 0 0; }
+.overview-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule-soft); }
+.overview-figure figcaption { margin-top: 14px; font-family: var(--sans); font-size: 14px; color: var(--ink-2); max-width: 78ch; }
+.limits-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; margin-top: 26px; }
+.limit-item { border-top: 2px solid var(--rule); padding-top: 18px; }
+.limit-item h3 { font-family: var(--serif); font-size: 19px; text-transform: none; letter-spacing: 0; margin: 0 0 12px; padding: 0; border: 0; }
+.limit-item p { font-size: 16px; color: var(--ink-2); }
+.limit-item a { font-family: var(--sans); font-size: 13px; }
+details.technical-details, details.technical-note, .body-indent > details { border: 1px solid var(--rule-soft); padding: 17px 20px; margin: 24px 0; background: var(--plate); }
+summary { cursor: pointer; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--ink-2); }
+details[open] > summary { margin-bottom: 16px; }
+details p:last-child { margin-bottom: 0; }
+.reading-note { font-size: 15px; color: var(--ink-2); margin-top: 22px; }
+.colophon { border-top: 1px solid var(--rule); margin-top: 64px; padding-top: 36px; }
+.reading-layout { display: grid; grid-template-columns: 205px minmax(0,1fr); gap: 36px; align-items: start; }
+.reading-layout .toc { position: sticky; top: 84px; max-height: calc(100vh - 108px); overflow-y: auto;
+  padding: 18px 0; background: none; border: 0; border-top: 1px solid var(--rule); margin-top: 48px; }
+.reading-layout .toc summary { font-size: 13px; }
+.toc ol { columns: 1; }
+.toc li { font-size: 13px; margin-bottom: 13px; line-height: 1.5; }
+.reading-body { min-width: 0; }
+.reading-body .body-indent { margin-left: 0; }
+.reading-body .sec-num { min-width: 30px; }
+.reading-body .stats { grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); }
+.reading-body section:first-child { padding-top: 44px; }
+.reading-body h2 { font-size: clamp(24px,2.5vw,30px); }
+.reading-body .pagefoot { font-size: 12px; }
+.chart-guide figure { margin: 24px 0 34px; }
+.chart-guide img { display:block; width:100%; height:auto; background:#fff; border:1px solid var(--rule-soft); }
+.chart-guide figcaption { font-size:15px; color:var(--ink-2); margin-top:12px; max-width:78ch; }
+.archive-note { border-left: 3px solid var(--rule); padding: 14px 18px; color: var(--ink-2); font-size:15px; }
+.chart-guide h3 { font-family:var(--serif); font-size:22px; letter-spacing:0; text-transform:none; }
+.atlas-archive { margin-top:40px; padding:22px; border:1px solid var(--rule); }
+@media (max-width: 850px) {
+  .reading-layout { display: block; }
+  .reading-layout .toc { position: static; max-height: none; margin-top:24px; padding:16px 18px; background:var(--plate); border:1px solid var(--rule-soft); }
+  .toc ol { columns:2; }
+}
+@media (max-width: 640px) {
+  .sitenav-inner { gap:18px; min-height:54px; }
+  .sitenav .brand { font-size:11px; }
+  .sitenav a { font-size:12px; }
+  .sitenav a:last-child { display:none; }
+  .hero { padding-top:40px; }
+  .desktop-break { display:none; }
+  .hero .standfirst { font-size:18px; }
+  .hero-answer { font-size:16px; }
+  .finding { column-gap:10px; grid-template-columns:24px minmax(0,1fr); }
+  .finding h3 { font-size:21px; }
+  .limits-grid { grid-template-columns:1fr; gap:20px; }
+  .toc ol { columns:1; }
+  .pagefoot { font-size:12px; }
+  .atlas-archive { padding:16px; }
+}
+@media print {
+  .sitenav, .toplink, .toc, .quickpath, .cta { display:none !important; }
+  .reading-layout { display:block; }
+}
+
 """
 
 
@@ -469,7 +548,7 @@ def facts() -> dict:
         "post_cycle_key": p2["post_cycle"],
         "harrell_c":    tenyr["harrell_c"],
         "c_horizon":    int(tenyr["horizon_years"]),
-        "c_n":          tenyr["n"],
+        "c_n":          tenyr["n_evaluable"],
         "missing":      [],
     }
 
@@ -506,6 +585,8 @@ def facts() -> dict:
     else:
         f["missing"].append(
             "test count -- run the whole suite: .venv/Scripts/python.exe -m pytest")
+    pce = json.loads((ROOT / "reports" / "pce_results.json").read_text(encoding="utf-8"))
+    f["pce"] = pce
     return f
 
 
@@ -644,13 +725,12 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
             f"Burden &mdash; CardioTrace | {AUTHOR}",
             f"Age-standardised cardiovascular prevalence across {f['n_cycles']} "
             f"NHANES cycles: the standardised series moves {signed(f['std_slope'])} "
-            f"pp per decade while the crude series rises with the ageing of the "
-            f"population."),
+            f"pp per decade; its uncertainty interval includes zero."),
         "pandemic.html": (
             f"Pandemic &mdash; CardioTrace | {AUTHOR}",
-            f"Whether COVID-19 bent the cardiovascular prevalence trend: "
+            f"A descriptive comparison with the earlier cardiovascular prevalence trend: "
             f"{f['post_cycle']} sits {signed(f['gap'])} pp from the extrapolated "
-            f"counterfactual, with a 95% interval that contains zero."),
+            f"trend, with a 95% interval that contains zero."),
         "cohort.html": (
             f"Cohort &mdash; CardioTrace | {AUTHOR}",
             f"A prospective cohort of {num(f['cohort_n'])} US adults free of "
@@ -669,16 +749,15 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
         "learning.html": (
             f"Predictive Modeling &mdash; CardioTrace | {AUTHOR}",
             (f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
-             f"set or the model form? A screen of {f['n_candidates']} laboratory "
+             f"set or the model form? A screen of {f['n_candidates']} additional "
              f"candidates against the eleven, and gradient boosting against a "
              f"cause-specific Cox pair on the same held-out cycles."
              if "n_candidates" in f else
              f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
              f"set or by the model form?")),
         "explore.html": (
-            f"Tableau visual atlas &mdash; CardioTrace | {AUTHOR}",
-            "Three reviewed Tableau dashboards: population burden, mortality risk "
-            "and model evidence, with report links and an editable workbook."),
+            f"Tableau dashboards &mdash; CardioTrace | {AUTHOR}",
+            "Three Tableau dashboards for population trends, mortality risk and model comparisons, with an editable workbook."),
         "cardiotrace-report.html": (
             f"Full report &mdash; CardioTrace | {AUTHOR}",
             f"The complete CardioTrace write-up in one file: every section, table "
@@ -742,18 +821,32 @@ def anchor_headings(html: str, seen: set[str]) -> str:
 
 
 def contents(html: str, label: str = "On this page") -> str:
-    """A static table of contents.
-
-    No JavaScript: the ids are known at build time, so a scroll-spy would add a
-    runtime dependency to reproduce what the anchor already does.
-    """
+    """A compact native disclosure on mobile, expanded beside desktop reading."""
     items = ANCHORED.findall(html)
-    if len(items) < 3:
+    if label == "Contents":
+        items = [item for item in items if item[0] == "2"]
+    if not items:
         return ""
-    lis = "".join(f'<li class="toc-h{lvl}"><a href="#{hid}">{plain(txt)}</a></li>'
-                  for lvl, hid, txt in items)
-    return (f'<nav class="toc" aria-label="{label}"><p class="toc-label">{label}</p>'
-            f'<ol>{lis}</ol></nav>')
+    links = "".join(f'<li><a href="#{hid}">{plain(txt)}</a></li>' for _, hid, txt in items)
+    return (f'<details class="toc" open><summary>{label}</summary>'
+            f'<nav aria-label="{label}"><ol>{links}</ol></nav></details>')
+
+
+def reading_layout(intro: str, section: str, label: str = "On this page") -> str:
+    return f'{intro}<div class="reading-layout">{contents(section, label)}<div class="reading-body">{section}</div></div>'
+
+
+def chapter_links(current: str) -> str:
+    chapters = [("index.html", "Overview")] + [(value[0], value[1]) for value in PAGES.values()] + [METHODS[:2]]
+    index = next(i for i, (name, _) in enumerate(chapters) if name == current)
+    links = []
+    if index:
+        url, label = chapters[index - 1]
+        links.append(f'<a rel="prev" href="{url}">&larr; {label}</a>')
+    if index + 1 < len(chapters):
+        url, label = chapters[index + 1]
+        links.append(f'<a rel="next" href="{url}">{label} &rarr;</a>')
+    return "".join(links)
 
 
 def scrollable_tables(html: str) -> str:
@@ -781,13 +874,13 @@ def page(title: str, description: str, canonical: str, style: str, current: str,
 <head>
 {head(title, description, canonical, style)}
 </head>
-<body>
+<body id="top">
 <a class="skip" href="#main">Skip to content</a>
 {nav(current)}
 <main class="wrap" id="main" tabindex="-1">
 {body}
 <div class="pagefoot">
-  <span>CardioTrace &middot; NHANES 1999&ndash;2022 &middot; NCHS Linked Mortality File<br>
+  <span>CardioTrace &middot; NHANES 1999&ndash;August 2023 &middot; mortality follow-up through 2019<br>
   <span class="byline">{AUTHOR} &middot; {AUTHOR_PROGRAM}</span></span>
   <span class="footlinks">{prev_next}{author_links()}<a href="#top">Back to top &uarr;</a></span>
 </div>
@@ -802,85 +895,42 @@ def page(title: str, description: str, canonical: str, style: str, current: str,
 
 
 def build_hero(f: dict) -> str:
-    """The front page's first screen: what was built, how to reach me, four numbers.
-
-    The report's own masthead opens "Three estimands, three designs" -- right for
-    a statistical reader and wrong for the first ten seconds of a recruiter's
-    visit, who needs to know what the thing IS before being told how it is
-    partitioned. The report keeps that opening; the index gets this one.
-
-    The contact row is here rather than at the foot because a reader who is
-    convinced at the top should not have to scroll 50,000 characters to act on
-    it, and because a portfolio with no way to reach its author is a portfolio
-    that converts nothing.
-    """
-    contact = [
-        (RESUME_URL, "R&eacute;sum&eacute;", "lead"),
-        (f"mailto:{EMAIL}", "Email", "lead"),
-        (LINKEDIN_URL, "LinkedIn", ""),
-        (REPO_URL, "GitHub", ""),
-        ("cardiotrace-report.html", "Read the research", ""),
-        ("explore.html", "Visual atlas", ""),
-    ]
-    links = "".join(
-        '<a href="{}"{}>{}</a>'.format(href, f' class="{cls}"' if cls else "", text)
-        for href, text, cls in contact if href)
-
-    tiles = [
-        (f"{f['n_cycles']} survey cycles", "1999&ndash;2023",
-         "harmonised from the published files"),
-        (f"{num(f['n_adults'])} adults", "survey-weighted",
-         "design-based intervals throughout"),
-        (f"{num(f['cohort_n'])}-person cohort",
-         f"{num(f['cvd_deaths'])} CVD deaths",
-         "linked to the National Death Index"),
-        ("Discrimination", f"C&nbsp;=&nbsp;{f['harrell_c']:.3f}",
-         f"at {f['c_horizon']} years, on cycles held out in time"),
-    ]
-    cells = "".join(f'<div class="stat"><div class="k">{k}</div>'
-                    f'<div class="v">{v}</div><div class="n">{n}</div></div>'
-                    for k, v, n in tiles)
-
-    # The thirty-second path. The full report is long on purpose -- it is the
-    # artefact a methods reader wants -- so the index has to offer a way through
-    # it that does not require reading it.
-    steps = [("#built", "What I built"), ("#findings", "Three findings"),
-             ("methods.html", "Methods &amp; engineering"),
-             ("#limits", "What it cannot show")]
-    path = "".join(f'<a href="{h}">{s}</a>' for h, s in steps)
-
+    """Lead with the research question; give author information its own place."""
     return f"""<header class="masthead hero">
-  <p class="eyebrow">{AUTHOR} &middot; {AUTHOR_HEADLINE}</p>
-  <h1>CardioTrace</h1>
-  <p class="standfirst measure">An end-to-end population health research
-  pipeline over {f['n_cycles']} NHANES cycles and linked mortality records
-  &mdash; complex-survey inference, competing-risk survival modelling,
-  validation forward in time, and a report that regenerates from the data.</p>
-  <nav class="cta" aria-label="Contact and source">{links}</nav>
-  <p class="credentials">{AUTHOR_CREDENTIALS}</p>
-  <div class="stats hero-strip">{cells}</div>
-  <nav class="quickpath" aria-label="Thirty-second path through this site">
-    <span>30&nbsp;seconds:</span>{path}</nav>
+  <p class="eyebrow">Population health research &middot; NHANES</p>
+  <h1>Understanding cardiovascular<br class="desktop-break"> burden and long-term risk.</h1>
+  <p class="standfirst measure">How has cardiovascular disease changed across US surveys?
+  Which information helps rank the risk of cardiovascular death years later?</p>
+  <p class="hero-answer measure">CardioTrace uses public NHANES data to study population trends
+  and long-term mortality risk. In this analysis, adding a kidney marker improved risk ranking.</p>
+  <nav class="cta" aria-label="Start reading">
+    <a class="lead" href="cardiotrace-report.html">Read the report <span aria-hidden="true">&rarr;</span></a>
+    <a href="explore.html">Tableau dashboards</a>
+  </nav>
+  <p class="hero-scope">{num(f['n_adults'])} adults in the survey analysis &nbsp;&middot;&nbsp;
+  {num(f['cohort_n'])} in the separate mortality cohort &nbsp;&middot;&nbsp;
+  Mortality follow-up ends in 2019</p>
+  <nav class="quickpath" aria-label="Overview contents">
+    <a href="#findings">Findings</a><a href="#limits">Limits</a>
+    <a href="#built">How it was built</a><a href="#author">Author</a>
+  </nav>
 </header>"""
 
 
 def build_colophon() -> str:
-    """The author line, in the register a journal uses: name, affiliation and a
-    contribution statement, set in the same gutter grid as every section head.
-
-    NO LINK ROW. The five contact links are in the first screen, and repeating
-    them here put Résumé, GitHub and LinkedIn on the index three times over --
-    hero, colophon, page footer. Three asks read as one nervous ask. A reader
-    who has scrolled this far and wants to act scrolls back up, or uses the
-    footer, which carries the same links for every page and so has a reason to
-    exist that this row did not.
-    """
-    return f"""<section class="colophon" aria-labelledby="colophon-h">
+    """Keep personal details together, outside the research narrative."""
+    links = [(RESUME_URL, "Resume (PDF)"),
+             (f"mailto:{EMAIL}" if EMAIL else "", "Email"), (LINKEDIN_URL, "LinkedIn")]
+    contacts = "".join(f'<a href="{attr(url)}">{label}</a>' for url, label in links if url)
+    return f"""<section class="colophon" id="author" aria-labelledby="colophon-h">
   <div class="sec-head"><div class="sec-num">AUTHOR</div>
-  <h2 id="colophon-h">{AUTHOR}</h2></div>
+  <h2 id="colophon-h">About {AUTHOR}</h2></div>
   <div class="body-indent">
     <p class="colophon-affil">{AUTHOR_PROGRAM}</p>
     <p class="colophon-stmt measure">{AUTHOR_STATEMENT}</p>
+    <p class="measure">My work here includes tracing data problems across survey cycles,
+    documenting analytical decisions, and turning results into a reproducible report.</p>
+    <nav class="colophon-links" aria-label="About the author">{contacts}</nav>
   </div>
 </section>"""
 
@@ -896,7 +946,7 @@ def build_evidence(f: dict) -> str:
     The last two are omitted, not invented, when their artefact is absent.
     """
     tiles = [
-        ("Survey cycles", num(f["n_cycles"]), "NHANES 1999&ndash;2022, harmonised"),
+        ("Survey cycles", num(f["n_cycles"]), "NHANES 1999&ndash;August 2023, harmonised"),
         ("Public-use files catalogued", num(f["n_files"]),
          "each recorded with the rule that kept or dropped it"),
         (f"Adults {f['age_floor']}+ analysed", num(f["n_adults"]),
@@ -921,120 +971,89 @@ def build_evidence(f: dict) -> str:
 
 
 def build_findings(f: dict) -> str:
-    """Three cards, each leading with its own number.
-
-    slope + CI   reports/descriptive_results.json  part1.std_slope_per_decade,
-                                                   part1.std_slope_ci
-    gap   + CI   reports/descriptive_results.json  part2.gap, part2.gap_ci,
-                                                   part2.post_cycle
-    Harrell C    reports/model_results.json        prediction[horizon 10y].harrell_c
-    """
+    """A conclusion first; its estimate and limits immediately underneath."""
     cards = [
-        ("burden.html", f"The burden across {f['n_cycles']} cycles",
-         "chip result", "Result",
-         f"{signed_html(f['std_slope'])}&nbsp;pp", "per decade, age-standardised",
-         f"95% CI {signed_html(f['std_slope_ci'][0])} to "
-         f"{signed_html(f['std_slope_ci'][1])} pp",
-         "Crude growth was largely explained by the ageing of the population; "
-         "the age-standardised estimate declined modestly over the same window."),
-        ("pandemic.html", "The pandemic", "chip quiet", "No detectable change",
-         f"{signed_html(f['gap'])}&nbsp;pp",
-         f"{f['post_cycle']} against the extrapolated trend",
-         f"95% CI {signed_html(f['gap_ci'][0])} to {signed_html(f['gap_ci'][1])} pp "
-         f"&mdash; contains zero",
-         "The observed level sits above the pre-pandemic trend, but the interval "
-         "contains zero. One post-pandemic cycle cannot settle it."),
-        ("cohort.html", "Prospective cardiovascular mortality", "chip result", "Result",
-         f"{f['harrell_c']:.3f}", f"Harrell C, {f['c_horizon']}-year risk",
-         f"held-out later cycles, n&nbsp;=&nbsp;{num(f['c_n'])}",
-         "Blood pressure at examination predicts cardiovascular death up to twenty "
-         "years later, validated forward in time rather than at random."),
+        ("01", "burden.html", "The age-standardised trend remains uncertain.",
+         "The overall and age-standardised series tell different stories. The pre-pandemic "
+         "trend estimate is slightly downward, but its interval also allows no change.",
+         f"{signed_html(f['std_slope'])} percentage points per decade; 95% CI "
+         f"{signed_html(f['std_slope_ci'][0])} to {signed_html(f['std_slope_ci'][1])}.", "Population burden"),
+        ("02", "pandemic.html", "The pandemic's impact remains unclear.",
+         "The available data are insufficient to assess the pandemic's impact on cardiovascular disease. "
+         "The later survey estimate is above the earlier trend, but the interval includes no difference.",
+         f"Observed minus extrapolated: {signed_html(f['gap'])} percentage points; "
+         f"95% CI {signed_html(f['gap_ci'][0])} to {signed_html(f['gap_ci'][1])}.", "The later survey"),
     ]
     if "delta_c_wide" in f:
-        cards.append(
-            ("learning.html", "What limits it", "chip result", "Result",
-             f"{f['delta_c_wide']:+.3f}".replace("-", "&minus;"),
-             "Harrell C, from one screened variable",
-             f"95% CI {f['delta_c_wide_lo']:+.3f} to {f['delta_c_wide_hi']:+.3f}"
-             f" &mdash; gradient boosting on the same eleven: "
-             f"{f['delta_c_gbm']:+.3f}".replace("-", "&minus;"),
-             "The gain is in the variable set, not the model form &mdash; though "
-             "boosting on the wider set is not separable from the reference. "
-             f"And {f['n_top5_forbidden']} of the five variables the prediction "
-             "leans on hardest are ones the causal model may not simply adjust "
-             "for."))
+        cards.append(("03", "learning.html", "Adding UACR helped in this model comparison.",
+                      "Urine albumin-to-creatinine ratio, a kidney marker, added useful ranking "
+                      "information. Gradient boosting on the existing inputs did not improve the tested model.",
+                      f"Change in weighted C: {f['delta_c_wide']:+.4f} "
+                      f"(95% CI {f['delta_c_wide_lo']:+.4f} to "
+                      f"{f['delta_c_wide_hi']:+.4f}); evaluated on the same Part 4 sample.",
+                      "Variables and models"))
     return "".join(
-        f'<article class="finding"><span class="{cls}">{chip}</span>'
-        f'<p class="fnum"><b>{value}</b> <span>{unit}</span></p>'
-        f'<h3>{name}</h3><p class="fci">{ci}</p><p class="what">{what}</p>'
-        f'<p class="go"><a href="{href}">Read this part &rarr;</a></p></article>'
-        for href, name, cls, chip, value, unit, ci, what in cards)
-
+        f'<article class="finding"><span class="finding-index">{number}</span>'
+        f'<h3>{title}</h3><p class="what">{what}</p><p class="fci">{estimate}</p>'
+        f'<p class="go"><a href="{href}">{label} &rarr;</a></p></article>'
+        for number, href, title, what, estimate, label in cards)
 
 
 def build_limits(f: dict) -> str:
-    """What the design cannot answer, on the front page rather than at the end.
-
-    A portfolio that only lists what it found reads as advocacy. The three here
-    are the ones a methods reader would raise first, and each is a property of
-    the data rather than of the effort: one post-pandemic observation, an
-    outcome that is mortality and not incidence, and a complete-case restriction
-    that is disclosed rather than repaired.
-    """
+    """Short, visible boundaries on the conclusions above."""
     items = [
-        ("One post-pandemic observation",
-         f"The trend comparison rests on a single cycle, {f['post_cycle']}, "
-         f"reported on a redesigned sample. It is a contrast against an "
-         f"extrapolation, not a quasi-experiment. No second point exists to fix "
-         f"it &mdash; the report documents why &mdash; and documenting a "
-         f"limitation does not lift it."),
-        ("Mortality, not incidence",
-         "The linkage adds a cause of death, not a non-fatal event. Someone who "
-         "has a heart attack and survives is not an event here."),
-        ("Complete-case selection is not repaired",
-         "The prediction model needs all eleven inputs, which drops 10.6% of the "
-         "cohort but 14.6% of the deaths. Inverse-probability weights address "
-         "censoring; they do not fix this."),
+        ("Pandemic effects", "The available data are insufficient to assess the pandemic's "
+         "impact on cardiovascular disease. Mortality follow-up ends in 2019.", "pandemic.html"),
+        ("Death versus illness", "Non-fatal heart attacks and strokes are not outcomes in the linked "
+         "mortality data. These predictions do not describe all cardiovascular illness.", "cohort.html"),
+        ("Use beyond this sample", "Missing inputs can select who enters an analysis. Tests on later "
+         "NHANES cycles do not establish clinical usefulness in other populations.", "methods.html"),
     ]
-    cells = "".join(
-        f'<div class="stat"><div class="k">{k}</div>'
-        f'<div class="n" style="margin-top:6px">{v}</div></div>' for k, v in items)
-    return f"""<section class="evidence" id="limits" aria-labelledby="limits-h">
+    cells = "".join(f'<div class="limit-item"><h3>{title}</h3><p>{text}</p>'
+                    f'<a href="{href}">Read the limitation &rarr;</a></div>'
+                    for title, text, href in items)
+    return f"""<section id="limits" aria-labelledby="limits-h">
   <div class="sec-head"><div class="sec-num">LIMITS</div>
-  <h2 id="limits-h">What this design cannot show</h2></div>
-  <div class="body-indent">
-    <div class="stats evidence-strip">{cells}</div>
-  </div>
+  <h2 id="limits-h">Limitations</h2></div>
+  <div class="body-indent"><div class="limits-grid">{cells}</div></div>
 </section>"""
 
 
-def build_index(style: str, sections: dict[str, str],
-                f: dict, meta: dict) -> str:
-    """Overview: who made it, what it took, and what each part found."""
+def build_index(style: str, sections: dict[str, str], f: dict, meta: dict) -> str:
     title, desc = meta["index.html"]
-    seen: set[str] = set()
-    explore = ('<p class="measure" style="margin-top:14px">Follow the results through '
-               f'three <a href="{EXPLORE[0]}">Tableau dashboards</a>, with '
-               'high-resolution previews and an editable workbook.</p>')
+    with Image.open(DOCS / "tableau/current/01-population-burden.png") as dashboard:
+        dashboard_width, dashboard_height = dashboard.size
     body = f"""{build_hero(f)}
-
-{build_evidence(f)}
-
-<section id="findings">
-  <div class="sec-head"><div class="sec-num">THE&nbsp;PARTS</div>
-  <h2>What each part asks, and what it found</h2></div>
-  <div class="body-indent">
-    <div class="findings">{build_findings(f)}</div>
-    <p class="measure" style="margin-top:26px">The full write-up is also available
-    as <a href="cardiotrace-report.html">a single page</a>, which carries every
-    section, table and figure in one file.</p>{explore}
-  </div>
+<section id="findings" aria-labelledby="findings-h">
+  <div class="sec-head"><div class="sec-num">FINDINGS</div><h2 id="findings-h">Key findings</h2></div>
+  <div class="body-indent"><div class="findings">{build_findings(f)}</div></div>
 </section>
-
+<section class="overview-figure" aria-labelledby="overview-figure-h">
+  <div class="sec-head"><div class="sec-num">IN VIEW</div><h2 id="overview-figure-h">Population trends</h2></div>
+  <div class="body-indent"><figure>
+    <a href="explore.html#population"><img src="tableau/current/01-population-burden.png"
+      width="{dashboard_width}" height="{dashboard_height}" loading="lazy" alt="Tableau dashboard combining cardiovascular prevalence trends, race and ethnicity estimates, and age patterns."></a>
+    <figcaption>The pre-pandemic age-standardised trend is {signed_html(f['std_slope'])} percentage points per decade
+    (95% CI {signed_html(f['std_slope_ci'][0])} to {signed_html(f['std_slope_ci'][1])}).
+    <a href="explore.html#population">Open the Tableau dashboard &rarr;</a></figcaption>
+  </figure></div>
+</section>
 {build_limits(f)}
-
-{scrollable_tables(anchor_headings(sections["1"], seen))}
-
+<section id="built" aria-labelledby="built-h">
+  <div class="sec-head"><div class="sec-num">PROCESS</div><h2 id="built-h">Data and methods</h2></div>
+  <div class="body-indent"><p class="measure">Public survey files become a documented cohort,
+  analysis tables, and this report. File inventories, variable mappings, and regression checks
+  help catch the data losses found in earlier versions.</p>
+  <details class="technical-details"><summary>Data, tools and reproducibility</summary>
+    <p>The active analysis uses Python to read NHANES files, fit the models and generate the report.
+    PostgreSQL and dbt remain an optional warehouse path. Independent R checks cover the original survey estimators.</p>
+    <p>{num(f['n_files'])} files catalogued across {f['n_cycles']} survey cycles.
+    <a href="methods.html">Methods and source records</a> &middot;
+    <a href="{REPO_URL}">Code and reproducibility instructions</a></p>
+  </details>
+  <p class="reading-note">Prefer one continuous read? The <a href="cardiotrace-report.html">complete HTML report</a>
+  includes every chapter and embeds its figures for offline reading.</p></div>
+</section>
 {build_colophon()}"""
     return page(title, desc, "", style, "index.html", body)
 
@@ -1043,79 +1062,109 @@ def atlas_report_link(filename: str) -> str:
     for anchor, _, title, _, links in PANELS:
         if filename in [link[0] for link in links]:
             return (f'<p class="atlas-note"><a href="explore.html#{anchor}">'
-                    f'View {title.lower()} in the Tableau atlas &rarr;</a></p>')
+                    f'See the {title.lower()} charts &rarr;</a></p>')
     return ""
 
 
 def build_explore(style: str, f: dict, meta: dict) -> str:
-    """A report-linked gallery, with an optional published Tableau embed."""
-    audit = validate_atlas()
+    """Three visible Tableau dashboards, with individual charts as supplements."""
+    validate_atlas()
+    audit = validate_snapshot()
     title, desc = meta["explore.html"]
-    fname, label, stand = EXPLORE
-    sections = []
+    # Copy current generated figures explicitly, including ones absent from a chapter.
+    figures = ["part1_standardisation.png", "part1_by_race.png", "cif_by_sbp.png",
+               "calibration.png", "part4_arms.png"]
+    for name in figures:
+        (ASSETS / name).write_bytes((ROOT / "reports/figures" / name).read_bytes())
+    def figure(name: str, alt: str, caption: str) -> str:
+        return (f'<figure><a href="assets/{name}" aria-label="Open full-size chart: {attr(alt)}">'
+                f'<img src="assets/{name}" loading="lazy" alt="{attr(alt)}"></a>'
+                f'<figcaption>{caption}</figcaption></figure>')
+    population = figure("part1_standardisation.png", "Crude and age-standardised cardiovascular prevalence over survey cycles",
+        f"Pre-pandemic age-standardised trend: {signed_html(f['std_slope'])} percentage points per decade "
+        f"(95% CI {signed_html(f['std_slope_ci'][0])} to {signed_html(f['std_slope_ci'][1])}). "
+        "The interval includes zero. Standardisation changes the comparison; it does not establish what caused the change.")
+    population += figure("part1_by_race.png", "Cardiovascular prevalence estimates by race and ethnicity",
+        "Intervals describe uncertainty around group estimates. Lines guide reading across surveys; "
+        "they do not fit a trend across the post-pandemic survey redesign. These are descriptive comparisons, not effects of group membership.")
+    mortality = figure("cif_by_sbp.png", "Cardiovascular death incidence across baseline blood-pressure groups",
+        "These curves describe observed cardiovascular deaths while accounting for competing deaths. "
+        "Groups can differ in age and other characteristics; the plot does not estimate the effect of a blood-pressure intervention.")
+    mortality += figure("calibration.png", "Predicted and observed cardiovascular mortality by risk group at five and ten years",
+        "Calibration asks whether predicted risk agrees with observed risk. Observed risk uses weighted Aalen–Johansen estimates, "
+        "accounting for early censoring and competing deaths. Intervals are not shown; group-level agreement alone is incomplete validation.")
+    models = figure("part4_arms.png", "Paired changes in risk ranking for candidate inputs and model forms",
+        "The Part 4 comparison holds the evaluation sample constant. Adding UACR improved the tested Cox model; "
+        "the tested gradient boosting model did not. Intervals are conditional on the fitted training models.")
+    dashboards = {}
+    for anchor, image, panel_title, description, _ in PANELS:
+        with Image.open(DOCS / "tableau/current" / image) as dashboard:
+            width, height = dashboard.size
+        dashboards[anchor] = (
+            f'<figure class="tableau-dashboard"><a href="tableau/current/{image}" '
+            f'aria-label="Open full-size Tableau dashboard: {attr(panel_title)}">'
+            f'<img src="tableau/current/{image}" loading="lazy" width="{width}" height="{height}" '
+            f'alt="Tableau dashboard: {attr(description)}"></a>'
+            f'<figcaption><a href="tableau/current/{image}">Full-size dashboard</a> &middot; '
+            f'<a href="tableau/current/{WORKBOOK}" download>Download workbook</a></figcaption></figure>')
+    historical = []
     for anchor, image, panel_title, description, links in PANELS:
-        report_links = "".join(f'<a href="{url}">{text} &rarr;</a>' for url, text in links)
-        sections.append(f"""<section class="atlas-panel" id="{anchor}" aria-labelledby="{anchor}-title">
-  <h2 id="{anchor}-title">{panel_title}</h2>
-  <p class="measure">{description}</p>
-  <nav class="atlas-links" aria-label="Report chapters for {panel_title.lower()}">{report_links}</nav>
-  <figure><a href="tableau/{image}" aria-label="Open full-resolution {panel_title.lower()} dashboard">
-    <img src="tableau/{image}" width="2760" height="1880" loading="lazy" alt="{attr(description)}"></a>
-    <figcaption>Reviewed Tableau preview. <a href="tableau/{image}" download>Download PNG</a>
-    &middot; 2760 &times; 1880 pixels. Select the image to read it at full size.</figcaption></figure>
-</section>""")
-    jump = "".join(f'<a href="#{anchor}">{panel_title}</a>' for anchor, _, panel_title, _, _ in PANELS)
+        historical.append(f'<figure id="historical-{anchor}"><img src="tableau/{image}" loading="lazy" '
+                          f'width="2760" height="1880" alt="Historical Tableau snapshot: {attr(description)}">'
+                          f'<figcaption>{panel_title}, reviewed 6 September 2026. '
+                          f'<a href="tableau/{image}">Full-size historical PNG</a></figcaption></figure>')
     embed = ""
     if TABLEAU_VIZ:
-        embed = f"""<div class="vizwrap" aria-label="Interactive Tableau workbook">
-  <div class="tableauPlaceholder" id="viz-cardiotrace">
-    <object class="tableauViz" style="display:none">
-      <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F">
-      <param name="embed_code_version" value="3"><param name="site_root" value="">
-      <param name="name" value="{attr(TABLEAU_VIZ)}"><param name="tabs" value="yes">
-      <param name="toolbar" value="yes"><param name="showAppBanner" value="false">
-    </object>
-  </div>
-</div><script src="https://public.tableau.com/javascripts/api/viz_v1.js"></script>
-<p class="measure">The interactive view loads from Tableau Public. The previews and workbook below remain available independently.</p>"""
-    body = f"""<header class="masthead"><p class="eyebrow">CardioTrace &middot; Tableau research atlas</p>
-<h1>{label}</h1><p class="standfirst measure">{stand}</p>
-<nav class="atlas-links" aria-label="Atlas downloads">
-  <a href="tableau/{WORKBOOK}" download>Download Tableau workbook</a>
-  <a href="cardiotrace-report.html#tableau-atlas">Read the full report</a>
-  <a href="#using-the-workbook">Workbook guide</a>
-</nav></header>
-<p class="atlas-note">The images below are high-resolution previews. Open the downloaded workbook in
-Tableau Public or Tableau Desktop for hover details and editing. It contains the aggregate data;
-no connection to the research environment is needed.</p>
-<nav class="atlas-links" aria-label="Dashboards">{jump}</nav>
-{embed}
-{''.join(sections)}
-<section id="using-the-workbook" aria-labelledby="workbook-guide"><h2 id="workbook-guide">Use the editable workbook</h2>
-<p class="measure">Open the downloaded <code>.twbx</code> file in Tableau Public or Tableau Desktop.
-Choose a dashboard from the bottom tabs, press F7 for presentation mode, and hover a mark for exact values,
-intervals and source details. The workbook includes the aggregate data and twelve editable worksheets.
-Save edits to your computer from the File menu.</p>
-<p class="measure">For a slide or document, use each dashboard's full-resolution PNG link.
-For offline reading, save the <a href="cardiotrace-report.html#tableau-atlas">complete HTML report</a>;
-all three previews are embedded in that file.</p></section>
-<section aria-labelledby="atlas-evidence"><h2 id="atlas-evidence">How these views connect to the evidence</h2>
-<p class="measure">The atlas uses the report's committed result tables and JSON, from research version
-<a href="{REPO_URL}/tree/{audit['source_commit']}">{audit['source_commit'][:7]}</a>.
-The site build checks their hashes against the reviewed workbook manifest. A changed source stops publication
-until the visual companion is updated and reviewed.</p>
-<p class="measure">Analysis samples and survey weights differ across the study parts. Intervals show uncertainty;
-PCE remains a prespecified historical ranking benchmark with a different endpoint. Part 4 uses a separate common sample,
-and decision curves are exploratory. Follow each dashboard's report links for the full methods and limitations.</p>
-<nav class="atlas-links" aria-label="Source and verification records">
-<a href="tableau/data-audit.json">Data sources and transformations</a>
-<a href="tableau/verification.json">Workbook verification</a>
-<a href="{REPO_URL}/blob/main/docs/tableau-dashboard.md">Maintenance and reproduction</a>
-</nav></section>"""
-    return page(title, desc, fname, style, fname, body)
+        embed = (f'<p><a href="https://public.tableau.com/views/{attr(TABLEAU_VIZ)}">'
+                 'Open the published Tableau view</a> (check its revision date before using its results).</p>')
+    body = f"""<header class="masthead">
+  <p class="eyebrow">CardioTrace &middot; Tableau</p><h1>Research dashboards</h1>
+  <p class="standfirst measure">Three dashboards bring the related charts together.
+  View them below, or open the workbook in Tableau to explore the data.</p>
+  <p><a href="tableau/current/{WORKBOOK}" download>Download Tableau workbook (.twbx)</a></p>
+  <nav class="atlas-links" aria-label="Chart groups"><a href="#population">Population burden</a>
+  <a href="#mortality">Mortality risk</a><a href="#models">Model comparison</a></nav>
+</header>
+<section id="population" class="chart-guide atlas-panel" aria-labelledby="population-title">
+  <h2 id="population-title">Population burden</h2><p class="lede measure">The overall prevalence and the age-standardised estimate describe different aspects of the same population.</p>
+  {dashboards['population']}
+  <p class="measure">The available data are insufficient to assess the pandemic's impact on cardiovascular disease.</p>
+  <details class="technical-details"><summary>Individual charts</summary>{population}</details>
+  <nav class="atlas-links" aria-label="Population methods"><a href="burden.html">Trends and survey design &rarr;</a>
+  <a href="pandemic.html">Pandemic comparison &rarr;</a><a href="#mortality">Next: mortality risk &darr;</a></nav>
+</section>
+<section id="mortality" class="chart-guide atlas-panel" aria-labelledby="mortality-title">
+  <h2 id="mortality-title">Mortality risk</h2><p class="lede measure">Risk ranking and risk calibration answer different questions.</p>
+  <p class="measure">Weighted C = {f['harrell_c']:.3f} at {f['c_horizon']} years on {num(f['c_n'])} participants with complete inputs in later cycles.
+  C measures ordering among comparable pairs; it is not the percentage of people whose outcome was predicted correctly.</p>
+  {dashboards['mortality']}
+  <details class="technical-details"><summary>Individual charts and calibration</summary>{mortality}</details>
+  <nav class="atlas-links" aria-label="Mortality methods"><a href="cohort.html">Cohort and calibration &rarr;</a>
+  <a href="#population">Previous: population burden &uarr;</a><a href="#models">Next: model comparison &darr;</a></nav>
+</section>
+<section id="models" class="chart-guide atlas-panel" aria-labelledby="models-title">
+  <h2 id="models-title">Model comparison</h2><p class="lede measure">Compare model inputs, risk scores and ranking performance.</p>
+  {dashboards['models']}
+  <details class="technical-details"><summary>Individual chart and comparison details</summary>{models}
+  <p class="measure">The paired PCE intervals include zero at both horizons.
+  PCE targets hard ASCVD, including non-fatal events; this study records cardiovascular deaths.</p></details>
+  <nav class="atlas-links" aria-label="Model methods"><a href="learning.html">Variables and models &rarr;</a>
+  <a href="methods.html">PCE comparison &rarr;</a><a href="#mortality">Previous: mortality risk &uarr;</a></nav>
+</section>
+<details class="atlas-archive" id="tableau-history"><summary>Historical Tableau workbook &middot; 6 September 2026</summary>
+  <p class="archive-note">This reviewed workbook is preserved as a historical snapshot. Its calibration views predate the early-censoring correction
+  used in the current charts above. Use the current report for current results.</p>
+  <p><a href="tableau/{WORKBOOK}" download>Download the historical Tableau workbook (.twbx)</a> &middot;
+  <a href="tableau/README.md">Snapshot notes</a></p>{embed}
+  <p class="measure">The workbook includes aggregate data and editable worksheets; open it in Tableau for editing and hover details.
+  Its original source files, workbook and previews remain hash-verified against research version
+  <a href="{REPO_URL}/tree/{audit['source_commit']}">{audit['source_commit'][:7]}</a>.</p>
+  {''.join(historical)}
+</details>
+<p class="reading-note"><a href="cardiotrace-report.html">Read the complete report &rarr;</a></p>"""
+    return page(title, desc, "explore.html", style, "explore.html", body,
+                '<a href="index.html">&larr; Overview</a>')
 
-
-# ── the single-file report ───────────────────────────────────────────────────
 
 def chrome_single_file(html: str, meta: dict) -> str:
     """Give the emailed report the same head, landmarks and contents.
@@ -1146,12 +1195,13 @@ def chrome_single_file(html: str, meta: dict) -> str:
          "head block", regex=True)
     once("</style>", EXTRA_CSS + "</style>", "chrome CSS")
     once('<body>\n<div class="wrap">',
-         '<body>\n<a class="skip" href="#main">Skip to content</a>\n'
-         '<main class="wrap" id="main" tabindex="-1">', "skip link and landmark")
+         '<body id="top">\n<a class="skip" href="#main">Skip to content</a>\n'
+         + nav('cardiotrace-report.html') + '\n<main class="wrap report-wrap" id="main" tabindex="-1">', "skip link and landmark")
     once("</div>\n</body>", f"</main>\n{TOPLINK}\n</body>", "closing landmark")
 
     raw = scrollable_tables(anchor_headings(raw, seen))
-    once("</header>", "</header>\n" + contents(raw, "Contents"), "contents block")
+    once("</header>", "</header>\n<div class=\"reading-layout\">" + contents(raw, "Contents") + '<div class="reading-body">', "contents block")
+    once("</main>", "</div></div></main>", "reading layout end")
     return raw
 
 
@@ -1179,11 +1229,11 @@ def main() -> None:
         title, desc = meta[fname]
         seen: set[str] = set()
         sec = scrollable_tables(anchor_headings(sections[key], seen))
+        sec = sec.replace('href="#analysis-assumptions"', 'href="methods.html#analysis-assumptions"')
         body = page(title, desc, fname, style, fname,
-                    f'<header class="masthead"><p class="eyebrow">CardioTrace</p>'
+                    reading_layout(f'<header class="masthead"><p class="eyebrow">CardioTrace</p>'
                     f'<h1>{label}</h1><p class="standfirst measure">{stand}</p></header>'
-                    f'{atlas_report_link(fname)}{contents(sec)}{sec}',
-                    prev_next=f'<a href="{order[i + 1]}">Next &rarr;</a> &nbsp;&middot;&nbsp; ')
+                    f'{atlas_report_link(fname)}', sec), prev_next=chapter_links(fname))
         (DOCS / fname).write_text(externalise_images(body), encoding="utf-8")
         written.append(fname)
 
@@ -1192,9 +1242,9 @@ def main() -> None:
     seen = set()
     sec = scrollable_tables(anchor_headings(sections["6"] + sections["7"], seen))
     body = page(title, desc, fname, style, fname,
-                f'<header class="masthead"><p class="eyebrow">CardioTrace</p>'
+                reading_layout(f'<header class="masthead"><p class="eyebrow">CardioTrace</p>'
                 f'<h1>{label}</h1><p class="standfirst measure">{stand}</p></header>'
-                f'{atlas_report_link(fname)}{contents(sec)}{sec}')
+                f'{atlas_report_link(fname)}', sec), prev_next=chapter_links(fname))
     (DOCS / fname).write_text(externalise_images(body), encoding="utf-8")
     written.append(fname)
 

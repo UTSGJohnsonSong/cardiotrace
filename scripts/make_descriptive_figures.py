@@ -211,14 +211,10 @@ def figure_standardisation(overall: pd.DataFrame, p1: dict) -> None:
     crude_d = 100 * (pre["p_crude"].iloc[-1] - pre["p_crude"].iloc[0])
     std_d = 100 * (pre["p_std"].iloc[-1] - pre["p_std"].iloc[0])
     _heading(fig,
-             f"Crude prevalence rose {crude_d:.1f} points. "
-             f"Age-standardised fell {abs(std_d):.1f}.",
-             f"Self-reported cardiovascular disease, US adults {p1['age_floor']}+, "
-             f"NHANES {int(overall['year'].iloc[0])}–"
-             f"{int(overall['year'].iloc[-1]) + 1}. Weighted mean age rose "
-             f"{p1['mean_age_first']:.1f} → {p1['mean_age_last']:.1f} over the "
-             "same period. Band is the 95% design-based interval on the "
-             "standardised series.")
+             "Age composition changes the prevalence comparison.",
+             f"US adults {p1['age_floor']}+. Across the 1999–2018 endpoint estimates: crude "
+             f"{crude_d:+.1f} percentage points; age-standardised {std_d:+.1f}. "
+             "The band shows 95% design-based intervals. The later redesigned survey is plotted separately.")
     _style(ax, "Prevalence (%)")
     ax.set_xticks(XTICKS)
     ax.set_xticklabels(XLABELS, fontsize=8.5)

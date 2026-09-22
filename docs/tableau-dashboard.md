@@ -1,13 +1,56 @@
-# Tableau research atlas: publication and maintenance
+# Tableau dashboards: maintenance
 
-## Current delivered atlas
+## Current delivery — 22 September 2026
 
-The delivered atlas has **three dashboards and twelve native worksheets**, covering
-population burden, mortality risk and model evidence. [Open the atlas](explore.html)
-or [download the portable workbook](tableau/cardiotrace-atlas.twbx). The report
-chapters link to the corresponding dashboard, and the atlas links back to their
-methods and limitations. The complete HTML report also embeds all three preview
-images so that a saved copy remains self-contained.
+The three dashboards in `docs/tableau/current/` are the primary visual overview
+on `explore.html`. Individual Python figures remain available in expandable
+sections. The native workbook and previews use the current aggregate results,
+including weighted Aalen–Johansen calibration. The September 6 workbook and
+previews remain unchanged in `docs/tableau/` as a separately labelled archive.
+
+`python scripts/tableau_atlas.py --current` checks the new source hashes,
+workbook and preview hashes, embedded connections and complete native-review
+record. `--snapshot` independently verifies the original frozen September 6
+sources. The default CLI retains the original strict current-source check for
+the old artifact and correctly rejects its outdated calibration sources.
+
+The current workbook was saved and reopened in Tableau Public 2026.2. Its
+12 embedded tables (334 rows) were compared exactly with the generated Hyper
+extract. Three previews were captured from the actual presentation canvas at
+1380 × 940 pixels, and a native tooltip was inspected. `verification.json`
+records the review and exact artifacts. The browser previews are static images;
+the downloadable workbook provides editable native views. There is no Tableau
+Public web view configured.
+
+To regenerate the current workbook, first commit the aggregate results, then
+run the optional generator with an explicit research commit:
+
+```sh
+python scripts/build_tableau_atlas.py --out build/tableau --source-commit 64dbdbd
+```
+
+For a later research revision, replace that commit only after reviewing the
+changed result tables, captions and units. Repeat native save/reopen, all-table
+comparison, tooltip inspection and preview review before replacing `current/`
+as one set. Do not regenerate hashes alone to make stale output pass. A full
+Python rebuild validates the frozen native artifacts but does not operate the
+Tableau GUI or recreate its screenshots.
+
+## September 18 presentation plan — superseded by the current delivery
+
+## Current charts and the preserved native snapshot
+
+[The current visual overview](explore.html) presents Python-generated charts
+from current aggregate results. The main model calibration now uses
+Aalen–Johansen observed risks to account for early censoring. Current charts
+are the primary visual evidence linked from the report chapters.
+
+The **6 September 2026 native Tableau snapshot** has three dashboards and twelve
+worksheets, covering population burden, mortality risk and model evidence. Its
+[portable workbook](tableau/cardiotrace-atlas.twbx) and three previews predate
+that calibration correction. They are retained as a separate, labelled archive,
+not presented as the current results. The complete HTML report embeds the
+historical previews inside a collapsed appendix for offline provenance.
 
 The workbook and reviewed PNGs live in `docs/tableau/`. They read published
 aggregate CSV/JSON results, not participant records. `data-audit.json` records
@@ -15,16 +58,29 @@ the source research version and input hashes; `verification.json` records the
 native save/reopen check, exact extract comparison and artifact hashes.
 The original source digests are retained; `source_sha256_lf` normalises only
 CRLF to LF so that a Windows review and Linux CI check the same source text.
-`scripts/tableau_atlas.py` runs during report/site generation and rejects a changed
-source, an altered reviewed image/workbook or a non-portable data connection.
-This guard also runs in tests and the render rebuild in CI.
+The twelve original aggregate source files are preserved under
+`docs/tableau/source-snapshot/`, with their repository-relative paths intact.
+Neither the manifests nor the reviewed workbook and previews were refreshed to
+accept the new calibration. `scripts/tableau_atlas.py` has two explicit checks:
 
-The website publishes previews and a downloadable workbook even without a
-Tableau Public account. `TABLEAU_VIZ` in `scripts/build_site.py` remains optional:
-only set it after verifying a real, published view. Without it, no Tableau
-script loads and the page clearly identifies its images as previews.
+- `validate()` / the default CLI compares the manifest with **current** source
+  files. It still fails after any source change, including the calibration
+  correction; it never falls back to historical files.
+- `validate_snapshot()` / `python scripts/tableau_atlas.py --snapshot` compares
+  the same original manifest with the **frozen** files. The labelled historical
+  appendix and archive use this check. Both modes also validate exact preview
+  and workbook hashes, worksheet inventory and portable embedded connections.
 
-### Rebuilding a changed atlas
+Tests cover changed current sources, changed frozen sources and changed reviewed
+artifacts. Snapshot validation certifies preservation, not currency or native
+Tableau re-review of new results.
+
+The website provides current charts without requiring Tableau or a login. The
+historical workbook remains an optional download. No Tableau Public publication
+or current interactive workbook is implied: a real public view must be checked
+against a newly reviewed native artifact before it can be linked as current.
+
+### Preparing a future current native Tableau atlas
 
 1. Install the optional `requirements-tableau.txt` dependencies in a separate
    environment. Normal analysis, site builds and CI do not need them.
@@ -35,9 +91,11 @@ script loads and the page clearly identifies its images as previews.
 3. Open the generated TWBX in Tableau, inspect all dashboards and tooltips,
    save locally and reopen the packaged file. Check that every connection is
    embedded and compare each Hyper table with the generated extract.
-4. Capture the three presentation canvases. Update the workbook, previews and
-   audit/verification records in `docs/tableau/` as one reviewed set. Do not
-   refresh a source hash solely to silence a stale-dashboard failure.
+4. Capture the three presentation canvases. Publish the new workbook, previews,
+   sources and audit/verification records as one newly reviewed set in a separate
+   versioned location. Preserve the 6 September snapshot. Only then change the
+   site references and validation configuration to identify the new native set.
+   Do not refresh a source hash solely to silence a stale-dashboard failure.
 5. Run the suite, regenerate the report/site/README/handover/summary, commit
    the changes, and run `scripts/verify_clean_rebuild.py --full`. Commit only
    the new receipt afterward. CI and the receipt gate must pass before merging.
@@ -46,13 +104,13 @@ The generation script produces the initial native workbook; the committed
 version is then saved by Tableau. Native XML and thumbnails may differ, so
 exact numerical extract comparison and visual review are separate checks.
 
-## Historical explorer proposal — not the delivered atlas
+## Historical explorer proposal — not the delivered native atlas
 
 The original prevalence-only proposal below is retained as design history.
 Its four sheets, filters and 1000 × 720 sizing were not implemented as specified;
-the delivered 1380 × 940 atlas follows the broader report. The original
+the historical 1380 × 940 native atlas follows the broader report. The original
 187-cell prevalence extract remains a source, alongside the mortality and model
-results listed in the current manifest. Do not describe the proposal's filters
+results listed in its frozen manifest. Do not describe the proposal's filters
 as features of the delivered workbook.
 
 ### Original proposal

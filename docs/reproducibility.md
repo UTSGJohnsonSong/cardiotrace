@@ -110,12 +110,27 @@ These checks cover the original survey estimators, not the new PCE adaptation.
 
 ## Tableau visual companion
 
-The Tableau companion is a reviewed native-workbook snapshot in `docs/tableau/`.
-Report/site rendering checks its source and artifact hashes without installing
-Tableau. Regenerating the workbook uses separate optional dependencies and a
-native Tableau visual review; see [the atlas maintenance guide](tableau-dashboard.md).
-The full analysis receipt includes the source/hash gate and regenerated HTML,
-not a rerun of Tableau GUI capture. The single-file report embeds the previews.
+The current companion contains three native Tableau dashboard exports and a
+portable workbook in `docs/tableau/current/`. The web guide presents these
+combined dashboards first, with individual Python figures available on
+expansion. `scripts/tableau_atlas.py::validate_current()` checks the current
+analysis-source hashes and the native Tableau review record, including the
+workbook and preview artifacts, before rendering. Changing the analysis sources
+requires rebuilding and reviewing the current workbook; the old review cannot
+certify new results.
+
+The 6 September 2026 workbook and previews remain in `docs/tableau/` as a
+historical snapshot, before the early-censoring calibration correction. Its
+inputs are frozen in `docs/tableau/source-snapshot/`; `validate_snapshot()`
+checks those original source and artifact hashes independently. Preserve both
+versions and their provenance.
+
+Regenerating the workbook uses optional dependencies and a native Tableau
+visual review; see [the atlas maintenance guide](tableau-dashboard.md). The
+full analysis receipt covers the source/hash gates and regenerated HTML, not a
+rerun of Tableau GUI capture. The single-file report embeds the current
+dashboard exports. Browser images and workbook downloads do not constitute an
+interactive Tableau Public deployment; no Public link is configured.
 
 ## Optional warehouse
 

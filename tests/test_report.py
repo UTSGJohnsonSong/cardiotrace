@@ -227,3 +227,41 @@ def test_the_p_value_formatter_states_a_bound_rather_than_a_zero():
     assert pval(0.1058) == "0.1058"
     assert pval(float("nan")) == "&mdash;"
     assert importlib.util  # the import is the documentation of why exec is used
+
+
+def test_forward_path_preserves_rejection_and_the_model_at_each_step():
+    """A pooled candidate must not look selected just because it passed stage 1."""
+    path = pd.DataFrame([
+        {"step": 0, "entered": "baseline", "wald": float("nan"),
+         "n": 1234, "events": 56, "selected": True},
+        {"step": 1, "entered": "kidney", "wald": 12.34,
+         "n": 1234, "events": 56, "selected": True},
+        {"step": 2, "entered": "glucose", "wald": 1.23,
+         "n": 1234, "events": 56, "selected": False},
+    ])
+    html = render_report._forward_path_rows(path, {"kidney": "Kidney measure",
+                                                  "glucose": "Glucose measure"})
+    rows = re.findall(r"<tr>(.*?)</tr>", html)
+    assert len(rows) == 3
+    cells = [re.findall(r"<td>(.*?)</td>", row) for row in rows]
+    assert "Kidney measure" not in cells[1][1]
+    assert "Kidney measure" in cells[2][1]
+    assert "Glucose measure" not in cells[2][1]
+    assert cells[2][2] == "Glucose measure"
+    assert cells[1][5:] == ["12.34", "Added"]
+    assert cells[2][5:] == ["1.23", "Not added; path stops"]
+    assert all(row[3:5] == ["1,234", "56"] for row in cells)
+    assert not NAN_CELL.search(html)
+
+
+@pytest.mark.parametrize("changed_column", ["n", "events"])
+def test_forward_path_cannot_claim_a_fixed_sample_when_counts_change(changed_column):
+    path = pd.DataFrame([
+        {"step": 0, "entered": "baseline", "wald": float("nan"),
+         "n": 100, "events": 10, "selected": True},
+        {"step": 1, "entered": "candidate", "wald": 8.0,
+         "n": 100, "events": 10, "selected": True},
+    ])
+    path.loc[1, changed_column] -= 1
+    with pytest.raises(ValueError, match="fixed sample"):
+        render_report._forward_path_rows(path, {})
