@@ -47,6 +47,9 @@ Thumbs.db
 .idea/
 *.swp
 
+# Tableau session recovery files
+*.twbr
+
 # Credentials — ignore a root-level profiles.yml, but keep the committed
 # dbt/profiles.yml (local Docker creds only, needed for reproducibility).
 /profiles.yml

@@ -626,19 +626,18 @@ details p:last-child { margin-bottom: 0; }
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="cardiotrace-report.html">Read the report</a><a href="explore.html">Charts</a><a href="index.html#author">About the author</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html" aria-current="page">Overview</a><a href="cardiotrace-report.html">Read the report</a><a href="explore.html">Tableau</a><a href="index.html#author">About the author</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
 <header class="masthead hero">
   <p class="eyebrow">Population health research &middot; NHANES</p>
   <h1>Understanding cardiovascular<br class="desktop-break"> burden and long-term risk.</h1>
   <p class="standfirst measure">How has cardiovascular disease changed across US surveys?
   Which information helps rank the risk of cardiovascular death years later?</p>
-  <p class="hero-answer measure">CardioTrace brings these questions together in an auditable study.
-  An additional kidney marker improved one model comparison; the historical PCE comparison
-  did not establish an advantage for CardioTrace.</p>
+  <p class="hero-answer measure">CardioTrace uses public NHANES data to study population trends
+  and long-term mortality risk. In this analysis, adding a kidney marker improved risk ranking.</p>
   <nav class="cta" aria-label="Start reading">
     <a class="lead" href="cardiotrace-report.html">Read the report <span aria-hidden="true">&rarr;</span></a>
-    <a href="explore.html">Explore the charts</a>
+    <a href="explore.html">Tableau dashboards</a>
   </nav>
   <p class="hero-scope">62,877 adults in the survey analysis &nbsp;&middot;&nbsp;
   20,736 in the separate mortality cohort &nbsp;&middot;&nbsp;
@@ -649,26 +648,26 @@ details p:last-child { margin-bottom: 0; }
   </nav>
 </header>
 <section id="findings" aria-labelledby="findings-h">
-  <div class="sec-head"><div class="sec-num">FINDINGS</div><h2 id="findings-h">What the study found</h2></div>
-  <div class="body-indent"><div class="findings"><article class="finding"><span class="finding-index">01</span><h3>The age-standardised trend remains uncertain.</h3><p class="what">The overall and age-standardised series tell different stories. The pre-pandemic trend estimate is slightly downward, but its interval also allows no change.</p><p class="fci">&minus;0.59 percentage points per decade; 95% CI &minus;1.22 to +0.04.</p><p class="go"><a href="burden.html">Population burden &rarr;</a></p></article><article class="finding"><span class="finding-index">02</span><h3>One later survey cannot establish a pandemic effect.</h3><p class="what">The post-pandemic estimate is above the earlier extrapolated trend. Uncertainty and a redesigned survey prevent a causal interpretation.</p><p class="fci">Observed minus extrapolated: +0.45 percentage points; 95% CI &minus;0.76 to +1.66.</p><p class="go"><a href="pandemic.html">The later survey &rarr;</a></p></article><article class="finding"><span class="finding-index">03</span><h3>Adding UACR helped in this model comparison.</h3><p class="what">Urine albumin-to-creatinine ratio, a kidney marker, added useful ranking information. Gradient boosting on the existing inputs did not improve the tested model.</p><p class="fci">Change in weighted C: +0.0176 (95% CI +0.0074 to +0.0275); evaluated on the same Part 4 sample.</p><p class="go"><a href="learning.html">Variables and models &rarr;</a></p></article><article class="finding"><span class="finding-index">04</span><h3>Superiority to the historical PCE score was not established.</h3><p class="what">The paired intervals include zero at both horizons. PCE predicts a broader cardiovascular endpoint; this study observes cardiovascular death.</p><p class="fci">The benchmark uses its own paired sample. Its C values cannot be compared directly with other study samples.</p><p class="go"><a href="methods.html">The benchmark comparison &rarr;</a></p></article></div></div>
+  <div class="sec-head"><div class="sec-num">FINDINGS</div><h2 id="findings-h">Key findings</h2></div>
+  <div class="body-indent"><div class="findings"><article class="finding"><span class="finding-index">01</span><h3>The age-standardised trend remains uncertain.</h3><p class="what">The overall and age-standardised series tell different stories. The pre-pandemic trend estimate is slightly downward, but its interval also allows no change.</p><p class="fci">&minus;0.59 percentage points per decade; 95% CI &minus;1.22 to +0.04.</p><p class="go"><a href="burden.html">Population burden &rarr;</a></p></article><article class="finding"><span class="finding-index">02</span><h3>The pandemic's impact remains unclear.</h3><p class="what">The available data are insufficient to assess the pandemic's impact on cardiovascular disease. The later survey estimate is above the earlier trend, but the interval includes no difference.</p><p class="fci">Observed minus extrapolated: +0.45 percentage points; 95% CI &minus;0.76 to +1.66.</p><p class="go"><a href="pandemic.html">The later survey &rarr;</a></p></article><article class="finding"><span class="finding-index">03</span><h3>Adding UACR helped in this model comparison.</h3><p class="what">Urine albumin-to-creatinine ratio, a kidney marker, added useful ranking information. Gradient boosting on the existing inputs did not improve the tested model.</p><p class="fci">Change in weighted C: +0.0176 (95% CI +0.0074 to +0.0275); evaluated on the same Part 4 sample.</p><p class="go"><a href="learning.html">Variables and models &rarr;</a></p></article></div></div>
 </section>
 <section class="overview-figure" aria-labelledby="overview-figure-h">
-  <div class="sec-head"><div class="sec-num">IN VIEW</div><h2 id="overview-figure-h">Read the trend with its uncertainty</h2></div>
+  <div class="sec-head"><div class="sec-num">IN VIEW</div><h2 id="overview-figure-h">Population trends</h2></div>
   <div class="body-indent"><figure>
-    <a href="explore.html#population"><img src="assets/part1_standardisation.png"
-      width="1800" height="720" loading="lazy" alt="Crude and age-standardised cardiovascular prevalence across NHANES survey cycles."></a>
+    <a href="explore.html#population"><img src="tableau/current/01-population-burden.png"
+      width="1380" height="940" loading="lazy" alt="Tableau dashboard combining cardiovascular prevalence trends, race and ethnicity estimates, and age patterns."></a>
     <figcaption>The pre-pandemic age-standardised trend is &minus;0.59 percentage points per decade
     (95% CI &minus;1.22 to +0.04).
-    The interval includes zero; a decline is not established. <a href="explore.html#population">See the charts and their explanations &rarr;</a></figcaption>
+    <a href="explore.html#population">Open the Tableau dashboard &rarr;</a></figcaption>
   </figure></div>
 </section>
 <section id="limits" aria-labelledby="limits-h">
   <div class="sec-head"><div class="sec-num">LIMITS</div>
-  <h2 id="limits-h">Where the evidence stops</h2></div>
-  <div class="body-indent"><div class="limits-grid"><div class="limit-item"><h3>Pandemic effects</h3><p>One redesigned post-pandemic survey cannot isolate the pandemic's effect. The mortality model has no post-2019 follow-up.</p><a href="pandemic.html">Read the limitation &rarr;</a></div><div class="limit-item"><h3>Death versus illness</h3><p>Non-fatal heart attacks and strokes are not outcomes in the linked mortality data. These predictions do not describe all cardiovascular illness.</p><a href="cohort.html">Read the limitation &rarr;</a></div><div class="limit-item"><h3>Use beyond this sample</h3><p>Missing inputs can select who enters an analysis. Tests on later NHANES cycles do not establish clinical usefulness in other populations.</p><a href="methods.html">Read the limitation &rarr;</a></div></div></div>
+  <h2 id="limits-h">Limitations</h2></div>
+  <div class="body-indent"><div class="limits-grid"><div class="limit-item"><h3>Pandemic effects</h3><p>The available data are insufficient to assess the pandemic's impact on cardiovascular disease. Mortality follow-up ends in 2019.</p><a href="pandemic.html">Read the limitation &rarr;</a></div><div class="limit-item"><h3>Death versus illness</h3><p>Non-fatal heart attacks and strokes are not outcomes in the linked mortality data. These predictions do not describe all cardiovascular illness.</p><a href="cohort.html">Read the limitation &rarr;</a></div><div class="limit-item"><h3>Use beyond this sample</h3><p>Missing inputs can select who enters an analysis. Tests on later NHANES cycles do not establish clinical usefulness in other populations.</p><a href="methods.html">Read the limitation &rarr;</a></div></div></div>
 </section>
 <section id="built" aria-labelledby="built-h">
-  <div class="sec-head"><div class="sec-num">PROCESS</div><h2 id="built-h">A result you can trace back</h2></div>
+  <div class="sec-head"><div class="sec-num">PROCESS</div><h2 id="built-h">Data and methods</h2></div>
   <div class="body-indent"><p class="measure">Public survey files become a documented cohort,
   analysis tables, and this report. File inventories, variable mappings, and regression checks
   help catch the data losses found in earlier versions.</p>
@@ -690,7 +689,7 @@ details p:last-child { margin-bottom: 0; }
     <p class="colophon-stmt measure">I designed and built CardioTrace end to end &mdash; from reproducible CDC data acquisition to survey-weighted inference and prospective risk modelling.</p>
     <p class="measure">My work here includes tracing data problems across survey cycles,
     documenting analytical decisions, and turning results into a reproducible report.</p>
-    <nav class="colophon-links" aria-label="About the author"><a href="assets/Zekun_Song_Resume.pdf">R&eacute;sum&eacute; (PDF)</a><a href="mailto:zekun.song@mail.utoronto.ca">Email</a><a href="https://www.linkedin.com/in/zekun-song/">LinkedIn</a></nav>
+    <nav class="colophon-links" aria-label="About the author"><a href="assets/Zekun_Song_Resume.pdf">Resume (PDF)</a><a href="mailto:zekun.song@mail.utoronto.ca">Email</a><a href="https://www.linkedin.com/in/zekun-song/">LinkedIn</a></nav>
   </div>
 </section>
 <div class="pagefoot">

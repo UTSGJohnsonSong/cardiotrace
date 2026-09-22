@@ -10,6 +10,7 @@ from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRECTORY = 'tableau'
+CURRENT_DIRECTORY = 'tableau/current'
 WORKBOOK = 'cardiotrace-atlas.twbx'
 SITE = 'https://utsgjohnsonsong.github.io/cardiotrace/'
 PANELS = (
@@ -55,9 +56,32 @@ def validate_snapshot(root=ROOT):
                      snapshot=True)
 
 
-def _validate(root, *, source_root, snapshot):
+def validate_current(root=ROOT):
+    """Verify the new native review against current aggregate source bytes."""
+    root = Path(root)
+    directory = root / 'docs' / CURRENT_DIRECTORY
+    verification = json.loads((directory / 'verification.json').read_text(encoding='utf-8'))
+    for requirement in ('native_saved', 'final_output_reopened_in_tableau',
+                        'all_three_dashboards_rendered', 'tooltip_visually_verified',
+                        'all_data_connections_embedded', 'source_hashes_match'):
+        if verification.get(requirement) is not True:
+            raise ValueError(f'Current Tableau native review is incomplete: {requirement}')
+    if not verification.get('tables') or any(
+            table.get('all_values_match') is not True for table in verification['tables']):
+        raise ValueError('Current Tableau extract comparison is incomplete')
+    audit = _validate(root, source_root=root, snapshot=False, directory=directory)
+    tables = verification['tables']
+    expected = [(chart['sheet'], chart['rows']) for chart in audit['charts']]
+    if [(table.get('sheet'), table.get('rows')) for table in tables] != expected:
+        raise ValueError('Current Tableau extract comparison does not cover every chart')
+    if verification.get('rows') != sum(rows for _, rows in expected):
+        raise ValueError('Current Tableau extract row total differs from its audit')
+    return audit
+
+
+def _validate(root, *, source_root, snapshot, directory=None):
     """Share artifact checks without allowing current-source validation to fall back."""
-    directory = root / 'docs' / DIRECTORY
+    directory = directory or root / 'docs' / DIRECTORY
     audit = json.loads((directory / 'data-audit.json').read_text(encoding='utf-8'))
     verification = json.loads((directory / 'verification.json').read_text(encoding='utf-8'))
     if audit['source_commit'] != verification['source_commit']:
@@ -108,32 +132,27 @@ def _validate(root, *, source_root, snapshot):
 
 
 def report_appendix(root=ROOT):
-    """Embed the verified historical snapshot, separately from current evidence."""
-    audit = validate_snapshot(root)
+    """Embed the current reviewed Tableau dashboards for offline reading."""
+    audit = validate_current(root)
     figures = []
     for anchor, filename, title, description, links in PANELS:
-        image = base64.b64encode((Path(root) / 'docs' / DIRECTORY / filename).read_bytes()).decode('ascii')
+        image = base64.b64encode((Path(root) / 'docs' / CURRENT_DIRECTORY / filename).read_bytes()).decode('ascii')
         figures.append(f'<figure><a href="{SITE}explore.html#{anchor}">'
                        f'<img src="data:image/png;base64,{image}" '
-                       f'alt="Historical Tableau dashboard: {html.escape(description)}" loading="lazy" width="2760" height="1880" '
+                       f'alt="Tableau dashboard: {html.escape(description)}" loading="lazy" '
                        f'style="width:100%;height:auto"></a>'
                        f'<figcaption><b>{title}.</b> {description}</figcaption></figure>')
     return f'''<section id="tableau-atlas">
-  <div class="sec-head"><div class="sec-num">A</div><h2>Historical Tableau snapshot (6 Sep 2026)</h2></div>
+  <div class="sec-head"><div class="sec-num">A</div><h2>Tableau dashboards</h2></div>
   <div class="body-indent">
-    <p class="lede measure">These three native Tableau dashboards preserve the review completed on 6 September 2026.
-    They predate the Aalen–Johansen calibration correction and do not represent the current results.
-    <a href="{SITE}explore.html">View the current charts</a> for the updated evidence.</p>
-    <details><summary>Open the historical Tableau previews and workbook</summary>
-    <p class="measure">The previews are embedded for offline reading. The
-    <a href="{SITE}{DIRECTORY}/{WORKBOOK}">historical editable workbook</a> retains its reviewed extract and hover details.
-    Frozen source files, workbook and image hashes are checked separately from current results.
-    The snapshot describes research version
+    <p class="lede measure">Three combined views of population burden, mortality risk and model comparisons.
+    The native Tableau workbook uses the current aggregate results, including Aalen–Johansen calibration.</p>
+    <p class="measure">The previews are embedded for offline reading. Download the
+    <a href="{SITE}{CURRENT_DIRECTORY}/{WORKBOOK}">editable Tableau workbook</a> for native charts and hover details.
+    The reviewed workbook describes research version
     <a href="https://github.com/UTSGJohnsonSong/cardiotrace/tree/{audit['source_commit']}">{audit['source_commit'][:7]}</a>.
-    PCE remains a historical ranking benchmark;
-    the endpoint mismatch and distinct analysis samples remain part of the interpretation.</p>
+    The <a href="{SITE}explore.html#tableau-history">6 September snapshot</a> is preserved separately.</p>
     {''.join(figures)}
-    </details>
   </div>
 </section>'''
 
@@ -142,7 +161,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--snapshot', action='store_true',
                         help='check the labelled historical snapshot against frozen sources')
+    parser.add_argument('--current', action='store_true',
+                        help='check the newly reviewed atlas against current source files')
     args = parser.parse_args()
-    audit = validate_snapshot() if args.snapshot else validate()
+    if args.snapshot and args.current:
+        parser.error('choose either --snapshot or --current')
+    audit = validate_current() if args.current else validate_snapshot() if args.snapshot else validate()
     source_kind = 'frozen historical' if args.snapshot else 'current'
     print(f"Tableau atlas matches {len(audit['source_sha256'])} {source_kind} source files")

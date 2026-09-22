@@ -8,14 +8,21 @@ Published site: <https://utsgjohnsonsong.github.io/cardiotrace/>
 Repository: <https://github.com/UTSGJohnsonSong/cardiotrace>
 
 Visual companion: <https://utsgjohnsonsong.github.io/cardiotrace/explore.html>.
-The chart guide uses current Python-generated figures. Three reviewed Tableau
-dashboards and the portable workbook are retained in `docs/tableau/` as a dated
-6 September 2026 snapshot, before the early-censoring calibration correction.
-The report embeds them in a clearly marked historical disclosure.
-`scripts/tableau_atlas.py::validate_snapshot` checks the frozen source files and
-reviewed artifacts; `validate` still rejects mismatched current sources. Follow
-`docs/tableau-dashboard.md` when updating the atlas; its original explorer plan
-is explicitly retained as history, not as a list of implemented features.
+The guide leads with three native Tableau dashboard exports for burden,
+mortality risk and model comparisons; supporting Python figures are available
+on expansion. Current exports and the portable workbook belong in
+`docs/tableau/current/`. `scripts/tableau_atlas.py::validate_current()` checks
+current analysis sources and the native Tableau review record before rendering.
+The exports are readable images in the browser, not a configured Tableau Public
+interactive view.
+
+The original 6 September 2026 workbook and previews remain in `docs/tableau/`,
+with their source files frozen in `docs/tableau/source-snapshot/`. They predate
+the early-censoring calibration correction and remain labelled as history.
+`validate_snapshot()` checks those original sources and artifacts independently;
+their earlier review does not certify the current workbook. Follow
+`docs/tableau-dashboard.md` when rebuilding or reviewing either version. A full
+analysis rebuild does not repeat native Tableau capture or publish to Tableau Public.
 
 ---
 
@@ -114,7 +121,7 @@ National Death Index fixed the time order at the cost of a harder endpoint
 <!-- HANDOVER_STATUS_START -->
 **Generated from tracked results; edit the producers, not this block.**
 
-**Tests:** 254 collected. This includes conditional skips.
+**Tests:** 260 collected. This includes conditional skips.
 The count is not a passed-test count; consult the actual pytest run and CI.
 
 | Cohort | Value |

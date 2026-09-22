@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Charts &mdash; CardioTrace | Zekun Song</title>
-<meta name="description" content="Current research figures explained in the browser, with links to methods and a historical Tableau workbook.">
+<title>Tableau dashboards &mdash; CardioTrace | Zekun Song</title>
+<meta name="description" content="Three Tableau dashboards for population trends, mortality risk and model comparisons, with an editable workbook.">
 <meta name="author" content="Zekun Song">
 <meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://utsgjohnsonsong.github.io/cardiotrace/explore.html">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cstyle%3E.g%7Bfill%3A%23f7f6f2%7D%40media%28prefers-color-scheme%3Adark%29%7B.g%7Bfill%3A%2316161a%7D%7D%3C%2Fstyle%3E%3Crect%20class%3D%22g%22%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%226%22%2F%3E%3Cpath%20d%3D%22M2%2020h5.2l2.6-7.4%204.2%2014.2%204.1-19%202.9%2012.2H30%22%20fill%3D%22none%22%20stroke%3D%22%232a78d6%22%20stroke-width%3D%222.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CardioTrace">
-<meta property="og:title" content="Charts &mdash; CardioTrace | Zekun Song">
-<meta property="og:description" content="Current research figures explained in the browser, with links to methods and a historical Tableau workbook.">
+<meta property="og:title" content="Tableau dashboards &mdash; CardioTrace | Zekun Song">
+<meta property="og:description" content="Three Tableau dashboards for population trends, mortality risk and model comparisons, with an editable workbook.">
 <meta property="og:url" content="https://utsgjohnsonsong.github.io/cardiotrace/explore.html">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
@@ -22,8 +22,8 @@
 <meta property="og:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <meta property="article:author" content="Zekun Song">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Charts &mdash; CardioTrace | Zekun Song">
-<meta name="twitter:description" content="Current research figures explained in the browser, with links to methods and a historical Tableau workbook.">
+<meta name="twitter:title" content="Tableau dashboards &mdash; CardioTrace | Zekun Song">
+<meta name="twitter:description" content="Three Tableau dashboards for population trends, mortality risk and model comparisons, with an editable workbook.">
 <meta name="twitter:image" content="https://utsgjohnsonsong.github.io/cardiotrace/assets/cardiotrace-card.png">
 <meta name="twitter:image:alt" content="Crude and age-standardised cardiovascular disease prevalence in US adults, NHANES 1999-2023: the crude series rises while the age-standardised series falls.">
 <style>
@@ -626,32 +626,41 @@ details p:last-child { margin-bottom: 0; }
 </head>
 <body id="top">
 <a class="skip" href="#main">Skip to content</a>
-<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="cardiotrace-report.html">Read the report</a><a href="explore.html" aria-current="page">Charts</a><a href="index.html#author">About the author</a></div></nav>
+<nav class="sitenav" aria-label="Sections of this report"><div class="sitenav-inner"><a class="brand" href="index.html">CardioTrace</a><a href="index.html">Overview</a><a href="cardiotrace-report.html">Read the report</a><a href="explore.html" aria-current="page">Tableau</a><a href="index.html#author">About the author</a></div></nav>
 <main class="wrap" id="main" tabindex="-1">
 <header class="masthead">
-  <p class="eyebrow">CardioTrace &middot; visual guide</p><h1>The results, in view.</h1>
-  <p class="standfirst measure">Start with a chart, then follow the evidence. These figures use the current
-  analysis outputs and can be read here without installing software.</p>
+  <p class="eyebrow">CardioTrace &middot; Tableau</p><h1>Research dashboards</h1>
+  <p class="standfirst measure">Three dashboards bring the related charts together.
+  View them below, or open the workbook in Tableau to explore the data.</p>
+  <p><a href="tableau/current/cardiotrace-atlas.twbx" download>Download Tableau workbook (.twbx)</a></p>
   <nav class="atlas-links" aria-label="Chart groups"><a href="#population">Population burden</a>
-  <a href="#mortality">Mortality risk</a><a href="#models">Model evidence</a></nav>
+  <a href="#mortality">Mortality risk</a><a href="#models">Model comparison</a></nav>
 </header>
-<section id="population" class="chart-guide" aria-labelledby="population-title">
+<section id="population" class="chart-guide atlas-panel" aria-labelledby="population-title">
   <h2 id="population-title">Population burden</h2><p class="lede measure">The overall prevalence and the age-standardised estimate describe different aspects of the same population.</p>
-  <figure><a href="assets/part1_standardisation.png" aria-label="Open full-size chart: Crude and age-standardised cardiovascular prevalence over survey cycles"><img src="assets/part1_standardisation.png" loading="lazy" alt="Crude and age-standardised cardiovascular prevalence over survey cycles"></a><figcaption>Pre-pandemic age-standardised trend: &minus;0.59 percentage points per decade (95% CI &minus;1.22 to +0.04). The interval includes zero. Standardisation changes the comparison; it does not establish what caused the change.</figcaption></figure><figure><a href="assets/part1_by_race.png" aria-label="Open full-size chart: Cardiovascular prevalence estimates by race and ethnicity"><img src="assets/part1_by_race.png" loading="lazy" alt="Cardiovascular prevalence estimates by race and ethnicity"></a><figcaption>Intervals describe uncertainty around group estimates. Lines guide reading across surveys; they do not fit a trend across the post-pandemic survey redesign. These are descriptive comparisons, not effects of group membership.</figcaption></figure><nav class="atlas-links" aria-label="Population methods"><a href="burden.html">Burden: trends and survey design &rarr;</a>
-  <a href="pandemic.html">Pandemic: the limits of one later survey &rarr;</a></nav>
+  <figure class="tableau-dashboard"><a href="tableau/current/01-population-burden.png" aria-label="Open full-size Tableau dashboard: Population burden"><img src="tableau/current/01-population-burden.png" loading="lazy" width="1380" height="940" alt="Tableau dashboard: Crude and age-standardised prevalence, latest race–ethnicity intervals, and age patterns across survey cycles."></a><figcaption><a href="tableau/current/01-population-burden.png">Full-size dashboard</a> &middot; <a href="tableau/current/cardiotrace-atlas.twbx" download>Download workbook</a></figcaption></figure>
+  <p class="measure">The available data are insufficient to assess the pandemic's impact on cardiovascular disease.</p>
+  <details class="technical-details"><summary>Individual charts</summary><figure><a href="assets/part1_standardisation.png" aria-label="Open full-size chart: Crude and age-standardised cardiovascular prevalence over survey cycles"><img src="assets/part1_standardisation.png" loading="lazy" alt="Crude and age-standardised cardiovascular prevalence over survey cycles"></a><figcaption>Pre-pandemic age-standardised trend: &minus;0.59 percentage points per decade (95% CI &minus;1.22 to +0.04). The interval includes zero. Standardisation changes the comparison; it does not establish what caused the change.</figcaption></figure><figure><a href="assets/part1_by_race.png" aria-label="Open full-size chart: Cardiovascular prevalence estimates by race and ethnicity"><img src="assets/part1_by_race.png" loading="lazy" alt="Cardiovascular prevalence estimates by race and ethnicity"></a><figcaption>Intervals describe uncertainty around group estimates. Lines guide reading across surveys; they do not fit a trend across the post-pandemic survey redesign. These are descriptive comparisons, not effects of group membership.</figcaption></figure></details>
+  <nav class="atlas-links" aria-label="Population methods"><a href="burden.html">Trends and survey design &rarr;</a>
+  <a href="pandemic.html">Pandemic comparison &rarr;</a><a href="#mortality">Next: mortality risk &darr;</a></nav>
 </section>
-<section id="mortality" class="chart-guide" aria-labelledby="mortality-title">
+<section id="mortality" class="chart-guide atlas-panel" aria-labelledby="mortality-title">
   <h2 id="mortality-title">Mortality risk</h2><p class="lede measure">Risk ranking and risk calibration answer different questions.</p>
   <p class="measure">Weighted C = 0.838 at 10 years on 4,669 participants with complete inputs in later cycles.
   C measures ordering among comparable pairs; it is not the percentage of people whose outcome was predicted correctly.</p>
-  <figure><a href="assets/cif_by_sbp.png" aria-label="Open full-size chart: Cardiovascular death incidence across baseline blood-pressure groups"><img src="assets/cif_by_sbp.png" loading="lazy" alt="Cardiovascular death incidence across baseline blood-pressure groups"></a><figcaption>These curves describe observed cardiovascular deaths while accounting for competing deaths. Groups can differ in age and other characteristics; the plot does not estimate the effect of a blood-pressure intervention.</figcaption></figure><figure><a href="assets/calibration.png" aria-label="Open full-size chart: Predicted and observed cardiovascular mortality by risk group at five and ten years"><img src="assets/calibration.png" loading="lazy" alt="Predicted and observed cardiovascular mortality by risk group at five and ten years"></a><figcaption>Calibration asks whether predicted risk agrees with observed risk. Observed risk uses weighted Aalen–Johansen estimates, accounting for early censoring and competing deaths. Intervals are not shown; group-level agreement alone is incomplete validation.</figcaption></figure><nav class="atlas-links" aria-label="Mortality methods"><a href="cohort.html">Cohort: eligibility, associations and calibration &rarr;</a></nav>
+  <figure class="tableau-dashboard"><a href="tableau/current/02-mortality-risk.png" aria-label="Open full-size Tableau dashboard: Mortality risk"><img src="tableau/current/02-mortality-risk.png" loading="lazy" width="1380" height="940" alt="Tableau dashboard: Blood-pressure strata, adjusted associations checked in R, and five- and ten-year calibration."></a><figcaption><a href="tableau/current/02-mortality-risk.png">Full-size dashboard</a> &middot; <a href="tableau/current/cardiotrace-atlas.twbx" download>Download workbook</a></figcaption></figure>
+  <details class="technical-details"><summary>Individual charts and calibration</summary><figure><a href="assets/cif_by_sbp.png" aria-label="Open full-size chart: Cardiovascular death incidence across baseline blood-pressure groups"><img src="assets/cif_by_sbp.png" loading="lazy" alt="Cardiovascular death incidence across baseline blood-pressure groups"></a><figcaption>These curves describe observed cardiovascular deaths while accounting for competing deaths. Groups can differ in age and other characteristics; the plot does not estimate the effect of a blood-pressure intervention.</figcaption></figure><figure><a href="assets/calibration.png" aria-label="Open full-size chart: Predicted and observed cardiovascular mortality by risk group at five and ten years"><img src="assets/calibration.png" loading="lazy" alt="Predicted and observed cardiovascular mortality by risk group at five and ten years"></a><figcaption>Calibration asks whether predicted risk agrees with observed risk. Observed risk uses weighted Aalen–Johansen estimates, accounting for early censoring and competing deaths. Intervals are not shown; group-level agreement alone is incomplete validation.</figcaption></figure></details>
+  <nav class="atlas-links" aria-label="Mortality methods"><a href="cohort.html">Cohort and calibration &rarr;</a>
+  <a href="#population">Previous: population burden &uarr;</a><a href="#models">Next: model comparison &darr;</a></nav>
 </section>
-<section id="models" class="chart-guide" aria-labelledby="models-title">
-  <h2 id="models-title">Model evidence</h2><p class="lede measure">A useful comparison changes one thing at a time and uses the same evaluation sample.</p>
-  <figure><a href="assets/part4_arms.png" aria-label="Open full-size chart: Paired changes in risk ranking for candidate inputs and model forms"><img src="assets/part4_arms.png" loading="lazy" alt="Paired changes in risk ranking for candidate inputs and model forms"></a><figcaption>The Part 4 comparison holds the evaluation sample constant. Adding UACR improved the tested Cox model; the tested gradient boosting model did not. Intervals are conditional on the fitted training models.</figcaption></figure><p class="measure">The separate paired PCE comparison does not establish CardioTrace superiority.
-  PCE targets hard ASCVD, including non-fatal events; the observed endpoint here is cardiovascular mortality.</p>
-  <nav class="atlas-links" aria-label="Model methods"><a href="learning.html">Predictive modeling: the Part 4 experiment &rarr;</a>
-  <a href="methods.html">Methods: the historical PCE benchmark &rarr;</a></nav>
+<section id="models" class="chart-guide atlas-panel" aria-labelledby="models-title">
+  <h2 id="models-title">Model comparison</h2><p class="lede measure">Compare model inputs, risk scores and ranking performance.</p>
+  <figure class="tableau-dashboard"><a href="tableau/current/03-model-evidence.png" aria-label="Open full-size Tableau dashboard: Model evidence"><img src="tableau/current/03-model-evidence.png" loading="lazy" width="1380" height="940" alt="Tableau dashboard: Paired comparisons with historical PCE, the separate Part 4 learning experiment, and exploratory decision curves."></a><figcaption><a href="tableau/current/03-model-evidence.png">Full-size dashboard</a> &middot; <a href="tableau/current/cardiotrace-atlas.twbx" download>Download workbook</a></figcaption></figure>
+  <details class="technical-details"><summary>Individual chart and comparison details</summary><figure><a href="assets/part4_arms.png" aria-label="Open full-size chart: Paired changes in risk ranking for candidate inputs and model forms"><img src="assets/part4_arms.png" loading="lazy" alt="Paired changes in risk ranking for candidate inputs and model forms"></a><figcaption>The Part 4 comparison holds the evaluation sample constant. Adding UACR improved the tested Cox model; the tested gradient boosting model did not. Intervals are conditional on the fitted training models.</figcaption></figure>
+  <p class="measure">The paired PCE intervals include zero at both horizons.
+  PCE targets hard ASCVD, including non-fatal events; this study records cardiovascular deaths.</p></details>
+  <nav class="atlas-links" aria-label="Model methods"><a href="learning.html">Variables and models &rarr;</a>
+  <a href="methods.html">PCE comparison &rarr;</a><a href="#mortality">Previous: mortality risk &uarr;</a></nav>
 </section>
 <details class="atlas-archive" id="tableau-history"><summary>Historical Tableau workbook &middot; 6 September 2026</summary>
   <p class="archive-note">This reviewed workbook is preserved as a historical snapshot. Its calibration views predate the early-censoring correction

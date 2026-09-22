@@ -8,8 +8,9 @@ from lxml import etree as E
 from tableauhyperapi import HyperProcess, Telemetry, Connection, CreateMode, TableDefinition, TableName, SqlType, Inserter
 
 HERE=Path(__file__).resolve().parents[1]
-ap=argparse.ArgumentParser(); ap.add_argument('--repo',type=Path,default=HERE); ap.add_argument('--out',type=Path,default=HERE/'build'/'tableau'); args=ap.parse_args()
+ap=argparse.ArgumentParser(); ap.add_argument('--repo',type=Path,default=HERE); ap.add_argument('--out',type=Path,default=HERE/'build'/'tableau'); ap.add_argument('--source-commit',default='9517c6fbcd8a8e4f42ac9356e27f539689d64322',help='Reviewed research commit whose aggregate bytes must match'); args=ap.parse_args()
 REPO=args.repo.resolve(); OUT=args.out.resolve(); OUT.mkdir(parents=True,exist_ok=True)
+commit=subprocess.check_output(['git','-C',str(REPO),'rev-parse',args.source_commit],text=True).strip()
 BLUE='#2a78d6'; ORANGE='#eb6834'; INK='#182c3b'; MUTED='#596871'; PAPER='#f7f6f2'; WHITE='#fcfcfb'; GRID='#e1e0d9'
 COLORS={'Age-standardised':BLUE,'Crude':ORANGE,'10-year':BLUE,'5-year':ORANGE,'CardioTrace':BLUE,'Published PCE':ORANGE,'Mortality adaptation':'#72a4ba','Same-input Cox':'#556777','Cox + UACR':BLUE,'GBM / 11 inputs':'#eb6834','GBM + UACR':'#ad7348','Age + sex':'#849398','Reference':'#aab4b8','Higher SBP':ORANGE,'Other':BLUE}
 sources={}; plots={}; audit=[]
@@ -71,7 +72,7 @@ put('Adjusted associations',rows,'interval','Adjusted hazard ratio (linear scale
 for horizon in [10,5]:
     cal=read_csv(f'reports/tables/calibration_{horizon}y.csv'); rows=[]
     for r in cal:
-        rows.append(record(float(r['predicted_pct']),float(r['observed_pct']),category='Decile '+str(int(r['bin'])+1),series=f'{horizon}-year',label='',detail=f"{horizon}-year calibration, decile {int(r['bin'])+1}\nPredicted {r['predicted_pct']}%; observed {r['observed_pct']}%\nn={r['n']}\nOriginal prediction sample; distinct from PCE paired sample.\nSource: calibration_{horizon}y.csv"))
+        rows.append(record(float(r['predicted_pct']),float(r['observed_pct']),category='Decile '+str(int(r['bin'])+1),series=f'{horizon}-year',label='',detail=f"{horizon}-year calibration, decile {int(r['bin'])+1}\nPredicted {r['predicted_pct']}%; observed {r['observed_pct']}%\nn={r['n']}; early censored={r['n_early_censored']}; horizon known={r['n_horizon_known']}\nObserved risk: survey-weighted Aalen–Johansen.\nOriginal prediction sample; distinct from PCE paired sample.\nSource: calibration_{horizon}y.csv"))
     ceiling=11 if horizon==10 else 4
     rows+=[record(v,v,series='Reference',detail='Perfect calibration: observed = predicted. Visual identity guide, not an observation.') for v in [0,ceiling]]
     put(f'Calibration {horizon}y',rows,'line','Predicted mortality (%)','Observed (%)',(0,ceiling),(0,ceiling))
@@ -247,7 +248,7 @@ def kpi(d,x,value,label,note,color=BLUE):
 def caption(d,x,y,w,title,note):
     text(d,x,y,w,26,title,14,INK,bold=True); text(d,x,y+28,w,37,note,10,MUTED)
 def footer(d,content):
-    text(d,34,874,1310,52,content+'\nSOURCE  CardioTrace / main 9517c6f · CDC NHANES · Published aggregates only · Hover marks for estimates and provenance.',10,MUTED)
+    text(d,34,874,1310,52,content+f'\nSOURCE  CardioTrace / {commit[:7]} · CDC NHANES · Published aggregates only · Hover marks for estimates and provenance.',10,MUTED)
 
 d=dashboard('01  Population burden')
 heading(d,'01','Aging changes the picture','Part 1 + 2  ·  US adults 20+  ·  Repeated cross-sectional surveys, 1999–2018 and Aug 2021–Aug 2023')
@@ -261,7 +262,7 @@ caption(d,850,297,495,'02 / Latest race–ethnicity estimates','Values are point
 chart(d,'Latest race intervals',838,360,518,259)
 caption(d,34,643,890,'03 / The age gradient, cycle by cycle','Age-specific prevalence (%)  ·  No intervals were estimated for these cells. Darker cells indicate higher prevalence.')
 chart(d,'Age profile',26,703,911,155)
-text(d,958,656,388,198,'READ THE CHANGE CAREFULLY\n\nThe pre-pandemic standardised slope is −0.59 pp per decade (95% CI −1.22 to +0.04).\n\nOne redesigned post-pandemic cycle cannot identify a pandemic effect.',12,INK,bg=WHITE)
+text(d,958,656,388,198,'INTERPRETATION\n\nThe pre-pandemic standardised slope is −0.59 pp per decade (95% CI −1.22 to +0.04).\n\nThe available data are insufficient to assess the pandemic’s impact on cardiovascular disease.',12,INK,bg=WHITE)
 footer(d,'Self-reported CVD; age-standardisation uses the 2000 US population. *2021–23 = Aug 2021–Aug 2023, a redesigned survey period.')
 
 d=dashboard('02  Mortality risk')
@@ -274,23 +275,23 @@ caption(d,34,298,582,'01 / Absolute risk increases across BP strata','15-year Aa
 chart(d,'Blood pressure gradient',26,360,625,258)
 caption(d,692,298,650,'02 / Adjusted associations, independently checked in R','Seven selected terms; 95% t CIs, df 123. Smoking reference: never. Values = HR; null HR = 1.')
 chart(d,'Adjusted associations',675,360,681,258)
-caption(d,34,642,620,'03 / 10-year calibration','Blue = decile calibration curve; grey = perfect calibration. Original sample; PCE sample differs.')
+caption(d,34,642,620,'03 / 10-year calibration','Observed risk: weighted Aalen–Johansen. Blue = deciles; grey = perfect calibration. PCE sample differs.')
 chart(d,'Calibration 10y',26,704,625,151)
-caption(d,694,642,640,'04 / 5-year calibration','Orange = decile calibration curve; grey = perfect calibration. Hover for decile sizes and estimates.')
+caption(d,694,642,640,'04 / 5-year calibration','Weighted Aalen–Johansen accounts for early censoring. Orange = deciles; grey = perfect calibration.')
 chart(d,'Calibration 5y',675,704,681,151)
 footer(d,'BP and model associations are observational, not treatment effects. Tobin medication correction follows the protocol; inference uses MEC weights.')
 
 d=dashboard('03  Model evidence')
-heading(d,'03','No demonstrated superiority over historical PCE','Part 3 benchmark + Part 4 learning  ·  Paired comparisons within each test sample  ·  PCE is a prespecified historical benchmark')
+heading(d,'03','Model comparison','Part 3 benchmark + Part 4 learning  ·  Paired comparisons within each test sample  ·  PCE is a prespecified historical benchmark')
 kpi(d,32,'3,302','paired 10-year test participants','2005–2008 baseline; primary ethnicity set')
 kpi(d,366,'4,985','paired 5-year test participants','2009–2014 baseline; primary ethnicity set')
 kpi(d,700,'−0.011','10-year ΔC: CardioTrace minus PCE','95% CI −0.021 to +0.0004',MUTED)
 kpi(d,1034,'+0.014','5-year ΔC: CardioTrace minus PCE','95% CI −0.011 to +0.040',MUTED)
 caption(d,34,298,585,'01 / Four arms, the same participants within each horizon','Survey-weighted Harrell C  ·  ORANGE published PCE; BLUE CardioTrace. Higher means better ranking.')
 chart(d,'Paired discrimination',26,360,625,258)
-caption(d,694,298,646,'02 / Every paired difference interval includes zero','ΔC versus published PCE  ·  95% paired PSU bootstrap CIs; 200 replicates, conditional on training fits.')
+caption(d,694,298,646,'02 / Paired differences and uncertainty','ΔC versus published PCE  ·  95% paired PSU bootstrap CIs; 200 replicates, conditional on training fits.')
 chart(d,'Paired differences',675,360,681,258)
-caption(d,34,642,620,'03 / Adding UACR helped in a separate learning experiment','Part 4: n=4,641; 191 CVD deaths  ·  ΔC versus 11-input Cox. This sample differs from PCE.')
+caption(d,34,642,620,'03 / UACR in the learning experiment','Part 4: n=4,641; 191 CVD deaths  ·  ΔC versus 11-input Cox. This sample differs from PCE.')
 chart(d,'Part 4 learning',26,704,625,151)
 caption(d,694,642,646,'04 / Exploratory 10-year decision curves','Blue: CardioTrace; light blue: adaptation; grey: same-input Cox. Treat-none = 0; treat-all omitted. No CIs.')
 chart(d,'Decision curves 10y',675,704,681,151)
@@ -318,7 +319,6 @@ for z in root.findall('dashboards/dashboard/zones/zone'):
 twb=OUT/'CardioTrace Research Atlas.twb'; twb.write_bytes(E.tostring(root,pretty_print=True,encoding='utf-8',xml_declaration=True))
 with zipfile.ZipFile(OUT/'CardioTrace Research Atlas.twbx','w',zipfile.ZIP_DEFLATED) as z:
     z.write(twb,twb.name); z.write(data,data.name)
-commit='9517c6fbcd8a8e4f42ac9356e27f539689d64322'
 for rel,digest in sources.items():
     published=subprocess.check_output(['git','-C',str(REPO),'show',f'{commit}:{rel}'])
     assert published==(REPO/rel).read_bytes().replace(b'\r\n',b'\n'), f'{rel} changed: review the atlas labels and source version before rebuilding.'

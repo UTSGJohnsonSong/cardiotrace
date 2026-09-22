@@ -44,6 +44,20 @@
 
 ---
 
+## 2026-09-22 presentation and Tableau update
+
+Lead the website with the research questions and three main findings. Keep the
+PCE comparison, its intervals and endpoint difference in the detailed methods;
+do not make a claim of superior performance. Describe the pandemic question as
+insufficient data to assess its impact on cardiovascular disease. These are
+presentation changes, not changes to the estimands or model-selection rules.
+
+Restore three visible Tableau dashboards from current aggregate results under
+`docs/tableau/current/`, with individual charts available on expansion. Review
+the native workbook, embedded data and exported previews together before using
+`validate_current()`. Preserve the original September 6 snapshot independently.
+Replace the site Resume PDF with the exact file selected by the author.
+
 ## 2026-09-18 website and calibration decisions
 
 Keep the implemented estimands, candidate pool, selection rules and temporal

@@ -1,4 +1,42 @@
-# Current charts and the historical Tableau atlas: maintenance
+# Tableau dashboards: maintenance
+
+## Current delivery — 22 September 2026
+
+The three dashboards in `docs/tableau/current/` are the primary visual overview
+on `explore.html`. Individual Python figures remain available in expandable
+sections. The native workbook and previews use the current aggregate results,
+including weighted Aalen–Johansen calibration. The September 6 workbook and
+previews remain unchanged in `docs/tableau/` as a separately labelled archive.
+
+`python scripts/tableau_atlas.py --current` checks the new source hashes,
+workbook and preview hashes, embedded connections and complete native-review
+record. `--snapshot` independently verifies the original frozen September 6
+sources. The default CLI retains the original strict current-source check for
+the old artifact and correctly rejects its outdated calibration sources.
+
+The current workbook was saved and reopened in Tableau Public 2026.2. Its
+12 embedded tables (334 rows) were compared exactly with the generated Hyper
+extract. Three previews were captured from the actual presentation canvas at
+1380 × 940 pixels, and a native tooltip was inspected. `verification.json`
+records the review and exact artifacts. The browser previews are static images;
+the downloadable workbook provides editable native views. There is no Tableau
+Public web view configured.
+
+To regenerate the current workbook, first commit the aggregate results, then
+run the optional generator with an explicit research commit:
+
+```sh
+python scripts/build_tableau_atlas.py --out build/tableau --source-commit 64dbdbd
+```
+
+For a later research revision, replace that commit only after reviewing the
+changed result tables, captions and units. Repeat native save/reopen, all-table
+comparison, tooltip inspection and preview review before replacing `current/`
+as one set. Do not regenerate hashes alone to make stale output pass. A full
+Python rebuild validates the frozen native artifacts but does not operate the
+Tableau GUI or recreate its screenshots.
+
+## September 18 presentation plan — superseded by the current delivery
 
 ## Current charts and the preserved native snapshot
 

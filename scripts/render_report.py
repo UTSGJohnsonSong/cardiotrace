@@ -946,7 +946,7 @@ def build() -> str:
     <span><b>Cohort</b> {n_cohort} adults 40–79 · {n_cvd} CVD deaths</span>
     <span><b>Mortality follow-up through</b> {DATA_CUTOFF}</span>
   </div>
-  <p class="measure"><a href="#tableau-atlas">Historical Tableau snapshot and editable workbook &rarr;</a></p>
+  <p class="measure"><a href="#tableau-atlas">Tableau dashboards and workbook &rarr;</a></p>
 </header>
 
 <section>

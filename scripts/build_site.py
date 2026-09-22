@@ -30,6 +30,7 @@ import shutil
 import sys
 import urllib.parse
 from pathlib import Path
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -39,7 +40,7 @@ DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 
 from src.descriptive import DESC_CYCLES, display_cycle  # noqa: E402
-from scripts.tableau_atlas import PANELS, WORKBOOK, validate_snapshot as validate_atlas  # noqa: E402
+from scripts.tableau_atlas import PANELS, WORKBOOK, validate_current as validate_atlas, validate_snapshot  # noqa: E402
 
 N_CYCLES = len(DESC_CYCLES)
 
@@ -124,11 +125,11 @@ PAGES = {
 METHODS = ("methods.html", "Methods",
            "The comparison against the prespecified risk-score benchmark, the data "
            "sources, and what was done to them.")
-EXPLORE = ("explore.html", "Visual atlas",
-           "A visual guide to the current results, with the reviewed Tableau workbook preserved as a historical snapshot.")
+EXPLORE = ("explore.html", "Tableau dashboards",
+           "Three Tableau dashboards covering population trends, mortality risk and model comparisons.")
 
 NAV = [("index.html", "Overview"), ("cardiotrace-report.html", "Read the report"),
-       ("explore.html", "Charts"), ("index.html#author", "About the author")]
+       ("explore.html", "Tableau"), ("index.html#author", "About the author")]
 
 
 EXTRA_CSS = """
@@ -755,8 +756,8 @@ def titles_and_descriptions(f: dict) -> dict[str, tuple[str, str]]:
              f"Is the {f['harrell_c']:.3f} concordance limited by the variable "
              f"set or by the model form?")),
         "explore.html": (
-            f"Charts &mdash; CardioTrace | {AUTHOR}",
-            "Current research figures explained in the browser, with links to methods and a historical Tableau workbook."),
+            f"Tableau dashboards &mdash; CardioTrace | {AUTHOR}",
+            "Three Tableau dashboards for population trends, mortality risk and model comparisons, with an editable workbook."),
         "cardiotrace-report.html": (
             f"Full report &mdash; CardioTrace | {AUTHOR}",
             f"The complete CardioTrace write-up in one file: every section, table "
@@ -900,12 +901,11 @@ def build_hero(f: dict) -> str:
   <h1>Understanding cardiovascular<br class="desktop-break"> burden and long-term risk.</h1>
   <p class="standfirst measure">How has cardiovascular disease changed across US surveys?
   Which information helps rank the risk of cardiovascular death years later?</p>
-  <p class="hero-answer measure">CardioTrace brings these questions together in an auditable study.
-  An additional kidney marker improved one model comparison; the historical PCE comparison
-  did not establish an advantage for CardioTrace.</p>
+  <p class="hero-answer measure">CardioTrace uses public NHANES data to study population trends
+  and long-term mortality risk. In this analysis, adding a kidney marker improved risk ranking.</p>
   <nav class="cta" aria-label="Start reading">
     <a class="lead" href="cardiotrace-report.html">Read the report <span aria-hidden="true">&rarr;</span></a>
-    <a href="explore.html">Explore the charts</a>
+    <a href="explore.html">Tableau dashboards</a>
   </nav>
   <p class="hero-scope">{num(f['n_adults'])} adults in the survey analysis &nbsp;&middot;&nbsp;
   {num(f['cohort_n'])} in the separate mortality cohort &nbsp;&middot;&nbsp;
@@ -919,7 +919,7 @@ def build_hero(f: dict) -> str:
 
 def build_colophon() -> str:
     """Keep personal details together, outside the research narrative."""
-    links = [(RESUME_URL, "R&eacute;sum&eacute; (PDF)"),
+    links = [(RESUME_URL, "Resume (PDF)"),
              (f"mailto:{EMAIL}" if EMAIL else "", "Email"), (LINKEDIN_URL, "LinkedIn")]
     contacts = "".join(f'<a href="{attr(url)}">{label}</a>' for url, label in links if url)
     return f"""<section class="colophon" id="author" aria-labelledby="colophon-h">
@@ -978,9 +978,9 @@ def build_findings(f: dict) -> str:
          "trend estimate is slightly downward, but its interval also allows no change.",
          f"{signed_html(f['std_slope'])} percentage points per decade; 95% CI "
          f"{signed_html(f['std_slope_ci'][0])} to {signed_html(f['std_slope_ci'][1])}.", "Population burden"),
-        ("02", "pandemic.html", "One later survey cannot establish a pandemic effect.",
-         "The post-pandemic estimate is above the earlier extrapolated trend. Uncertainty "
-         "and a redesigned survey prevent a causal interpretation.",
+        ("02", "pandemic.html", "The pandemic's impact remains unclear.",
+         "The available data are insufficient to assess the pandemic's impact on cardiovascular disease. "
+         "The later survey estimate is above the earlier trend, but the interval includes no difference.",
          f"Observed minus extrapolated: {signed_html(f['gap'])} percentage points; "
          f"95% CI {signed_html(f['gap_ci'][0])} to {signed_html(f['gap_ci'][1])}.", "The later survey"),
     ]
@@ -992,11 +992,6 @@ def build_findings(f: dict) -> str:
                       f"(95% CI {f['delta_c_wide_lo']:+.4f} to "
                       f"{f['delta_c_wide_hi']:+.4f}); evaluated on the same Part 4 sample.",
                       "Variables and models"))
-    cards.append(("04", "methods.html", "Superiority to the historical PCE score was not established.",
-                  "The paired intervals include zero at both horizons. PCE predicts a broader "
-                  "cardiovascular endpoint; this study observes cardiovascular death.",
-                  "The benchmark uses its own paired sample. Its C values cannot be compared directly with other study samples.",
-                  "The benchmark comparison"))
     return "".join(
         f'<article class="finding"><span class="finding-index">{number}</span>'
         f'<h3>{title}</h3><p class="what">{what}</p><p class="fci">{estimate}</p>'
@@ -1007,8 +1002,8 @@ def build_findings(f: dict) -> str:
 def build_limits(f: dict) -> str:
     """Short, visible boundaries on the conclusions above."""
     items = [
-        ("Pandemic effects", "One redesigned post-pandemic survey cannot isolate the pandemic's "
-         "effect. The mortality model has no post-2019 follow-up.", "pandemic.html"),
+        ("Pandemic effects", "The available data are insufficient to assess the pandemic's "
+         "impact on cardiovascular disease. Mortality follow-up ends in 2019.", "pandemic.html"),
         ("Death versus illness", "Non-fatal heart attacks and strokes are not outcomes in the linked "
          "mortality data. These predictions do not describe all cardiovascular illness.", "cohort.html"),
         ("Use beyond this sample", "Missing inputs can select who enters an analysis. Tests on later "
@@ -1019,31 +1014,33 @@ def build_limits(f: dict) -> str:
                     for title, text, href in items)
     return f"""<section id="limits" aria-labelledby="limits-h">
   <div class="sec-head"><div class="sec-num">LIMITS</div>
-  <h2 id="limits-h">Where the evidence stops</h2></div>
+  <h2 id="limits-h">Limitations</h2></div>
   <div class="body-indent"><div class="limits-grid">{cells}</div></div>
 </section>"""
 
 
 def build_index(style: str, sections: dict[str, str], f: dict, meta: dict) -> str:
     title, desc = meta["index.html"]
+    with Image.open(DOCS / "tableau/current/01-population-burden.png") as dashboard:
+        dashboard_width, dashboard_height = dashboard.size
     body = f"""{build_hero(f)}
 <section id="findings" aria-labelledby="findings-h">
-  <div class="sec-head"><div class="sec-num">FINDINGS</div><h2 id="findings-h">What the study found</h2></div>
+  <div class="sec-head"><div class="sec-num">FINDINGS</div><h2 id="findings-h">Key findings</h2></div>
   <div class="body-indent"><div class="findings">{build_findings(f)}</div></div>
 </section>
 <section class="overview-figure" aria-labelledby="overview-figure-h">
-  <div class="sec-head"><div class="sec-num">IN VIEW</div><h2 id="overview-figure-h">Read the trend with its uncertainty</h2></div>
+  <div class="sec-head"><div class="sec-num">IN VIEW</div><h2 id="overview-figure-h">Population trends</h2></div>
   <div class="body-indent"><figure>
-    <a href="explore.html#population"><img src="assets/part1_standardisation.png"
-      width="1800" height="720" loading="lazy" alt="Crude and age-standardised cardiovascular prevalence across NHANES survey cycles."></a>
+    <a href="explore.html#population"><img src="tableau/current/01-population-burden.png"
+      width="{dashboard_width}" height="{dashboard_height}" loading="lazy" alt="Tableau dashboard combining cardiovascular prevalence trends, race and ethnicity estimates, and age patterns."></a>
     <figcaption>The pre-pandemic age-standardised trend is {signed_html(f['std_slope'])} percentage points per decade
     (95% CI {signed_html(f['std_slope_ci'][0])} to {signed_html(f['std_slope_ci'][1])}).
-    The interval includes zero; a decline is not established. <a href="explore.html#population">See the charts and their explanations &rarr;</a></figcaption>
+    <a href="explore.html#population">Open the Tableau dashboard &rarr;</a></figcaption>
   </figure></div>
 </section>
 {build_limits(f)}
 <section id="built" aria-labelledby="built-h">
-  <div class="sec-head"><div class="sec-num">PROCESS</div><h2 id="built-h">A result you can trace back</h2></div>
+  <div class="sec-head"><div class="sec-num">PROCESS</div><h2 id="built-h">Data and methods</h2></div>
   <div class="body-indent"><p class="measure">Public survey files become a documented cohort,
   analysis tables, and this report. File inventories, variable mappings, and regression checks
   help catch the data losses found in earlier versions.</p>
@@ -1070,8 +1067,9 @@ def atlas_report_link(filename: str) -> str:
 
 
 def build_explore(style: str, f: dict, meta: dict) -> str:
-    """Current figures in the browser; reviewed Tableau kept as a dated archive."""
-    audit = validate_atlas()
+    """Three visible Tableau dashboards, with individual charts as supplements."""
+    validate_atlas()
+    audit = validate_snapshot()
     title, desc = meta["explore.html"]
     # Copy current generated figures explicitly, including ones absent from a chapter.
     figures = ["part1_standardisation.png", "part1_by_race.png", "cif_by_sbp.png",
@@ -1098,6 +1096,17 @@ def build_explore(style: str, f: dict, meta: dict) -> str:
     models = figure("part4_arms.png", "Paired changes in risk ranking for candidate inputs and model forms",
         "The Part 4 comparison holds the evaluation sample constant. Adding UACR improved the tested Cox model; "
         "the tested gradient boosting model did not. Intervals are conditional on the fitted training models.")
+    dashboards = {}
+    for anchor, image, panel_title, description, _ in PANELS:
+        with Image.open(DOCS / "tableau/current" / image) as dashboard:
+            width, height = dashboard.size
+        dashboards[anchor] = (
+            f'<figure class="tableau-dashboard"><a href="tableau/current/{image}" '
+            f'aria-label="Open full-size Tableau dashboard: {attr(panel_title)}">'
+            f'<img src="tableau/current/{image}" loading="lazy" width="{width}" height="{height}" '
+            f'alt="Tableau dashboard: {attr(description)}"></a>'
+            f'<figcaption><a href="tableau/current/{image}">Full-size dashboard</a> &middot; '
+            f'<a href="tableau/current/{WORKBOOK}" download>Download workbook</a></figcaption></figure>')
     historical = []
     for anchor, image, panel_title, description, links in PANELS:
         historical.append(f'<figure id="historical-{anchor}"><img src="tableau/{image}" loading="lazy" '
@@ -1109,29 +1118,38 @@ def build_explore(style: str, f: dict, meta: dict) -> str:
         embed = (f'<p><a href="https://public.tableau.com/views/{attr(TABLEAU_VIZ)}">'
                  'Open the published Tableau view</a> (check its revision date before using its results).</p>')
     body = f"""<header class="masthead">
-  <p class="eyebrow">CardioTrace &middot; visual guide</p><h1>The results, in view.</h1>
-  <p class="standfirst measure">Start with a chart, then follow the evidence. These figures use the current
-  analysis outputs and can be read here without installing software.</p>
+  <p class="eyebrow">CardioTrace &middot; Tableau</p><h1>Research dashboards</h1>
+  <p class="standfirst measure">Three dashboards bring the related charts together.
+  View them below, or open the workbook in Tableau to explore the data.</p>
+  <p><a href="tableau/current/{WORKBOOK}" download>Download Tableau workbook (.twbx)</a></p>
   <nav class="atlas-links" aria-label="Chart groups"><a href="#population">Population burden</a>
-  <a href="#mortality">Mortality risk</a><a href="#models">Model evidence</a></nav>
+  <a href="#mortality">Mortality risk</a><a href="#models">Model comparison</a></nav>
 </header>
-<section id="population" class="chart-guide" aria-labelledby="population-title">
+<section id="population" class="chart-guide atlas-panel" aria-labelledby="population-title">
   <h2 id="population-title">Population burden</h2><p class="lede measure">The overall prevalence and the age-standardised estimate describe different aspects of the same population.</p>
-  {population}<nav class="atlas-links" aria-label="Population methods"><a href="burden.html">Burden: trends and survey design &rarr;</a>
-  <a href="pandemic.html">Pandemic: the limits of one later survey &rarr;</a></nav>
+  {dashboards['population']}
+  <p class="measure">The available data are insufficient to assess the pandemic's impact on cardiovascular disease.</p>
+  <details class="technical-details"><summary>Individual charts</summary>{population}</details>
+  <nav class="atlas-links" aria-label="Population methods"><a href="burden.html">Trends and survey design &rarr;</a>
+  <a href="pandemic.html">Pandemic comparison &rarr;</a><a href="#mortality">Next: mortality risk &darr;</a></nav>
 </section>
-<section id="mortality" class="chart-guide" aria-labelledby="mortality-title">
+<section id="mortality" class="chart-guide atlas-panel" aria-labelledby="mortality-title">
   <h2 id="mortality-title">Mortality risk</h2><p class="lede measure">Risk ranking and risk calibration answer different questions.</p>
   <p class="measure">Weighted C = {f['harrell_c']:.3f} at {f['c_horizon']} years on {num(f['c_n'])} participants with complete inputs in later cycles.
   C measures ordering among comparable pairs; it is not the percentage of people whose outcome was predicted correctly.</p>
-  {mortality}<nav class="atlas-links" aria-label="Mortality methods"><a href="cohort.html">Cohort: eligibility, associations and calibration &rarr;</a></nav>
+  {dashboards['mortality']}
+  <details class="technical-details"><summary>Individual charts and calibration</summary>{mortality}</details>
+  <nav class="atlas-links" aria-label="Mortality methods"><a href="cohort.html">Cohort and calibration &rarr;</a>
+  <a href="#population">Previous: population burden &uarr;</a><a href="#models">Next: model comparison &darr;</a></nav>
 </section>
-<section id="models" class="chart-guide" aria-labelledby="models-title">
-  <h2 id="models-title">Model evidence</h2><p class="lede measure">A useful comparison changes one thing at a time and uses the same evaluation sample.</p>
-  {models}<p class="measure">The separate paired PCE comparison does not establish CardioTrace superiority.
-  PCE targets hard ASCVD, including non-fatal events; the observed endpoint here is cardiovascular mortality.</p>
-  <nav class="atlas-links" aria-label="Model methods"><a href="learning.html">Predictive modeling: the Part 4 experiment &rarr;</a>
-  <a href="methods.html">Methods: the historical PCE benchmark &rarr;</a></nav>
+<section id="models" class="chart-guide atlas-panel" aria-labelledby="models-title">
+  <h2 id="models-title">Model comparison</h2><p class="lede measure">Compare model inputs, risk scores and ranking performance.</p>
+  {dashboards['models']}
+  <details class="technical-details"><summary>Individual chart and comparison details</summary>{models}
+  <p class="measure">The paired PCE intervals include zero at both horizons.
+  PCE targets hard ASCVD, including non-fatal events; this study records cardiovascular deaths.</p></details>
+  <nav class="atlas-links" aria-label="Model methods"><a href="learning.html">Variables and models &rarr;</a>
+  <a href="methods.html">PCE comparison &rarr;</a><a href="#mortality">Previous: mortality risk &uarr;</a></nav>
 </section>
 <details class="atlas-archive" id="tableau-history"><summary>Historical Tableau workbook &middot; 6 September 2026</summary>
   <p class="archive-note">This reviewed workbook is preserved as a historical snapshot. Its calibration views predate the early-censoring correction

@@ -172,7 +172,7 @@ for horizon, test in pce["tests"].items():
         f"{horizon}: C {b['c']:.4f} vs {a['c']:.4f}, paired ΔC "
         f"{delta['delta']:+.4f} (95% interval {delta['lo']:+.4f} to {delta['hi']:+.4f})")
 lines.append(
-    "- **The historical PCE benchmark does not establish CardioTrace superiority.** "
+    "- **Historical risk-score comparison.** "
     + "; ".join(pce_results) + ". Each comparison uses the same participants for "
     "both arms. PCE targets hard ASCVD; this study observes CVD mortality, so these "
     "are prognostic ranking comparisons, not same-endpoint clinical validation. "
