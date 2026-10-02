@@ -1,8 +1,8 @@
 {
   "full": {
-    "commit": "ddfae8811e9c33c45a13cff98d2ee11896e8c10b",
-    "branch": "improve-research-reading",
-    "ran_at": "2026-09-22T23:25:55+00:00",
+    "commit": "cc0b701a4c3b093341cd32982ed06532ac416d88",
+    "branch": "update-resume-2026-10-02",
+    "ran_at": "2026-10-02T20:35:33+00:00",
     "stages": [
       "cohort",
       "descriptive",
