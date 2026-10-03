@@ -71,9 +71,7 @@ AUTHOR_STATEMENT = (
     "data acquisition to survey-weighted inference and prospective risk modelling.")
 
 # ── FILL THESE IN ───────────────────────────────────────────────────────────
-# None of these three is known to this repository. An empty string means the
-# thing is left off the site entirely and `main()` says so on stdout; nothing is
-# ever rendered as a dead link or a "coming soon" page.
+# Author links with an empty URL are omitted from the site.
 #
 # The résumé is served from this repository rather than linked off-site, so the
 # page cannot rot when a file-host link expires -- and so that what a reader
@@ -84,6 +82,7 @@ AUTHOR_STATEMENT = (
 # Tableau account -- and docs/tableau-dashboard.md is the recipe. Setting it
 # here adds an interactive embed above the always-available reviewed previews.
 RESUME_URL = "assets/Zekun_Song_Resume.pdf"
+WEBSITE_URL = "https://zekunsong.com/"
 LINKEDIN_URL = "https://www.linkedin.com/in/zekun-song/"
 EMAIL = "zekun.song@mail.utoronto.ca"
 TABLEAU_VIZ = ""    # e.g. "CardioTraceExplorer/Dashboard1"
@@ -919,7 +918,7 @@ def build_hero(f: dict) -> str:
 
 def build_colophon() -> str:
     """Keep personal details together, outside the research narrative."""
-    links = [(RESUME_URL, "Resume (PDF)"),
+    links = [(WEBSITE_URL, "Personal website"), (RESUME_URL, "Resume (PDF)"),
              (f"mailto:{EMAIL}" if EMAIL else "", "Email"), (LINKEDIN_URL, "LinkedIn")]
     contacts = "".join(f'<a href="{attr(url)}">{label}</a>' for url, label in links if url)
     return f"""<section class="colophon" id="author" aria-labelledby="colophon-h">
