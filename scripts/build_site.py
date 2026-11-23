@@ -73,15 +73,18 @@ AUTHOR_STATEMENT = (
 # ── FILL THESE IN ───────────────────────────────────────────────────────────
 # Author links with an empty URL are omitted from the site.
 #
-# The résumé is served from this repository rather than linked off-site, so the
-# page cannot rot when a file-host link expires -- and so that what a reader
-# downloads is a version this commit can be checked against.
+# RESUME_URL is empty on purpose: the résumé download was withdrawn on
+# 2026-11-23 because the published copy had gone out of date, and the PDF was
+# removed from docs/assets/. If it returns, serve it from this repository
+# rather than linking off-site, so the page cannot rot when a file-host link
+# expires -- and so that what a reader downloads is a version this commit can
+# be checked against.
 #
 # TABLEAU_VIZ is the workbook path out of a Tableau Public share URL, e.g.
 # "CardioTraceExplorer/Dashboard1". Publishing is a manual step -- it needs a
 # Tableau account -- and docs/tableau-dashboard.md is the recipe. Setting it
 # here adds an interactive embed above the always-available reviewed previews.
-RESUME_URL = "assets/Zekun_Song_Resume.pdf"
+RESUME_URL = ""
 WEBSITE_URL = "https://zekunsong.com/"
 LINKEDIN_URL = "https://www.linkedin.com/in/zekun-song/"
 EMAIL = "zekun.song@mail.utoronto.ca"
