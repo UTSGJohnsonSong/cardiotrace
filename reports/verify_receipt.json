@@ -1,8 +1,8 @@
 {
   "full": {
-    "commit": "326d11bde3ea97e13939aee8bffa23c1ee9fdd10",
-    "branch": "add-personal-website-2026-10-03",
-    "ran_at": "2026-10-03T19:45:10+00:00",
+    "commit": "2a0024bb18781e355d11f65b20f31d5a0cd65dcc",
+    "branch": "remove-resume-link-2026-11-23",
+    "ran_at": "2026-11-23T09:34:57+00:00",
     "stages": [
       "cohort",
       "descriptive",
