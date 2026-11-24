@@ -1,8 +1,8 @@
 {
   "full": {
-    "commit": "2a0024bb18781e355d11f65b20f31d5a0cd65dcc",
-    "branch": "remove-resume-link-2026-11-23",
-    "ran_at": "2026-11-23T09:34:57+00:00",
+    "commit": "dda352f2077d0ec4b99a9021381b9d800489c4fa",
+    "branch": "reword-readme-postmortem-2026-11-23",
+    "ran_at": "2026-11-23T22:48:12+00:00",
     "stages": [
       "cohort",
       "descriptive",

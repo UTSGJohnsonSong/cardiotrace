@@ -104,8 +104,12 @@ Every non-obvious decision has a written reason in
 
 ### What went wrong, and how it was caught
 
-The first version of this pipeline published fabricated numbers, for the reason in the
-withdrawal note above. Four separate defects turned out to share one cause:
+The first version of this pipeline published incorrect numbers. Its downloader hardcoded
+17 module names and read an HTTP 404 as "that panel was not collected". CDC had renamed
+the laboratory modules, so 1999–2004 entered the warehouse with no laboratory data at
+all, and 15,332 of its 62,890 adults (24.4%) had their laboratory values median-imputed
+and then modelled as if they had been measured. That pipeline is kept, and never run, in
+[`legacy-invalid/`](legacy-invalid). Four separate defects turned out to share one cause:
 **pattern-matching identifiers instead of enumerating them.**
 
 | defect | consequence |
@@ -233,7 +237,7 @@ CardioTrace/
 
 `legacy-invalid/` holds the first version of this project: a cross-sectional XGBoost model
 that regressed self-reported cardiovascular disease on variables measured at the same
-visit, on a sample where a quarter of the laboratory values had been imputed because the
+visit, on a sample where 24.4% of the adults had median-imputed laboratory values because the
 downloader treated a 404 as an empty module. It is kept rather than deleted, because the
 numbers it produced were published and deleting it would leave no way to answer where they
 came from. No build target reaches it, `make verify` proves a clean rebuild does not touch
